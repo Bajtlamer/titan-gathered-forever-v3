@@ -1,0 +1,4604 @@
+[
+  {
+    "itemID": 162515,
+    "name": "Midnight Salmon",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 6
+  },
+  {
+    "itemID": 152543,
+    "name": "Sand Shifter",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 7
+  },
+  {
+    "itemID": 152544,
+    "name": "Slimy Mackerel",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 8
+  },
+  {
+    "itemID": 152545,
+    "name": "Frenzied Fangtooth",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 9
+  },
+  {
+    "itemID": 152546,
+    "name": "Lane Snapper",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 10
+  },
+  {
+    "itemID": 152547,
+    "name": "Great Sea Catfish",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 11
+  },
+  {
+    "itemID": 152548,
+    "name": "Tiragarde Perch",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 12
+  },
+  {
+    "itemID": 152549,
+    "name": "Redtail Loach",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 13
+  },
+  {
+    "itemID": 152631,
+    "name": "Briny Flesh",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 14
+  },
+  {
+    "itemID": 154897,
+    "name": "Stringy Loins",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 15
+  },
+  {
+    "itemID": 154898,
+    "name": "Meaty Haunch",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 16
+  },
+  {
+    "itemID": 154899,
+    "name": "Thick Paleo Steak",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 17
+  },
+  {
+    "itemID": 160398,
+    "name": "Choral Honey",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 18
+  },
+  {
+    "itemID": 160399,
+    "name": "Wild Flour",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 19
+  },
+  {
+    "itemID": 160400,
+    "name": "Foosaka",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 20
+  },
+  {
+    "itemID": 160709,
+    "name": "Fresh Potato",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 21
+  },
+  {
+    "itemID": 160710,
+    "name": "Wild Berries",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 22
+  },
+  {
+    "itemID": 160711,
+    "name": "Aromatic Fish Oil",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 23
+  },
+  {
+    "itemID": 160712,
+    "name": "Powdered Sugar",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 24
+  },
+  {
+    "itemID": 163782,
+    "name": "Cursed Haunch",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 25
+  },
+  {
+    "itemID": 162461,
+    "name": "Sanguicell",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 26
+  },
+  {
+    "itemID": 133680,
+    "name": "Slice of Bacon",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 27
+  },
+  {
+    "itemID": 124101,
+    "name": "Aethril",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 28
+  },
+  {
+    "itemID": 124102,
+    "name": "Dreamleaf",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 29
+  },
+  {
+    "itemID": 124103,
+    "name": "Foxflower",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 30
+  },
+  {
+    "itemID": 124104,
+    "name": "Fjarnskaggl",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 31
+  },
+  {
+    "itemID": 124105,
+    "name": "Starlight Rose",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 32
+  },
+  {
+    "itemID": 124107,
+    "name": "Cursed Queenfish",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 33
+  },
+  {
+    "itemID": 124108,
+    "name": "Mossgill Perch",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 34
+  },
+  {
+    "itemID": 124109,
+    "name": "Highmountain Salmon",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 35
+  },
+  {
+    "itemID": 124110,
+    "name": "Stormray",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 36
+  },
+  {
+    "itemID": 124111,
+    "name": "Runescale Koi",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 37
+  },
+  {
+    "itemID": 124112,
+    "name": "Black Barracuda",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 38
+  },
+  {
+    "itemID": 124117,
+    "name": "Lean Shank",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 39
+  },
+  {
+    "itemID": 124118,
+    "name": "Fatty Bearsteak",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 40
+  },
+  {
+    "itemID": 124119,
+    "name": "Big Gamy Ribs",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 41
+  },
+  {
+    "itemID": 124120,
+    "name": "Leyblood",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 42
+  },
+  {
+    "itemID": 124121,
+    "name": "Wildfowl Egg",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 43
+  },
+  {
+    "itemID": 128304,
+    "name": "Yseralline Seed",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 44
+  },
+  {
+    "itemID": 133607,
+    "name": "Silver Mackerel",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 45
+  },
+  {
+    "itemID": 142336,
+    "name": "Falcosaur Egg",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 46
+  },
+  {
+    "itemID": 109124,
+    "name": "Frostweed",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 47
+  },
+  {
+    "itemID": 109125,
+    "name": "Fireweed",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 48
+  },
+  {
+    "itemID": 109126,
+    "name": "Gorgrond Flytrap",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 49
+  },
+  {
+    "itemID": 109127,
+    "name": "Starflower",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 50
+  },
+  {
+    "itemID": 109128,
+    "name": "Nagrand Arrowbloom",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 51
+  },
+  {
+    "itemID": 109129,
+    "name": "Talador Orchid",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 52
+  },
+  {
+    "itemID": 109131,
+    "name": "Raw Clefthoof Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 53
+  },
+  {
+    "itemID": 109132,
+    "name": "Raw Talbuk Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 54
+  },
+  {
+    "itemID": 109133,
+    "name": "Rylak Egg",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 55
+  },
+  {
+    "itemID": 109134,
+    "name": "Raw Elekk Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 56
+  },
+  {
+    "itemID": 109135,
+    "name": "Raw Riverbeast Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 57
+  },
+  {
+    "itemID": 109136,
+    "name": "Raw Boar Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 58
+  },
+  {
+    "itemID": 109137,
+    "name": "Crescent Saberfish Flesh",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 59
+  },
+  {
+    "itemID": 109138,
+    "name": "Jawless Skulker Flesh",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 60
+  },
+  {
+    "itemID": 109139,
+    "name": "Fat Sleeper Flesh",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 61
+  },
+  {
+    "itemID": 109140,
+    "name": "Blind Lake Sturgeon Flesh",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 62
+  },
+  {
+    "itemID": 109141,
+    "name": "Fire Ammonite Tentacle",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 63
+  },
+  {
+    "itemID": 109142,
+    "name": "Sea Scorpion Segment",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 64
+  },
+  {
+    "itemID": 109143,
+    "name": "Abyssal Gulper Eel Flesh",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 65
+  },
+  {
+    "itemID": 109144,
+    "name": "Blackwater Whiptail Flesh",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 66
+  },
+  {
+    "itemID": 128499,
+    "name": "Fel Egg",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 67
+  },
+  {
+    "itemID": 128500,
+    "name": "Fel Ham",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 68
+  },
+  {
+    "itemID": 74856,
+    "name": "Jade Lungfish",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 69
+  },
+  {
+    "itemID": 74857,
+    "name": "Giant Mantis Shrimp",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 70
+  },
+  {
+    "itemID": 74859,
+    "name": "Emperor Salmon",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 71
+  },
+  {
+    "itemID": 74860,
+    "name": "Redbelly Mandarin",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 72
+  },
+  {
+    "itemID": 74861,
+    "name": "Tiger Gourami",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 73
+  },
+  {
+    "itemID": 74863,
+    "name": "Jewel Danio",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 74
+  },
+  {
+    "itemID": 74864,
+    "name": "Reef Octopus",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 75
+  },
+  {
+    "itemID": 74865,
+    "name": "Krasarang Paddlefish",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 76
+  },
+  {
+    "itemID": 74866,
+    "name": "Golden Carp",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 77
+  },
+  {
+    "itemID": 85506,
+    "name": "Viseclaw Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 78
+  },
+  {
+    "itemID": 102541,
+    "name": "Aged Balsamic Vinegar",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 79
+  },
+  {
+    "itemID": 102542,
+    "name": "Ancient Pandaren Spices",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 80
+  },
+  {
+    "itemID": 102543,
+    "name": "Aged Mogu'shan Cheese",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 81
+  },
+  {
+    "itemID": 74659,
+    "name": "Farm Chicken",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 82
+  },
+  {
+    "itemID": 74660,
+    "name": "Pandaren Peach",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 83
+  },
+  {
+    "itemID": 74661,
+    "name": "Black Pepper",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 84
+  },
+  {
+    "itemID": 74662,
+    "name": "Rice Flour",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 85
+  },
+  {
+    "itemID": 74832,
+    "name": "Barley",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 86
+  },
+  {
+    "itemID": 74833,
+    "name": "Raw Tiger Steak",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 87
+  },
+  {
+    "itemID": 74834,
+    "name": "Mushan Ribs",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 88
+  },
+  {
+    "itemID": 74837,
+    "name": "Raw Turtle Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 89
+  },
+  {
+    "itemID": 74838,
+    "name": "Raw Crab Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 90
+  },
+  {
+    "itemID": 74839,
+    "name": "Wildfowl Breast",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 91
+  },
+  {
+    "itemID": 74840,
+    "name": "Green Cabbage",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 92
+  },
+  {
+    "itemID": 74841,
+    "name": "Juicycrunch Carrot",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 93
+  },
+  {
+    "itemID": 74842,
+    "name": "Mogu Pumpkin",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 94
+  },
+  {
+    "itemID": 74843,
+    "name": "Scallions",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 95
+  },
+  {
+    "itemID": 74844,
+    "name": "Red Blossom Leek",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 96
+  },
+  {
+    "itemID": 74845,
+    "name": "Ginseng",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 97
+  },
+  {
+    "itemID": 74846,
+    "name": "Witchberries",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 98
+  },
+  {
+    "itemID": 74847,
+    "name": "Jade Squash",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 99
+  },
+  {
+    "itemID": 74848,
+    "name": "Striped Melon",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 100
+  },
+  {
+    "itemID": 74849,
+    "name": "Pink Turnip",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 101
+  },
+  {
+    "itemID": 74850,
+    "name": "White Turnip",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 102
+  },
+  {
+    "itemID": 74851,
+    "name": "Rice",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 103
+  },
+  {
+    "itemID": 74852,
+    "name": "Yak Milk",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 104
+  },
+  {
+    "itemID": 74853,
+    "name": "100 Year Soy Sauce",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 105
+  },
+  {
+    "itemID": 74854,
+    "name": "Instant Noodles",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 106
+  },
+  {
+    "itemID": 75014,
+    "name": "Raw Crocolisk Belly",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 107
+  },
+  {
+    "itemID": 79246,
+    "name": "Delicate Blossom Petals",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 108
+  },
+  {
+    "itemID": 79250,
+    "name": "Fresh Pomfruit",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 109
+  },
+  {
+    "itemID": 85583,
+    "name": "Needle Mushrooms",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 110
+  },
+  {
+    "itemID": 85584,
+    "name": "Silkworm Pupa",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 111
+  },
+  {
+    "itemID": 85585,
+    "name": "Red Beans",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 112
+  },
+  {
+    "itemID": 102536,
+    "name": "Fresh Lushroom",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 113
+  },
+  {
+    "itemID": 102537,
+    "name": "Fresh Silkfeather Hawk Eggs",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 114
+  },
+  {
+    "itemID": 102538,
+    "name": "Fresh Shao-Tien Rice",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 115
+  },
+  {
+    "itemID": 102539,
+    "name": "Fresh Strawberries",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 116
+  },
+  {
+    "itemID": 102540,
+    "name": "Fresh Mangos",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 117
+  },
+  {
+    "itemID": 53062,
+    "name": "Sharptooth",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 118
+  },
+  {
+    "itemID": 53063,
+    "name": "Mountain Trout",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 119
+  },
+  {
+    "itemID": 53064,
+    "name": "Highland Guppy",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 120
+  },
+  {
+    "itemID": 53066,
+    "name": "Blackbelly Mudfish",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 121
+  },
+  {
+    "itemID": 53067,
+    "name": "Striped Lurker",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 122
+  },
+  {
+    "itemID": 53068,
+    "name": "Lavascale Catfish",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 123
+  },
+  {
+    "itemID": 53069,
+    "name": "Murglesnout",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 124
+  },
+  {
+    "itemID": 53070,
+    "name": "Fathom Eel",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 125
+  },
+  {
+    "itemID": 53071,
+    "name": "Algaefin Rockfish",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 126
+  },
+  {
+    "itemID": 53072,
+    "name": "Deepsea Sagefish",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 127
+  },
+  {
+    "itemID": 62778,
+    "name": "Toughened Flesh",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 128
+  },
+  {
+    "itemID": 62779,
+    "name": "Monstrous Claw",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 129
+  },
+  {
+    "itemID": 62780,
+    "name": "Snake Eye",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 130
+  },
+  {
+    "itemID": 62781,
+    "name": "Giant Turtle Tongue",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 131
+  },
+  {
+    "itemID": 62782,
+    "name": "Dragon Flank",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 132
+  },
+  {
+    "itemID": 62783,
+    "name": "Basilisk \\",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 133
+  },
+  {
+    "itemID": 62784,
+    "name": "Crocolisk Tail",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 134
+  },
+  {
+    "itemID": 62785,
+    "name": "Delicate Wing",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 135
+  },
+  {
+    "itemID": 62786,
+    "name": "Cocoa Beans",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 136
+  },
+  {
+    "itemID": 62791,
+    "name": "Blood Shrimp",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 137
+  },
+  {
+    "itemID": 43007,
+    "name": "Northern Spices",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 138
+  },
+  {
+    "itemID": 36782,
+    "name": "Succulent Clam Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 139
+  },
+  {
+    "itemID": 34736,
+    "name": "Chunk o' Mammoth",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 140
+  },
+  {
+    "itemID": 41800,
+    "name": "Deep Sea Monsterbelly",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 141
+  },
+  {
+    "itemID": 41801,
+    "name": "Moonglow Cuttlefish",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 142
+  },
+  {
+    "itemID": 41802,
+    "name": "Imperial Manta Ray",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 143
+  },
+  {
+    "itemID": 41803,
+    "name": "Rockfin Grouper",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 144
+  },
+  {
+    "itemID": 41805,
+    "name": "Borean Man O' War",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 145
+  },
+  {
+    "itemID": 41806,
+    "name": "Musselback Sculpin",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 146
+  },
+  {
+    "itemID": 41807,
+    "name": "Dragonfin Angelfish",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 147
+  },
+  {
+    "itemID": 41808,
+    "name": "Bonescale Snapper",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 148
+  },
+  {
+    "itemID": 41809,
+    "name": "Glacial Salmon",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 149
+  },
+  {
+    "itemID": 41810,
+    "name": "Fangtooth Herring",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 150
+  },
+  {
+    "itemID": 41812,
+    "name": "Barrelhead Goby",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 151
+  },
+  {
+    "itemID": 41813,
+    "name": "Nettlefish",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 152
+  },
+  {
+    "itemID": 43009,
+    "name": "Shoveltusk Flank",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 153
+  },
+  {
+    "itemID": 43010,
+    "name": "Worm Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 154
+  },
+  {
+    "itemID": 43011,
+    "name": "Worg Haunch",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 155
+  },
+  {
+    "itemID": 43012,
+    "name": "Rhino Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 156
+  },
+  {
+    "itemID": 43013,
+    "name": "Chilled Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 157
+  },
+  {
+    "itemID": 43501,
+    "name": "Northern Egg",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 158
+  },
+  {
+    "itemID": 22577,
+    "name": "Mote of Shadow",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 159
+  },
+  {
+    "itemID": 24477,
+    "name": "Jaggal Clam Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 160
+  },
+  {
+    "itemID": 33823,
+    "name": "Bloodfin Catfish",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 161
+  },
+  {
+    "itemID": 33824,
+    "name": "Crescent-Tail Skullfish",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 162
+  },
+  {
+    "itemID": 21024,
+    "name": "Chimaerok Tenderloin",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 163
+  },
+  {
+    "itemID": 27422,
+    "name": "Barbed Gill Trout",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 164
+  },
+  {
+    "itemID": 27425,
+    "name": "Spotted Feltail",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 165
+  },
+  {
+    "itemID": 27429,
+    "name": "Zangarian Sporefish",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 166
+  },
+  {
+    "itemID": 27435,
+    "name": "Figluster's Mudfish",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 167
+  },
+  {
+    "itemID": 27437,
+    "name": "Icefin Bluefish",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 168
+  },
+  {
+    "itemID": 27438,
+    "name": "Golden Darter",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 169
+  },
+  {
+    "itemID": 27439,
+    "name": "Furious Crawdad",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 170
+  },
+  {
+    "itemID": 27515,
+    "name": "Huge Spotted Feltail",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 171
+  },
+  {
+    "itemID": 27516,
+    "name": "Enormous Barbed Gill Trout",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 172
+  },
+  {
+    "itemID": 27671,
+    "name": "Buzzard Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 173
+  },
+  {
+    "itemID": 27674,
+    "name": "Ravager Flesh",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 174
+  },
+  {
+    "itemID": 27677,
+    "name": "Chunk o' Basilisk",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 175
+  },
+  {
+    "itemID": 27678,
+    "name": "Clefthoof Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 176
+  },
+  {
+    "itemID": 27681,
+    "name": "Warped Flesh",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 177
+  },
+  {
+    "itemID": 27682,
+    "name": "Talbuk Venison",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 178
+  },
+  {
+    "itemID": 31670,
+    "name": "Raptor Ribs",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 179
+  },
+  {
+    "itemID": 31671,
+    "name": "Serpent Flesh",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 180
+  },
+  {
+    "itemID": 12808,
+    "name": "Essence of Undeath",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 181
+  },
+  {
+    "itemID": 13888,
+    "name": "Darkclaw Lobster",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 182
+  },
+  {
+    "itemID": 13889,
+    "name": "Raw Whitescale Salmon",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 183
+  },
+  {
+    "itemID": 20424,
+    "name": "Sandworm Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 184
+  },
+  {
+    "itemID": 35562,
+    "name": "Bear Flank",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 185
+  },
+  {
+    "itemID": 4603,
+    "name": "Raw Spotted Yellowtail",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 186
+  },
+  {
+    "itemID": 7974,
+    "name": "Zesty Clam Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 187
+  },
+  {
+    "itemID": 12207,
+    "name": "Giant Egg",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 188
+  },
+  {
+    "itemID": 13754,
+    "name": "Raw Glossy Mightfish",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 189
+  },
+  {
+    "itemID": 13756,
+    "name": "Raw Summer Bass",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 190
+  },
+  {
+    "itemID": 13757,
+    "name": "Lightning Eel",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 191
+  },
+  {
+    "itemID": 13758,
+    "name": "Raw Redgill",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 192
+  },
+  {
+    "itemID": 13759,
+    "name": "Raw Nightfin Snapper",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 193
+  },
+  {
+    "itemID": 13760,
+    "name": "Raw Sunscale Salmon",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 194
+  },
+  {
+    "itemID": 9061,
+    "name": "Goblin Rocket Fuel",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 195
+  },
+  {
+    "itemID": 8150,
+    "name": "Deeprock Salt",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 196
+  },
+  {
+    "itemID": 12205,
+    "name": "White Spider Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 197
+  },
+  {
+    "itemID": 12206,
+    "name": "Tender Crab Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 198
+  },
+  {
+    "itemID": 12208,
+    "name": "Tender Wolf Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 199
+  },
+  {
+    "itemID": 21153,
+    "name": "Raw Greater Sagefish",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 200
+  },
+  {
+    "itemID": 3404,
+    "name": "Buzzard Wing",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 201
+  },
+  {
+    "itemID": 4655,
+    "name": "Giant Clam Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 202
+  },
+  {
+    "itemID": 6362,
+    "name": "Raw Rockscale Cod",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 203
+  },
+  {
+    "itemID": 8365,
+    "name": "Raw Mithril Head Trout",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 204
+  },
+  {
+    "itemID": 12204,
+    "name": "Heavy Kodo Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 205
+  },
+  {
+    "itemID": 3821,
+    "name": "Goldthorn",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 206
+  },
+  {
+    "itemID": 3712,
+    "name": "Turtle Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 207
+  },
+  {
+    "itemID": 12037,
+    "name": "Mystery Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 208
+  },
+  {
+    "itemID": 12184,
+    "name": "Raptor Flesh",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 209
+  },
+  {
+    "itemID": 12202,
+    "name": "Tiger Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 210
+  },
+  {
+    "itemID": 12203,
+    "name": "Red Wolf Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 211
+  },
+  {
+    "itemID": 2251,
+    "name": "Gooey Spider Leg",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 212
+  },
+  {
+    "itemID": 4402,
+    "name": "Small Flame Sac",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 213
+  },
+  {
+    "itemID": 6308,
+    "name": "Raw Bristle Whisker Catfish",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 214
+  },
+  {
+    "itemID": 3667,
+    "name": "Tender Crocolisk Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 215
+  },
+  {
+    "itemID": 3731,
+    "name": "Lion Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 216
+  },
+  {
+    "itemID": 5471,
+    "name": "Stag Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 217
+  },
+  {
+    "itemID": 5504,
+    "name": "Tangy Clam Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 218
+  },
+  {
+    "itemID": 3685,
+    "name": "Raptor Egg",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 219
+  },
+  {
+    "itemID": 5470,
+    "name": "Thunder Lizard Tail",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 220
+  },
+  {
+    "itemID": 3730,
+    "name": "Big Bear Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 221
+  },
+  {
+    "itemID": 21071,
+    "name": "Raw Sagefish",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 222
+  },
+  {
+    "itemID": 1015,
+    "name": "Lean Wolf Flank",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 223
+  },
+  {
+    "itemID": 1468,
+    "name": "Murloc Fin",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 224
+  },
+  {
+    "itemID": 1080,
+    "name": "Tough Condor Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 225
+  },
+  {
+    "itemID": 2452,
+    "name": "Swiftthistle",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 226
+  },
+  {
+    "itemID": 5468,
+    "name": "Soft Frenzy Flesh",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 227
+  },
+  {
+    "itemID": 6289,
+    "name": "Raw Longjaw Mud Snapper",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 228
+  },
+  {
+    "itemID": 6317,
+    "name": "Raw Loch Frenzy",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 229
+  },
+  {
+    "itemID": 6361,
+    "name": "Raw Rainbow Fin Albacore",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 230
+  },
+  {
+    "itemID": 22644,
+    "name": "Crunchy Spider Leg",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 231
+  },
+  {
+    "itemID": 2677,
+    "name": "Boar Ribs",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 232
+  },
+  {
+    "itemID": 2924,
+    "name": "Crocolisk Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 233
+  },
+  {
+    "itemID": 5503,
+    "name": "Clam Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 234
+  },
+  {
+    "itemID": 2674,
+    "name": "Crawler Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 235
+  },
+  {
+    "itemID": 2675,
+    "name": "Crawler Claw",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 236
+  },
+  {
+    "itemID": 723,
+    "name": "Goretusk Liver",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 237
+  },
+  {
+    "itemID": 3173,
+    "name": "Bear Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 238
+  },
+  {
+    "itemID": 67229,
+    "name": "Stag Flank",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 239
+  },
+  {
+    "itemID": 785,
+    "name": "Mageroyal",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 240
+  },
+  {
+    "itemID": 2673,
+    "name": "Coyote Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 241
+  },
+  {
+    "itemID": 5467,
+    "name": "Kodo Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 242
+  },
+  {
+    "itemID": 5469,
+    "name": "Strider Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 243
+  },
+  {
+    "itemID": 5466,
+    "name": "Scorpid Stinger",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 244
+  },
+  {
+    "itemID": 769,
+    "name": "Chunk of Boar Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 245
+  },
+  {
+    "itemID": 2672,
+    "name": "Stringy Wolf Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 246
+  },
+  {
+    "itemID": 2678,
+    "name": "Mild Spices",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 247
+  },
+  {
+    "itemID": 2886,
+    "name": "Crag Boar Rib",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 248
+  },
+  {
+    "itemID": 5465,
+    "name": "Small Spider Leg",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 249
+  },
+  {
+    "itemID": 6291,
+    "name": "Raw Brilliant Smallfish",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 250
+  },
+  {
+    "itemID": 6303,
+    "name": "Raw Slitherskin Mackerel",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 251
+  },
+  {
+    "itemID": 6889,
+    "name": "Small Egg",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 252
+  },
+  {
+    "itemID": 12223,
+    "name": "Meaty Bat Wing",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 253
+  },
+  {
+    "itemID": 17194,
+    "name": "Holiday Spices",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 254
+  },
+  {
+    "itemID": 27668,
+    "name": "Lynx Meat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 255
+  },
+  {
+    "itemID": 27669,
+    "name": "Bat Flesh",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 256
+  },
+  {
+    "itemID": 30817,
+    "name": "Simple Flour",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 257
+  },
+  {
+    "itemID": 44835,
+    "name": "Autumnal Herbs",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 258
+  },
+  {
+    "itemID": 5051,
+    "name": "Dig Rat",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 259
+  },
+  {
+    "itemID": 23676,
+    "name": "Moongraze Stag Tenderloin",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 260
+  },
+  {
+    "itemID": 44834,
+    "name": "Wild Turkey",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 261
+  },
+  {
+    "itemID": 44853,
+    "name": "Honey",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 262
+  },
+  {
+    "itemID": 124669,
+    "name": "Darkmoon Daggermaw",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 263
+  },
+  {
+    "itemID": 129100,
+    "name": "Gem Chip",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 264
+  },
+  {
+    "itemID": 133588,
+    "name": "Flaked Sea Salt",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 265
+  },
+  {
+    "itemID": 133589,
+    "name": "Dalape\u00f1o Pepper",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 266
+  },
+  {
+    "itemID": 133590,
+    "name": "Muskenbutter",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 267
+  },
+  {
+    "itemID": 133591,
+    "name": "River Onion",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 268
+  },
+  {
+    "itemID": 133592,
+    "name": "Stonedark Snail",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 269
+  },
+  {
+    "itemID": 133593,
+    "name": "Royal Olive",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 270
+  },
+  {
+    "itemID": 160705,
+    "name": "Major's Frothy Coffee",
+    "file": "TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "line": 271
+  },
+  {
+    "itemID": 10938,
+    "name": "Lesser Magic Essence",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 6
+  },
+  {
+    "itemID": 10939,
+    "name": "Greater Magic Essence",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 7
+  },
+  {
+    "itemID": 10940,
+    "name": "Strange Dust",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 8
+  },
+  {
+    "itemID": 14343,
+    "name": "Small Brilliant Shard",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 9
+  },
+  {
+    "itemID": 14344,
+    "name": "Large Brilliant Shard",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 10
+  },
+  {
+    "itemID": 16202,
+    "name": "Lesser Eternal Essence",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 11
+  },
+  {
+    "itemID": 16203,
+    "name": "Greater Eternal Essence",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 12
+  },
+  {
+    "itemID": 16204,
+    "name": "Light Illusion Dust",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 13
+  },
+  {
+    "itemID": 22445,
+    "name": "Arcane Dust",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 14
+  },
+  {
+    "itemID": 22446,
+    "name": "Greater Planar Essence",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 15
+  },
+  {
+    "itemID": 22447,
+    "name": "Lesser Planar Essence",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 16
+  },
+  {
+    "itemID": 22448,
+    "name": "Small Prismatic Shard",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 17
+  },
+  {
+    "itemID": 22449,
+    "name": "Large Prismatic Shard",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 18
+  },
+  {
+    "itemID": 22450,
+    "name": "Void Crystal",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 19
+  },
+  {
+    "itemID": 34052,
+    "name": "Dream Shard",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 20
+  },
+  {
+    "itemID": 34053,
+    "name": "Small Dream Shard",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 21
+  },
+  {
+    "itemID": 34054,
+    "name": "Infinite Dust",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 22
+  },
+  {
+    "itemID": 34055,
+    "name": "Greater Cosmic Essence",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 23
+  },
+  {
+    "itemID": 34056,
+    "name": "Lesser Cosmic Essence",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 24
+  },
+  {
+    "itemID": 34057,
+    "name": "Abyss Crystal",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 25
+  },
+  {
+    "itemID": 52555,
+    "name": "Hypnotic Dust",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 26
+  },
+  {
+    "itemID": 52718,
+    "name": "Lesser Celestial Essence",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 27
+  },
+  {
+    "itemID": 52719,
+    "name": "Greater Celestial Essence",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 28
+  },
+  {
+    "itemID": 52720,
+    "name": "Small Heavenly Shard",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 29
+  },
+  {
+    "itemID": 52721,
+    "name": "Heavenly Shard",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 30
+  },
+  {
+    "itemID": 52722,
+    "name": "Maelstrom Crystal",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 31
+  },
+  {
+    "itemID": 74247,
+    "name": "Ethereal Shard",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 32
+  },
+  {
+    "itemID": 74248,
+    "name": "Sha Crystal",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 33
+  },
+  {
+    "itemID": 74249,
+    "name": "Spirit Dust",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 34
+  },
+  {
+    "itemID": 74250,
+    "name": "Mysterious Essence",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 35
+  },
+  {
+    "itemID": 74252,
+    "name": "Small Ethereal Shard",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 36
+  },
+  {
+    "itemID": 80433,
+    "name": "Blood Spirit",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 37
+  },
+  {
+    "itemID": 94289,
+    "name": "Haunting Spirit",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 38
+  },
+  {
+    "itemID": 102218,
+    "name": "Spirit of War",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 39
+  },
+  {
+    "itemID": 105718,
+    "name": "Sha Crystal Fragment",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 40
+  },
+  {
+    "itemID": 109693,
+    "name": "Draenic Dust",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 41
+  },
+  {
+    "itemID": 111245,
+    "name": "Luminous Shard",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 42
+  },
+  {
+    "itemID": 113588,
+    "name": "Temporal Crystal",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 43
+  },
+  {
+    "itemID": 115502,
+    "name": "Small Luminous Shard",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 44
+  },
+  {
+    "itemID": 115504,
+    "name": "Fractured Temporal Crystal",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 45
+  },
+  {
+    "itemID": 124440,
+    "name": "Arkhana",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 46
+  },
+  {
+    "itemID": 124441,
+    "name": "Leylight Shard",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 47
+  },
+  {
+    "itemID": 124442,
+    "name": "Chaos Crystal",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 48
+  },
+  {
+    "itemID": 152875,
+    "name": "Gloom Dust",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 49
+  },
+  {
+    "itemID": 152876,
+    "name": "Umbra Shard",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 50
+  },
+  {
+    "itemID": 152877,
+    "name": "Veiled Crystal",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 51
+  },
+  {
+    "itemID": 156930,
+    "name": "Rich Illusion Dust",
+    "file": "TitanGatheredForeverV3_Enchanting/TitanGatheredForeverV3_Enchanting.en.lua",
+    "line": 52
+  },
+  {
+    "itemID": 765,
+    "name": "Silverleaf",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 6
+  },
+  {
+    "itemID": 2447,
+    "name": "Peacebloom",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 7
+  },
+  {
+    "itemID": 2449,
+    "name": "Earthroot",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 8
+  },
+  {
+    "itemID": 181166,
+    "name": "Bloodthistle",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 9
+  },
+  {
+    "itemID": 785,
+    "name": "Mageroyal",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 10
+  },
+  {
+    "itemID": 2450,
+    "name": "Briarthorn",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 11
+  },
+  {
+    "itemID": 2452,
+    "name": "Swiftthistle",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 12
+  },
+  {
+    "itemID": 3820,
+    "name": "Stranglekelp",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 13
+  },
+  {
+    "itemID": 2453,
+    "name": "Bruiseweed",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 14
+  },
+  {
+    "itemID": 3355,
+    "name": "Wild Steelbloom",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 15
+  },
+  {
+    "itemID": 3369,
+    "name": "Grave Moss",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 16
+  },
+  {
+    "itemID": 3356,
+    "name": "Kingsblood",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 17
+  },
+  {
+    "itemID": 3357,
+    "name": "Liferoot",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 18
+  },
+  {
+    "itemID": 3818,
+    "name": "Fadeleaf",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 19
+  },
+  {
+    "itemID": 3821,
+    "name": "Goldthorn",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 20
+  },
+  {
+    "itemID": 3358,
+    "name": "Khadgar's Whisker",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 21
+  },
+  {
+    "itemID": 3819,
+    "name": "Wintersbite",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 23
+  },
+  {
+    "itemID": 4625,
+    "name": "Firebloom",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 24
+  },
+  {
+    "itemID": 8831,
+    "name": "Purple Lotus",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 25
+  },
+  {
+    "itemID": 8836,
+    "name": "Arthas' Tears",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 26
+  },
+  {
+    "itemID": 8838,
+    "name": "Sungrass",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 27
+  },
+  {
+    "itemID": 8839,
+    "name": "Blindweed",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 28
+  },
+  {
+    "itemID": 8845,
+    "name": "Ghost Mushroom",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 29
+  },
+  {
+    "itemID": 8846,
+    "name": "Gromsblood",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 30
+  },
+  {
+    "itemID": 13463,
+    "name": "Dreamfoil",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 31
+  },
+  {
+    "itemID": 13464,
+    "name": "Golden Sansam",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 32
+  },
+  {
+    "itemID": 13465,
+    "name": "Mountain Silversage",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 33
+  },
+  {
+    "itemID": 13466,
+    "name": "Plaguebloom",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 35
+  },
+  {
+    "itemID": 13467,
+    "name": "Icecap",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 36
+  },
+  {
+    "itemID": 13468,
+    "name": "Black Lotus",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 37
+  },
+  {
+    "itemID": 22785,
+    "name": "Felweed",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 38
+  },
+  {
+    "itemID": 22786,
+    "name": "Dreaming Glory",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 39
+  },
+  {
+    "itemID": 22787,
+    "name": "Ragveil",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 40
+  },
+  {
+    "itemID": 22789,
+    "name": "Terocone",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 41
+  },
+  {
+    "itemID": 22790,
+    "name": "Ancient Lichen",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 42
+  },
+  {
+    "itemID": 22791,
+    "name": "Netherbloom",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 43
+  },
+  {
+    "itemID": 22792,
+    "name": "Nightmare Vine",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 44
+  },
+  {
+    "itemID": 22793,
+    "name": "Mana Thistle",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 45
+  },
+  {
+    "itemID": 22794,
+    "name": "Fel Lotus",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 46
+  },
+  {
+    "itemID": 28714,
+    "name": "Flame Cap",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 47
+  },
+  {
+    "itemID": 36901,
+    "name": "Goldclover",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 48
+  },
+  {
+    "itemID": 36904,
+    "name": "Tiger Lily",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 49
+  },
+  {
+    "itemID": 36906,
+    "name": "Icethorn",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 50
+  },
+  {
+    "itemID": 36907,
+    "name": "Talandra's Rose",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 51
+  },
+  {
+    "itemID": 36903,
+    "name": "Adder's Tongue",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 52
+  },
+  {
+    "itemID": 36905,
+    "name": "Lichbloom",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 53
+  },
+  {
+    "itemID": 37921,
+    "name": "Deadnettle",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 54
+  },
+  {
+    "itemID": 39970,
+    "name": "Fire Leaf",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 55
+  },
+  {
+    "itemID": 36908,
+    "name": "Frost Lotus",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 56
+  },
+  {
+    "itemID": 52984,
+    "name": "Stormvine",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 57
+  },
+  {
+    "itemID": 52986,
+    "name": "Heartblossom",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 58
+  },
+  {
+    "itemID": 52983,
+    "name": "Cinderbloom",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 59
+  },
+  {
+    "itemID": 52985,
+    "name": "Azshara's Veil",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 60
+  },
+  {
+    "itemID": 52988,
+    "name": "Whiptail",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 61
+  },
+  {
+    "itemID": 52987,
+    "name": "Twilight Jasmine",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 62
+  },
+  {
+    "itemID": 13466,
+    "name": "Sorrowmoss",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 63
+  },
+  {
+    "itemID": 3819,
+    "name": "Dragon's Teeth",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 64
+  },
+  {
+    "itemID": 22797,
+    "name": "Nightmare Seed",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 65
+  },
+  {
+    "itemID": 72237,
+    "name": "Rain Poppy",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 66
+  },
+  {
+    "itemID": 72234,
+    "name": "Green Tea Leaf",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 67
+  },
+  {
+    "itemID": 72235,
+    "name": "Silkweed",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 68
+  },
+  {
+    "itemID": 79010,
+    "name": "Snow Lily",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 69
+  },
+  {
+    "itemID": 79011,
+    "name": "Fool's Cap",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 70
+  },
+  {
+    "itemID": 72238,
+    "name": "Golden Lotus",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 71
+  },
+  {
+    "itemID": 152510,
+    "name": "Anchor Weed",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 77
+  },
+  {
+    "itemID": 152505,
+    "name": "Riverbud",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 78
+  },
+  {
+    "itemID": 152506,
+    "name": "Star Moss",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 79
+  },
+  {
+    "itemID": 152507,
+    "name": "Akunda's Bite",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 80
+  },
+  {
+    "itemID": 152508,
+    "name": "Winter's Kiss",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 81
+  },
+  {
+    "itemID": 152509,
+    "name": "Siren's Pollen",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 82
+  },
+  {
+    "itemID": 152511,
+    "name": "Sea Stalk",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 83
+  },
+  {
+    "itemID": 166888,
+    "name": "Germinating Seed",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 85
+  },
+  {
+    "itemID": 169596,
+    "name": "Zin'anthid Tentacle",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 86
+  },
+  {
+    "itemID": 168487,
+    "name": "Zin'anthid",
+    "file": "TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "line": 87
+  },
+  {
+    "itemID": 2589,
+    "name": "Linen Cloth",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 7
+  },
+  {
+    "itemID": 2770,
+    "name": "Copper Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 9
+  },
+  {
+    "itemID": 2771,
+    "name": "Tin Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 10
+  },
+  {
+    "itemID": 2775,
+    "name": "Silver Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 11
+  },
+  {
+    "itemID": 2772,
+    "name": "Iron Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 12
+  },
+  {
+    "itemID": 2776,
+    "name": "Gold Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 13
+  },
+  {
+    "itemID": 3858,
+    "name": "Mithril Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 14
+  },
+  {
+    "itemID": 7911,
+    "name": "Truesilver Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 15
+  },
+  {
+    "itemID": 10620,
+    "name": "Thorium Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 16
+  },
+  {
+    "itemID": 11370,
+    "name": "Dark Iron Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 17
+  },
+  {
+    "itemID": 23424,
+    "name": "Fel Iron Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 19
+  },
+  {
+    "itemID": 23425,
+    "name": "Adamantite Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 20
+  },
+  {
+    "itemID": 23427,
+    "name": "Eternium Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 21
+  },
+  {
+    "itemID": 23426,
+    "name": "Khorium Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 22
+  },
+  {
+    "itemID": 18562,
+    "name": "Elementium Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 24
+  },
+  {
+    "itemID": 36909,
+    "name": "Cobalt Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 25
+  },
+  {
+    "itemID": 36912,
+    "name": "Saronite Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 26
+  },
+  {
+    "itemID": 36910,
+    "name": "Titanium Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 27
+  },
+  {
+    "itemID": 52183,
+    "name": "Pyrite Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 28
+  },
+  {
+    "itemID": 53038,
+    "name": "Obsidium Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 29
+  },
+  {
+    "itemID": 52185,
+    "name": "Elementium Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 30
+  },
+  {
+    "itemID": 72093,
+    "name": "Kyparite",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 32
+  },
+  {
+    "itemID": 72092,
+    "name": "Ghost Iron Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 33
+  },
+  {
+    "itemID": 72094,
+    "name": "Black Trillium Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 34
+  },
+  {
+    "itemID": 72103,
+    "name": "White Trillium Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 35
+  },
+  {
+    "itemID": 152512,
+    "name": "Monelite Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 37
+  },
+  {
+    "itemID": 152579,
+    "name": "Storm Silver Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 38
+  },
+  {
+    "itemID": 152513,
+    "name": "Platinum Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 39
+  },
+  {
+    "itemID": 168185,
+    "name": "Osmenite Ore",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 41
+  },
+  {
+    "itemID": 2835,
+    "name": "Rough Stone",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 46
+  },
+  {
+    "itemID": 2836,
+    "name": "Coarse Stone",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 47
+  },
+  {
+    "itemID": 2838,
+    "name": "Heavy Stone",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 48
+  },
+  {
+    "itemID": 7912,
+    "name": "Solid Stone",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 49
+  },
+  {
+    "itemID": 12365,
+    "name": "Dense Stone",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 50
+  },
+  {
+    "itemID": 3470,
+    "name": "Rough Grinding Stone",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 51
+  },
+  {
+    "itemID": 3478,
+    "name": "Coarse Grinding Stone",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 52
+  },
+  {
+    "itemID": 3486,
+    "name": "Heavy Grinding Stone",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 53
+  },
+  {
+    "itemID": 7966,
+    "name": "Solid Grinding Stone",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 54
+  },
+  {
+    "itemID": 12644,
+    "name": "Dense Grinding Stone",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 55
+  },
+  {
+    "itemID": 169598,
+    "name": "Osmenite Dust",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 57
+  },
+  {
+    "itemID": 774,
+    "name": "Malachite",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 62
+  },
+  {
+    "itemID": 818,
+    "name": "Tigerseye",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 63
+  },
+  {
+    "itemID": 1210,
+    "name": "Shadowgem",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 64
+  },
+  {
+    "itemID": 1206,
+    "name": "Moss Agate",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 65
+  },
+  {
+    "itemID": 1705,
+    "name": "Lesser Moonstone",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 66
+  },
+  {
+    "itemID": 1529,
+    "name": "Jade",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 67
+  },
+  {
+    "itemID": 3864,
+    "name": "Citrine",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 68
+  },
+  {
+    "itemID": 9262,
+    "name": "Black Vitriol",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 69
+  },
+  {
+    "itemID": 7909,
+    "name": "Aquamarine",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 70
+  },
+  {
+    "itemID": 7910,
+    "name": "Star Ruby",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 71
+  },
+  {
+    "itemID": 11754,
+    "name": "Black Diamond",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 72
+  },
+  {
+    "itemID": 19774,
+    "name": "Souldarite",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 73
+  },
+  {
+    "itemID": 11382,
+    "name": "Blood of the Mountain",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 74
+  },
+  {
+    "itemID": 12799,
+    "name": "Large Opal",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 75
+  },
+  {
+    "itemID": 12361,
+    "name": "Blue Sapphire",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 76
+  },
+  {
+    "itemID": 18335,
+    "name": "Pristine Black Diamond",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 77
+  },
+  {
+    "itemID": 12364,
+    "name": "Huge Emerald",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 78
+  },
+  {
+    "itemID": 12800,
+    "name": "Azerothian Diamond",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 79
+  },
+  {
+    "itemID": 12363,
+    "name": "Arcane Crystal",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 80
+  },
+  {
+    "itemID": 11185,
+    "name": "Green Power Crystal",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 81
+  },
+  {
+    "itemID": 11184,
+    "name": "Blue Power Crystal",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 82
+  },
+  {
+    "itemID": 11186,
+    "name": "Red Power Crystal",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 83
+  },
+  {
+    "itemID": 11188,
+    "name": "Yellow Power Crystal",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 84
+  },
+  {
+    "itemID": 169597,
+    "name": "Osmenite Shards",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 86
+  },
+  {
+    "itemID": 2840,
+    "name": "Copper Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 91
+  },
+  {
+    "itemID": 2841,
+    "name": "Bronze Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 92
+  },
+  {
+    "itemID": 2842,
+    "name": "Silver Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 93
+  },
+  {
+    "itemID": 3575,
+    "name": "Iron Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 94
+  },
+  {
+    "itemID": 3576,
+    "name": "Tin Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 95
+  },
+  {
+    "itemID": 3577,
+    "name": "Gold Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 96
+  },
+  {
+    "itemID": 3859,
+    "name": "Steel Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 97
+  },
+  {
+    "itemID": 3860,
+    "name": "Mithril Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 98
+  },
+  {
+    "itemID": 6037,
+    "name": "Truesilver Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 99
+  },
+  {
+    "itemID": 11371,
+    "name": "Dark Iron Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 100
+  },
+  {
+    "itemID": 12359,
+    "name": "Thorium Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 101
+  },
+  {
+    "itemID": 12655,
+    "name": "Enchanted Thorium Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 102
+  },
+  {
+    "itemID": 17771,
+    "name": "Enchanted Elementium Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 103
+  },
+  {
+    "itemID": 22573,
+    "name": "Mote of Earth",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 104
+  },
+  {
+    "itemID": 22574,
+    "name": "Mote of Fire",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 105
+  },
+  {
+    "itemID": 23445,
+    "name": "Fel Iron Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 106
+  },
+  {
+    "itemID": 23446,
+    "name": "Adamantite Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 107
+  },
+  {
+    "itemID": 23447,
+    "name": "Eternium Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 108
+  },
+  {
+    "itemID": 23448,
+    "name": "Felsteel Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 109
+  },
+  {
+    "itemID": 23449,
+    "name": "Khorium Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 110
+  },
+  {
+    "itemID": 23573,
+    "name": "Hardened Adamantite Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 111
+  },
+  {
+    "itemID": 35128,
+    "name": "Hardened Khorium",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 112
+  },
+  {
+    "itemID": 36913,
+    "name": "Saronite Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 113
+  },
+  {
+    "itemID": 36916,
+    "name": "Cobalt Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 114
+  },
+  {
+    "itemID": 37663,
+    "name": "Titansteel Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 115
+  },
+  {
+    "itemID": 41163,
+    "name": "Titanium Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 116
+  },
+  {
+    "itemID": 51950,
+    "name": "Pyrium Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 117
+  },
+  {
+    "itemID": 52186,
+    "name": "Elementium Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 118
+  },
+  {
+    "itemID": 53039,
+    "name": "Hardened Elementium Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 119
+  },
+  {
+    "itemID": 54849,
+    "name": "Obsidium Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 120
+  },
+  {
+    "itemID": 72095,
+    "name": "Trillium Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 121
+  },
+  {
+    "itemID": 72096,
+    "name": "Ghost Iron Bar",
+    "file": "TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "line": 122
+  },
+  {
+    "itemID": 783,
+    "name": "Light Hide",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 7
+  },
+  {
+    "itemID": 4232,
+    "name": "Medium Hide",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 8
+  },
+  {
+    "itemID": 4235,
+    "name": "Heavy Hide",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 9
+  },
+  {
+    "itemID": 8169,
+    "name": "Thick Hide",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 10
+  },
+  {
+    "itemID": 8171,
+    "name": "Rugged Hide",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 11
+  },
+  {
+    "itemID": 25707,
+    "name": "Fel Hide",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 12
+  },
+  {
+    "itemID": 72163,
+    "name": "Magnificent Hide",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 13
+  },
+  {
+    "itemID": 110609,
+    "name": "Raw Beast Hide",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 14
+  },
+  {
+    "itemID": 110610,
+    "name": "Raw Beast Hide Scraps",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 15
+  },
+  {
+    "itemID": 112182,
+    "name": "Patch of Fel Hide",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 16
+  },
+  {
+    "itemID": 124113,
+    "name": "Stonehide Leather",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 17
+  },
+  {
+    "itemID": 154722,
+    "name": "Tempest Hide",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 18
+  },
+  {
+    "itemID": 2318,
+    "name": "Light Leather",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 23
+  },
+  {
+    "itemID": 2319,
+    "name": "Medium Leather",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 24
+  },
+  {
+    "itemID": 21887,
+    "name": "Knothide Leather",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 25
+  },
+  {
+    "itemID": 25649,
+    "name": "Knothide Leather Scraps",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 26
+  },
+  {
+    "itemID": 2675,
+    "name": "Crawler Claw",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 27
+  },
+  {
+    "itemID": 2934,
+    "name": "Ruined Leather Scraps",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 28
+  },
+  {
+    "itemID": 4234,
+    "name": "Heavy Leather",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 29
+  },
+  {
+    "itemID": 4304,
+    "name": "Thick Leather",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 30
+  },
+  {
+    "itemID": 8170,
+    "name": "Rugged Leather",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 31
+  },
+  {
+    "itemID": 15417,
+    "name": "Devilsaur Leather",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 32
+  },
+  {
+    "itemID": 15419,
+    "name": "Warbear Leather",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 33
+  },
+  {
+    "itemID": 17012,
+    "name": "Core Leather",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 34
+  },
+  {
+    "itemID": 25699,
+    "name": "Crystal Infused Leather",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 35
+  },
+  {
+    "itemID": 25708,
+    "name": "Thick Clefthoof Leather",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 36
+  },
+  {
+    "itemID": 33567,
+    "name": "Borean Leather Scraps",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 37
+  },
+  {
+    "itemID": 33568,
+    "name": "Borean Leather",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 38
+  },
+  {
+    "itemID": 38558,
+    "name": "Nerubian Chitin",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 39
+  },
+  {
+    "itemID": 44128,
+    "name": "Arctic Fur",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 40
+  },
+  {
+    "itemID": 52976,
+    "name": "Savage Leather",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 41
+  },
+  {
+    "itemID": 52977,
+    "name": "Savage Leather Scraps",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 42
+  },
+  {
+    "itemID": 60224,
+    "name": "Handful of Obsidium Bolts",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 43
+  },
+  {
+    "itemID": 72120,
+    "name": "Exotic Leather",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 44
+  },
+  {
+    "itemID": 72162,
+    "name": "Sha-Touched Leather",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 45
+  },
+  {
+    "itemID": 112177,
+    "name": "Nerubian Chitin Fragment",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 46
+  },
+  {
+    "itemID": 120945,
+    "name": "Primal Spirit",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 47
+  },
+  {
+    "itemID": 124117,
+    "name": "Lean Shank",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 48
+  },
+  {
+    "itemID": 124118,
+    "name": "Fatty Bearsteak",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 49
+  },
+  {
+    "itemID": 124119,
+    "name": "Big Gamy Ribs",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 50
+  },
+  {
+    "itemID": 124120,
+    "name": "Leyblood",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 51
+  },
+  {
+    "itemID": 124124,
+    "name": "Blood of Sargeras",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 52
+  },
+  {
+    "itemID": 124438,
+    "name": "Unbroken Claw",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 53
+  },
+  {
+    "itemID": 124439,
+    "name": "Unbroken Tooth",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 54
+  },
+  {
+    "itemID": 127759,
+    "name": "Felblight",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 55
+  },
+  {
+    "itemID": 151566,
+    "name": "Fiendish Leather",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 56
+  },
+  {
+    "itemID": 151568,
+    "name": "Primal Sargerite",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 57
+  },
+  {
+    "itemID": 152541,
+    "name": "Coarse Leather",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 58
+  },
+  {
+    "itemID": 152631,
+    "name": "Briny Flesh",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 59
+  },
+  {
+    "itemID": 154164,
+    "name": "Blood-Stained Bone",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 60
+  },
+  {
+    "itemID": 154165,
+    "name": "Calcified Bone",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 61
+  },
+  {
+    "itemID": 154897,
+    "name": "Stringy Loins",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 62
+  },
+  {
+    "itemID": 154899,
+    "name": "Thick Paleo Steak",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 63
+  },
+  {
+    "itemID": 160502,
+    "name": "Chemical Blasting Cap",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 64
+  },
+  {
+    "itemID": 6470,
+    "name": "Deviate Scale",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 69
+  },
+  {
+    "itemID": 6471,
+    "name": "Perfect Deviate Scale",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 70
+  },
+  {
+    "itemID": 7286,
+    "name": "Black Whelp Scale",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 71
+  },
+  {
+    "itemID": 7392,
+    "name": "Green Whelp Scale",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 72
+  },
+  {
+    "itemID": 8154,
+    "name": "Scorpid Scale",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 73
+  },
+  {
+    "itemID": 8165,
+    "name": "Worn Dragonscale",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 74
+  },
+  {
+    "itemID": 8167,
+    "name": "Turtle Scale",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 75
+  },
+  {
+    "itemID": 12607,
+    "name": "Brilliant Chromatic Scale",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 76
+  },
+  {
+    "itemID": 15408,
+    "name": "Heavy Scorpid Scale",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 77
+  },
+  {
+    "itemID": 15410,
+    "name": "Scale of Onyxia",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 78
+  },
+  {
+    "itemID": 15412,
+    "name": "Green Dragonscale",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 79
+  },
+  {
+    "itemID": 15414,
+    "name": "Red Dragonscale",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 80
+  },
+  {
+    "itemID": 15415,
+    "name": "Blue Dragonscale",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 81
+  },
+  {
+    "itemID": 15416,
+    "name": "Black Dragonscale",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 82
+  },
+  {
+    "itemID": 25700,
+    "name": "Fel Scales",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 83
+  },
+  {
+    "itemID": 29539,
+    "name": "Cobra Scales",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 84
+  },
+  {
+    "itemID": 29547,
+    "name": "Wind Scales",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 85
+  },
+  {
+    "itemID": 29548,
+    "name": "Nether Dragonscales",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 86
+  },
+  {
+    "itemID": 38557,
+    "name": "Icy Dragonscale",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 87
+  },
+  {
+    "itemID": 38561,
+    "name": "Jormungar Scale",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 88
+  },
+  {
+    "itemID": 52979,
+    "name": "Blackened Dragonscale",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 89
+  },
+  {
+    "itemID": 52982,
+    "name": "Deepsea Scale",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 90
+  },
+  {
+    "itemID": 79101,
+    "name": "Prismatic Scale",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 91
+  },
+  {
+    "itemID": 112155,
+    "name": "Deepsea Scale Fragment",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 92
+  },
+  {
+    "itemID": 112156,
+    "name": "Blackened Dragonscale Fragment",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 93
+  },
+  {
+    "itemID": 112157,
+    "name": "Prismatic Scale Fragment",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 94
+  },
+  {
+    "itemID": 112158,
+    "name": "Icy Dragonscale Fragment",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 95
+  },
+  {
+    "itemID": 112185,
+    "name": "Wind Scale Fragment",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 96
+  },
+  {
+    "itemID": 124115,
+    "name": "Stormscale",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 97
+  },
+  {
+    "itemID": 153050,
+    "name": "Shimmerscale",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 98
+  },
+  {
+    "itemID": 153051,
+    "name": "Mistscale",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 99
+  },
+  {
+    "itemID": 161433,
+    "name": "Thick Webbing",
+    "file": "TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "line": 100
+  },
+  {
+    "itemID": 165703,
+    "name": "Breath of Bwonsamdi",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 6
+  },
+  {
+    "itemID": 158378,
+    "name": "Embroidered Deep Sea Satin",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 7
+  },
+  {
+    "itemID": 152577,
+    "name": "Deep Sea Satin",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 8
+  },
+  {
+    "itemID": 152576,
+    "name": "Tidespray Linen",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 9
+  },
+  {
+    "itemID": 162461,
+    "name": "Sanguicell",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 10
+  },
+  {
+    "itemID": 124124,
+    "name": "Blood of Sargeras",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 11
+  },
+  {
+    "itemID": 130183,
+    "name": "Shadowruby",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 12
+  },
+  {
+    "itemID": 151568,
+    "name": "Primal Sargerite",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 13
+  },
+  {
+    "itemID": 152668,
+    "name": "Expulsom",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 14
+  },
+  {
+    "itemID": 162460,
+    "name": "Hydrocore",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 15
+  },
+  {
+    "itemID": 165948,
+    "name": "Tidalcore",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 16
+  },
+  {
+    "itemID": 124440,
+    "name": "Arkhana",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 17
+  },
+  {
+    "itemID": 127004,
+    "name": "Imbued Silkweave",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 18
+  },
+  {
+    "itemID": 124106,
+    "name": "Felwort",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 19
+  },
+  {
+    "itemID": 127759,
+    "name": "Felblight",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 20
+  },
+  {
+    "itemID": 111556,
+    "name": "Hexweave Cloth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 21
+  },
+  {
+    "itemID": 113262,
+    "name": "Sorcerous Water",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 22
+  },
+  {
+    "itemID": 113263,
+    "name": "Sorcerous Earth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 23
+  },
+  {
+    "itemID": 113264,
+    "name": "Sorcerous Air",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 24
+  },
+  {
+    "itemID": 118472,
+    "name": "Savage Blood",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 25
+  },
+  {
+    "itemID": 120945,
+    "name": "Primal Spirit",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 26
+  },
+  {
+    "itemID": 109119,
+    "name": "True Iron Ore",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 27
+  },
+  {
+    "itemID": 109126,
+    "name": "Gorgrond Flytrap",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 28
+  },
+  {
+    "itemID": 110609,
+    "name": "Raw Beast Hide",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 29
+  },
+  {
+    "itemID": 123918,
+    "name": "Leystone Ore",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 30
+  },
+  {
+    "itemID": 124113,
+    "name": "Stonehide Leather",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 31
+  },
+  {
+    "itemID": 124115,
+    "name": "Stormscale",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 32
+  },
+  {
+    "itemID": 124437,
+    "name": "Shal'dorei Silk",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 33
+  },
+  {
+    "itemID": 124438,
+    "name": "Unbroken Claw",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 34
+  },
+  {
+    "itemID": 124439,
+    "name": "Unbroken Tooth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 35
+  },
+  {
+    "itemID": 127037,
+    "name": "Runic Catgut",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 36
+  },
+  {
+    "itemID": 127681,
+    "name": "Sharp Spritethorn",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 37
+  },
+  {
+    "itemID": 142335,
+    "name": "Pristine Falcosaur Feather",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 38
+  },
+  {
+    "itemID": 151567,
+    "name": "Lightweave Cloth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 39
+  },
+  {
+    "itemID": 159959,
+    "name": "Nylon Thread",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 40
+  },
+  {
+    "itemID": 76061,
+    "name": "Spirit of Harmony",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 41
+  },
+  {
+    "itemID": 80433,
+    "name": "Blood Spirit",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 42
+  },
+  {
+    "itemID": 82447,
+    "name": "Imperial Silk",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 43
+  },
+  {
+    "itemID": 94289,
+    "name": "Haunting Spirit",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 44
+  },
+  {
+    "itemID": 98619,
+    "name": "Celestial Cloth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 45
+  },
+  {
+    "itemID": 102218,
+    "name": "Spirit of War",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 46
+  },
+  {
+    "itemID": 82441,
+    "name": "Bolt of Windwool Cloth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 47
+  },
+  {
+    "itemID": 111557,
+    "name": "Sumptuous Fur",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 48
+  },
+  {
+    "itemID": 72988,
+    "name": "Windwool Cloth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 49
+  },
+  {
+    "itemID": 71998,
+    "name": "Essence of Destruction",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 50
+  },
+  {
+    "itemID": 52078,
+    "name": "Chaos Orb",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 51
+  },
+  {
+    "itemID": 54440,
+    "name": "Dreamcloth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 52
+  },
+  {
+    "itemID": 52325,
+    "name": "Volatile Fire",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 53
+  },
+  {
+    "itemID": 52326,
+    "name": "Volatile Water",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 54
+  },
+  {
+    "itemID": 52327,
+    "name": "Volatile Earth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 55
+  },
+  {
+    "itemID": 52328,
+    "name": "Volatile Air",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 56
+  },
+  {
+    "itemID": 52329,
+    "name": "Volatile Life",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 57
+  },
+  {
+    "itemID": 52555,
+    "name": "Hypnotic Dust",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 58
+  },
+  {
+    "itemID": 53010,
+    "name": "Embersilk Cloth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 59
+  },
+  {
+    "itemID": 53643,
+    "name": "Bolt of Embersilk Cloth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 60
+  },
+  {
+    "itemID": 36919,
+    "name": "Cardinal Ruby",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 61
+  },
+  {
+    "itemID": 36922,
+    "name": "King's Amber",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 62
+  },
+  {
+    "itemID": 36925,
+    "name": "Majestic Zircon",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 63
+  },
+  {
+    "itemID": 36934,
+    "name": "Eye of Zul",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 64
+  },
+  {
+    "itemID": 22682,
+    "name": "Frozen Rune",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 65
+  },
+  {
+    "itemID": 34052,
+    "name": "Dream Shard",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 66
+  },
+  {
+    "itemID": 36930,
+    "name": "Monarch Topaz",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 67
+  },
+  {
+    "itemID": 41593,
+    "name": "Ebonweave",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 68
+  },
+  {
+    "itemID": 41594,
+    "name": "Moonshroud",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 69
+  },
+  {
+    "itemID": 41595,
+    "name": "Spellweave",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 70
+  },
+  {
+    "itemID": 43102,
+    "name": "Frozen Orb",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 71
+  },
+  {
+    "itemID": 45087,
+    "name": "Runed Orb",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 72
+  },
+  {
+    "itemID": 47556,
+    "name": "Crusader Orb",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 73
+  },
+  {
+    "itemID": 49908,
+    "name": "Primordial Saronite",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 74
+  },
+  {
+    "itemID": 69237,
+    "name": "Living Ember",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 75
+  },
+  {
+    "itemID": 36908,
+    "name": "Frost Lotus",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 76
+  },
+  {
+    "itemID": 38425,
+    "name": "Heavy Borean Leather",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 77
+  },
+  {
+    "itemID": 30183,
+    "name": "Nether Vortex",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 78
+  },
+  {
+    "itemID": 36784,
+    "name": "Siren's Tear",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 79
+  },
+  {
+    "itemID": 34055,
+    "name": "Greater Cosmic Essence",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 80
+  },
+  {
+    "itemID": 35622,
+    "name": "Eternal Water",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 81
+  },
+  {
+    "itemID": 35624,
+    "name": "Eternal Earth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 82
+  },
+  {
+    "itemID": 35625,
+    "name": "Eternal Life",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 83
+  },
+  {
+    "itemID": 35627,
+    "name": "Eternal Shadow",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 84
+  },
+  {
+    "itemID": 36783,
+    "name": "Northsea Pearl",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 85
+  },
+  {
+    "itemID": 36860,
+    "name": "Eternal Fire",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 86
+  },
+  {
+    "itemID": 41511,
+    "name": "Bolt of Imbued Frostweave",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 87
+  },
+  {
+    "itemID": 37701,
+    "name": "Crystallized Earth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 88
+  },
+  {
+    "itemID": 37702,
+    "name": "Crystallized Fire",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 89
+  },
+  {
+    "itemID": 37704,
+    "name": "Crystallized Life",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 90
+  },
+  {
+    "itemID": 42253,
+    "name": "Iceweb Spider Silk",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 91
+  },
+  {
+    "itemID": 22450,
+    "name": "Void Crystal",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 92
+  },
+  {
+    "itemID": 21845,
+    "name": "Primal Mooncloth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 93
+  },
+  {
+    "itemID": 24271,
+    "name": "Spellcloth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 94
+  },
+  {
+    "itemID": 24272,
+    "name": "Shadowcloth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 95
+  },
+  {
+    "itemID": 34664,
+    "name": "Sunmote",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 96
+  },
+  {
+    "itemID": 22794,
+    "name": "Fel Lotus",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 97
+  },
+  {
+    "itemID": 21844,
+    "name": "Bolt of Soulcloth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 98
+  },
+  {
+    "itemID": 33470,
+    "name": "Frostweave Cloth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 99
+  },
+  {
+    "itemID": 34054,
+    "name": "Infinite Dust",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 100
+  },
+  {
+    "itemID": 38426,
+    "name": "Eternium Thread",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 101
+  },
+  {
+    "itemID": 41510,
+    "name": "Bolt of Frostweave",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 102
+  },
+  {
+    "itemID": 21842,
+    "name": "Bolt of Imbued Netherweave",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 103
+  },
+  {
+    "itemID": 23571,
+    "name": "Primal Might",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 104
+  },
+  {
+    "itemID": 23572,
+    "name": "Primal Nether",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 105
+  },
+  {
+    "itemID": 32428,
+    "name": "Heart of Darkness",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 106
+  },
+  {
+    "itemID": 21884,
+    "name": "Primal Fire",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 107
+  },
+  {
+    "itemID": 21885,
+    "name": "Primal Water",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 108
+  },
+  {
+    "itemID": 21886,
+    "name": "Primal Life",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 109
+  },
+  {
+    "itemID": 22446,
+    "name": "Greater Planar Essence",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 110
+  },
+  {
+    "itemID": 22451,
+    "name": "Primal Air",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 111
+  },
+  {
+    "itemID": 22452,
+    "name": "Primal Earth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 112
+  },
+  {
+    "itemID": 22456,
+    "name": "Primal Shadow",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 113
+  },
+  {
+    "itemID": 22457,
+    "name": "Primal Mana",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 114
+  },
+  {
+    "itemID": 17010,
+    "name": "Fiery Core",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 115
+  },
+  {
+    "itemID": 17011,
+    "name": "Lava Core",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 116
+  },
+  {
+    "itemID": 12364,
+    "name": "Huge Emerald",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 117
+  },
+  {
+    "itemID": 12800,
+    "name": "Azerothian Diamond",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 118
+  },
+  {
+    "itemID": 12809,
+    "name": "Guardian Stone",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 119
+  },
+  {
+    "itemID": 12811,
+    "name": "Righteous Orb",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 120
+  },
+  {
+    "itemID": 13468,
+    "name": "Black Lotus",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 121
+  },
+  {
+    "itemID": 17012,
+    "name": "Core Leather",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 122
+  },
+  {
+    "itemID": 21840,
+    "name": "Bolt of Netherweave",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 123
+  },
+  {
+    "itemID": 21877,
+    "name": "Netherweave Cloth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 124
+  },
+  {
+    "itemID": 21881,
+    "name": "Netherweb Spider Silk",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 125
+  },
+  {
+    "itemID": 21882,
+    "name": "Soul Essence",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 126
+  },
+  {
+    "itemID": 21887,
+    "name": "Knothide Leather",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 127
+  },
+  {
+    "itemID": 22445,
+    "name": "Arcane Dust",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 128
+  },
+  {
+    "itemID": 14344,
+    "name": "Large Brilliant Shard",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 129
+  },
+  {
+    "itemID": 7076,
+    "name": "Essence of Earth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 130
+  },
+  {
+    "itemID": 7078,
+    "name": "Essence of Fire",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 131
+  },
+  {
+    "itemID": 7080,
+    "name": "Essence of Water",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 132
+  },
+  {
+    "itemID": 7082,
+    "name": "Essence of Air",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 133
+  },
+  {
+    "itemID": 12360,
+    "name": "Arcanite Bar",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 134
+  },
+  {
+    "itemID": 12803,
+    "name": "Living Essence",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 135
+  },
+  {
+    "itemID": 12808,
+    "name": "Essence of Undeath",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 136
+  },
+  {
+    "itemID": 16203,
+    "name": "Greater Eternal Essence",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 137
+  },
+  {
+    "itemID": 20520,
+    "name": "Dark Rune",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 138
+  },
+  {
+    "itemID": 12804,
+    "name": "Powerful Mojo",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 139
+  },
+  {
+    "itemID": 12810,
+    "name": "Enchanted Leather",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 140
+  },
+  {
+    "itemID": 14048,
+    "name": "Bolt of Runecloth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 141
+  },
+  {
+    "itemID": 14342,
+    "name": "Mooncloth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 142
+  },
+  {
+    "itemID": 156930,
+    "name": "Rich Illusion Dust",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 143
+  },
+  {
+    "itemID": 6037,
+    "name": "Truesilver Bar",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 144
+  },
+  {
+    "itemID": 7910,
+    "name": "Star Ruby",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 145
+  },
+  {
+    "itemID": 12662,
+    "name": "Demonic Rune",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 146
+  },
+  {
+    "itemID": 4342,
+    "name": "Purple Dye",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 147
+  },
+  {
+    "itemID": 8170,
+    "name": "Rugged Leather",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 148
+  },
+  {
+    "itemID": 10290,
+    "name": "Pink Dye",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 149
+  },
+  {
+    "itemID": 14047,
+    "name": "Runecloth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 150
+  },
+  {
+    "itemID": 14227,
+    "name": "Ironweb Spider Silk",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 151
+  },
+  {
+    "itemID": 14256,
+    "name": "Felcloth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 152
+  },
+  {
+    "itemID": 14341,
+    "name": "Rune Thread",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 153
+  },
+  {
+    "itemID": 9210,
+    "name": "Ghost Dye",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 154
+  },
+  {
+    "itemID": 4339,
+    "name": "Bolt of Mageweave",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 155
+  },
+  {
+    "itemID": 7077,
+    "name": "Heart of Fire",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 156
+  },
+  {
+    "itemID": 7079,
+    "name": "Globe of Water",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 157
+  },
+  {
+    "itemID": 7972,
+    "name": "Ichor of Undeath",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 158
+  },
+  {
+    "itemID": 10286,
+    "name": "Heart of the Wild",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 159
+  },
+  {
+    "itemID": 8831,
+    "name": "Purple Lotus",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 160
+  },
+  {
+    "itemID": 4625,
+    "name": "Firebloom",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 161
+  },
+  {
+    "itemID": 3864,
+    "name": "Citrine",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 162
+  },
+  {
+    "itemID": 7971,
+    "name": "Black Pearl",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 163
+  },
+  {
+    "itemID": 8153,
+    "name": "Wildvine",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 164
+  },
+  {
+    "itemID": 13926,
+    "name": "Golden Pearl",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 165
+  },
+  {
+    "itemID": 2325,
+    "name": "Black Dye",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 166
+  },
+  {
+    "itemID": 4304,
+    "name": "Thick Leather",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 167
+  },
+  {
+    "itemID": 4338,
+    "name": "Mageweave Cloth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 168
+  },
+  {
+    "itemID": 8343,
+    "name": "Heavy Silken Thread",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 169
+  },
+  {
+    "itemID": 10285,
+    "name": "Shadow Silk",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 170
+  },
+  {
+    "itemID": 1529,
+    "name": "Jade",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 171
+  },
+  {
+    "itemID": 4305,
+    "name": "Bolt of Silk Cloth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 172
+  },
+  {
+    "itemID": 4337,
+    "name": "Thick Spider's Silk",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 173
+  },
+  {
+    "itemID": 6261,
+    "name": "Orange Dye",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 174
+  },
+  {
+    "itemID": 3577,
+    "name": "Gold Bar",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 175
+  },
+  {
+    "itemID": 4234,
+    "name": "Heavy Leather",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 176
+  },
+  {
+    "itemID": 4291,
+    "name": "Silken Thread",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 177
+  },
+  {
+    "itemID": 4306,
+    "name": "Silk Cloth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 178
+  },
+  {
+    "itemID": 7071,
+    "name": "Iron Buckle",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 179
+  },
+  {
+    "itemID": 5500,
+    "name": "Iridescent Pearl",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 180
+  },
+  {
+    "itemID": 2997,
+    "name": "Bolt of Woolen Cloth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 181
+  },
+  {
+    "itemID": 4340,
+    "name": "Gray Dye",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 182
+  },
+  {
+    "itemID": 4341,
+    "name": "Yellow Dye",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 183
+  },
+  {
+    "itemID": 6371,
+    "name": "Fire Oil",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 184
+  },
+  {
+    "itemID": 7067,
+    "name": "Elemental Earth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 185
+  },
+  {
+    "itemID": 7068,
+    "name": "Elemental Fire",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 186
+  },
+  {
+    "itemID": 7069,
+    "name": "Elemental Air",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 187
+  },
+  {
+    "itemID": 7070,
+    "name": "Elemental Water",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 188
+  },
+  {
+    "itemID": 7072,
+    "name": "Naga Scale",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 189
+  },
+  {
+    "itemID": 2319,
+    "name": "Medium Leather",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 190
+  },
+  {
+    "itemID": 2321,
+    "name": "Fine Thread",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 191
+  },
+  {
+    "itemID": 3182,
+    "name": "Spider's Silk",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 192
+  },
+  {
+    "itemID": 5498,
+    "name": "Small Lustrous Pearl",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 193
+  },
+  {
+    "itemID": 2592,
+    "name": "Wool Cloth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 194
+  },
+  {
+    "itemID": 2605,
+    "name": "Green Dye",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 195
+  },
+  {
+    "itemID": 2318,
+    "name": "Light Leather",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 196
+  },
+  {
+    "itemID": 2604,
+    "name": "Red Dye",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 197
+  },
+  {
+    "itemID": 2996,
+    "name": "Bolt of Linen Cloth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 198
+  },
+  {
+    "itemID": 6260,
+    "name": "Blue Dye",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 199
+  },
+  {
+    "itemID": 2320,
+    "name": "Coarse Thread",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 200
+  },
+  {
+    "itemID": 2324,
+    "name": "Bleach",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 201
+  },
+  {
+    "itemID": 2589,
+    "name": "Linen Cloth",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 202
+  },
+  {
+    "itemID": 18240,
+    "name": "Ogre Tannin",
+    "file": "TitanGatheredForeverV3_Tailoring/TitanGatheredForeverV3_Tailoring.en.lua",
+    "line": 203
+  }
+]

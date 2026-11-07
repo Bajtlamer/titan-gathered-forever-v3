@@ -1,0 +1,16 @@
+[
+  {
+    "itemID": 11137,
+    "kind": "supply",
+    "reason": "Supply turn-in: a bundle of 20 fills Waylaid Crate: Expert Curiosities.",
+    "evidence": "https://www.wowhead.com/forever/item=248694/waylaid-crate-expert-curiosities"
+  },
+  {
+    "itemID": 264019,
+    "kind": "auction",
+    "reason": "Auction use: transferable crafting order requesting Draught of Water Breathing for a delivery reward.",
+    "auctionable": true,
+    "evidence": "https://www.wowhead.com/forever/item=264019/craftsmans-writ-draught-of-water-breathing",
+    "tradeEvidence": "https://www.wowhead.com/forever/guide/professions/craftsmans-writs-overview-recipes-rewards"
+  }
+]

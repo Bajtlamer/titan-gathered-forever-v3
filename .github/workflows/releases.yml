@@ -1,0 +1,78 @@
+name: Verify and package TGF v3
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    defaults:
+      run:
+        working-directory: TitanGatheredForeverV3
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install LuaJIT
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y luajit
+      - name: Validate version and tag
+        id: version
+        run: |
+          python3 - <<'PY'
+          import os, re
+          from pathlib import Path
+          version = re.search(r'^## Version: ([a-zA-Z0-9.-]+)$', Path('TitanGatheredForeverV3.toc').read_text(), re.M).group(1)
+          if os.environ.get('GITHUB_REF_TYPE') == 'tag':
+              assert os.environ['GITHUB_REF_NAME'] == 'v' + version, 'Tag must match the addon version'
+          assert Path(f'release-notes/ref-{version}.md').is_file(), 'Release notes are required'
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write(f'version={version}\n')
+          PY
+      - name: Reconstruct independently loadable profession addons
+        run: python3 tools/generate_catalog.py
+      - name: Run all checks
+        run: python3 tools/check.py
+      - name: Build individual and collection downloads
+        run: python3 tools/package.py
+      - name: Verify staged download hashes
+        working-directory: TitanGatheredForeverV3/dist/releases/${{ steps.version.outputs.version }}
+        run: sha256sum --check SHA256SUMS
+      - uses: actions/upload-artifact@v7
+        with:
+          name: tgf-v3-downloads-${{ steps.version.outputs.version }}
+          path: TitanGatheredForeverV3/dist/releases/${{ steps.version.outputs.version }}/
+          if-no-files-found: error
+          compression-level: 0
+
+  publish:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: tgf-v3-downloads-${{ needs.build.outputs.version }}
+          path: release-downloads
+      - name: Publish verified download set
+        working-directory: TitanGatheredForeverV3
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          extra=()
+          if [[ "$VERSION" == *-* ]]; then extra+=(--prerelease); fi
+          gh release create "$GITHUB_REF_NAME" "$GITHUB_WORKSPACE/release-downloads/"* \
+            --verify-tag --title "Titan Gathered Forever v3 $VERSION" \
+            --notes-file "release-notes/ref-$VERSION.md" "${extra[@]}"

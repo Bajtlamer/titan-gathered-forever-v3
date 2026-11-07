@@ -1,0 +1,815 @@
+[
+  {
+    "module": "Fishing",
+    "itemID": 4603,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "status": "legacy-fish-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Fishing",
+    "itemID": 6289,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "status": "legacy-fish-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Fishing",
+    "itemID": 6291,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "status": "legacy-fish-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Fishing",
+    "itemID": 6303,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "status": "legacy-fish-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Fishing",
+    "itemID": 6308,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "status": "legacy-fish-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Fishing",
+    "itemID": 6317,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "status": "legacy-fish-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Fishing",
+    "itemID": 6361,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "status": "legacy-fish-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Fishing",
+    "itemID": 6362,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "status": "legacy-fish-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Fishing",
+    "itemID": 8365,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "status": "legacy-fish-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Fishing",
+    "itemID": 13754,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "status": "legacy-fish-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Fishing",
+    "itemID": 13756,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "status": "legacy-fish-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Fishing",
+    "itemID": 13759,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "status": "legacy-fish-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Fishing",
+    "itemID": 13760,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "status": "legacy-fish-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Fishing",
+    "itemID": 13889,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "status": "legacy-fish-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Fishing",
+    "itemID": 21071,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "status": "legacy-fish-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Fishing",
+    "itemID": 21153,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Cooking/TitanGatheredForeverV3_Cooking.en.lua",
+    "status": "legacy-fish-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 765,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 785,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 2447,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 2449,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 2450,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 2452,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 2453,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 3355,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 3356,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 3357,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 3358,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 3369,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 3818,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 3819,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 3820,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 3821,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 4625,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 8831,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 8836,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 8838,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 8839,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 8845,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 8846,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 13463,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 13464,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 13465,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 13466,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 13467,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 13468,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Herbs/TitanGatheredForeverV3_Herbs.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 249274,
+    "evidence": "https://www.wowhead.com/forever/item=249274/stranglevine"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 249399,
+    "evidence": "https://www.wowhead.com/forever/item=249399/frilled-lichen"
+  },
+  {
+    "module": "Herbs",
+    "itemID": 249424,
+    "evidence": "https://www.wowhead.com/forever/item=249424/rosecap"
+  },
+  {
+    "module": "Mining",
+    "itemID": 774,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 818,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 1206,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 1210,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 1529,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 1705,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 2770,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 2771,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 2772,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 2775,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 2776,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 2835,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 2836,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 2838,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 2840,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 2841,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 2842,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 3470,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 3478,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 3486,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 3575,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 3576,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 3577,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 3858,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 3859,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 3860,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 3864,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 6037,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 7909,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 7910,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 7911,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 7912,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 7966,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 9262,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 10620,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 11184,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 11185,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 11186,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 11188,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 11370,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 11371,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 11382,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 11754,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 12359,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 12361,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 12363,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 12364,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 12365,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 12644,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 12655,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 12799,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 12800,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 18562,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 19774,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Mining/TitanGatheredForeverV3_Mining.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Mining",
+    "itemID": 249391,
+    "evidence": "https://www.wowhead.com/forever/item=249391/pyrite"
+  },
+  {
+    "module": "Mining",
+    "itemID": 249425,
+    "evidence": "https://www.wowhead.com/forever/item=249425/bauxite"
+  },
+  {
+    "module": "Mining",
+    "itemID": 249426,
+    "evidence": "https://www.wowhead.com/forever/item=249426/pitchblende"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 783,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 2318,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 2319,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 2675,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 2934,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 4232,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 4234,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 4235,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 4304,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 6470,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 6471,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 7286,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 7392,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 8154,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 8165,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 8167,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 8169,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 8170,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 8171,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 12607,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 15408,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 15410,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 15412,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 15414,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 15415,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 15416,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 15417,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 15419,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 17012,
+    "evidence": "data/legacy-items.json#TitanGatheredForeverV3_Skinning/TitanGatheredForeverV3_Skinning.en.lua",
+    "status": "legacy-membership-with-forever-recipe-evidence"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 249427,
+    "evidence": "https://www.wowhead.com/forever/item=249427/pristine-leather"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 249428,
+    "evidence": "https://www.wowhead.com/forever/item=249428/pristine-hide"
+  },
+  {
+    "module": "Skinning",
+    "itemID": 249429,
+    "evidence": "https://www.wowhead.com/forever/item=249429/pristine-scale"
+  }
+]

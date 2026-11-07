@@ -1,0 +1,119 @@
+local _, ns = ...
+local Tooltips = {}
+ns.Tooltips = Tooltips
+
+function Tooltips.Count(value)
+    return tostring(value or 0)
+end
+
+function Tooltips.DisplayCounts(count)
+    local bags, bank = count.bags or 0, count.bank or 0
+    return { bags = bags, bank = bank, total = bags + bank }
+end
+
+function Tooltips.BankObservation(count)
+    if not ns.settings.showBank then return nil end
+    if count.bankState == 'cached' and count.bankObservedAt then
+        return string.format(ns.L.bankObserved, date('%Y-%m-%d %H:%M', count.bankObservedAt))
+    end
+end
+
+function Tooltips.CountHeading()
+    if not ns.settings.showBank then return 'Bags' end
+    return 'Bags / Bank / Total'
+end
+
+function Tooltips.CountValues(count)
+    count = Tooltips.DisplayCounts(count)
+    local values = { ns.Style.Count(count.bags, 'bags') }
+    if ns.settings.showBank then
+        values[#values + 1] = ns.Style.Count(count.bank, 'bank')
+        values[#values + 1] = ns.Style.Count(count.total, 'total')
+    end
+    return table.concat(values, ' / ')
+end
+
+function Tooltips.Lines(itemID)
+    local record = ns.Catalog.Get(itemID)
+    if not ns.inventory then return {} end
+    if not record and (not ns.history or ns.history:Total((ns.characterID or UnitGUID('player')), itemID) == 0) then return {} end
+    record = record or { professions = {}, recipes = {}, recipeCounts = {}, uses = {} }
+    local lines = {}
+    for _, profession in ipairs(record.professions) do
+        local count = record.recipeCounts[profession] or 0
+        lines[#lines + 1] = ns.Style.Text(ns.Style.gold, 'Reagent for ')
+            .. ns.Style.Text(ns.Style.cyan, profession)
+            .. ns.Style.Text(ns.Style.gray, string.format(' (%d recipes).', count))
+    end
+    for _, use in ipairs(record.uses) do lines[#lines + 1] = ns.Style.Text(ns.Style.note, use.reason) end
+    -- A small sample gives a concrete use without overwhelming the native item tooltip.
+    for index = 1, math.min(2, #record.recipes) do
+        local info = C_Spell.GetSpellInfo(record.recipes[index])
+        if info and ns.IsPublic(info.name) and type(info.name) == 'string' then
+            lines[#lines + 1] = ns.Style.Text(ns.Style.gold, 'Recipe: ') .. ns.Style.Text(ns.Style.violet, info.name)
+        end
+    end
+    local observed = ns.inventory:Get(itemID)
+    local counts = Tooltips.DisplayCounts(observed)
+    if #lines > 0 then lines[#lines + 1] = false end -- Render a rule before inventory counts.
+    lines[#lines + 1] = ns.Style.Text(ns.Style.gold, 'Bags: ') .. ns.Style.Count(counts.bags, 'bags')
+    if ns.settings.showBank then
+        lines[#lines + 1] = ns.Style.Text(ns.Style.gold, 'Bank: ') .. ns.Style.Count(counts.bank, 'bank')
+        lines[#lines + 1] = ns.Style.Text(ns.Style.gold, 'Total: ') .. ns.Style.Count(counts.total, 'total')
+    end
+    if observed.bagsState == 'cached' then
+        lines[#lines + 1] = ns.Style.Text(ns.Style.gray, 'Bag refresh incomplete; showing last observed counts.')
+    end
+    local observation = Tooltips.BankObservation(observed)
+    if observation then lines[#lines + 1] = ns.Style.Text(ns.Style.gray, observation) end
+    if ns.settings.historyTooltips and ns.history then
+        local character = (ns.characterID or UnitGUID('player'))
+        local quantity = ns.history:Total(character, itemID)
+        local sources = ns.history:Rates(character, itemID)
+        if quantity > 0 then
+            lines[#lines + 1] = false
+            lines[#lines + 1] = ns.Style.Text(ns.Style.gold, 'Lifetime obtained: ') .. ns.Style.Text(ns.Style.cyan, tostring(quantity))
+            for index = 1, math.min(3, #sources) do
+                local row = sources[index]
+                lines[#lines + 1] = ns.Style.Text(ns.Style.note, string.format('%s: %.1f%% (%d / %d samples)',
+                    ns.Reports.Source(row), row.percent, row.hits, row.trials))
+            end
+            lines[#lines + 1] = ns.Style.Text(ns.Style.gray, 'Observed complete loot samples, not guaranteed drop rates. /tgf history')
+        end
+        if #sources == 0 and ns.gathering then
+            local found = 0
+            for mapID, nodes in pairs(ns.gathering.saved.maps) do
+                if type(nodes) == 'table' then for _, node in ipairs(nodes) do
+                    if node.itemID == itemID and found < 3 then
+                        if found == 0 then lines[#lines + 1] = false end
+                        found = found + 1
+                        lines[#lines + 1] = ns.Style.Text(ns.Style.note, string.format('Recorded near %s: %.1f, %.1f',
+                            ns.Reports.Zone(mapID), node.x * 100, node.y * 100))
+                    end
+                end end
+            end
+        end
+    end
+    return lines
+end
+
+function Tooltips.Append(tooltip, data)
+    if not ns.settings or not ns.settings.itemTooltips or not ns.inventory
+        or not data or not ns.IsPublic(data.id) or type(data.id) ~= 'number'
+        or (not ns.Catalog.Get(data.id) and (not ns.history or ns.history:Total((ns.characterID or UnitGUID('player')), data.id) == 0)) then return end
+    if tooltip.IsForbidden and tooltip:IsForbidden() then return end
+    if not tooltip.tgForeverHooked then
+        tooltip:HookScript('OnTooltipCleared', function(self) self.tgForeverItemID = nil end)
+        tooltip.tgForeverHooked = true
+    end
+    if tooltip.tgForeverItemID == data.id then return end
+    tooltip.tgForeverItemID = data.id
+    ns.Style.Separator(tooltip)
+    for _, line in ipairs(Tooltips.Lines(data.id)) do
+        if line == false then ns.Style.Separator(tooltip) else tooltip:AddLine(line, 1, 1, 1, true) end
+    end
+end
+
+function Tooltips.Initialize()
+    TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, Tooltips.Append)
+end

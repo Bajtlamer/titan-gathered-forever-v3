@@ -1,0 +1,5254 @@
+{
+  "addedIDs": [
+    118,
+    159,
+    729,
+    730,
+    731,
+    814,
+    929,
+    1081,
+    1179,
+    1205,
+    1251,
+    1288,
+    1475,
+    1645,
+    1708,
+    2289,
+    2312,
+    2313,
+    2454,
+    2455,
+    2457,
+    2458,
+    2459,
+    2570,
+    2594,
+    2596,
+    2686,
+    2692,
+    2723,
+    2863,
+    2880,
+    2894,
+    3013,
+    3030,
+    3172,
+    3174,
+    3371,
+    3372,
+    3383,
+    3385,
+    3389,
+    3390,
+    3391,
+    3466,
+    3713,
+    3823,
+    3824,
+    3827,
+    3829,
+    3857,
+    4096,
+    4231,
+    4233,
+    4236,
+    4243,
+    4246,
+    4255,
+    4265,
+    4289,
+    4357,
+    4359,
+    4360,
+    4361,
+    4363,
+    4364,
+    4368,
+    4371,
+    4375,
+    4377,
+    4380,
+    4382,
+    4385,
+    4387,
+    4389,
+    4394,
+    4397,
+    4399,
+    4400,
+    4404,
+    4405,
+    4407,
+    4461,
+    4470,
+    4536,
+    4589,
+    4605,
+    4611,
+    5082,
+    5116,
+    5373,
+    5507,
+    5633,
+    5635,
+    5637,
+    5784,
+    5785,
+    5966,
+    6048,
+    6217,
+    6338,
+    6358,
+    6359,
+    6370,
+    6452,
+    6453,
+    6522,
+    6530,
+    6662,
+    7075,
+    7081,
+    7191,
+    7287,
+    7387,
+    7428,
+    8146,
+    8151,
+    8152,
+    8168,
+    8172,
+    8173,
+    8368,
+    8544,
+    8766,
+    8925,
+    8949,
+    8951,
+    8959,
+    9060,
+    9206,
+    9260,
+    10026,
+    10284,
+    10308,
+    10500,
+    10502,
+    10505,
+    10507,
+    10518,
+    10543,
+    10546,
+    10558,
+    10559,
+    10560,
+    10561,
+    10576,
+    10577,
+    10586,
+    10592,
+    10647,
+    10648,
+    10978,
+    10998,
+    11040,
+    11082,
+    11083,
+    11084,
+    11128,
+    11134,
+    11135,
+    11137,
+    11138,
+    11139,
+    11144,
+    11174,
+    11175,
+    11176,
+    11177,
+    11178,
+    11291,
+    12753,
+    12938,
+    13422,
+    13423,
+    13444,
+    13510,
+    13511,
+    13512,
+    13755,
+    13890,
+    13893,
+    14044,
+    14530,
+    15407,
+    15409,
+    15420,
+    15422,
+    15423,
+    15564,
+    15992,
+    15994,
+    16000,
+    16005,
+    16006,
+    16206,
+    16583,
+    17034,
+    17035,
+    17056,
+    17196,
+    17202,
+    17203,
+    18255,
+    18256,
+    18512,
+    18567,
+    18631,
+    18984,
+    18986,
+    19441,
+    19726,
+    19767,
+    19768,
+    19943,
+    20381,
+    20498,
+    20500,
+    20501,
+    20725,
+    22202,
+    22203,
+    23567,
+    213370,
+    213373,
+    213378,
+    213381,
+    227813,
+    238786,
+    238787,
+    238788,
+    239016,
+    239017,
+    247786,
+    248815,
+    248819,
+    248820,
+    248821,
+    248822,
+    248823,
+    248824,
+    248825,
+    249274,
+    249391,
+    249399,
+    249409,
+    249410,
+    249424,
+    249425,
+    249426,
+    249427,
+    249428,
+    249429,
+    249430,
+    249431,
+    249432,
+    249726,
+    249796,
+    251290,
+    251291,
+    251524,
+    255007,
+    255645,
+    260784,
+    260794,
+    260796,
+    260799,
+    260801,
+    260804,
+    260808,
+    260813,
+    260815,
+    260823,
+    264019,
+    272941,
+    273125,
+    273127,
+    273128,
+    273129,
+    273130,
+    273131,
+    274030
+  ],
+  "catalogueIDs": 532,
+  "complete": false,
+  "legacy": [
+    {
+      "itemID": 723,
+      "names": [
+        "Goretusk Liver"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 765,
+      "names": [
+        "Silverleaf"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 769,
+      "names": [
+        "Chunk of Boar Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 774,
+      "names": [
+        "Malachite"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 783,
+      "names": [
+        "Light Hide"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 785,
+      "names": [
+        "Mageroyal"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 818,
+      "names": [
+        "Tigerseye"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 1015,
+      "names": [
+        "Lean Wolf Flank"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 1080,
+      "names": [
+        "Tough Condor Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 1206,
+      "names": [
+        "Moss Agate"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 1210,
+      "names": [
+        "Shadowgem"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 1468,
+      "names": [
+        "Murloc Fin"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 1529,
+      "names": [
+        "Jade"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 1705,
+      "names": [
+        "Lesser Moonstone"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2251,
+      "names": [
+        "Gooey Spider Leg"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2318,
+      "names": [
+        "Light Leather"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2319,
+      "names": [
+        "Medium Leather"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2320,
+      "names": [
+        "Coarse Thread"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2321,
+      "names": [
+        "Fine Thread"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2324,
+      "names": [
+        "Bleach"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2325,
+      "names": [
+        "Black Dye"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2447,
+      "names": [
+        "Peacebloom"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2449,
+      "names": [
+        "Earthroot"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2450,
+      "names": [
+        "Briarthorn"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2452,
+      "names": [
+        "Swiftthistle"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2453,
+      "names": [
+        "Bruiseweed"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2589,
+      "names": [
+        "Linen Cloth"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2592,
+      "names": [
+        "Wool Cloth"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2604,
+      "names": [
+        "Red Dye"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2605,
+      "names": [
+        "Green Dye"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2672,
+      "names": [
+        "Stringy Wolf Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2673,
+      "names": [
+        "Coyote Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2674,
+      "names": [
+        "Crawler Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2675,
+      "names": [
+        "Crawler Claw"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2677,
+      "names": [
+        "Boar Ribs"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2678,
+      "names": [
+        "Mild Spices"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2770,
+      "names": [
+        "Copper Ore"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2771,
+      "names": [
+        "Tin Ore"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2772,
+      "names": [
+        "Iron Ore"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2775,
+      "names": [
+        "Silver Ore"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2776,
+      "names": [
+        "Gold Ore"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2835,
+      "names": [
+        "Rough Stone"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2836,
+      "names": [
+        "Coarse Stone"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2838,
+      "names": [
+        "Heavy Stone"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2840,
+      "names": [
+        "Copper Bar"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2841,
+      "names": [
+        "Bronze Bar"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2842,
+      "names": [
+        "Silver Bar"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2886,
+      "names": [
+        "Crag Boar Rib"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2924,
+      "names": [
+        "Crocolisk Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2934,
+      "names": [
+        "Ruined Leather Scraps"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2996,
+      "names": [
+        "Bolt of Linen Cloth"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 2997,
+      "names": [
+        "Bolt of Woolen Cloth"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3173,
+      "names": [
+        "Bear Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3182,
+      "names": [
+        "Spider's Silk"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3355,
+      "names": [
+        "Wild Steelbloom"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3356,
+      "names": [
+        "Kingsblood"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3357,
+      "names": [
+        "Liferoot"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3358,
+      "names": [
+        "Khadgar's Whisker"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3369,
+      "names": [
+        "Grave Moss"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3404,
+      "names": [
+        "Buzzard Wing"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3470,
+      "names": [
+        "Rough Grinding Stone"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3478,
+      "names": [
+        "Coarse Grinding Stone"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3486,
+      "names": [
+        "Heavy Grinding Stone"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3575,
+      "names": [
+        "Iron Bar"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3576,
+      "names": [
+        "Tin Bar"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3577,
+      "names": [
+        "Gold Bar"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3667,
+      "names": [
+        "Tender Crocolisk Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3685,
+      "names": [
+        "Raptor Egg"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3712,
+      "names": [
+        "Turtle Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3730,
+      "names": [
+        "Big Bear Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3731,
+      "names": [
+        "Lion Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3818,
+      "names": [
+        "Fadeleaf"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3819,
+      "names": [
+        "Dragon's Teeth",
+        "Wintersbite"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3820,
+      "names": [
+        "Stranglekelp"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3821,
+      "names": [
+        "Goldthorn"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3858,
+      "names": [
+        "Mithril Ore"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3859,
+      "names": [
+        "Steel Bar"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3860,
+      "names": [
+        "Mithril Bar"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 3864,
+      "names": [
+        "Citrine"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 4232,
+      "names": [
+        "Medium Hide"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 4234,
+      "names": [
+        "Heavy Leather"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 4235,
+      "names": [
+        "Heavy Hide"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 4291,
+      "names": [
+        "Silken Thread"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 4304,
+      "names": [
+        "Thick Leather"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 4305,
+      "names": [
+        "Bolt of Silk Cloth"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 4306,
+      "names": [
+        "Silk Cloth"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 4337,
+      "names": [
+        "Thick Spider's Silk"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 4338,
+      "names": [
+        "Mageweave Cloth"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 4339,
+      "names": [
+        "Bolt of Mageweave"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 4340,
+      "names": [
+        "Gray Dye"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 4341,
+      "names": [
+        "Yellow Dye"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 4342,
+      "names": [
+        "Purple Dye"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 4402,
+      "names": [
+        "Small Flame Sac"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 4603,
+      "names": [
+        "Raw Spotted Yellowtail"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 4625,
+      "names": [
+        "Firebloom"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 4655,
+      "names": [
+        "Giant Clam Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 5051,
+      "names": [
+        "Dig Rat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 5465,
+      "names": [
+        "Small Spider Leg"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 5466,
+      "names": [
+        "Scorpid Stinger"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 5467,
+      "names": [
+        "Kodo Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 5468,
+      "names": [
+        "Soft Frenzy Flesh"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 5469,
+      "names": [
+        "Strider Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 5470,
+      "names": [
+        "Thunder Lizard Tail"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 5471,
+      "names": [
+        "Stag Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 5498,
+      "names": [
+        "Small Lustrous Pearl"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 5500,
+      "names": [
+        "Iridescent Pearl"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 5503,
+      "names": [
+        "Clam Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 5504,
+      "names": [
+        "Tangy Clam Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 6037,
+      "names": [
+        "Truesilver Bar"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 6260,
+      "names": [
+        "Blue Dye"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 6261,
+      "names": [
+        "Orange Dye"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 6289,
+      "names": [
+        "Raw Longjaw Mud Snapper"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 6291,
+      "names": [
+        "Raw Brilliant Smallfish"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 6303,
+      "names": [
+        "Raw Slitherskin Mackerel"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 6308,
+      "names": [
+        "Raw Bristle Whisker Catfish"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 6317,
+      "names": [
+        "Raw Loch Frenzy"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 6361,
+      "names": [
+        "Raw Rainbow Fin Albacore"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 6362,
+      "names": [
+        "Raw Rockscale Cod"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 6371,
+      "names": [
+        "Fire Oil"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 6470,
+      "names": [
+        "Deviate Scale"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 6471,
+      "names": [
+        "Perfect Deviate Scale"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 6889,
+      "names": [
+        "Small Egg"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 7067,
+      "names": [
+        "Elemental Earth"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 7068,
+      "names": [
+        "Elemental Fire"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 7069,
+      "names": [
+        "Elemental Air"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 7070,
+      "names": [
+        "Elemental Water"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 7071,
+      "names": [
+        "Iron Buckle"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 7072,
+      "names": [
+        "Naga Scale"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 7076,
+      "names": [
+        "Essence of Earth"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 7077,
+      "names": [
+        "Heart of Fire"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 7078,
+      "names": [
+        "Essence of Fire"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 7079,
+      "names": [
+        "Globe of Water"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 7080,
+      "names": [
+        "Essence of Water"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 7082,
+      "names": [
+        "Essence of Air"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 7286,
+      "names": [
+        "Black Whelp Scale"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 7392,
+      "names": [
+        "Green Whelp Scale"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 7909,
+      "names": [
+        "Aquamarine"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 7910,
+      "names": [
+        "Star Ruby"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 7911,
+      "names": [
+        "Truesilver Ore"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 7912,
+      "names": [
+        "Solid Stone"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 7966,
+      "names": [
+        "Solid Grinding Stone"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 7971,
+      "names": [
+        "Black Pearl"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 7972,
+      "names": [
+        "Ichor of Undeath"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 7974,
+      "names": [
+        "Zesty Clam Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 8150,
+      "names": [
+        "Deeprock Salt"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 8153,
+      "names": [
+        "Wildvine"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 8154,
+      "names": [
+        "Scorpid Scale"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 8165,
+      "names": [
+        "Worn Dragonscale"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 8167,
+      "names": [
+        "Turtle Scale"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 8169,
+      "names": [
+        "Thick Hide"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 8170,
+      "names": [
+        "Rugged Leather"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 8171,
+      "names": [
+        "Rugged Hide"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 8343,
+      "names": [
+        "Heavy Silken Thread"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 8365,
+      "names": [
+        "Raw Mithril Head Trout"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 8831,
+      "names": [
+        "Purple Lotus"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 8836,
+      "names": [
+        "Arthas' Tears"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 8838,
+      "names": [
+        "Sungrass"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 8839,
+      "names": [
+        "Blindweed"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 8845,
+      "names": [
+        "Ghost Mushroom"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 8846,
+      "names": [
+        "Gromsblood"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 9061,
+      "names": [
+        "Goblin Rocket Fuel"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 9210,
+      "names": [
+        "Ghost Dye"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 9262,
+      "names": [
+        "Black Vitriol"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 10285,
+      "names": [
+        "Shadow Silk"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 10286,
+      "names": [
+        "Heart of the Wild"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 10290,
+      "names": [
+        "Pink Dye"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 10620,
+      "names": [
+        "Thorium Ore"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 10938,
+      "names": [
+        "Lesser Magic Essence"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 10939,
+      "names": [
+        "Greater Magic Essence"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 10940,
+      "names": [
+        "Strange Dust"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 11184,
+      "names": [
+        "Blue Power Crystal"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 11185,
+      "names": [
+        "Green Power Crystal"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 11186,
+      "names": [
+        "Red Power Crystal"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 11188,
+      "names": [
+        "Yellow Power Crystal"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 11370,
+      "names": [
+        "Dark Iron Ore"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 11371,
+      "names": [
+        "Dark Iron Bar"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 11382,
+      "names": [
+        "Blood of the Mountain"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 11754,
+      "names": [
+        "Black Diamond"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12037,
+      "names": [
+        "Mystery Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12184,
+      "names": [
+        "Raptor Flesh"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12202,
+      "names": [
+        "Tiger Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12203,
+      "names": [
+        "Red Wolf Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12204,
+      "names": [
+        "Heavy Kodo Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12205,
+      "names": [
+        "White Spider Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12206,
+      "names": [
+        "Tender Crab Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12207,
+      "names": [
+        "Giant Egg"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12208,
+      "names": [
+        "Tender Wolf Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12223,
+      "names": [
+        "Meaty Bat Wing"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12359,
+      "names": [
+        "Thorium Bar"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12360,
+      "names": [
+        "Arcanite Bar"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12361,
+      "names": [
+        "Blue Sapphire"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12363,
+      "names": [
+        "Arcane Crystal"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12364,
+      "names": [
+        "Huge Emerald"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12365,
+      "names": [
+        "Dense Stone"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12607,
+      "names": [
+        "Brilliant Chromatic Scale"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12644,
+      "names": [
+        "Dense Grinding Stone"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12655,
+      "names": [
+        "Enchanted Thorium Bar"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12662,
+      "names": [
+        "Demonic Rune"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12799,
+      "names": [
+        "Large Opal"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12800,
+      "names": [
+        "Azerothian Diamond"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12803,
+      "names": [
+        "Living Essence"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12804,
+      "names": [
+        "Powerful Mojo"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12808,
+      "names": [
+        "Essence of Undeath"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12809,
+      "names": [
+        "Guardian Stone"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12810,
+      "names": [
+        "Enchanted Leather"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 12811,
+      "names": [
+        "Righteous Orb"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 13463,
+      "names": [
+        "Dreamfoil"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 13464,
+      "names": [
+        "Golden Sansam"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 13465,
+      "names": [
+        "Mountain Silversage"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 13466,
+      "names": [
+        "Plaguebloom",
+        "Sorrowmoss"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 13467,
+      "names": [
+        "Icecap"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 13468,
+      "names": [
+        "Black Lotus"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 13754,
+      "names": [
+        "Raw Glossy Mightfish"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 13756,
+      "names": [
+        "Raw Summer Bass"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 13757,
+      "names": [
+        "Lightning Eel"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 13758,
+      "names": [
+        "Raw Redgill"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 13759,
+      "names": [
+        "Raw Nightfin Snapper"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 13760,
+      "names": [
+        "Raw Sunscale Salmon"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 13888,
+      "names": [
+        "Darkclaw Lobster"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 13889,
+      "names": [
+        "Raw Whitescale Salmon"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 13926,
+      "names": [
+        "Golden Pearl"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 14047,
+      "names": [
+        "Runecloth"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 14048,
+      "names": [
+        "Bolt of Runecloth"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 14227,
+      "names": [
+        "Ironweb Spider Silk"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 14256,
+      "names": [
+        "Felcloth"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 14341,
+      "names": [
+        "Rune Thread"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 14342,
+      "names": [
+        "Mooncloth"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 14343,
+      "names": [
+        "Small Brilliant Shard"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 14344,
+      "names": [
+        "Large Brilliant Shard"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 15408,
+      "names": [
+        "Heavy Scorpid Scale"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 15410,
+      "names": [
+        "Scale of Onyxia"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 15412,
+      "names": [
+        "Green Dragonscale"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 15414,
+      "names": [
+        "Red Dragonscale"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 15415,
+      "names": [
+        "Blue Dragonscale"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 15416,
+      "names": [
+        "Black Dragonscale"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 15417,
+      "names": [
+        "Devilsaur Leather"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 15419,
+      "names": [
+        "Warbear Leather"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 16202,
+      "names": [
+        "Lesser Eternal Essence"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 16203,
+      "names": [
+        "Greater Eternal Essence"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 16204,
+      "names": [
+        "Light Illusion Dust"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 17010,
+      "names": [
+        "Fiery Core"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 17011,
+      "names": [
+        "Lava Core"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 17012,
+      "names": [
+        "Core Leather"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 17194,
+      "names": [
+        "Holiday Spices"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 17771,
+      "names": [
+        "Enchanted Elementium Bar"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 18240,
+      "names": [
+        "Ogre Tannin"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 18335,
+      "names": [
+        "Pristine Black Diamond"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 18562,
+      "names": [
+        "Elementium Ore"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 19774,
+      "names": [
+        "Souldarite"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 20424,
+      "names": [
+        "Sandworm Meat"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 20520,
+      "names": [
+        "Dark Rune"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 21024,
+      "names": [
+        "Chimaerok Tenderloin"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 21071,
+      "names": [
+        "Raw Sagefish"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 21153,
+      "names": [
+        "Raw Greater Sagefish"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 21840,
+      "names": [
+        "Bolt of Netherweave"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 21842,
+      "names": [
+        "Bolt of Imbued Netherweave"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 21844,
+      "names": [
+        "Bolt of Soulcloth"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 21845,
+      "names": [
+        "Primal Mooncloth"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 21877,
+      "names": [
+        "Netherweave Cloth"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 21881,
+      "names": [
+        "Netherweb Spider Silk"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 21882,
+      "names": [
+        "Soul Essence"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 21884,
+      "names": [
+        "Primal Fire"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 21885,
+      "names": [
+        "Primal Water"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 21886,
+      "names": [
+        "Primal Life"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 21887,
+      "names": [
+        "Knothide Leather"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 22445,
+      "names": [
+        "Arcane Dust"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 22446,
+      "names": [
+        "Greater Planar Essence"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 22447,
+      "names": [
+        "Lesser Planar Essence"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 22448,
+      "names": [
+        "Small Prismatic Shard"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 22449,
+      "names": [
+        "Large Prismatic Shard"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 22450,
+      "names": [
+        "Void Crystal"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 22451,
+      "names": [
+        "Primal Air"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 22452,
+      "names": [
+        "Primal Earth"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 22456,
+      "names": [
+        "Primal Shadow"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 22457,
+      "names": [
+        "Primal Mana"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 22573,
+      "names": [
+        "Mote of Earth"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 22574,
+      "names": [
+        "Mote of Fire"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 22577,
+      "names": [
+        "Mote of Shadow"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 22644,
+      "names": [
+        "Crunchy Spider Leg"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 22682,
+      "names": [
+        "Frozen Rune"
+      ],
+      "status": "present-in-forever-evidence"
+    },
+    {
+      "itemID": 22785,
+      "names": [
+        "Felweed"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 22786,
+      "names": [
+        "Dreaming Glory"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 22787,
+      "names": [
+        "Ragveil"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 22789,
+      "names": [
+        "Terocone"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 22790,
+      "names": [
+        "Ancient Lichen"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 22791,
+      "names": [
+        "Netherbloom"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 22792,
+      "names": [
+        "Nightmare Vine"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 22793,
+      "names": [
+        "Mana Thistle"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 22794,
+      "names": [
+        "Fel Lotus"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 22797,
+      "names": [
+        "Nightmare Seed"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 23424,
+      "names": [
+        "Fel Iron Ore"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 23425,
+      "names": [
+        "Adamantite Ore"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 23426,
+      "names": [
+        "Khorium Ore"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 23427,
+      "names": [
+        "Eternium Ore"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 23445,
+      "names": [
+        "Fel Iron Bar"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 23446,
+      "names": [
+        "Adamantite Bar"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 23447,
+      "names": [
+        "Eternium Bar"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 23448,
+      "names": [
+        "Felsteel Bar"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 23449,
+      "names": [
+        "Khorium Bar"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 23571,
+      "names": [
+        "Primal Might"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 23572,
+      "names": [
+        "Primal Nether"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 23573,
+      "names": [
+        "Hardened Adamantite Bar"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 23676,
+      "names": [
+        "Moongraze Stag Tenderloin"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 24271,
+      "names": [
+        "Spellcloth"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 24272,
+      "names": [
+        "Shadowcloth"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 24477,
+      "names": [
+        "Jaggal Clam Meat"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 25649,
+      "names": [
+        "Knothide Leather Scraps"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 25699,
+      "names": [
+        "Crystal Infused Leather"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 25700,
+      "names": [
+        "Fel Scales"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 25707,
+      "names": [
+        "Fel Hide"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 25708,
+      "names": [
+        "Thick Clefthoof Leather"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 27422,
+      "names": [
+        "Barbed Gill Trout"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 27425,
+      "names": [
+        "Spotted Feltail"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 27429,
+      "names": [
+        "Zangarian Sporefish"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 27435,
+      "names": [
+        "Figluster's Mudfish"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 27437,
+      "names": [
+        "Icefin Bluefish"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 27438,
+      "names": [
+        "Golden Darter"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 27439,
+      "names": [
+        "Furious Crawdad"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 27515,
+      "names": [
+        "Huge Spotted Feltail"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 27516,
+      "names": [
+        "Enormous Barbed Gill Trout"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 27668,
+      "names": [
+        "Lynx Meat"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 27669,
+      "names": [
+        "Bat Flesh"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 27671,
+      "names": [
+        "Buzzard Meat"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 27674,
+      "names": [
+        "Ravager Flesh"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 27677,
+      "names": [
+        "Chunk o' Basilisk"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 27678,
+      "names": [
+        "Clefthoof Meat"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 27681,
+      "names": [
+        "Warped Flesh"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 27682,
+      "names": [
+        "Talbuk Venison"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 28714,
+      "names": [
+        "Flame Cap"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 29539,
+      "names": [
+        "Cobra Scales"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 29547,
+      "names": [
+        "Wind Scales"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 29548,
+      "names": [
+        "Nether Dragonscales"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 30183,
+      "names": [
+        "Nether Vortex"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 30817,
+      "names": [
+        "Simple Flour"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 31670,
+      "names": [
+        "Raptor Ribs"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 31671,
+      "names": [
+        "Serpent Flesh"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 32428,
+      "names": [
+        "Heart of Darkness"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 33470,
+      "names": [
+        "Frostweave Cloth"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 33567,
+      "names": [
+        "Borean Leather Scraps"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 33568,
+      "names": [
+        "Borean Leather"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 33823,
+      "names": [
+        "Bloodfin Catfish"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 33824,
+      "names": [
+        "Crescent-Tail Skullfish"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 34052,
+      "names": [
+        "Dream Shard"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 34053,
+      "names": [
+        "Small Dream Shard"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 34054,
+      "names": [
+        "Infinite Dust"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 34055,
+      "names": [
+        "Greater Cosmic Essence"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 34056,
+      "names": [
+        "Lesser Cosmic Essence"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 34057,
+      "names": [
+        "Abyss Crystal"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 34664,
+      "names": [
+        "Sunmote"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 34736,
+      "names": [
+        "Chunk o' Mammoth"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 35128,
+      "names": [
+        "Hardened Khorium"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 35562,
+      "names": [
+        "Bear Flank"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 35622,
+      "names": [
+        "Eternal Water"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 35624,
+      "names": [
+        "Eternal Earth"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 35625,
+      "names": [
+        "Eternal Life"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 35627,
+      "names": [
+        "Eternal Shadow"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 36782,
+      "names": [
+        "Succulent Clam Meat"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 36783,
+      "names": [
+        "Northsea Pearl"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 36784,
+      "names": [
+        "Siren's Tear"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 36860,
+      "names": [
+        "Eternal Fire"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 36901,
+      "names": [
+        "Goldclover"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 36903,
+      "names": [
+        "Adder's Tongue"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 36904,
+      "names": [
+        "Tiger Lily"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 36905,
+      "names": [
+        "Lichbloom"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 36906,
+      "names": [
+        "Icethorn"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 36907,
+      "names": [
+        "Talandra's Rose"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 36908,
+      "names": [
+        "Frost Lotus"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 36909,
+      "names": [
+        "Cobalt Ore"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 36910,
+      "names": [
+        "Titanium Ore"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 36912,
+      "names": [
+        "Saronite Ore"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 36913,
+      "names": [
+        "Saronite Bar"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 36916,
+      "names": [
+        "Cobalt Bar"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 36919,
+      "names": [
+        "Cardinal Ruby"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 36922,
+      "names": [
+        "King's Amber"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 36925,
+      "names": [
+        "Majestic Zircon"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 36930,
+      "names": [
+        "Monarch Topaz"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 36934,
+      "names": [
+        "Eye of Zul"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 37663,
+      "names": [
+        "Titansteel Bar"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 37701,
+      "names": [
+        "Crystallized Earth"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 37702,
+      "names": [
+        "Crystallized Fire"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 37704,
+      "names": [
+        "Crystallized Life"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 37921,
+      "names": [
+        "Deadnettle"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 38425,
+      "names": [
+        "Heavy Borean Leather"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 38426,
+      "names": [
+        "Eternium Thread"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 38557,
+      "names": [
+        "Icy Dragonscale"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 38558,
+      "names": [
+        "Nerubian Chitin"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 38561,
+      "names": [
+        "Jormungar Scale"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 39970,
+      "names": [
+        "Fire Leaf"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 41163,
+      "names": [
+        "Titanium Bar"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 41510,
+      "names": [
+        "Bolt of Frostweave"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 41511,
+      "names": [
+        "Bolt of Imbued Frostweave"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 41593,
+      "names": [
+        "Ebonweave"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 41594,
+      "names": [
+        "Moonshroud"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 41595,
+      "names": [
+        "Spellweave"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 41800,
+      "names": [
+        "Deep Sea Monsterbelly"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 41801,
+      "names": [
+        "Moonglow Cuttlefish"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 41802,
+      "names": [
+        "Imperial Manta Ray"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 41803,
+      "names": [
+        "Rockfin Grouper"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 41805,
+      "names": [
+        "Borean Man O' War"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 41806,
+      "names": [
+        "Musselback Sculpin"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 41807,
+      "names": [
+        "Dragonfin Angelfish"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 41808,
+      "names": [
+        "Bonescale Snapper"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 41809,
+      "names": [
+        "Glacial Salmon"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 41810,
+      "names": [
+        "Fangtooth Herring"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 41812,
+      "names": [
+        "Barrelhead Goby"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 41813,
+      "names": [
+        "Nettlefish"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 42253,
+      "names": [
+        "Iceweb Spider Silk"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 43007,
+      "names": [
+        "Northern Spices"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 43009,
+      "names": [
+        "Shoveltusk Flank"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 43010,
+      "names": [
+        "Worm Meat"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 43011,
+      "names": [
+        "Worg Haunch"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 43012,
+      "names": [
+        "Rhino Meat"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 43013,
+      "names": [
+        "Chilled Meat"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 43102,
+      "names": [
+        "Frozen Orb"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 43501,
+      "names": [
+        "Northern Egg"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 44128,
+      "names": [
+        "Arctic Fur"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 44834,
+      "names": [
+        "Wild Turkey"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 44835,
+      "names": [
+        "Autumnal Herbs"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 44853,
+      "names": [
+        "Honey"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 45087,
+      "names": [
+        "Runed Orb"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 47556,
+      "names": [
+        "Crusader Orb"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 49908,
+      "names": [
+        "Primordial Saronite"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 51950,
+      "names": [
+        "Pyrium Bar"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 52078,
+      "names": [
+        "Chaos Orb"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 52183,
+      "names": [
+        "Pyrite Ore"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 52185,
+      "names": [
+        "Elementium Ore"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 52186,
+      "names": [
+        "Elementium Bar"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 52325,
+      "names": [
+        "Volatile Fire"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 52326,
+      "names": [
+        "Volatile Water"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 52327,
+      "names": [
+        "Volatile Earth"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 52328,
+      "names": [
+        "Volatile Air"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 52329,
+      "names": [
+        "Volatile Life"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 52555,
+      "names": [
+        "Hypnotic Dust"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 52718,
+      "names": [
+        "Lesser Celestial Essence"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 52719,
+      "names": [
+        "Greater Celestial Essence"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 52720,
+      "names": [
+        "Small Heavenly Shard"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 52721,
+      "names": [
+        "Heavenly Shard"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 52722,
+      "names": [
+        "Maelstrom Crystal"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 52976,
+      "names": [
+        "Savage Leather"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 52977,
+      "names": [
+        "Savage Leather Scraps"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 52979,
+      "names": [
+        "Blackened Dragonscale"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 52982,
+      "names": [
+        "Deepsea Scale"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 52983,
+      "names": [
+        "Cinderbloom"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 52984,
+      "names": [
+        "Stormvine"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 52985,
+      "names": [
+        "Azshara's Veil"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 52986,
+      "names": [
+        "Heartblossom"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 52987,
+      "names": [
+        "Twilight Jasmine"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 52988,
+      "names": [
+        "Whiptail"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 53010,
+      "names": [
+        "Embersilk Cloth"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 53038,
+      "names": [
+        "Obsidium Ore"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 53039,
+      "names": [
+        "Hardened Elementium Bar"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 53062,
+      "names": [
+        "Sharptooth"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 53063,
+      "names": [
+        "Mountain Trout"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 53064,
+      "names": [
+        "Highland Guppy"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 53066,
+      "names": [
+        "Blackbelly Mudfish"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 53067,
+      "names": [
+        "Striped Lurker"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 53068,
+      "names": [
+        "Lavascale Catfish"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 53069,
+      "names": [
+        "Murglesnout"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 53070,
+      "names": [
+        "Fathom Eel"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 53071,
+      "names": [
+        "Algaefin Rockfish"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 53072,
+      "names": [
+        "Deepsea Sagefish"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 53643,
+      "names": [
+        "Bolt of Embersilk Cloth"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 54440,
+      "names": [
+        "Dreamcloth"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 54849,
+      "names": [
+        "Obsidium Bar"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 60224,
+      "names": [
+        "Handful of Obsidium Bolts"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 62778,
+      "names": [
+        "Toughened Flesh"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 62779,
+      "names": [
+        "Monstrous Claw"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 62780,
+      "names": [
+        "Snake Eye"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 62781,
+      "names": [
+        "Giant Turtle Tongue"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 62782,
+      "names": [
+        "Dragon Flank"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 62783,
+      "names": [
+        "Basilisk \\"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 62784,
+      "names": [
+        "Crocolisk Tail"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 62785,
+      "names": [
+        "Delicate Wing"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 62786,
+      "names": [
+        "Cocoa Beans"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 62791,
+      "names": [
+        "Blood Shrimp"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 67229,
+      "names": [
+        "Stag Flank"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 69237,
+      "names": [
+        "Living Ember"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 71998,
+      "names": [
+        "Essence of Destruction"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 72092,
+      "names": [
+        "Ghost Iron Ore"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 72093,
+      "names": [
+        "Kyparite"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 72094,
+      "names": [
+        "Black Trillium Ore"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 72095,
+      "names": [
+        "Trillium Bar"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 72096,
+      "names": [
+        "Ghost Iron Bar"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 72103,
+      "names": [
+        "White Trillium Ore"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 72120,
+      "names": [
+        "Exotic Leather"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 72162,
+      "names": [
+        "Sha-Touched Leather"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 72163,
+      "names": [
+        "Magnificent Hide"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 72234,
+      "names": [
+        "Green Tea Leaf"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 72235,
+      "names": [
+        "Silkweed"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 72237,
+      "names": [
+        "Rain Poppy"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 72238,
+      "names": [
+        "Golden Lotus"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 72988,
+      "names": [
+        "Windwool Cloth"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74247,
+      "names": [
+        "Ethereal Shard"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74248,
+      "names": [
+        "Sha Crystal"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74249,
+      "names": [
+        "Spirit Dust"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74250,
+      "names": [
+        "Mysterious Essence"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74252,
+      "names": [
+        "Small Ethereal Shard"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74659,
+      "names": [
+        "Farm Chicken"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74660,
+      "names": [
+        "Pandaren Peach"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74661,
+      "names": [
+        "Black Pepper"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74662,
+      "names": [
+        "Rice Flour"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74832,
+      "names": [
+        "Barley"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74833,
+      "names": [
+        "Raw Tiger Steak"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74834,
+      "names": [
+        "Mushan Ribs"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74837,
+      "names": [
+        "Raw Turtle Meat"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74838,
+      "names": [
+        "Raw Crab Meat"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74839,
+      "names": [
+        "Wildfowl Breast"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74840,
+      "names": [
+        "Green Cabbage"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74841,
+      "names": [
+        "Juicycrunch Carrot"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74842,
+      "names": [
+        "Mogu Pumpkin"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74843,
+      "names": [
+        "Scallions"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74844,
+      "names": [
+        "Red Blossom Leek"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74845,
+      "names": [
+        "Ginseng"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74846,
+      "names": [
+        "Witchberries"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74847,
+      "names": [
+        "Jade Squash"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74848,
+      "names": [
+        "Striped Melon"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74849,
+      "names": [
+        "Pink Turnip"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74850,
+      "names": [
+        "White Turnip"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74851,
+      "names": [
+        "Rice"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74852,
+      "names": [
+        "Yak Milk"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74853,
+      "names": [
+        "100 Year Soy Sauce"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74854,
+      "names": [
+        "Instant Noodles"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74856,
+      "names": [
+        "Jade Lungfish"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74857,
+      "names": [
+        "Giant Mantis Shrimp"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74859,
+      "names": [
+        "Emperor Salmon"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74860,
+      "names": [
+        "Redbelly Mandarin"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74861,
+      "names": [
+        "Tiger Gourami"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74863,
+      "names": [
+        "Jewel Danio"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74864,
+      "names": [
+        "Reef Octopus"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74865,
+      "names": [
+        "Krasarang Paddlefish"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 74866,
+      "names": [
+        "Golden Carp"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 75014,
+      "names": [
+        "Raw Crocolisk Belly"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 76061,
+      "names": [
+        "Spirit of Harmony"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 79010,
+      "names": [
+        "Snow Lily"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 79011,
+      "names": [
+        "Fool's Cap"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 79101,
+      "names": [
+        "Prismatic Scale"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 79246,
+      "names": [
+        "Delicate Blossom Petals"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 79250,
+      "names": [
+        "Fresh Pomfruit"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 80433,
+      "names": [
+        "Blood Spirit"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 82441,
+      "names": [
+        "Bolt of Windwool Cloth"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 82447,
+      "names": [
+        "Imperial Silk"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 85506,
+      "names": [
+        "Viseclaw Meat"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 85583,
+      "names": [
+        "Needle Mushrooms"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 85584,
+      "names": [
+        "Silkworm Pupa"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 85585,
+      "names": [
+        "Red Beans"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 94289,
+      "names": [
+        "Haunting Spirit"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 98619,
+      "names": [
+        "Celestial Cloth"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 102218,
+      "names": [
+        "Spirit of War"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 102536,
+      "names": [
+        "Fresh Lushroom"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 102537,
+      "names": [
+        "Fresh Silkfeather Hawk Eggs"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 102538,
+      "names": [
+        "Fresh Shao-Tien Rice"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 102539,
+      "names": [
+        "Fresh Strawberries"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 102540,
+      "names": [
+        "Fresh Mangos"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 102541,
+      "names": [
+        "Aged Balsamic Vinegar"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 102542,
+      "names": [
+        "Ancient Pandaren Spices"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 102543,
+      "names": [
+        "Aged Mogu'shan Cheese"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 105718,
+      "names": [
+        "Sha Crystal Fragment"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 109119,
+      "names": [
+        "True Iron Ore"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 109124,
+      "names": [
+        "Frostweed"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 109125,
+      "names": [
+        "Fireweed"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 109126,
+      "names": [
+        "Gorgrond Flytrap"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 109127,
+      "names": [
+        "Starflower"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 109128,
+      "names": [
+        "Nagrand Arrowbloom"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 109129,
+      "names": [
+        "Talador Orchid"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 109131,
+      "names": [
+        "Raw Clefthoof Meat"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 109132,
+      "names": [
+        "Raw Talbuk Meat"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 109133,
+      "names": [
+        "Rylak Egg"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 109134,
+      "names": [
+        "Raw Elekk Meat"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 109135,
+      "names": [
+        "Raw Riverbeast Meat"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 109136,
+      "names": [
+        "Raw Boar Meat"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 109137,
+      "names": [
+        "Crescent Saberfish Flesh"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 109138,
+      "names": [
+        "Jawless Skulker Flesh"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 109139,
+      "names": [
+        "Fat Sleeper Flesh"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 109140,
+      "names": [
+        "Blind Lake Sturgeon Flesh"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 109141,
+      "names": [
+        "Fire Ammonite Tentacle"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 109142,
+      "names": [
+        "Sea Scorpion Segment"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 109143,
+      "names": [
+        "Abyssal Gulper Eel Flesh"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 109144,
+      "names": [
+        "Blackwater Whiptail Flesh"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 109693,
+      "names": [
+        "Draenic Dust"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 110609,
+      "names": [
+        "Raw Beast Hide"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 110610,
+      "names": [
+        "Raw Beast Hide Scraps"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 111245,
+      "names": [
+        "Luminous Shard"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 111556,
+      "names": [
+        "Hexweave Cloth"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 111557,
+      "names": [
+        "Sumptuous Fur"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 112155,
+      "names": [
+        "Deepsea Scale Fragment"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 112156,
+      "names": [
+        "Blackened Dragonscale Fragment"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 112157,
+      "names": [
+        "Prismatic Scale Fragment"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 112158,
+      "names": [
+        "Icy Dragonscale Fragment"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 112177,
+      "names": [
+        "Nerubian Chitin Fragment"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 112182,
+      "names": [
+        "Patch of Fel Hide"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 112185,
+      "names": [
+        "Wind Scale Fragment"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 113262,
+      "names": [
+        "Sorcerous Water"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 113263,
+      "names": [
+        "Sorcerous Earth"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 113264,
+      "names": [
+        "Sorcerous Air"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 113588,
+      "names": [
+        "Temporal Crystal"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 115502,
+      "names": [
+        "Small Luminous Shard"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 115504,
+      "names": [
+        "Fractured Temporal Crystal"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 118472,
+      "names": [
+        "Savage Blood"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 120945,
+      "names": [
+        "Primal Spirit"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 123918,
+      "names": [
+        "Leystone Ore"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124101,
+      "names": [
+        "Aethril"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124102,
+      "names": [
+        "Dreamleaf"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124103,
+      "names": [
+        "Foxflower"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124104,
+      "names": [
+        "Fjarnskaggl"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124105,
+      "names": [
+        "Starlight Rose"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124106,
+      "names": [
+        "Felwort"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124107,
+      "names": [
+        "Cursed Queenfish"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124108,
+      "names": [
+        "Mossgill Perch"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124109,
+      "names": [
+        "Highmountain Salmon"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124110,
+      "names": [
+        "Stormray"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124111,
+      "names": [
+        "Runescale Koi"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124112,
+      "names": [
+        "Black Barracuda"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124113,
+      "names": [
+        "Stonehide Leather"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124115,
+      "names": [
+        "Stormscale"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124117,
+      "names": [
+        "Lean Shank"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124118,
+      "names": [
+        "Fatty Bearsteak"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124119,
+      "names": [
+        "Big Gamy Ribs"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124120,
+      "names": [
+        "Leyblood"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124121,
+      "names": [
+        "Wildfowl Egg"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124124,
+      "names": [
+        "Blood of Sargeras"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124437,
+      "names": [
+        "Shal'dorei Silk"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124438,
+      "names": [
+        "Unbroken Claw"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124439,
+      "names": [
+        "Unbroken Tooth"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124440,
+      "names": [
+        "Arkhana"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124441,
+      "names": [
+        "Leylight Shard"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124442,
+      "names": [
+        "Chaos Crystal"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 124669,
+      "names": [
+        "Darkmoon Daggermaw"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 127004,
+      "names": [
+        "Imbued Silkweave"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 127037,
+      "names": [
+        "Runic Catgut"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 127681,
+      "names": [
+        "Sharp Spritethorn"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 127759,
+      "names": [
+        "Felblight"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 128304,
+      "names": [
+        "Yseralline Seed"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 128499,
+      "names": [
+        "Fel Egg"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 128500,
+      "names": [
+        "Fel Ham"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 129100,
+      "names": [
+        "Gem Chip"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 130183,
+      "names": [
+        "Shadowruby"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 133588,
+      "names": [
+        "Flaked Sea Salt"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 133589,
+      "names": [
+        "Dalape\u00f1o Pepper"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 133590,
+      "names": [
+        "Muskenbutter"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 133591,
+      "names": [
+        "River Onion"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 133592,
+      "names": [
+        "Stonedark Snail"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 133593,
+      "names": [
+        "Royal Olive"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 133607,
+      "names": [
+        "Silver Mackerel"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 133680,
+      "names": [
+        "Slice of Bacon"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 142335,
+      "names": [
+        "Pristine Falcosaur Feather"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 142336,
+      "names": [
+        "Falcosaur Egg"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 151566,
+      "names": [
+        "Fiendish Leather"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 151567,
+      "names": [
+        "Lightweave Cloth"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 151568,
+      "names": [
+        "Primal Sargerite"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 152505,
+      "names": [
+        "Riverbud"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 152506,
+      "names": [
+        "Star Moss"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 152507,
+      "names": [
+        "Akunda's Bite"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 152508,
+      "names": [
+        "Winter's Kiss"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 152509,
+      "names": [
+        "Siren's Pollen"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 152510,
+      "names": [
+        "Anchor Weed"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 152511,
+      "names": [
+        "Sea Stalk"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 152512,
+      "names": [
+        "Monelite Ore"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 152513,
+      "names": [
+        "Platinum Ore"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 152541,
+      "names": [
+        "Coarse Leather"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 152543,
+      "names": [
+        "Sand Shifter"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 152544,
+      "names": [
+        "Slimy Mackerel"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 152545,
+      "names": [
+        "Frenzied Fangtooth"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 152546,
+      "names": [
+        "Lane Snapper"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 152547,
+      "names": [
+        "Great Sea Catfish"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 152548,
+      "names": [
+        "Tiragarde Perch"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 152549,
+      "names": [
+        "Redtail Loach"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 152576,
+      "names": [
+        "Tidespray Linen"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 152577,
+      "names": [
+        "Deep Sea Satin"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 152579,
+      "names": [
+        "Storm Silver Ore"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 152631,
+      "names": [
+        "Briny Flesh"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 152668,
+      "names": [
+        "Expulsom"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 152875,
+      "names": [
+        "Gloom Dust"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 152876,
+      "names": [
+        "Umbra Shard"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 152877,
+      "names": [
+        "Veiled Crystal"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 153050,
+      "names": [
+        "Shimmerscale"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 153051,
+      "names": [
+        "Mistscale"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 154164,
+      "names": [
+        "Blood-Stained Bone"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 154165,
+      "names": [
+        "Calcified Bone"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 154722,
+      "names": [
+        "Tempest Hide"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 154897,
+      "names": [
+        "Stringy Loins"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 154898,
+      "names": [
+        "Meaty Haunch"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 154899,
+      "names": [
+        "Thick Paleo Steak"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 156930,
+      "names": [
+        "Rich Illusion Dust"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 158378,
+      "names": [
+        "Embroidered Deep Sea Satin"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 159959,
+      "names": [
+        "Nylon Thread"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 160398,
+      "names": [
+        "Choral Honey"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 160399,
+      "names": [
+        "Wild Flour"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 160400,
+      "names": [
+        "Foosaka"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 160502,
+      "names": [
+        "Chemical Blasting Cap"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 160705,
+      "names": [
+        "Major's Frothy Coffee"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 160709,
+      "names": [
+        "Fresh Potato"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 160710,
+      "names": [
+        "Wild Berries"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 160711,
+      "names": [
+        "Aromatic Fish Oil"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 160712,
+      "names": [
+        "Powdered Sugar"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 161433,
+      "names": [
+        "Thick Webbing"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 162460,
+      "names": [
+        "Hydrocore"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 162461,
+      "names": [
+        "Sanguicell"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 162515,
+      "names": [
+        "Midnight Salmon"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 163782,
+      "names": [
+        "Cursed Haunch"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 165703,
+      "names": [
+        "Breath of Bwonsamdi"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 165948,
+      "names": [
+        "Tidalcore"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 166888,
+      "names": [
+        "Germinating Seed"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 168185,
+      "names": [
+        "Osmenite Ore"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 168487,
+      "names": [
+        "Zin'anthid"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 169596,
+      "names": [
+        "Zin'anthid Tentacle"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 169597,
+      "names": [
+        "Osmenite Shards"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 169598,
+      "names": [
+        "Osmenite Dust"
+      ],
+      "status": "unresolved"
+    },
+    {
+      "itemID": 181166,
+      "names": [
+        "Bloodthistle"
+      ],
+      "status": "unresolved"
+    }
+  ],
+  "limits": [
+    "Source mirror does not state its exact extraction build.",
+    "Client-table existence does not prove live obtainability.",
+    "Output-free enchantments and gathering/camping uses need independent coverage.",
+    "Unmatched legacy IDs are not proof of unavailability."
+  ],
+  "oldUniqueIDs": 708,
+  "sourceSHA256": "2dff9c8498786baa49c2cbd3d45b538b5fd7d7ca7778accc3e8d6cf1e53cf10a"
+}

@@ -1,0 +1,60 @@
+local passed = 0
+local function eq(a,b) assert(a == b, tostring(a) .. ' != ' .. tostring(b)) end
+local function test(name, fn) local ok, e = pcall(fn); if not ok then error(name .. ': ' .. e) end; passed = passed + 1 end
+local ns = {}; assert(loadfile('TitanGatheredForeverV3/History.lua'))('TitanGatheredForeverV3', ns)
+local function event(id, items, complete)
+ return { id=id, kind='Mining', source='1731', mapID=1, x=.4, y=.6, at=100, items=items or {}, complete=complete ~= false }
+end
+test('quantities differ from obtained outcomes and empty trials count', function()
+ local h=ns.History.New({}); h:Observe('a','Alice',event('one',{[2770]=4,[1210]=1}))
+ h:Observe('a','Alice',event('two',{[2770]=2})); h:Observe('a','Alice',event('three',{}))
+ local rows=h:Rates('a'); eq(#rows,2); eq(rows[1].trials,3)
+ for _,r in ipairs(rows) do if r.itemID==1210 then eq(r.hits,1); eq(r.quantity,1); assert(math.abs(r.percent-100/3)<0.00001) end end
+ eq(h:Totals('a')[1].quantity + h:Totals('a')[2].quantity,7)
+end)
+test('completed source repeats do not duplicate records', function()
+ local h=ns.History.New({}); local e=event('one',{[2770]=4}); h:Observe('a','Alice',e); h:Observe('a','Alice',e)
+ eq(h:Totals('a')[1].quantity,4); eq(h:Rates('a')[1].trials,1)
+end)
+test('partial loot counts lifetime but only becomes a rate sample when completed', function()
+ local h=ns.History.New({}); h:Observe('a','Alice',event('one',{[2770]=2},false))
+ eq(h:Totals('a')[1].quantity,2); eq(#h:Rates('a'),0)
+ h:Observe('a','Alice',event('one',{[1210]=1},true))
+ eq(h:Rates('a')[1].trials,1); eq(#h:Rates('a'),2)
+end)
+test('characters isolate history and combined rates sum sample counts', function()
+ local saved={}; local h=ns.History.New(saved)
+ h:Observe('a','Alice',event('one',{[2770]=2})); h:Observe('b','Bob',event('one',{[2770]=3}))
+ eq(h:Totals('a')[1].quantity,2); eq(h:Totals('b')[1].quantity,3)
+ eq(h:Totals(nil)[1].quantity,5); eq(h:Rates(nil)[1].trials,2)
+ h=ns.History.New(saved); eq(h:Totals('a')[1].quantity,2)
+end)
+test('source and zone groups do not mix and observed material index is retained', function()
+ local h=ns.History.New({}); h:Observe('a','A',event('one',{[1210]=1}))
+ local e=event('two',{[2770]=1}); e.mapID=2; h:Observe('a','A',e)
+ eq(#h:Rates('a'),2); assert(h:ItemsFor('Mining')[1210])
+end)
+test('combined rates weight zero-outcome character samples rather than averaging percentages',function()
+ local h=ns.History.New({});h:Observe('a','A',event('one',{[1210]=1}))
+ for i=1,9 do h:Observe('b','B',event('other'..i,{}))end
+ local r=h:Rates(nil,1210)[1];eq(r.trials,10);eq(r.hits,1);eq(r.percent,10)
+end)
+test('rate denominators exclude periods when an item was outside recording scope',function()
+ local h=ns.History.New({});local off=event('one',{});off.policy={key='off',items={[2770]=true},rare=false}
+ h:Observe('a','A',off)
+ local on=event('two',{[1210]=1});on.policy={key='on',items={},rare=true};on.qualities={[1210]=3}
+ h:Observe('a','A',on)
+ local r=h:Rates('a',1210)[1];eq(r.trials,1);eq(r.percent,100)
+end)
+test('rare coverage does not override excluded known profession materials',function()
+ local h=ns.History.New({});local off=event('one',{});off.policy={key='off',items={},knownItems={[1210]=true},rare=true}
+ h:Observe('a','A',off)
+ local on=event('two',{[1210]=1});on.policy={key='on',items={[1210]=true},knownItems={[1210]=true},rare=true};on.qualities={[1210]=3}
+ h:Observe('a','A',on);eq(h:Rates('a',1210)[1].trials,1)
+end)
+test('recording pauses invalidate a partial sample without losing lifetime totals',function()
+ local h=ns.History.New({});h:Observe('a','A',event('one',{[2770]=2},false))
+ h:InvalidatePending('a');h:Observe('a','A',event('one',{[1210]=1},true))
+ eq(#h:Rates('a'),0);eq(h:Total('a',2770),2);eq(h:Total('a',1210),1)
+end)
+print('PASS ' .. passed .. ' lifetime history and observed-rate checks')

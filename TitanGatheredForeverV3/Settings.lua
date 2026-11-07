@@ -1,0 +1,39 @@
+local _, ns = ...
+ns.Settings = {}
+
+function ns.Settings.Initialize(saved)
+    if type(saved) ~= 'table' or saved.schema ~= 1 then saved = { schema = 1 } end
+    if type(saved.settings) ~= 'table' then saved.settings = {} end
+    local settings = saved.settings
+    if type(settings.showZero) ~= 'boolean' then settings.showZero = false end
+    if type(settings.showBank) ~= 'boolean' then settings.showBank = true end
+    if type(settings.debugMode) ~= 'boolean' then settings.debugMode = false end
+    settings.showTotal = nil
+    if type(settings.itemTooltips) ~= 'boolean' then settings.itemTooltips = true end
+    if type(settings.categories) ~= 'table' then settings.categories = {} end
+    for _, key in ipairs({ 'gatheringMap', 'mapMining', 'mapHerbs', 'mapSkinning', 'mapFishing', 'mapRare', 'mapWorld', 'mapMinimap' }) do
+        if type(settings[key]) ~= 'boolean' then settings[key] = true end
+    end
+    if type(settings.recordHistory) ~= 'boolean' then settings.recordHistory = true end
+    if type(settings.recordRare) ~= 'boolean' then settings.recordRare = true end
+    if type(settings.historyTooltips) ~= 'boolean' then settings.historyTooltips = true end
+    if type(settings.mapProfessions) ~= 'table' then settings.mapProfessions = {} end
+    if type(settings.historyProfessions) ~= 'table' then settings.historyProfessions = {} end
+    if type(settings.mapItems) ~= 'table' then settings.mapItems = {} end
+    for _, kind in ipairs({ 'Mining', 'Herbs', 'Skinning', 'Fishing', 'Cooking', 'Alchemy', 'Blacksmithing', 'Engineering', 'FirstAid', 'Leatherworking', 'Tailoring', 'Rare' }) do
+        if type(settings.mapItems[kind]) ~= 'table' then settings.mapItems[kind] = {} end
+    end
+    for old, current in pairs({ ['First Aid'] = 'FirstAid', Herbalism = 'Herbs', Other = 'Auction' }) do
+        if settings.categories[current] == nil and type(settings.categories[old]) == 'boolean' then
+            settings.categories[current] = settings.categories[old]
+        end
+    end
+    if type(settings.rowsPerPage) ~= 'number' or settings.rowsPerPage < 5
+        or settings.rowsPerPage > 40 or settings.rowsPerPage ~= math.floor(settings.rowsPerPage) then
+        settings.rowsPerPage = 20
+    end
+    if type(saved.characters) ~= 'table' then saved.characters = {} end
+    if type(saved.gathering) ~= 'table' then saved.gathering = {} end
+    if type(saved.history) ~= 'table' then saved.history = {} end
+    return saved, settings
+end

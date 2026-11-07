@@ -1,0 +1,25 @@
+[
+  {
+    "spellID": 13626,
+    "outputItemID": null,
+    "profession": "Enchanting",
+    "reagents": [
+      { "itemID": 10998, "quantity": 1 },
+      { "itemID": 11083, "quantity": 1 },
+      { "itemID": 11084, "quantity": 1 }
+    ],
+    "evidence": "https://www.wowhead.com/forever/spell=13626/enchant-chest-minor-stats",
+    "retrieved": "2026-11-06"
+  },
+  {
+    "spellID": 13655,
+    "outputItemID": null,
+    "profession": "Enchanting",
+    "reagents": [
+      { "itemID": 7067, "quantity": 1 },
+      { "itemID": 11138, "quantity": 1 }
+    ],
+    "evidence": "https://www.wowhead.com/forever/spell=13655/enchant-weapon-lesser-elemental-slayer",
+    "retrieved": "2026-11-06"
+  }
+]
