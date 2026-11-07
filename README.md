@@ -62,13 +62,13 @@ Install the renamed folders and disable the previous-generation addon folders. D
 
 WoW names its account SavedVariables file after the core addon folder. Renaming the folder therefore requires a one-time migration to retain settings, inventory snapshots, spots and lifetime history.
 
-Runtime ZIPs contain runtime files only. If you installed from ZIPs, first download the [migration tool](TitanGatheredForeverV3/tools/migrate_savedvariables.py) from the source and adjust its script path in the command below.
+Runtime ZIPs contain runtime files only. If you installed from ZIPs, first download the [migration tool](tools/migrate_savedvariables.py) from the source and adjust its script path in the command below.
 
 1. Close WoW so its current data is saved, and back up the account's SavedVariables directory.
 2. From the source checkout, run the migration tool, using the old and new files in that same account directory:
 
 ```sh
-python3 TitanGatheredForeverV3/tools/migrate_savedvariables.py \
+python3 tools/migrate_savedvariables.py \
   "/path/to/WTF/Account/ACCOUNT/SavedVariables/TitanGathered2.lua" \
   "/path/to/WTF/Account/ACCOUNT/SavedVariables/TitanGatheredForeverV3.lua"
 ```
@@ -91,17 +91,17 @@ Click a material in a report for its recorded sources. Use **TGF v3 spots** on t
 
 ## Development layout
 
-The repository root contains the shared core and thirteen separate optional addon folders. Development tools, tests, documentation and catalogue inputs live inside `TitanGatheredForeverV3/`. The root README and GitHub workflow cover the complete collection.
+The repository root contains the shared core and thirteen separate optional addon folders. All addon folders contain only game-required files. Development tools, tests, catalogue inputs, documentation and release notes live at the repository root. Generated packages are written to `dist/`; private local archives remain in ignored `.work/`.
 
 ```sh
 git clone https://github.com/Bajtlamer/titan-gathered-forever-v3.git
 cd titan-gathered-forever-v3
-python3 TitanGatheredForeverV3/tools/generate_catalog.py
-python3 TitanGatheredForeverV3/tools/check.py
-python3 TitanGatheredForeverV3/tools/package.py
+python3 tools/generate_catalog.py
+python3 tools/check.py
+python3 tools/package.py
 ```
 
-Python 3.10 or newer and LuaJIT with Lua 5.1 semantics are required. No Git initialization is required to run these local tools. The generator reconstructs profession addon folders from `catalogue/`. Runtime Lua lives in `TitanGatheredForeverV3/`, including its `Data/` and `Localization/` folders. Tests and tools live in that core folder too. Avoid editing unrelated addons.
+Python 3.10 or newer and LuaJIT with Lua 5.1 semantics are required. No Git initialization is required to run these local tools. The generator reconstructs profession addon folders from `catalogue/`. Runtime Lua lives in `TitanGatheredForeverV3/`, including its `Data/` and `Localization/` folders. Tests and tools live in root `tests/` and `tools/`. Avoid editing unrelated addons.
 
 The contributor guide retains its historical structure descriptions with the new addon identity. This README describes the current layout and commands.
 
@@ -114,12 +114,12 @@ Every release must provide:
 - A download index with version, dependencies, filenames, sizes and SHA-256 hashes.
 - Checksums for the downloadable archives.
 
-`python3 TitanGatheredForeverV3/tools/package.py` builds the normal distributions and a clean upload directory at `TitanGatheredForeverV3/dist/releases/<version>/`. Upload the contents of that version directory to the website's download area. The collection ZIP installs all modules; individual ZIPs let users select only their professions. Source archives supplied automatically by GitHub are development source, not installable addon packages.
+`python3 tools/package.py` builds the normal distributions and a clean upload directory at `dist/releases/<version>/`. Upload the contents of that version directory to the website's download area. The collection ZIP installs all modules; individual ZIPs let users select only their professions. Source archives supplied automatically by GitHub are development source, not installable addon packages.
 
-Tagged GitHub releases use the same build and verification pipeline. Runtime ZIPs exclude tests, catalogue source JSON, private archives, Git metadata, development documents and unrelated addons. See [the release playbook](TitanGatheredForeverV3/book-releases.md) for publishing steps.
+Tagged GitHub releases use the same build and verification pipeline. Runtime ZIPs exclude tests, catalogue source JSON, private archives, Git metadata, development documents and unrelated addons. See [the release playbook](book-releases.md) for publishing steps.
 
 ## Contributing and evidence
 
-Report the client and Titan versions, TGF v3 version, affected item/spell IDs, expected results, observed results and reproduction steps. Visible UI changes benefit from screenshots. Run the full checks and the relevant [in-game validation steps](TitanGatheredForeverV3/book-wow-forever-validation.md).
+Report the client and Titan versions, TGF v3 version, affected item/spell IDs, expected results, observed results and reproduction steps. Visible UI changes benefit from screenshots. Run the full checks and the relevant [in-game validation steps](book-wow-forever-validation.md).
 
 Recipe evidence includes the documented [DwarfExplorersBible client-table mirror](https://github.com/masterred92/DwarfExplorersBible/blob/main/Data.lua), supplementary Forever spell references and curated uses retained in `catalogue/`. Titan Panel is an external dependency. Original artwork and upstream material retain their attribution; this README does not assign a new blanket license to third-party content.

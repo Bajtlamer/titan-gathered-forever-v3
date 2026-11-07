@@ -31,11 +31,11 @@ These APIs were checked against the [Forever client UI source mirror](https://gi
 
 ## Data evidence
 
-- `data/forever-recipes.json`: numeric recipe facts captured from the [Forever recipe-data mirror](https://github.com/masterred92/DwarfExplorersBible/blob/main/Data.lua), attributed by that project to Forever client tables. Original mirror has 1,971 recipes with item outputs; it does not state an exact extraction build.
-- `data/verified-recipes.json`: separately sourced Forever enchantment relationships from Wowhead, including spells `13626` and `13655`, which have no conventional output item.
-- `data/curated-uses.json`: exact item-use evidence for a supply turn-in and an auctionable crafting writ.
-- `data/catalog-audit.json`: every old ID reconciled against current evidence, new IDs listed, and limitations retained. An unmatched old ID is unresolved, not proven absent from Forever.
-- `data/module-membership.json`: producer-module membership, kept separate from consuming professions. Existing gathering memberships are retained only for IDs supported by the current recipe union, with new scarce materials cross-checked against Wowhead's Forever profession guides. Fishing membership remains a partial seed.
+- `catalogue/forever-recipes.json`: numeric recipe facts captured from the [Forever recipe-data mirror](https://github.com/masterred92/DwarfExplorersBible/blob/main/Data.lua), attributed by that project to Forever client tables. Original mirror has 1,971 recipes with item outputs; it does not state an exact extraction build.
+- `catalogue/verified-recipes.json`: separately sourced Forever enchantment relationships from Wowhead, including spells `13626` and `13655`, which have no conventional output item.
+- `catalogue/curated-uses.json`: exact item-use evidence for a supply turn-in and an auctionable crafting writ.
+- `catalogue/catalog-audit.json`: every old ID reconciled against current evidence, new IDs listed, and limitations retained. An unmatched old ID is unresolved, not proven absent from Forever.
+- `catalogue/module-membership.json`: producer-module membership, kept separate from consuming professions. Existing gathering memberships are retained only for IDs supported by the current recipe union, with new scarce materials cross-checked against Wowhead's Forever profession guides. Fishing membership remains a partial seed.
 - Generated metadata contains a SHA-256 digest of the combined data inputs, including module membership. This pins captured content, not its live availability or extraction build.
 
 The alpha catalogue has 532 item IDs and 1,973 recipe records. All 15 initially identified missing enchanting reagent candidates are represented. Neither these counts nor recipe membership establish complete live coverage. Output-free enchants, profession camping uses, tradable useful items, and live obtainability need further reconciliation before a release.
@@ -92,17 +92,17 @@ Skinning gathering resources come from the separately loaded Skinning publisher.
 Automated source filtering does not prove corpse identity against the cast target. Live cast/loot correlation, multiple-material drops and minimap proximity remain unverified.
 
 
-## Development directly in the game installation
+## Separate development workspace
 
-The intended development root after applying the rename is `~/Sites/addons/titan-gathered-forever-v3/TitanGatheredForeverV3`. Shared runtime files remain directly in this folder, together with `tools/`, `tests/`, `data/`, `dist/`, documentation and `.work/` archives. There is no nested core addon folder. Profession and Auction addon folders remain siblings under `AddOns`, as required for independent WoW addon discovery. Only TGF v3 addon folders may be modified.
+The development root is `~/Sites/addons/titan-gathered-forever-v3`. All fourteen addon folders contain only manifest-loaded scripts/data and required artwork. Root `tools/`, `tests/`, `catalogue/`, `release-notes/` and documentation are development content. Generated output is in root `dist/`; private archives are preserved in root `.work/` and ignored by Git.
 
-Run these commands from the core folder:
+Run from the repository root:
 
-- `python3 tools/check.py`: run all automated checks and compile shipped Lua files.
-- `python3 tools/generate_catalog.py`: regenerate core metadata and sibling profession data.
-- `python3 tools/package.py`: build distributable archives in the core's `dist/` folder.
+- `python3 tools/check.py`: automated checks and Lua 5.1 compilation.
+- `python3 tools/generate_catalog.py`: regenerate runtime metadata and profession data.
+- `python3 tools/package.py`: build the collection, independent downloads and website upload set.
 
-The tools resolve paths relative to their own location. Lua host tests run from the parent AddOns directory. Packaging includes only manifest-listed runtime files and the core artwork; development files and unrelated addons are excluded. The prior installed TGF v3 files are preserved in `.work/before-development-relocation.zip`. The former development directory remains an unchanged reference copy, not the working location. The copied `AGENTS.md` is preserved verbatim; its old structural and command descriptions are historical and this section describes the current layout.
+Tools resolve paths relative to their own location and work independently of the caller's directory. Runtime ZIPs contain only manifest-listed files and required artwork. Install a built candidate into WoW for live validation; leave the separate workspace as the source of truth. Historical AGENTS.md contents were preserved while moving that guide to the root.
 
 
 ## History and source architecture in 0.4.0
@@ -118,4 +118,4 @@ Source-rate percentages measure complete observed loot sources, not all casts or
 
 ## Public source and release layout
 
-Development catalogue JSON now lives in `catalogue/`, separate from manifest-loaded `Data/Metadata.lua`. This avoids a case-insensitive macOS directory collision and supports clean Linux reconstruction. Source control is rooted in the installed core; module data and manifests are regenerated as independently loadable siblings. `dist/releases/<version>/` contains a flat website/GitHub upload set with the collection, fourteen independent addon downloads, downloads.json and SHA256SUMS. The core-only asset uses a `-core.zip` suffix in that flat directory.
+Development catalogue JSON now lives in `catalogue/`, separate from manifest-loaded `Data/Metadata.lua`. This avoids a case-insensitive macOS directory collision and supports clean Linux reconstruction. Source control is rooted in the collection workspace; module data and manifests are regenerated into independently loadable addon folders. `dist/releases/<version>/` contains a flat website/GitHub upload set with the collection, fourteen independent addon downloads, downloads.json and SHA256SUMS. The core-only asset uses a `-core.zip` suffix in that flat directory.

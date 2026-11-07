@@ -2,8 +2,8 @@
 
 ## Prepare a version
 
-1. Work inside the `TitanGatheredForeverV3` project core. Keep changes limited to TGF v3 folders.
-2. Update `VERSION` in `tools/generate_catalog.py` and the version in `TitanGatheredForeverV3.toc` together. Run `python3 tools/generate_catalog.py` to update profession manifests and generated data.
+1. Work from the repository root. Keep runtime changes limited to the TGF v3 addon folders.
+2. Update `VERSION` in `tools/generate_catalog.py` and the version in `TitanGatheredForeverV3/TitanGatheredForeverV3.toc` together. Run `python3 tools/generate_catalog.py` to update profession manifests and generated data.
 3. Add `release-notes/ref-<version>.md`. Describe implemented changes, meaningful validation and known limitations. Update README when scope or supported behavior changes.
 4. Run `python3 tools/check.py` and the relevant in-game checks in `book-wow-forever-validation.md`.
 5. Run `python3 tools/package.py`. It builds the collection, individual addon downloads and a clean `dist/releases/<version>/` upload directory. Rebuilding replaces that generated version directory.
@@ -25,7 +25,7 @@ On macOS, verify with `shasum -a 256 -c SHA256SUMS` from the upload directory. L
 ## Publish on GitHub
 
 1. Commit the reviewed source on `main` and push it to `Bajtlamer/titan-gathered-forever-v3`.
-2. Create a tag matching the manifest, such as `git tag v0.4.0-alpha`, then push that tag.
+2. Create a tag matching the manifest, such as `git tag v0.4.1-alpha`, then push that tag.
 3. The release workflow reconstructs optional modules, checks the source, builds downloads and publishes all seventeen files. Versions containing a hyphen are published as prereleases.
 4. Confirm the workflow passed and the release contains the full collection, core and all selected-module downloads. Never substitute GitHub's automatic source ZIP for an installable addon ZIP.
 
@@ -37,4 +37,4 @@ Upload the contents of `dist/releases/<version>/` to the website's versioned dow
 
 ## Source layout
 
-Git is initialized at the collection root and tracks all fourteen addon folders. The shared core contains catalogue inputs, tools, tests and documentation. Root README.md and .github/workflows/releases.yml are visible to GitHub. CI checks out the collection root and runs tools from the TitanGatheredForeverV3 core folder. Local `.work/`, `dist/`, caches and temporary files are ignored.
+Git is initialized at the collection root and tracks all fourteen runtime-only addon folders. Catalogue inputs, tools, tests, release notes, prefixed documents and AGENTS.md live at the root. CI runs root tools and verifies that addon directories contain only manifest files and required artwork. Local `.work/`, `dist/`, caches and temporary files remain ignored. Build clean candidates here, then install their runtime folders into WoW for in-game validation; do not develop directly in the live game installation.

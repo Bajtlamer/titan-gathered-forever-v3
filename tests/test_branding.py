@@ -7,12 +7,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 NAME = 'TitanGatheredForeverV3'
 TITLE = 'Titan Gathered Forever v3'
+CORE = ROOT / NAME
 
 
 class BrandingTests(unittest.TestCase):
     def test_core_identity_and_all_optional_dependencies(self):
-        self.assertEqual(ROOT.name, NAME)
-        toc = (ROOT / (NAME + '.toc')).read_text()
+        self.assertTrue(CORE.is_dir())
+        toc = (CORE / (NAME + '.toc')).read_text()
         self.assertIn('## Title: ' + TITLE + '\n', toc)
         self.assertIn('## SavedVariables: ' + NAME + 'DB\n', toc)
         modules = json.loads((ROOT / 'catalogue/modules.json').read_text())
@@ -20,13 +21,13 @@ class BrandingTests(unittest.TestCase):
         for module in modules:
             folder = module['folder']
             self.assertTrue(folder.startswith(NAME + '_'))
-            manifest = (ROOT.parent / folder / (folder + '.toc')).read_text()
+            manifest = (ROOT / folder / (folder + '.toc')).read_text()
             self.assertIn('## Dependencies: Titan, ' + NAME + '\n', manifest)
             self.assertIn('## Title: ' + TITLE + ': ', manifest)
 
     def test_runtime_has_no_old_brand(self):
         old = 'Titan' + 'Gathered2'
-        for file in [*ROOT.glob('*.lua'), *ROOT.glob('*.toc'), *ROOT.glob('Localization/*.lua')]:
+        for file in [*CORE.glob('*.lua'), *CORE.glob('*.toc'), *CORE.glob('Localization/*.lua')]:
             self.assertNotIn(old, file.read_text(), str(file))
             self.assertNotIn('TG' + '2', file.read_text(), str(file))
         self.assertTrue((ROOT / 'README.md').read_text().startswith('# ' + TITLE + '\n'))

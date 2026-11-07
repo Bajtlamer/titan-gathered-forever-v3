@@ -25,7 +25,7 @@ The user clarified that the original independently enabled profession-addon arch
 - Added personally observed Mining/Herbalism spots on the world map with resource icons, nearby-resource merging, persistence and a 500-point limit per map. A master switch plus profession switches stop recording and hide pins while retaining saved data. Module/category disabling also suppresses its spots.
 - `Other` was the combined non-profession-use category. It has been removed from the professions menu; the explicit Auction Items addon is configured separately.
 - `dist/TitanGatheredForeverV3-0.4.0-alpha.zip` is the full bundle. `dist/modules/` contains fourteen independent core/module downloads per version. Packaging core alone cannot overwrite the bundle.
-- Current verification: 174 automated checks pass: 25 Python, 17 inventory/catalogue, 38 host/tooltip, six optional-addon, eight presentation, 21 legacy gathering, nine lifetime/rate, 15 source collection, five report-window, 14 world-map, eight pin-style and eight minimap checks. Every shipped Lua file compiles with Lua 5.1 semantics.
+- Current verification: 177 automated checks pass: 28 Python, 17 inventory/catalogue, 38 host/tooltip, six optional-addon, eight presentation, 21 legacy gathering, nine lifetime/rate, 15 source collection, five report-window, 14 world-map, eight pin-style and eight minimap checks. Every shipped Lua file compiles with Lua 5.1 semantics.
 - Removed a legacy misclassification that put Linen Cloth in Mining. Remaining inherited producer associations and partial Fishing membership are explicitly alpha data limitations, pending a full source audit.
 - Direct Chrome inspection confirms the live Titan Gathered website and its separate module downloads. The prior RRsoft result came from the browsing service and was stale or mismatched, not evidence of a live redirect.
 
@@ -122,3 +122,10 @@ Release-preparation verification passes 169 checks. Fresh staged-source reconstr
 The official identity is Titan Gathered Forever v3, using TitanGatheredForeverV3 for the core folder, namespace and broker identifier. All thirteen optional addon folders and manifests use the same prefix. UI abbreviations use TGF v3; /tgf remains the command. Package filenames omit the redundant Forever segment because the new identifier already includes it.
 
 The renamed saved table is TitanGatheredForeverV3DB. A non-destructive one-time migration tool preserves the previous data and refuses existing targets. No Git actions are part of this rename. The rename has been applied to the user's new development copy; the installed game copy has not been changed.
+
+
+## Separate runtime from development content
+
+The project now develops outside the game installation. All fourteen addon folders contain only game-required manifest files and artwork. Tools, tests, catalogue JSON, release notes, contributor guidance and prefixed documents moved to the collection root. Private archives and old repository metadata remain preserved in root .work; generated packages moved to root dist. The redundant core README/ignore files were archived privately.
+
+Root commands and GitHub workflow paths were updated. A strict manifest-based regression verifies every addon folder's contents. The addon version remains 0.4.1-alpha because runtime behavior and packaged files are unchanged. All 177 checks and shipped Lua compilation pass; runtime/package hash verification accompanies this structural change. AGENTS.md was moved without changing its contents.

@@ -181,7 +181,7 @@ def generate(root, check=False):
     }
     outputs['catalogue/catalog-audit.json'] = json.dumps(audit, indent=2, sort_keys=True) + '\n'
     for path, content in outputs.items():
-        target = root.parent / path if path.startswith('TitanGatheredForeverV3') else root / path
+        target = root / path
         if check:
             if not target.exists() or target.read_text() != content:
                 raise ValueError(f'Stale generated file: {path}')

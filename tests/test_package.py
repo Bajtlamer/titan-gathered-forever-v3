@@ -71,7 +71,7 @@ class PackageTests(unittest.TestCase):
 
     def test_release_folder_contains_only_current_downloads_and_verified_metadata(self):
         with tempfile.TemporaryDirectory() as directory:
-            version = re.search(r'^## Version: (.+)$', (ROOT / 'TitanGatheredForeverV3.toc').read_text(), re.M).group(1)
+            version = re.search(r'^## Version: (.+)$', (ROOT / 'TitanGatheredForeverV3/TitanGatheredForeverV3.toc').read_text(), re.M).group(1)
             staging = packager.stage_release(ROOT, version, output=Path(directory) / 'release')
             files = {p.name for p in staging.iterdir()}
             self.assertEqual(len(files), 17)
@@ -92,7 +92,7 @@ class PackageTests(unittest.TestCase):
 
     def test_catalogue_inputs_are_separate_from_runtime_data(self):
         self.assertTrue((ROOT / 'catalogue/forever-recipes.json').is_file())
-        self.assertEqual(list((ROOT / 'Data').glob('*.json')), [])
+        self.assertEqual(list((ROOT / 'TitanGatheredForeverV3/Data').glob('*.json')), [])
 
 
 if __name__ == '__main__':
