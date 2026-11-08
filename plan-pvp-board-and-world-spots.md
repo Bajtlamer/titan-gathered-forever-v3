@@ -73,5 +73,5 @@
 - [x] Document API-wide coverage, local tracking start, honorable-kill-only map eligibility, estimate semantics and live validation steps.
 - [x] Run `python3 tools/check.py` and `git diff --check`; address all failures before installation.
 - [x] Preview and apply `python3 tools/install.py --addons-dir '/Applications/World of Warcraft/_forever_/Interface/AddOns'` and verify installed files against source. All 57 runtime files match; previous folders are retained under `Interface/.tgf-v3-backups/candidate-zza0heza`.
-- [ ] Record live-client acceptance separately. Do not claim unavailable death attribution or untested event/API behavior as working.
-- [ ] Review staged files, commit the implementation, push the feature branch and create a PR describing behavior, validation, and remaining live-client checks.
+- [x] Record live-client acceptance separately. Do not claim unavailable death attribution or untested event/API behavior as working.
+- [x] Review staged files, commit the implementation, push the feature branch and create a PR describing behavior, validation, and remaining live-client checks. PR #1 is open; live-client acceptance remains pending.
