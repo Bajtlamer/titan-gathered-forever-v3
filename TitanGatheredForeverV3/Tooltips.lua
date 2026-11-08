@@ -22,15 +22,21 @@ function Tooltips.CountHeading()
     if not ns.settings.showBank then return 'Bags' end
     return 'Bags / Bank / Total'
 end
+function Tooltips.ShowCount(value)
+    return ns.settings.showZero or (type(value)=='number' and value~=0)
+end
 
 function Tooltips.CountValues(count)
     count = Tooltips.DisplayCounts(count)
-    local values = { ns.Style.Count(count.bags, 'bags') }
     if ns.settings.showBank then
-        values[#values + 1] = ns.Style.Count(count.bank, 'bank')
-        values[#values + 1] = ns.Style.Count(count.total, 'total')
+        local values = {
+            Tooltips.ShowCount(count.bags) and ns.Style.Count(count.bags, 'bags') or '',
+            Tooltips.ShowCount(count.bank) and ns.Style.Count(count.bank, 'bank') or '',
+            Tooltips.ShowCount(count.total) and ns.Style.Count(count.total, 'total') or '',
+        }
+        return table.concat(values, ' / ')
     end
-    return table.concat(values, ' / ')
+    return Tooltips.ShowCount(count.bags) and ns.Style.Count(count.bags, 'bags') or ''
 end
 
 function Tooltips.Lines(itemID)
@@ -60,10 +66,16 @@ function Tooltips.Lines(itemID)
     local observed = ns.inventory:Get(itemID)
     local counts = Tooltips.DisplayCounts(observed)
     if #lines > 0 then lines[#lines + 1] = false end -- Render a rule before inventory counts.
-    lines[#lines + 1] = ns.Style.Text(ns.Style.gold, 'Bags: ') .. ns.Style.Count(counts.bags, 'bags')
+    if Tooltips.ShowCount(counts.bags) then
+        lines[#lines + 1] = ns.Style.Text(ns.Style.gold, 'Bags: ') .. ns.Style.Count(counts.bags, 'bags')
+    end
     if ns.settings.showBank then
-        lines[#lines + 1] = ns.Style.Text(ns.Style.gold, 'Bank: ') .. ns.Style.Count(counts.bank, 'bank')
-        lines[#lines + 1] = ns.Style.Text(ns.Style.gold, 'Total: ') .. ns.Style.Count(counts.total, 'total')
+        if Tooltips.ShowCount(counts.bank) then
+            lines[#lines + 1] = ns.Style.Text(ns.Style.gold, 'Bank: ') .. ns.Style.Count(counts.bank, 'bank')
+        end
+        if Tooltips.ShowCount(counts.total) then
+            lines[#lines + 1] = ns.Style.Text(ns.Style.gold, 'Total: ') .. ns.Style.Count(counts.total, 'total')
+        end
     end
     if observed.bagsState == 'cached' then
         lines[#lines + 1] = ns.Style.Text(ns.Style.gray, 'Bag refresh incomplete; showing last observed counts.')

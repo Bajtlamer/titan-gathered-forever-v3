@@ -14,6 +14,7 @@ This is an alpha. Automated checks pass against simulated host APIs, but history
 
 1. Before first visiting the bank, hover a tracked material. Bags should match carried stacks, Bank should show zero and Total should equal Bags. Neither the item tooltip nor the Titan summary should display unknown or a bank-visit reminder.
 2. Open the personal bank with known quantities of that material in bags and bank. Verify separate Bags, Bank and Total values and the invariant `Total = Bags + Bank`.
+2a. With Show bank counts enabled and Show items with zero counts disabled, verify a zero Bank value is omitted from both Titan summaries and item tooltips, while positive Bags, Bank and Total values remain visible. If all inventory values are zero, no zero-valued count lines should appear. Enable zero-count display and confirm the zeros return. Disable Show bank counts and confirm Bank and Total are hidden regardless of their values.
 3. Move a partial stack into the bank, then withdraw some. Wait for the inventory event batch to settle. Total should remain unchanged by either transfer.
 4. Move every bank stack out. Confirm a known bank count of zero rather than a retained old quantity.
 5. Close the bank. Its count should remain visible with a last-observed timestamp.

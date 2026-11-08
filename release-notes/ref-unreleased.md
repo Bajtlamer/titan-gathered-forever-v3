@@ -18,6 +18,7 @@ Updated 2026-11-08. These changes extend the 0.4.1-alpha source and installed de
 
 ## Corrected
 
+- Applied the zero-count display setting to each Bags, Bank and Total value in Titan summaries and item tooltips. Zero Bank counts no longer leak through when zero display is off; positive values remain visible, and Show bank counts continues to control Bank and Total together.
 - Report windows now open one at a time while retaining independent scope, filters and page. Lifetime materials, observed chances and profession actions use compact columns, wrapped rows and height-aware pagination. Acquired/crafted quantities, sample denominators and action outcomes stay distinct; source menus and native item hovers remain available.
 
 - Material visibility is now shared by item across profession menus and both maps. Linen Cloth no longer requires separate First Aid and Tailoring material toggles. Bulk actions affect the submenu’s materials globally; profession switches remain independent. Legacy hidden preferences migrate without deleting observations or statistics.
