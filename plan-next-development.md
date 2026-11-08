@@ -38,6 +38,8 @@ Fixed-reagent plans, deficits, selected inventory scope, freshness and contextua
 
 Schema-1 JSON, current/combined scopes, identity opt-in, safe numbered parts and offline reconstruction are implemented. Test clipboard/scroll behavior and complete round trips in game. The reader validates transport and framing rather than all statistical semantics. See plan-statistics-export.md and ref-statistics-export-format.md.
 
+Next planned extension: add user-initiated Import statistics so a player can transfer a validated export to another WoW installation. Before implementation, define how imported per-character records merge with existing SavedVariables, how repeated imports avoid double counting, and how combined exports are unpacked without importing their aggregate twice. Preserve the current export format and require explicit review of the target character and import result.
+
 ### 6. Catalogue reconciliation: partial, remains open
 
 Pinned mirror verification and the four-table 70862-labelled crosscheck match all 1,971 base recipe facts. Seven Fishing additions bring that module to 23 materials. Global counts remain 532 items and 1,973 recipes. The mirror sourceBuild remains null and complete remains false.

@@ -37,6 +37,21 @@ Add `ExportView.lua`, opened by `/tgf export` and Export statistics under Histor
 
 Check identity leaks in nested keys/labels, policy-specific combined denominators, partial-versus-complete quantities, empty/unknown datasets, unsupported feature schemas, Unicode chunk boundaries, JSON compatibility, large-part completeness, snapshot stability, edit restoration and identity reset. Full checks and shipped Lua compilation must pass. Real-client copy/selection/scroll behavior remains a live acceptance gate.
 
+## Follow-up: import statistics into another installation
+
+Add a user-initiated import path that accepts a previously validated schema-1 export and restores the selected character's statistics in another WoW installation. Reuse the existing numbered-part transport and strict reader rules; imports must not execute arbitrary payload content or alter game data before the user reviews the destination and import summary.
+
+Decide merge and repeat-import behavior before implementation. Importing the same snapshot twice must not double counts. Combined exports contain per-character records and a derived aggregate; restore the per-character records and do not import the aggregate as an additional character. Define how identity-opted and pseudonymous records map to existing characters, what happens when a character already has data, and how unsupported future schemas are rejected. Preserve existing observations and settings unless the user explicitly chooses a documented replacement action.
+
+Acceptance criteria:
+
+1. A complete single-document export and a reconstructed multi-part export can be imported into a different installation.
+2. Schema, framing, checksum, bounds and required fields are validated before any SavedVariables mutation.
+3. The import preview identifies included characters, available statistic groups, identity mapping and merge/replacement effects.
+4. Repeating an import cannot silently add the same cumulative snapshot twice.
+5. Malformed, incomplete, corrupt, unsupported or oversized input leaves existing data unchanged and reports a useful error.
+6. Tests cover current-character and combined exports, pseudonymous and identity-opted records, duplicate imports, existing destination data, and preservation of unrelated settings and history.
+
 ## Execution record
 
 - Existing 258-check local candidate retained. This task uses the already authorized inline execution and final independent review workflow.
