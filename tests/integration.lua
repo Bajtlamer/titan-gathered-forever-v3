@@ -97,6 +97,20 @@ local function fixture(interface, saved, noBroker, noModules)
     end
     _G.GetLootSourceInfo = function(index) return unpack(state.loot[index].sources) end
     _G.C_Spell = { GetSpellInfo = function(id) return { name = 'Recipe ' .. id } end }
+    _G.C_TradeSkillUI = {
+        GetRecipeInfo=function(id) if id==2536 then return {recipeID=id,name='Spiced Wolf Meat',learned=true,isRecraft=false,
+            isDummyRecipe=false,isGatheringRecipe=false,isEnchantingRecipe=false,isSalvageRecipe=false} end end,
+        GetProfessionInfoByRecipeID=function(id) if id==2536 then return {professionID=185,parentProfessionID=nil} end end,
+        GetRecipeSchematic=function(id,recraft)
+            eq(recraft,false)
+            if id==2536 then return {recipeID=id,recipeType=1,isRecraft=false,outputItemID=2680,
+                reagentSlotSchematics={{slotIndex=1,dataSlotIndex=1,reagentType=1,required=true,quantityRequired=2,
+                    reagents={{itemID=2672}},variableQuantities={},dataSlotType=1}}} end
+        end,
+    }
+    state.callbacks={}
+    _G.Professions=nil
+    _G.EventRegistry={RegisterCallback=function(_,event,callback,owner)state.callbacks[event]={fn=callback,owner=owner}end}
     _G.C_AddOns = { GetAddOnMetadata = function(_, key) return key == 'Version' and '0.1.0-alpha' or nil end }
     _G.TooltipDataProcessor = { AddTooltipPostCall = function(kind, fn) eq(kind, 0); state.post = fn end }
     _G.MenuUtil = { CreateContextMenu = function(_, fn)
@@ -133,8 +147,8 @@ local function fixture(interface, saved, noBroker, noModules)
     end }
     local ns = {}
     for _, path in ipairs({ 'Localization/enUS.lua', 'Style.lua', 'Data/Metadata.lua', 'Catalog.lua',
-                            'Settings.lua', 'Professions.lua', 'Inventory.lua', 'Gathering.lua', 'History.lua', 'Observations.lua', 'Sources.lua', 'PinStyle.lua', 'Map.lua', 'Minimap.lua',
-                            'Tooltips.lua', 'Reports.lua', 'Titan.lua', 'Core.lua' }) do
+                            'Settings.lua', 'Professions.lua', 'Inventory.lua', 'Gathering.lua', 'History.lua', 'Actions.lua', 'Production.lua', 'Crafting.lua', 'Export.lua', 'Observations.lua', 'Sources.lua', 'PinStyle.lua', 'IconConfig.lua', 'FlightPaths.lua', 'Map.lua', 'Minimap.lua',
+                            'Tooltips.lua', 'Reports.lua', 'CraftingView.lua', 'Titan.lua', 'Core.lua' }) do
         assert(loadfile('TitanGatheredForeverV3/' .. path))('TitanGatheredForeverV3', ns)
     end
     -- Keep integration scenarios small; the generated data is validated separately.
@@ -667,7 +681,7 @@ test('ordinary material sources map consuming professions and history persists w
     s.loot={{itemID=2589,sources={'Creature-0-1-2-3-123-56',1}}}
     s:Event('LOOT_READY');s:Event('LOOT_SLOT_CLEARED',1);s:Event('LOOT_CLOSED')
     eq(ns.history:Total(UnitGUID('player'),2589),3);eq(ns.gathering:Count(1,'Tailoring'),1)
-    ns.settings.recordHistory=false;ns.UpdateGathering();eq(ns.eventFrame.events.LOOT_READY,nil)
+    ns.settings.recordHistory=false;ns.settings.recordActions=false;ns.UpdateGathering();eq(ns.eventFrame.events.LOOT_READY,nil)
 end)
 test('fishing catches use a zone denominator and never include purchasing events',function()
     local s,ns=fixture()
@@ -704,6 +718,234 @@ test('map visibility changes preserve an active history observation',function()
     ns.settings.mapWorld=false;ns.UpdateGathering()
     s:Event('LOOT_SLOT_CLEARED',1);s:Event('LOOT_CLOSED')
     eq(ns.history:Total(UnitGUID('player'),2770),1)
+end)
+
+test('action recording works independently without changing loot history or maps',function()
+    local s,ns=fixture();s:Start()
+    ns.settings.gatheringMap=false;ns.settings.recordHistory=false;ns.UpdateGathering()
+    s:Event('UNIT_SPELLCAST_START','player','d1',13262)
+    s:Event('UNIT_SPELLCAST_STOP','player','d1',13262)
+    s:Event('UNIT_SPELLCAST_SUCCEEDED','player','d1',13262)
+    s:Event('UNIT_SPELLCAST_SUCCEEDED','player','d1',13262)
+    local r=ns.actions:Rows(UnitGUID('player'))[1];eq(r.attempts,1);eq(r.completed,1)
+    eq(#ns.history:Totals(),0);eq(ns.gathering:Count(1,'Enchanting'),0)
+    s.broker.OnClick({},'RightButton');assert(s.menu.buttons['Profession actions'])
+    assert(s.menu.checkboxes['Record profession actions']);assert(s.menu.checkboxes['Record Disenchanting actions'])
+    s.menu.checkboxes['Record Disenchanting actions'].callback()
+    s:Event('UNIT_SPELLCAST_SUCCEEDED','player','d2',13262);eq(ns.actions:Rows()[1].attempts,1)
+end)
+test('action recording pause seals late outcomes and world transitions leave gaps',function()
+    local s,ns=fixture();s:Start()
+    s:Event('UNIT_SPELLCAST_START','player','d1',13262)
+    ns.settings.recordActions=false;ns.UpdateGathering()
+    ns.settings.recordActions=true;ns.UpdateGathering()
+    s:Event('UNIT_SPELLCAST_SUCCEEDED','player','d1',13262)
+    eq(ns.actions:Rows()[1].completed,0);eq(ns.actions:Rows()[1].unresolved,1)
+    s:Event('UNIT_SPELLCAST_START','player','d2',13262);s:Event('PLAYER_LEAVING_WORLD')
+    s:Event('UNIT_SPELLCAST_SUCCEEDED','player','d2',13262);eq(ns.actions:Rows()[1].completed,0)
+end)
+test('fishing channel stop and duplicate loot windows count one catch without taking loot',function()
+    local s,ns=fixture()
+    ns.Catalog.RegisterModule({id='Fishing',label='Fishing',kind='profession',items={},recipes={}})
+    s:Start();s.fishing=true
+    s:Event('UNIT_SPELLCAST_SUCCEEDED','player','fish',7620)
+    s:Event('UNIT_SPELLCAST_CHANNEL_START','player','fish',7620)
+    s:Event('UNIT_SPELLCAST_CHANNEL_STOP','player','fish',7620)
+    s:Event('LOOT_READY');s:Event('LOOT_OPENED');s:Event('LOOT_CLOSED')
+    local r=ns.actions:Rows()[1];eq(r.attempts,1);eq(r.completed,1);eq(r.stopped,0)
+    eq(#ns.history:Totals(),0);eq(#ns.history:Rates(),0)
+end)
+test('map and history toggles preserve pending actions and disabled modules record none',function()
+    local s,ns=fixture();s:Start()
+    s:Event('UNIT_SPELLCAST_START','player','d1',13262)
+    ns.settings.mapWorld=false;ns.settings.recordHistory=false;ns.UpdateGathering()
+    s:Event('UNIT_SPELLCAST_SUCCEEDED','player','d1',13262);eq(ns.actions:Rows()[1].completed,1)
+    s:Event('UNIT_SPELLCAST_SUCCEEDED','player','notloaded',2575);eq(#ns.actions:Rows(),1)
+    ns.settings.categories.Enchanting=false;ns.UpdateGathering()
+    s:Event('UNIT_SPELLCAST_SUCCEEDED','player','disabled',13262);eq(ns.actions:Rows()[1].attempts,1)
+end)
+
+local function productionFixture()
+    local s,ns=fixture()
+    ns.Catalog.RegisterModule({id='Cooking',label='Cooking',kind='profession',items={},recipes={}})
+    s:Start();return s,ns
+end
+local function produced(operation)
+    return {operationID=operation or 1,itemID=2680,itemGUID='Item-meat',quantity=2,firstCraftReward=false,
+        isEnchant=false,bonusCraft=false,multicraft=0}
+end
+test('dedicated production results enrich lifetime views without changing loot inventory or maps',function()
+    local s,ns=productionFixture();local before=ns.inventory:Get(2680).bags
+    s:Event('UNIT_SPELLCAST_START','player','cook',2536)
+    s:Event('UNIT_SPELLCAST_SUCCEEDED','player','cook',2536)
+    s:Event('TRADE_SKILL_ITEM_CRAFTED_RESULT',produced());s:Event('TRADE_SKILL_ITEM_CRAFTED_RESULT',produced())
+    eq(ns.production:Total(UnitGUID('player'),2680),2);eq(ns.history:Total(UnitGUID('player'),2680),0)
+    eq(#ns.history:Rates(),0);eq(ns.inventory:Get(2680).bags,before);eq(ns.gathering:Count(1,'Cooking'),0)
+    local tip=CreateFrame('GameTooltip');s.post(tip,{id=2680});assert(contains(tip.lines,'Lifetime crafted: 2'))
+    local rows=ns.Reports.Rows('history',UnitGUID('player'),'Cooking');eq(#rows,1);eq(rows[1].crafted,2);eq(rows[1].quantity,0)
+    s.broker.OnClick({},'RightButton');assert(s.menu.buttons['Crafting and cooking'])
+    assert(s.menu.checkboxes['Record production']);assert(s.menu.checkboxes['Record Cooking production'])
+end)
+test('production switches are independent and seal late results across recording gaps',function()
+    local s,ns=productionFixture()
+    ns.settings.recordHistory=false;ns.settings.recordActions=false;ns.settings.gatheringMap=false;ns.UpdateGathering()
+    s:Event('UNIT_SPELLCAST_START','player','first',2536);s:Event('UNIT_SPELLCAST_SUCCEEDED','player','first',2536)
+    s:Event('TRADE_SKILL_ITEM_CRAFTED_RESULT',produced());eq(ns.production:Total(UnitGUID('player'),2680),2)
+    s:Event('UNIT_SPELLCAST_START','player','paused',2536)
+    ns.settings.productionProfessions.Cooking=false;ns.UpdateGathering()
+    ns.settings.productionProfessions.Cooking=true;ns.UpdateGathering()
+    s:Event('UNIT_SPELLCAST_SUCCEEDED','player','paused',2536)
+    s:Event('TRADE_SKILL_ITEM_CRAFTED_RESULT',produced(2));eq(ns.production:Total(UnitGUID('player'),2680),2)
+    ns.settings.recordProduction=false;ns.UpdateGathering();eq(ns.eventFrame.events.TRADE_SKILL_ITEM_CRAFTED_RESULT,nil)
+end)
+test('unavailable protected and nonitem recipe metadata fail closed',function()
+    local s,ns=productionFixture();eq(ns.Production.Recipe(2536).kind,'Cooking')
+    C_TradeSkillUI.GetRecipeSchematic=function()return {recipeID=2536,recipeType=3,isRecraft=false,outputItemID=2680}end
+    eq(ns.Production.Recipe(2536),nil)
+    s.secret={};C_TradeSkillUI.GetRecipeSchematic=function()return s.secret end
+    eq(ns.Production.Recipe(2536),nil);C_TradeSkillUI=nil
+    s:Event('UNIT_SPELLCAST_SUCCEEDED','player','missing',2536);eq(#ns.production:Rows(),0)
+end)
+test('explicit recraft recipe metadata cannot be admitted as newly produced output',function()
+    local s,ns=productionFixture()
+    C_TradeSkillUI.GetRecipeInfo=function()return{recipeID=2536,name='Recraft',learned=true,isRecraft=true,
+        isDummyRecipe=false,isGatheringRecipe=false,isEnchantingRecipe=false,isSalvageRecipe=false}end
+    eq(ns.Production.Recipe(2536),nil)
+end)
+test('world changes seal production while ordinary display changes preserve it',function()
+    local s,ns=productionFixture();s:Event('UNIT_SPELLCAST_START','player','cook',2536)
+    ns.settings.mapWorld=false;ns.settings.recordHistory=false;ns.UpdateGathering()
+    s:Event('TRADE_SKILL_ITEM_CRAFTED_RESULT',produced());s:Event('UNIT_SPELLCAST_SUCCEEDED','player','cook',2536)
+    eq(ns.production:Total(UnitGUID('player'),2680),2)
+    s:Event('UNIT_SPELLCAST_START','player','leave',2536);s:Event('PLAYER_LEAVING_WORLD')
+    s:Event('UNIT_SPELLCAST_SUCCEEDED','player','leave',2536);s:Event('TRADE_SKILL_ITEM_CRAFTED_RESULT',produced(2))
+    eq(ns.production:Total(UnitGUID('player'),2680),2)
+end)
+
+test('selected recipe adds compact reagent context using live quantity and bank display scope',function()
+    local s,ns=productionFixture()
+    local callback=s.callbacks['ProfessionsRecipeListMixin.Event.OnRecipeSelected'];assert(callback)
+    callback.fn(callback.owner,{recipeID=2536})
+    local tip=CreateFrame('GameTooltip');s.post(tip,{id=2672})
+    assert(contains(tip.lines,'For Spiced Wolf Meat: 2 per operation; missing 2 (Bags + Bank)'))
+    ns.settings.showBank=false;tip:ClearLines();s.post(tip,{id=2672})
+    assert(contains(tip.lines,'missing 2 (Bags)'));assert(not contains(tip.lines,'Bank:'))
+    s:Event('TRADE_SKILL_DATA_SOURCE_CHANGING');tip:ClearLines();s.post(tip,{id=2672})
+    assert(not contains(tip.lines,'For Spiced Wolf Meat'))
+    eq(#ns.history:Totals(),0);eq(#ns.production:Totals(),0);eq(ns.gathering:Count(1,'Cooking'),0)
+end)
+test('recipe planner slash command validates syntax and supports current selection',function()
+    local s,ns=productionFixture();local shown={}
+    ns.CraftingView={Show=function(id,operations)shown[#shown+1]={id,operations}end,Refresh=function()end}
+    SlashCmdList.TITANGATHEREDFOREVERV3('recipe 2536 3');eq(shown[1][1],2536);eq(shown[1][2],3)
+    ns.Crafting.Select({recipeID=2536});SlashCmdList.TITANGATHEREDFOREVERV3('recipe');eq(shown[2][1],2536)
+    SlashCmdList.TITANGATHEREDFOREVERV3('recipe 2536 1.5');eq(#shown,2)
+    s.broker.OnClick({},'RightButton');assert(s.menu.buttons['Plan selected recipe reagents'])
+end)
+test('inventory refresh updates an open planner without creating a bank observation',function()
+    local s,ns=productionFixture();local refreshed=0
+    ns.CraftingView={Refresh=function()refreshed=refreshed+1 end}
+    ns.settings.showBank=false;s:Event('BAG_UPDATE_DELAYED');s:Flush();assert(refreshed>0)
+    eq(ns.inventory:Get(2672).bankState,'unknown');eq(ns.inventory.character.bank,nil)
+end)
+test('profession disabling immediately clears an open recipe plan',function()
+    local s,ns=productionFixture();local displayed=ns.Crafting.Plan(2536,1);assert(not displayed.error)
+    ns.CraftingView={Refresh=function()displayed=ns.Crafting.Plan(2536,1)end}
+    s.broker.OnClick({},'RightButton');s.menu.checkboxes.Cooking.callback()
+    assert(displayed.error);eq(#displayed.rows,0)
+end)
+test('native selection follows highest learned rank while explicit recipe IDs stay exact',function()
+    local s,ns=productionFixture()
+    Professions={GetHighestLearnedRecipe=function(info)eq(info.recipeID,2536);return{recipeID=2537}end}
+    local callback=s.callbacks['ProfessionsRecipeListMixin.Event.OnRecipeSelected']
+    callback.fn(callback.owner,{recipeID=2536,nextRecipeID=2537});eq(ns.Crafting.selectedID,2537)
+    ns.Crafting.Select({recipeID=2536});eq(ns.Crafting.selectedID,2536)
+    Professions=nil;callback.fn(callback.owner,{recipeID=2536,nextRecipeID=2537});eq(ns.Crafting.selectedID,nil)
+end)
+
+test('statistics export slash and menu are user initiated and defaults exclude identity',function()
+    local s,ns=productionFixture();local opens=0
+    ns.ExportView={Show=function()opens=opens+1 end}
+    SlashCmdList.TITANGATHEREDFOREVERV3('export');eq(opens,1)
+    s.broker.OnClick({},'RightButton');assert(s.menu.buttons['Export statistics'])
+    s.menu.buttons['Export statistics']();eq(opens,2)
+    local d=ns.Export.Current({});eq(d.selection.scope,'character');eq(d.selection.includeIdentity,false)
+    eq(d.addon.interface,16001);eq(#ns.history:Totals(),0);eq(#ns.production:Totals(),0)
+end)
+
+test('flight points are independently enabled and persist with no profession modules', function()
+    local s,ns=fixture(nil,nil,false,true);s:Start()
+    eq(ns.settings.flightPoints,true);eq(#ns.Catalog.Modules(),0)
+    s.broker.OnClick({},'RightButton')
+    local option=s.menu.checkboxes['Show flight points'];assert(option,'Missing independent flight-points toggle')
+    eq(s.menu.paths['Show flight points'],'Flight points')
+    local gathering=ns.settings.gatheringMap
+    option.callback();eq(ns.settings.flightPoints,false);eq(ns.settings.gatheringMap,gathering)
+    local saved=TitanGatheredForeverV3DB
+    local again,loaded=fixture(nil,saved,false,true);again:Start();eq(loaded.settings.flightPoints,false)
+    loaded.settings.gatheringMap=false;again.broker.OnClick({},'RightButton')
+    again.menu.checkboxes['Show flight points'].callback();eq(loaded.settings.flightPoints,true)
+    eq(loaded.settings.gatheringMap,false)
+end)
+
+test('icon appearance window is available from slash and menu and saves independently',function()
+    local s,ns=fixture();s:Start();local opens=0
+    ns.IconConfig={Show=function()opens=opens+1 end}
+    SlashCmdList.TITANGATHEREDFOREVERV3('icons');eq(opens,1)
+    s.broker.OnClick({},'RightButton');assert(s.menu.buttons['Icon appearance...'])
+    s.menu.buttons['Icon appearance...']();eq(opens,2)
+    ns.PinStyle.Save({world={size=24,shape='square',border=true}})
+    local again,loaded=fixture(nil,TitanGatheredForeverV3DB);again:Start()
+    eq(loaded.PinStyle.Get('world').size,24);eq(loaded.PinStyle.Get('world').border,true)
+    eq(loaded.PinStyle.Get('minimap').size,14);eq(loaded.PinStyle.Get('flight').size,18)
+end)
+
+test('mining maps ore rather than stone or gem while retaining all output statistics',function()
+    local s,ns=fixture()
+    ns.Catalog.RegisterModule({id='Mining',label='Mining',kind='profession',recipes={},
+        items={[2770]={professions={},recipes={},uses={}},[2835]={professions={},recipes={},uses={}},
+               [1210]={professions={},recipes={},uses={}}},gatheringResources={[2770]=0}})
+    s:Start();local guid='GameObject-0-1-2-3-1731-91'
+    s.loot={{itemID=2835,sources={guid,2}},{itemID=1210,sources={guid,1}},{itemID=2770,sources={guid,3}}}
+    s:Event('UNIT_SPELLCAST_SUCCEEDED','player','ore-first',2575);s:Event('LOOT_READY')
+    for i=1,3 do s:Event('LOOT_SLOT_CLEARED',i)end;s:Event('LOOT_CLOSED')
+    local nodes=ns.gathering:List(1);eq(#nodes,1);eq(nodes[1].itemID,2770)
+    eq(ns.history:Total(UnitGUID('player'),2770),3);eq(ns.history:Total(UnitGUID('player'),2835),2)
+    eq(ns.history:Total(UnitGUID('player'),1210),1)
+    s.loot={{itemID=2770,sources={guid,3}},{itemID=2835,sources={guid,2}}}
+    s:Event('UNIT_SPELLCAST_SUCCEEDED','player','ore-second',2575);s:Event('LOOT_READY')
+    s:Event('LOOT_SLOT_CLEARED',1);s:Event('LOOT_SLOT_CLEARED',2);s:Event('LOOT_CLOSED')
+    nodes=ns.gathering:List(1);eq(#nodes,1);eq(nodes[1].itemID,2770);eq(nodes[1].count,2)
+    eq(ns.history:Total(UnitGUID('player'),2835),4)
+end)
+test('stone-only partial mining loot does not invent an ore marker and reopening records actual ore',function()
+    local s,ns=fixture()
+    ns.Catalog.RegisterModule({id='Mining',label='Mining',kind='profession',recipes={},
+        items={[2770]={professions={},recipes={},uses={}},[2835]={professions={},recipes={},uses={}}},
+        gatheringResources={[2770]=0}})
+    s:Start();local guid='GameObject-0-1-2-3-1731-92'
+    s.loot={{itemID=2835,sources={guid,1}},{itemID=2770,sources={guid,3}}}
+    s:Event('UNIT_SPELLCAST_SUCCEEDED','player','partial-ore',2575);s:Event('LOOT_READY')
+    s:Event('LOOT_SLOT_CLEARED',1);s:Event('LOOT_CLOSED');eq(#ns.gathering:List(1),0)
+    s.loot={{itemID=2770,sources={guid,3}}};s:Event('LOOT_READY');s:Event('LOOT_SLOT_CLEARED',1);s:Event('LOOT_CLOSED')
+    local nodes=ns.gathering:List(1);eq(#nodes,1);eq(nodes[1].itemID,2770)
+    eq(ns.history:Total(UnitGUID('player'),2835),1);eq(ns.history:Total(UnitGUID('player'),2770),3)
+end)
+
+test('mining marker selection preserves known scarce resources and ordinary material locations',function()
+    local s,ns=fixture()
+    ns.Catalog.RegisterModule({id='Mining',label='Mining',kind='profession',recipes={},
+        items={[2770]={professions={},recipes={},uses={}},[2835]={professions={},recipes={},uses={}},
+               [249391]={professions={},recipes={},uses={}}},gatheringResources={[2770]=0,[249391]=1}})
+    s:Start()
+    local function record(id,kind,item,x)
+        ns.Sources.Record({id=id,kind=kind,source='1731',mapID=1,x=x,y=.5,at=100,
+            complete=true,instanceType='none',items={[item]=2}})
+    end
+    record('stone-only','Mining',2835,.1);eq(#ns.gathering:List(1),0)
+    record('known-scarce','Mining',249391,.3);eq(ns.gathering:List(1)[1].itemID,249391)
+    record('ordinary-stone','Loot',2835,.8);eq(#ns.gathering:List(1),2)
+    eq(ns.history:Total(UnitGUID('player'),2835),4)
 end)
 
 for _, entry in ipairs(tests) do

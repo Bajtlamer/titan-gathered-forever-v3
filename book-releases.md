@@ -1,5 +1,45 @@
 # Publish Titan Gathered Forever v3 Releases
 
+## Develop and install a candidate
+
+Standing user instruction: install every completed, verified runtime update or new version into `/Applications/World of Warcraft/_forever_/Interface/AddOns` automatically. Follow `AGENTS.md` for verification, backups and reload/restart guidance. If live files already match, verify and report that state without creating a redundant backup. This is local-installation authorization; publication is a separate action.
+
+1. Edit the source checkout, then run `python3 tools/check.py`. Use `python3 tools/package.py` when you also need distributable ZIPs. The installer builds its own candidate with the same runtime-file allowlist.
+2. Close WoW before replacing addon folders. Choose the actual Forever client's existing `Interface/AddOns` directory, then preview from the repository root:
+
+   ```sh
+   python3 tools/install.py --addons-dir "/path/to/Forever/Interface/AddOns"
+   ```
+
+   Preview validates the candidate and lists all fourteen folders to add or replace. It makes no client changes. The destination is required; the tool does not guess which client to use.
+3. Apply the reviewed candidate:
+
+   ```sh
+   python3 tools/install.py --addons-dir "/path/to/Forever/Interface/AddOns" --apply
+   ```
+
+   This installs the core and all thirteen optional addons. Enable only the modules you want in WoW. Existing TG3 folders are moved intact to a unique directory under `Interface/.tgf-v3-backups/`; the command prints that directory. Old backups remain available on subsequent installs. Unrelated addons, previous-generation folders and SavedVariables are preserved. Disable the previous generation yourself before enabling TG3.
+4. Launch WoW with Titan Panel and the affected modules enabled. Enable Lua errors with `/console scriptErrors 1`; use `/reload` after subsequent configuration changes. Follow `book-wow-forever-validation.md`, checking startup, tooltips, bag/bank updates, maps, history and persistence. Automated checks do not establish live-client compatibility.
+
+The installer stages the complete candidate before replacement and automatically restores original folders if an ordinary installation error occurs. Symlink destinations, symlink/file TG3 targets and source/destination overlap are rejected. An exclusive `Interface/.tgf-v3-install-lock` directory blocks simultaneous installer runs.
+
+## Recover an earlier candidate
+
+Close WoW. Locate the backup directory printed by the installation command. Move the fourteen current TG3 folders out of AddOns to a separate holding directory, then move only the backed-up TG3 folders into AddOns. A folder absent from that backup was absent before that installation, so leave it uninstalled to restore the exact previous selection. Do not move other addons or SavedVariables. Enable the previous selection and validate it in game.
+
+If automatic recovery fails, the error reports the retained backup directory. This backup can be partial: some original folders may already have been restored in AddOns, and later folders may never have been touched. Restore each folder actually retained in the backup, moving its current AddOns counterpart into a separate holding directory first. Preserve other AddOns folders while inspecting their contents and your previous module selection. In this failure case, a missing backup folder does not establish that the addon was previously absent; do not follow the blanket fourteen-folder removal procedure above. Newly added candidate folders may need to be moved aside separately to recover your previous selection.
+
+Hard termination or power loss can also interrupt automatic recovery. After confirming no installer is running, inspect the backup and any `.tgf-stage-*` directory under Interface, recover the desired folders using the partial-backup procedure, and remove an abandoned `.tgf-v3-install-lock` before retrying. Keep backups until live validation succeeds.
+
+## Commit and push a source update
+
+1. Update README.md, ref-wow-forever-progress.md, plan-next-development.md and release-notes/ref-unreleased.md to describe current behavior and open issues. Preserve historical versioned release notes and mark superseded plans clearly.
+2. Run python3 tools/check.py, python3 tools/audit_catalog.py --check, python3 tools/generate_pin_outlines.py --check and git diff --check. Inspect all staged paths for private files, SavedVariables, local archives, generated distributions and credentials.
+3. Fetch the configured remote and check ancestry before pushing. Commit the reviewed source and documentation, then push the intended branch without force. A push to main runs verification/packaging CI; only a version tag invokes the publication job.
+4. Verify the remote branch resolves to the new commit and report the commit and check results. Do not claim that a source push has published updated downloadable assets or changed the website.
+
+The manifest can remain 0.4.1-alpha while preparing this unreleased source update. Assign and synchronize a new version only when an actual release is requested.
+
 ## Prepare a version
 
 1. Work from the repository root. Keep runtime changes limited to the TGF v3 addon folders.

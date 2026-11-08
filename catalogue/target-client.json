@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "product": "wowf",
+  "clientVersion": "1.60.1",
+  "build": "70862",
+  "expectedInterface": 16001,
+  "liveInterfaceVerified": false,
+  "recorded": "2026-11-07",
+  "evidence": "installation-metadata",
+  "source": "/Applications/World of Warcraft/.build.info",
+  "limitations": [
+    "Installation metadata is not a live GetBuildInfo observation.",
+    "The expected interface is the existing development target, not newly verified on this build."
+  ]
+}

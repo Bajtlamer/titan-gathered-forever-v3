@@ -87,26 +87,34 @@ function ns.ScheduleRefresh()
             end
         end
         ns.Titan.Refresh()
+        ns.Reports.Refresh()
     end)
 end
 
 local frame = CreateFrame('Frame')
 ns.eventFrame = frame
 local gatheringEvents = { 'UNIT_SPELLCAST_START', 'UNIT_SPELLCAST_SUCCEEDED', 'UNIT_SPELLCAST_FAILED',
-    'UNIT_SPELLCAST_INTERRUPTED', 'LOOT_READY', 'LOOT_OPENED', 'LOOT_SLOT_CLEARED', 'LOOT_CLOSED' }
+    'UNIT_SPELLCAST_INTERRUPTED', 'UNIT_SPELLCAST_STOP', 'UNIT_SPELLCAST_CHANNEL_START', 'UNIT_SPELLCAST_CHANNEL_STOP',
+    'LOOT_READY', 'LOOT_OPENED', 'LOOT_SLOT_CLEARED', 'LOOT_CLOSED' }
 
 function ns.GatheringEnabled(kind, itemID) return ns.Sources.Enabled(kind, itemID) end
 
 function ns.UpdateGathering()
     if not ns.gathering then return end
     ns.Sources.SettingsChanged()
+    ns.Actions.SettingsChanged()
+    ns.Production.SettingsChanged()
     ns.gathering:Cancel()
     if ns.observations and ns.observations.cast and not ns.Sources.Active(ns.observations.cast.kind) then ns.observations:Cancel() end
-    local enabled = ns.settings.recordHistory
+    local enabled = ns.settings.recordHistory or ns.settings.recordActions
     for _, category in ipairs(ns.Sources.Categories()) do enabled = enabled or ns.Sources.Enabled(category.id) end
     for _, event in ipairs(gatheringEvents) do
-        if enabled then frame:RegisterEvent(event) else frame:UnregisterEvent(event) end
+        if enabled or (ns.settings.recordProduction and event:match('^UNIT_SPELLCAST_')) then
+            frame:RegisterEvent(event)
+        else frame:UnregisterEvent(event) end
     end
+    if ns.settings.recordProduction then frame:RegisterEvent('TRADE_SKILL_ITEM_CRAFTED_RESULT')
+    else frame:UnregisterEvent('TRADE_SKILL_ITEM_CRAFTED_RESULT') end
     ns.Map.Attach()
     ns.Map.Update()
     ns.Minimap.Attach()
@@ -185,6 +193,20 @@ local function start()
         end, ns.GatheringEnabled)
     ns.history = ns.History.New(ns.db.history)
     ns.history:InvalidatePending(UnitGUID('player'))
+    ns.actions = ns.Actions.New(ns.db.actions, {
+        Character=function() return ns.characterID end,
+        Name=function() return (UnitName and UnitName('player') or ns.characterID)
+            .. ' - ' .. (GetRealmName and GetRealmName() or '') end,
+        Timestamp=time, Now=GetTime, Enabled=ns.Actions.Enabled,
+        Changed=function() ns.Reports.Refresh() end,
+    })
+    ns.production = ns.Production.New(ns.db.production, {
+        Character=function() return ns.characterID end,
+        Name=function() return (UnitName and UnitName('player') or ns.characterID)
+            .. ' - ' .. (GetRealmName and GetRealmName() or '') end,
+        Timestamp=time, Now=GetTime, Enabled=ns.Production.Enabled, Public=ns.IsPublic,
+        Recipe=ns.Production.Recipe, Changed=function() ns.Reports.Refresh() end,
+    })
     local observationAPI = gatheringAPI()
     local outdoor = observationAPI.CanRecord
     observationAPI.CanRecord = function(kind) return ns.Sources.Track(kind) or outdoor(kind) end
@@ -227,20 +249,32 @@ local function start()
     end
     ns.observations = ns.Observations.New(observationAPI)
     ns.UpdateGathering()
+    ns.FlightPaths.Attach()
     ns.Tooltips.Initialize()
+    ns.Crafting.Initialize()
     ns.Titan.Initialize()
     for _, event in ipairs({ 'BAG_UPDATE_DELAYED', 'BANKFRAME_OPENED', 'BANKFRAME_CLOSED',
                             'BANK_TABS_CHANGED', 'PLAYERBANKSLOTS_CHANGED', 'PLAYER_ENTERING_WORLD',
-                            'PLAYER_LEAVING_WORLD', 'ITEM_DATA_LOAD_RESULT', 'SKILL_LINES_CHANGED' }) do frame:RegisterEvent(event) end
+                            'PLAYER_LEAVING_WORLD', 'ITEM_DATA_LOAD_RESULT', 'SKILL_LINES_CHANGED',
+                            'TRADE_SKILL_DATA_SOURCE_CHANGING', 'TRADE_SKILL_DATA_SOURCE_CHANGED',
+                            'TRADE_SKILL_DETAILS_UPDATE', 'TRADE_SKILL_CLOSE' }) do frame:RegisterEvent(event) end
     SlashCmdList.TITANGATHEREDFOREVERV3 = function(command)
+        if command=='icons' then ns.IconConfig.Show(); return end
+        if command=='export'then ns.ExportView.Show();return end
+        if command=='recipe'or command:match('^recipe%s')then
+            local id,target=command:match('^recipe%s+(%d+)%s*(%d*)%s*$')
+            if command=='recipe'then id=ns.Crafting.selectedID;target=1 end
+            if not id then ns.Print('Usage: /tgf recipe <recipeID> [operations], or select a recipe and use /tgf recipe.');return end
+            ns.CraftingView.Show(tonumber(id),tonumber(target)or 1);return
+        end
         if command == 'refresh' then ns.ScheduleRefresh(); return end
         if command == 'next' or command == 'prev' then
             ns.Titan.page = math.max(1, ns.Titan.page + (command == 'next' and 1 or -1))
             ns.Titan.Refresh(); return
         end
-        if command == 'history' or command == 'chances' then ns.Reports.Show(command); return end
+        if command == 'history' or command == 'chances' or command == 'actions' or command == 'production' then ns.Reports.Show(command); return end
         if command == 'settings' then ns.Titan.Menu(UIParent); return end
-        local help = 'Commands: /tgf settings, /tgf refresh, /tgf next, /tgf prev, /tgf history, /tgf chances, /tgf status.'
+        local help = 'Commands: /tgf settings, /tgf icons, /tgf refresh, /tgf next, /tgf prev, /tgf history, /tgf chances, /tgf actions, /tgf production, /tgf recipe <recipeID> [operations], /tgf export, /tgf status.'
         if command ~= 'status' and not ns.settings.debugMode then ns.Print(help); return end
         local report = command == 'status' and ns.Print or ns.Debug
         local count = ns.inventory:Get(0)
@@ -270,18 +304,27 @@ end
 frame:SetScript('OnEvent', function(_, event, ...)
     if event == 'ADDON_LOADED' then
         if (...) == addonName then frame:RegisterEvent('PLAYER_LOGIN')
-        else ns.Map.Attach(); ns.Minimap.Attach() end
+        else ns.Map.Attach(); ns.Minimap.Attach(); ns.FlightPaths.Attach() end
         return
     end
     if event == 'PLAYER_LOGIN' then start(); return end
     if not ns.inventory then return end
+    if event=='TRADE_SKILL_DATA_SOURCE_CHANGING'or event=='TRADE_SKILL_CLOSE'or event=='PLAYER_LEAVING_WORLD'then ns.Crafting.Select(nil)end
     if event:match('^UNIT_SPELLCAST_') then
         local unit, castGUID, spellID = ...
         if ns.IsPublic(unit) and ns.IsPublic(castGUID) and ns.IsPublic(spellID) then
-            ns.observations:Cast(event, unit, castGUID, spellID)
+            ns.actions:Cast(event, unit, castGUID, spellID)
+            ns.production:Cast(event, unit, castGUID, spellID)
+            if event == 'UNIT_SPELLCAST_START' or event == 'UNIT_SPELLCAST_SUCCEEDED'
+                or event == 'UNIT_SPELLCAST_FAILED' or event == 'UNIT_SPELLCAST_INTERRUPTED' then
+                ns.observations:Cast(event, unit, castGUID, spellID)
+            end
         end
         return
+    elseif event == 'TRADE_SKILL_ITEM_CRAFTED_RESULT' then ns.production:Result(...); return
     elseif event == 'LOOT_READY' or event == 'LOOT_OPENED' then
+        local fishing = IsFishingLoot and IsFishingLoot()
+        if ns.IsPublic(fishing) and fishing == true then ns.actions:FishingLoot() end
         local _, fromItem = ...
         ns.observations:LootReady(event == 'LOOT_OPENED' and ns.IsPublic(fromItem) and fromItem == true); return
     elseif event == 'LOOT_SLOT_CLEARED' then
@@ -289,7 +332,9 @@ frame:SetScript('OnEvent', function(_, event, ...)
         if ns.IsPublic(slot) then ns.observations:SlotCleared(slot) end
         return
     elseif event == 'LOOT_CLOSED' then ns.observations:LootClosed(); return end
-    if event == 'PLAYER_ENTERING_WORLD' or event == 'PLAYER_LEAVING_WORLD' then ns.gathering:Cancel(); ns.observations:Cancel(true) end
+    if event == 'PLAYER_ENTERING_WORLD' or event == 'PLAYER_LEAVING_WORLD' then
+        ns.gathering:Cancel(); ns.observations:Cancel(true); ns.actions:Pause(); ns.production:Pause()
+    end
     if event == 'BANKFRAME_OPENED' then
         bankAttempts, bankVisit = 0, bankVisit + 1
         ns.inventory:SetBankOpen(true)

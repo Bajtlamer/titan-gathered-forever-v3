@@ -60,8 +60,8 @@
     "label": "Fishing",
     "kind": "profession",
     "folder": "TitanGatheredForeverV3_Fishing",
-    "itemCount": 16,
-    "recipeCount": 17
+    "itemCount": 23,
+    "recipeCount": 26
   },
   {
     "id": "Herbs",

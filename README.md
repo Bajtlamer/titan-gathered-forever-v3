@@ -8,7 +8,9 @@ Website: [titan-gathered.com](https://www.titan-gathered.com/).
 
 ## Current alpha
 
-Version `0.4.1-alpha` targets **WoW Forever 1.60.1, interface 16001**, with Titan Panel installed separately. Other WoW editions are outside this project's scope.
+The current development candidate retains version `0.4.1-alpha` and targets **WoW Forever 1.60.1, interface 16001**, with Titan Panel installed separately. It is installed in the local test client. The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); they do not represent a new tagged release. Other WoW editions are outside this project's scope.
+
+Validation: **360 automated checks pass**, plus Lua 5.1 compilation of every shipped Lua file. The user confirms the icon configurator works; the full [live acceptance checklist](book-wow-forever-validation.md) remains open.
 
 Implemented:
 
@@ -16,28 +18,49 @@ Implemented:
 - Learned profession skill ranks, item rarity colors and organized Titan configuration menus.
 - Per-character lifetime obtained-item totals, with an optional combined-character view.
 - Observed acquisition rates for readable loot sources, including mining and herbalism byproducts, skinning, fishing and supported ordinary material drops.
-- Outdoor world-map and minimap source icons, controlled by profession and material. Clearing map spots preserves lifetime statistics.
+- Outdoor world-map and minimap source icons, controlled by profession and material. Clearing map spots preserves lifetime statistics. Material icons use the original WoW artwork, default to no border, and remain centered at recorded/projected coordinates, including when markers overlap. Appearance is configurable.
+- Mining map markers prioritize primary ore rather than stones/gems. All outputs remain in statistics; old overlapping byproduct pins are hidden only where ore is recorded.
 - Disenchanting outcomes grouped by input item when its identity is readable. Enchanting creates no map spots.
+- Separate per-character action counters for Mining, Herbalism, Skinning, Fishing and Disenchanting, with combined reports and independent recording controls. Real-client event order remains under validation.
+- per-recipe crafting/cooking attempts, completed operations, matched output quantities, observed quantity distributions and explicit bonus/multicraft flags. Recording and reports are independent of gathering actions and acquired loot; live validation is pending.
+- live recipe reagent plans with required/available/missing quantities, material-limited operation estimates, cached-inventory labels and personal source evidence. Native reagent tooltips show a compact selected-recipe summary.
+- schema-versioned JSON statistics export with current/combined selection, identity opt-in and a manual copy window. Large snapshots use numbered parts and a local reconstruction tool.
+- faction-aware world-map flight points, including undiscovered routes. Markers retain their native artwork without addon borders; tooltips state discovered, undiscovered or unavailable status. The independent Flight points menu uses current-client locations and discovery status.
+- Small icon appearance window: `/tgf icons` or Titan menu > Icon appearance. Configure world-map materials, minimap materials and flight points independently: 12–40 px, circular crop or full image, and an optional thin gold outline. Preview before Apply; Cancel discards edits.
 - Independent profession addons, optional Auction Items and a shared core.
 
-Still planned:
+Open issues and next work:
 
-- Dedicated counters for actions performed, including mining attempts, skinning operations, fishing casts, crafting and cooking operations. Current complete-loot sample counts are not a complete action counter.
-- Crafting/cooking output and proc statistics, with recipe and action context.
-- Exportable, shareable lifetime datasets with documented formats and controls over shared character information.
-- Broader recipe and material coverage, additional contextual crafting assistance and richer analysis of source conditions.
+- Live validation of gathering action counters and crafting/cooking production, particularly queued casts, result identities and recording gaps.
+- Live validation of JSON copying, scrolling and numbered-part reconstruction in the actual client.
+- Reported partial artwork clipping/offset, especially Linen Cloth, remains unresolved across shapes/sizes. Further testing and a current screenshot are needed; no speculative offset fix has been applied.
+- Broader recipe and material coverage, support for complex reagent choices and richer analysis of source conditions. Catalogue completeness remains false, with 456 legacy IDs unresolved and 11 producer associations awaiting review.
 
-The catalogue currently contains 532 supported item IDs and 1,973 recipe relationships. Live availability and completeness remain under verification.
+The prioritized continuation roadmap is stored in [plan-next-development.md](plan-next-development.md).
+
+The catalogue currently contains 532 supported item IDs and 1,973 recipe relationships. Fishing now includes 23 materials, adding seven direct-reference omissions, including Alchemy fish. Live availability and completeness remain under verification.
+
+Latest installation metadata reports build 70862. The recipe snapshot retains target 70790 and an unknown extraction build; its 1,971 base facts match both the pinned mirror and the four public CSV tables labelled 1.60.1.70862. The crosscheck covers item-output recipe facts, while live obtainability and complete coverage remain unverified. See [ref-catalogue-reconciliation.md](ref-catalogue-reconciliation.md) for evidence and [book-catalogue-reconciliation.md](book-catalogue-reconciliation.md) for the audit workflow.
 
 ## What the percentages mean
 
-TGF v3 distinguishes **items obtained**, **successful outcomes**, **complete observed source samples**, and the future **action counters**.
+TGF v3 distinguishes **items obtained**, **successful outcomes**, **complete observed source samples**, and **observed profession actions**.
 
 For example, a gem obtained from 3 of 20 complete observed mining sources has an observed acquisition rate of **15% (3 / 20)**. Obtaining five gems in one source adds five items but only one successful outcome. This does not establish the server's guaranteed drop rate or the probability of success for an unobserved action.
 
 Fishing percentages describe complete looted catches in a zone, including junk catches, rather than every cast. Ordinary loot groups comparable source entries, zones and instance contexts. Disenchanting groups input item IDs; unreadable identity is explicitly unknown. Partial or unreadable loot does not create a complete rate sample. Recording policies prevent newly enabled materials from inheriting samples collected while they were excluded. Combined rates sum eligible samples rather than averaging character percentages.
 
 Lifetime history begins with acquisitions recorded in `0.4.0`. Earlier versions saved map locations and observation counts, which cannot reconstruct item quantities or drop-rate denominators. Purchases, trades, bank transfers and current bag contents are not treated as gathered items. Instance acquisitions may contribute to history, while instance and raid locations are excluded from map recording.
+
+Profession actions use separate schema-1 storage. An attempt requires a readable cast identity and a recognized start, channel start, success, failure or interruption event. Duplicate events share one attempt. A mining, herbalism, skinning or disenchanting completion means spell success, regardless of loot quantity. Fishing spell success only launches the line; its completion requires a confirmed fishing-loot window, even if you leave the loot behind. Stops without a confirmed result, explicit failures, interruptions and unresolved observations are reported separately. A stop does not prove manual cancellation or failure.
+
+`/tgf actions` shows the first recorded action time for each profession, current-character or combined counts, and profession filters. Combined coverage begins at the earliest included character observation; it does not mean all characters recorded continuously since then. Recording gaps are not reconstructed. Reloads, world transitions and action-recording changes seal pending observations without inventing outcomes. Recent cast receipts are bounded to 1024 per character; lifetime aggregates remain. These counters do not change source-rate percentages or reconstruct actions from earlier history.
+
+Crafting/cooking production also uses separate schema-1 storage. It requires a readable player cast start while recording is enabled and live recipe metadata from the corresponding profession. Supported item recipes include Cooking, Alchemy, Blacksmithing, Engineering, First Aid, Leatherworking, Tailoring, smelting under Mining and item-producing Enchanting recipes that the client identifies as ordinary item recipes. Recraft, dummy, gathering, enchanting-application and salvage recipe flags are excluded. Unknown metadata or protected fields do not produce guessed records.
+
+`/tgf production` separates completed casts from operations with matched dedicated crafted-item results. Item totals use actual reported quantities, not requested queue lengths, bag changes, loot chat or recipe defaults. Click a recipe for observed output-quantity distributions, failed/interrupted/unresolved attempts and matched-operation counts. Bonus and multicraft counts use only readable explicit fields as denominators; quantity variation alone is not labeled a proc. These observations do not establish server probabilities or complete production coverage.
+
+Production result events have no recipe ID. Matching therefore requires an unambiguous recent output/recipe context and a positive operation identity, within 60 seconds of the cast start. Secondary outputs arriving before a primary binding, first-craft rewards, unpaired results and ambiguous recipes are skipped. After a recording gap, recent sealed casts can suppress new output attribution for the remainder of that window while completed casts remain counted. Reloads preserve aggregates and seal pending contexts. Ordinary recipe identities used for recrafts and the actual Forever event sequence still require live validation. Lifetime material rows and item tooltips show crafted quantities separately from acquired loot; crafting creates no map spots or loot-rate samples.
 
 ## Install only what you need
 
@@ -78,10 +101,15 @@ The tool changes the old `TitanGathered2ForeverDB` assignment to `TitanGatheredF
 
 ## Use TGF v3
 
-Right-click the Titan entry for Display, Professions, Additional items, Gathering map, History and sources, and Diagnostics settings. History recording and map visibility have separate controls.
+Right-click the Titan entry for Display, Professions, Additional items, Icon appearance, Flight points, Gathering map, History and sources, and Diagnostics settings. History recording and map visibility have separate controls.
 
+- `/tgf icons`: small icon appearance window with separate World map, Minimap and Flights settings.
 - `/tgf history`: lifetime materials window.
 - `/tgf chances`: observed acquisition rates and source samples.
+- `/tgf actions`: observed profession attempts and results.
+- `/tgf production`: crafting/cooking recipe operations and observed outputs.
+- `/tgf recipe <recipeID> [operations]`: reagent plan for a recipe; omit the ID after selecting a native profession recipe.
+- `/tgf export`: versioned statistics snapshot for manual copying.
 - `/tgf settings`: configuration menu.
 - `/tgf refresh`: refresh accessible inventory.
 - `/tgf status`: explicit diagnostic report.
@@ -89,9 +117,37 @@ Right-click the Titan entry for Display, Professions, Additional items, Gatherin
 
 Click a material in a report for its recorded sources. Use **TGF v3 spots** on the world map to clear a category from the displayed map after confirmation. Debug mode prints local diagnostics and is normally off.
 
+History and sources includes Record profession actions and Action recording by profession. These switches are independent of lifetime item history and map visibility. Recording requires the corresponding profession addon and enabled profession category. Disabling a module retains its recorded counts for later reporting.
+
+Record production and Production recording by profession control crafting/cooking independently. The corresponding addon and profession category must be enabled. Turning off item-history or map display does not stop production recording; disabling a production module retains its prior statistics.
+
+## Plan recipe materials
+
+Select a recipe in the profession UI, then use `/tgf recipe` or Plan selected recipe reagents in the Titan menu. You can also enter an explicit recipe spell ID and operation target, such as `/tgf recipe 2536 3`. Production recipe details and known recipe examples in material source menus link to the same planner. More/Fewer adjusts the target; Refresh requests the normal inventory refresh. Planning does not craft or reserve anything.
+
+Native selection follows the highest learned rank used by the profession schematic; explicit recipe IDs remain exact. If a native rank transition cannot be resolved, select an explicit ID instead of receiving a guessed rank's requirements.
+
+Reagent quantities come from live client schematics on demand. The planner aggregates repeated item requirements, shows available and missing quantities for the requested operations, and estimates the material limit. Display > Show bank counts selects Bags or Bags + Bank for both the planner and reagent context. Cached snapshots are labeled estimates with bank observation time where available. Unknown counts display zero and suppress the overall material limit. A material limit does not certify learned skill, tools, cooldowns, location or other crafting requirements; unlearned recipes are labeled.
+
+Fixed single-item basic reagent slots are supported. Required alternatives, currency, variable quantities, protected data and unsupported slots leave the overall estimate unresolved; fixed rows may still be shown as a partial plan. Optional modifiers and finishing reagents are excluded. Recraft, gathering, salvage and dummy contexts are excluded. Ordinary enchantment recipes can be planned for their reagent requirements. Planning requires the recipe's loaded, enabled profession addon/category and does not load bulk recipe tables into the core.
+
+Each reagent links to personal acquisition evidence and recorded map positions. Source suggestions prioritize larger observed samples; they do not establish the best place to farm. Source/zone rates and saved positions are distinct: a zone-wide observed rate is not a probability at a particular coordinate, and an old position does not establish current resource availability. Native reagent tooltips add only a short per-operation deficit and material-limit summary for the selected recipe. Live recipe selection, slot availability and planner layout remain under validation.
+
+## Export statistics
+
+Use `/tgf export` or Export statistics under History and sources. The default is This character with names and GUIDs excluded. All characters retains per-character policy/coverage records plus a weighted combined summary. Include names/GUIDs is an explicit opt-in that resets on closing. Numeric game IDs, map IDs and gameplay timestamps remain in identity-excluded exports.
+
+Select text, copy with Ctrl+C or Cmd+C and save UTF-8 JSON outside addon folders. The addon sends nothing. Its snapshot stays fixed while copying; Generate captures a new one. Small exports are complete schema-1 JSON. Large exports are numbered JSON parts: save every part from the same snapshot and reconstruct with `tools/read_export.py`. The reader rejects missing, duplicate, mixed or corrupt parts and refuses to overwrite files.
+
+Exports preserve acquired/produced quantities separately, source policies and eligible denominators, action outcomes, production distributions and explicit proc-field counts. They exclude inventory snapshots, raw event receipts, coordinates and arbitrary saved labels. Unknown starts and unsupported feature schemas remain explicit. Exports are cumulative snapshots: do not sum repeated exports as independent observations.
+
+See [ref-statistics-export-format.md](ref-statistics-export-format.md) for fields and reconstruction commands. JSON is the initial format because one flat CSV would lose policy/distribution relationships. Clipboard round trips remain a live-client validation gate.
+
 ## Development layout
 
 The repository root contains the shared core and thirteen separate optional addon folders. All addon folders contain only game-required files. Development tools, tests, catalogue inputs, documentation and release notes live at the repository root. Generated packages are written to `dist/`; private local archives remain in ignored `.work/`.
+
+`python3 tools/audit_catalog.py` reports evidence gaps without writes or downloads. Use `--check` for the generated report, `--mirror-file` for pinned mirror verification and `--client-tables` for offline build-labelled CSV verification. Audit/generation share input validation and protect report output from source-file aliases. Unresolved IDs and inherited associations remain; completeness is false.
 
 ```sh
 git clone https://github.com/Bajtlamer/titan-gathered-forever-v3.git
@@ -101,9 +157,11 @@ python3 tools/check.py
 python3 tools/package.py
 ```
 
+The project's standing instruction is to install each completed, verified runtime update automatically into the local Forever client with tools/install.py, retaining backups and verifying installed bytes. This does not publish GitHub releases or change hosting.
+
 Python 3.10 or newer and LuaJIT with Lua 5.1 semantics are required. No Git initialization is required to run these local tools. The generator reconstructs profession addon folders from `catalogue/`. Runtime Lua lives in `TitanGatheredForeverV3/`, including its `Data/` and `Localization/` folders. Tests and tools live in root `tests/` and `tools/`. Avoid editing unrelated addons.
 
-The contributor guide retains its historical structure descriptions with the new addon identity. This README describes the current layout and commands.
+See [AGENTS.md](AGENTS.md) for current repository conventions and automatic local-installation instructions, [the runtime reference](ref-wow-forever-runtime.md) for implementation evidence, and [the roadmap](plan-next-development.md) for outstanding work.
 
 ## Releases and website downloads
 

@@ -1,5 +1,9 @@
 # Tooltip Restoration and Gathering Map Implementation Plan
 
+## Current status, 2026-11-08
+
+Historical implementation/design record. Some original decisions and task restrictions were superseded. Use README.md, ref-wow-forever-runtime.md and plan-next-development.md for current behavior and remaining work. See [the roadmap](plan-next-development.md), [progress](ref-wow-forever-progress.md) and [unreleased changes](release-notes/ref-unreleased.md). Original step counts and no-install/no-commit statements below refer to their original execution, not the current installed/source-push status.
+
 User authorized autonomous implementation, including item rarity colors and configurable map spotting. Existing separate profession addons remain unchanged in purpose.
 
 ## Required behavior
@@ -77,3 +81,11 @@ Implemented Skinning observations from successful casts and taken supported corp
 Provide saved Mining, Herbalism and Skinning switches and a Map materials submenu grouped by loaded profession. Every supported gathering material has a visibility checkbox; each profession includes Show all and Hide all. Material visibility affects both maps and retains saved spots and ongoing recording. Master/profession/category disabling stops recording too. World-map and minimap display switches remain independent.
 
 Verification: 126 checks and shipped Lua compilation pass. Independent review found no blocking defect. Live acceptance still covers Skinning event timing, source correlation, multi-material loot and icon separation. Other professions require meaningful source detection before adding map collection.
+
+## Screenshot correction: exact positions and transparent image rendering
+
+User supersedes the previous material-separation presentation: every marker must remain centered on its saved/projected position regardless of neighboring markers or observation count. Removed PinStyle.Offset and its world/minimap callers. Default pins retain only the image layer with source alpha, without masking/cropping, filled gold discs or shadows. Flight status colors use edge-only backdrops without center texture, preserving their separate feature requirement. Coordinate/count tests and no-fill/alpha-preservation tests were observed failing before the changes.
+
+An opaque source image is not made transparent by changing its container or file extension. The user confirmed keeping the original WoW images without addon borders. No new cutout asset set is required, and source image alpha is preserved unchanged. Existing data and earlier installed candidate are untouched.
+
+Final verification: 337 checks (75 Python, 262 Lua), every shipped Lua file compiles, and whitespace checks pass. Independent focused review found no important findings. A zoomed-out flight-border regression failed at 0.25 UI pixels before proportional border resizing, then passed at one UI pixel. No deferred findings. Updated candidate remains local, with no live files or saved data changed.

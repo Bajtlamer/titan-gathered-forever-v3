@@ -98,7 +98,8 @@ function Map:Refresh(force)
     if width <= 0 or height <= 0 then self:Hide(); return end
     local canvasScale, worldScale = canvas:GetEffectiveScale(), self.world:GetEffectiveScale()
     if canvasScale <= 0 or worldScale <= 0 then self:Hide(); return end
-    local iconSize = 14 * worldScale / canvasScale
+    local style = ns.PinStyle.Get('world')
+    local iconSize = style.size * worldScale / canvasScale
     self.overlay:Show()
     if not force and not self.dirty and canvas == self.canvas and mapID == self.mapID and width == self.width
         and height == self.height and iconSize == self.iconSize then return end
@@ -110,14 +111,14 @@ function Map:Refresh(force)
     self.mapID, self.width, self.height, self.dirty = mapID, width, height, false
     self.iconSize = iconSize
     local nodes = self:Nodes(mapID)
-    local groups = {}
     self.visibleCount = #nodes
     for index, node in ipairs(nodes) do
         local pin = self.pins[index] or self:CreatePin()
         pin.node = node
         pin:SetSize(iconSize, iconSize)
+        ns.PinStyle.Apply(pin, 'world')
         pin:ClearAllPoints()
-        pin:SetPoint('CENTER', self.overlay, 'TOPLEFT', node.x * width + ns.PinStyle.Offset(groups, node, iconSize * 1.3), -node.y * height)
+        pin:SetPoint('CENTER', self.overlay, 'TOPLEFT', node.x * width, -node.y * height)
         pin.texture:SetTexture(ns.PinStyle.Icon(node.itemID, node.kind))
         pin:Show()
     end

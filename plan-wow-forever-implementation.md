@@ -1,5 +1,9 @@
 # WoW Forever Implementation Plan
 
+## Current status, 2026-11-08
+
+Historical implementation/design record. Some original decisions and task restrictions were superseded. Use README.md, ref-wow-forever-runtime.md and plan-next-development.md for current behavior and remaining work. See [the roadmap](plan-next-development.md), [progress](ref-wow-forever-progress.md) and [unreleased changes](release-notes/ref-unreleased.md). Original step counts and no-install/no-commit statements below refer to their original execution, not the current installed/source-push status.
+
 > For agentic workers: use superpowers:executing-plans task by task. Review the complete implementation before delivery.
 
 **Goal:** Implement a Forever-only Titan plugin with item-use reasons and accurate bags, personal bank, and total counts.

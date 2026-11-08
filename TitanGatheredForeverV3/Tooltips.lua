@@ -36,7 +36,11 @@ end
 function Tooltips.Lines(itemID)
     local record = ns.Catalog.Get(itemID)
     if not ns.inventory then return {} end
-    if not record and (not ns.history or ns.history:Total((ns.characterID or UnitGUID('player')), itemID) == 0) then return {} end
+    local character=(ns.characterID or UnitGUID('player'))
+    local crafted=ns.production and ns.production:Total(character,itemID)or 0
+    local reagent,plan
+    if ns.Crafting then reagent,plan=ns.Crafting.Context(itemID)end
+    if not record and (not ns.history or ns.history:Total(character, itemID) == 0)and crafted==0 and not reagent then return {} end
     record = record or { professions = {}, recipes = {}, recipeCounts = {}, uses = {} }
     local lines = {}
     for _, profession in ipairs(record.professions) do
@@ -66,7 +70,18 @@ function Tooltips.Lines(itemID)
     end
     local observation = Tooltips.BankObservation(observed)
     if observation then lines[#lines + 1] = ns.Style.Text(ns.Style.gray, observation) end
+    if reagent then
+        lines[#lines+1]=false
+        lines[#lines+1]=ns.Style.Text(ns.Style.violet,string.format('For %s: %d per operation; missing %d (%s)',
+            plan.name,reagent.perOperation,reagent.missing,plan.scope))
+        lines[#lines+1]=ns.Style.Text(ns.Style.gray,plan.craftable and string.format('Material limit: %d operations%s. /tgf recipe',
+            plan.craftable,plan.cached and' (cached estimate)'or'')or'Material limit unavailable; inventory or recipe requirements unresolved. /tgf recipe')
+    end
     if ns.settings.historyTooltips and ns.history then
+        if crafted>0 then
+            lines[#lines+1]=false
+            lines[#lines+1]=ns.Style.Text(ns.Style.gold,'Lifetime crafted: ')..ns.Style.Text(ns.Style.cyan,tostring(crafted))
+        end
         local character = (ns.characterID or UnitGUID('player'))
         local quantity = ns.history:Total(character, itemID)
         local sources = ns.history:Rates(character, itemID)
@@ -100,7 +115,9 @@ end
 function Tooltips.Append(tooltip, data)
     if not ns.settings or not ns.settings.itemTooltips or not ns.inventory
         or not data or not ns.IsPublic(data.id) or type(data.id) ~= 'number'
-        or (not ns.Catalog.Get(data.id) and (not ns.history or ns.history:Total((ns.characterID or UnitGUID('player')), data.id) == 0)) then return end
+        or (not ns.Catalog.Get(data.id) and (not ns.history or ns.history:Total((ns.characterID or UnitGUID('player')), data.id) == 0)
+            and (not ns.production or ns.production:Total((ns.characterID or UnitGUID('player')),data.id)==0)
+            and (not ns.Crafting or not ns.Crafting.Context(data.id))) then return end
     if tooltip.IsForbidden and tooltip:IsForbidden() then return end
     if not tooltip.tgForeverHooked then
         tooltip:HookScript('OnTooltipCleared', function(self) self.tgForeverItemID = nil end)

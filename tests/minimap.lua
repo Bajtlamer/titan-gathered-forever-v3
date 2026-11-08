@@ -21,7 +21,7 @@ local function frame()
     function f:ClearAllPoints() end
     function f:SetPoint(_, _, _, x, y) self.x, self.y = x, y end
     function f:CreateTexture() return { SetAllPoints = function() end, SetTexture = function(_, icon) f.icon = icon end,
-        SetColorTexture = function() end, AddMaskTexture = function() end,
+        SetColorTexture = function() end, AddMaskTexture = function(self,mask) self.mask=mask end, RemoveMaskTexture = function(self) self.mask=nil end,
         SetSize = function() end, SetPoint = function() end } end
     function f:CreateMaskTexture() return { SetAtlas = function() end, SetAllPoints = function() end } end
     return f
@@ -79,7 +79,7 @@ test('hidden minimap and zero radius fail closed without stale icons', function(
     Minimap:Hide(); map:Refresh(); assert(not map.pins[1].shown)
     Minimap:Show(); state.radius = 0; map:Refresh(); assert(not map.pins[1].shown)
 end)
-test('skinning-only module attaches and separates different obtained materials', function()
+test('skinning-only module keeps co-located materials at their true projected position', function()
     state.radius, state.x, state.y = 100, 0.5, 0.5
     nodes = { { mapID = 1412, x = 0.5, y = 0.5, kind = 'Skinning', itemID = 783, count = 1 },
               { mapID = 1412, x = 0.5, y = 0.5, kind = 'Skinning', itemID = 2318, count = 1 } }
@@ -87,7 +87,9 @@ test('skinning-only module attaches and separates different obtained materials',
     ns.Minimap.Attach()
     local pins = ns.Minimap.instance.pins
     assert(#pins == 2 and pins[1].shown and pins[2].shown)
-    assert(pins[1].x ~= pins[2].x and pins[1].icon ~= pins[2].icon)
+    near(pins[1].x,0);near(pins[2].x,0);near(pins[1].y,0);near(pins[2].y,0)
+    assert(pins[1].icon ~= pins[2].icon)
+    nodes[1].count=50;ns.Minimap.instance:Refresh();near(pins[1].x,0);near(pins[2].x,0)
 end)
 test('hovering a mapped material shows observed history without losing native tooltip',function()
     local lines={};GameTooltip.AddLine=function(_,line)lines[#lines+1]=line end
@@ -96,5 +98,27 @@ test('hovering a mapped material shows observed history without losing native to
     local pin=ns.Minimap.instance.pins[1];pin.scripts.OnEnter(pin)
     local found=false;for _,line in ipairs(lines)do if line:find('50.0%',1,true)then found=true end end
     assert(found)
+end)
+test('minimap appearance applies independently and large icons remain within its edge',function()
+    ns.settings.iconAppearance={minimap={size=30,shape='square',border=false}}
+    ns.Minimap.instance:Refresh();local pin=ns.Minimap.instance.pins[1]
+    assert(pin.width==30 and pin.height==30 and pin.texture.mask==nil)
+    near(pin.x,0);near(pin.y,0);assert(ns.PinStyle.Get('world').size==14)
+    ns.settings.iconAppearance.minimap.size=40;nodes[1].x=.585
+    ns.Minimap.instance:Refresh();assert(ns.Minimap.instance.visibleCount==1)
+    assert(ns.Minimap.instance.pins[1].node.itemID==2318,'Large edge icon was not clipped')
+    ns.settings.iconAppearance=nil
+end)
+test('large square corners and enabled outlines do not cross the circular minimap boundary',function()
+    Minimap.width,Minimap.height=140,140
+    state.x,state.y,state.radius,state.rotate=.5,.5,100,false
+    nodes={{mapID=1412,x=.5495,y=.4505,kind='Skinning',itemID=783,count=1}}
+    ns.settings.iconAppearance={minimap={size=40,shape='square',border=false}}
+    ns.Minimap.instance:Refresh();assert(ns.Minimap.instance.visibleCount==0,'Square corner overflows the minimap')
+    ns.settings.iconAppearance.minimap.shape='circle'
+    ns.Minimap.instance:Refresh();assert(ns.Minimap.instance.visibleCount==1,'Unbordered circle should fit')
+    ns.settings.iconAppearance.minimap.border=true
+    ns.Minimap.instance:Refresh();assert(ns.Minimap.instance.visibleCount==0,'Outline overflows the minimap')
+    ns.settings.iconAppearance=nil
 end)
 print('PASS ' .. passed .. ' minimap icon projection, rotation, zoom, reuse and toggle checks')

@@ -20,7 +20,7 @@ local function frame(parent)
     function f:SetPoint(_, _, _, x, y) self.x, self.y = x, y end
     function f:CreateTexture()
         return { SetAllPoints = function() end, SetTexture = function(_, value) self.icon = value end,
-            SetColorTexture = function() end, AddMaskTexture = function() end,
+            SetColorTexture = function() end, AddMaskTexture = function(self,mask) self.mask=mask end, RemoveMaskTexture = function(self) self.mask=nil end,
             SetSize = function() end, SetPoint = function() end }
     end
     function f:CreateMaskTexture() return { SetAtlas = function() end, SetAllPoints = function() end } end
@@ -108,7 +108,11 @@ ns.gathering = ns.Gathering.New({}, { maps = { [2] = {
 ns.Map.Attach()
 local skins = ns.Map.instance.pins
 assert(#skins == 2 and skins[1].shown and skins[2].shown, 'Skinning-only module did not attach and render')
-assert(skins[1].x ~= skins[2].x and skins[1].icon ~= skins[2].icon, 'Different skinning materials overlap')
+assert(skins[1].x == 500 and skins[2].x == 500 and skins[1].y == -300 and skins[2].y == -300, 'Co-located materials were moved away from their saved coordinates')
+assert(skins[1].icon ~= skins[2].icon, 'Material artwork identities were lost')
+ns.gathering.saved.maps[2][1].count = 50
+ns.Map.instance:Refresh(true)
+assert(skins[1].x == 500 and skins[2].x == 500, 'Repeated observations spread icons into a row')
 assert(ns.gathering.saved.maps[2][1].x == ns.gathering.saved.maps[2][2].x, 'Display separation moved saved observations')
 assert(map.clearButton and map.clearButton.parent == world)
 assert(map.clearButton.text == 'TGF v3 spots')
@@ -116,4 +120,10 @@ local opened
 ns.Titan = { ClearSpotsMenu = function(owner, target) opened = {owner, target} end }
 map.clearButton.scripts.OnClick(map.clearButton)
 assert(opened[1] == map.clearButton and opened[2] == world)
-print('PASS 14 map rendering, scaling, projection, lifecycle, reuse, toggle and gathering-material checks')
+ns.settings.iconAppearance={world={size=28,shape='square',border=false}}
+ns.Map.instance:Refresh(true)
+assert(skins[1].width*canvas:GetEffectiveScale()==28,'World-map appearance size did not apply')
+assert(skins[1].texture.mask==nil,'Full-image selection left the circular crop attached')
+assert(skins[1].x==500 and skins[1].y==-300,'Appearance changed a saved marker position')
+ns.settings.iconAppearance=nil
+print('PASS 15 map rendering, scaling, projection, lifecycle, reuse, toggle and gathering-material checks')

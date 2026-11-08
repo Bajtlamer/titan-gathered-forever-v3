@@ -1,5 +1,9 @@
 # Restore Profession Addons and Optional Count Columns
 
+## Current status, 2026-11-08
+
+Historical implementation/design record. Some original decisions and task restrictions were superseded. Use README.md, ref-wow-forever-runtime.md and plan-next-development.md for current behavior and remaining work. See [the roadmap](plan-next-development.md), [progress](ref-wow-forever-progress.md) and [unreleased changes](release-notes/ref-unreleased.md). Original step counts and no-install/no-commit statements below refer to their original execution, not the current installed/source-push status.
+
 User correction, 2026-11-06: retain the original addon-pack architecture. Each profession must be independently selectable in WoW's AddOns screen. Shared code and ID indexing do not require a combined addon or an always-loaded database.
 
 ## Required behavior

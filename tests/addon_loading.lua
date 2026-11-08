@@ -30,8 +30,15 @@ assert(ns.Catalog.Get(765), 'Herbalism did not register Silverleaf')
 assert(ns.Catalog.Get(249399), 'Herbalism omitted Frilled Lichen')
 assert(not ns.Catalog.Get(264019), 'Auction data loaded without Auction addon')
 
+loadAddon('TitanGatheredForeverV3_Fishing')
+assert(not ns.Catalog.modules.Alchemy and not ns.Catalog.modules.Cooking, 'Fishing pulled in consuming profession addons')
+for _, id in ipairs({6358,6359,6522,13422,13755,13888,13893}) do
+    assert(ns.Catalog.Get(id), 'Fishing omitted evidenced material ' .. id)
+end
+assert(ns.Catalog.Get(6358).recipeCounts.Alchemy > 0, 'Fishing lost Alchemy use context')
+
 for _, folder in ipairs({ 'Alchemy', 'Auction', 'Blacksmithing', 'Cooking', 'Enchanting', 'Engineering',
-                          'FirstAid', 'Fishing', 'Leatherworking', 'Skinning', 'Tailoring' }) do
+                          'FirstAid', 'Leatherworking', 'Skinning', 'Tailoring' }) do
     loadAddon('TitanGatheredForeverV3_' .. folder)
 end
 assert(#ns.Catalog.Modules() == 13)
@@ -45,4 +52,4 @@ ns.settings.categories = {}
 for _, module in ipairs(ns.Catalog.Modules()) do ns.settings.categories[module.id] = false end
 ns.Catalog.Rebuild(ns.settings)
 assert(next(ns.Items) == nil and next(ns.Recipes) == nil)
-print('PASS 6 optional-addon loading scenarios (core only, subset, gathering, auction isolation, union, disabled index)')
+print('PASS 7 optional-addon loading scenarios (core only, subset, gathering, fishing, auction isolation, union, disabled index)')

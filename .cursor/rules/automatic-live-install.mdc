@@ -1,0 +1,8 @@
+---
+description: Install completed addon updates into the user's live WoW Forever client
+alwaysApply: true
+---
+
+# Automatic Live Installation
+
+Follow the Automatic Live Installation section in root `AGENTS.md` for every completed runtime update or new addon version. The user has explicitly authorized installation into `/Applications/World of Warcraft/_forever_/Interface/AddOns` after checks pass, using `tools/install.py` with backups and post-installation verification. Do not ask for the same task authorization again or leave completed runtime changes only in source. Respect sandbox approvals and preserve SavedVariables, other addons and game-session control. Publishing and hosting are separate actions.

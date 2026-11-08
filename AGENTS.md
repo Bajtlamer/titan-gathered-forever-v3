@@ -1,35 +1,46 @@
 # Repository Guidelines
 
-## Project Structure & Module Organization
+## Structure and runtime
 
-This repository contains Titan Gathered Forever v3, a World of Warcraft addon that tracks materials in bags and the bank.
+Titan Gathered Forever v3 targets WoW Forever 1.60.1, interface 16001, with Titan Panel installed separately. Do not change client APIs or manifest versions without matching evidence and live validation.
 
-- `TitanGatheredForeverV3/` holds shared tracking logic, English localization, UI XML, the `.toc` manifest, and `Artwork/TitanOre.tga`.
-- `TitanGatheredForeverV3_<Profession>/` contains Cooking, Enchanting, Herbs, Mining, Skinning, and Tailoring modules. Each has Lua logic, English data/localization, XML, and a manifest.
-- Manifests load XML; XML loads localization before module logic. Preserve this order and the declared dependencies on `Titan` and `TitanGatheredForeverV3`.
+- TitanGatheredForeverV3/ contains the shared runtime, English localization, generated metadata and required artwork. Its .toc loads Lua in the declared order.
+- Twelve profession addons and a separate Auction Items addon publish compact catalogue records. Preserve their exact folder/manifest names and dependencies on Titan and the shared core.
+- catalogue/, tools/, tests/, release-notes/ and prefixed Markdown documents live at repository root. Runtime folders contain only manifest-loaded code and allowlisted artwork. Keep private archives, generated distributions, SavedVariables and temporary files out of Git.
+- Follow the user's document prefixes: plan-, ref-, book-, Codex-, budget-, bom- and tmp-. Temporary tmp-* files must be ignored and deleted after use. Avoid emoji, decorative glyphs and em dashes.
 
-## Build, Test, and Development Commands
+## Development and verification
 
-There is no build step or dependency installation. Copy the addon directories into the target WoW client's `Interface/AddOns/` directory and install Titan Panel separately. Enable the core addon and the modules being tested.
+There is no dependency installation/build step for runtime Lua. Use Python 3.10 or newer and LuaJIT with Lua 5.1 semantics for tooling/tests. Do not substitute the machine's Lua 5.5 compiler.
 
-- `/reload`: reload the UI after Lua or XML edits.
-- `/console scriptErrors 1`: enable Lua error reporting in game.
-- `find TitanGatheredForeverV3* -name '*.lua' -exec luac -p {} \;`: check Lua syntax when a compatible Lua compiler is installed. This does not validate WoW API behavior.
+- python3 tools/check.py: all Python/Lua suites, generated-catalogue validation and compilation of every shipped Lua file.
+- python3 tools/generate_catalog.py: regenerate catalogue publishers, metadata and evidence reports after reviewed data changes. --check rejects stale outputs.
+- python3 tools/generate_pin_outlines.py --check: verify deterministic transparent outline assets.
+- python3 tools/audit_catalog.py --check: validate the evidence report. Optional offline mirror/client-table inputs verify pinned bytes and scoped recipe facts; builds do not download or execute external sources.
+- python3 tools/package.py: runtime-only collection, individual addon ZIPs, downloads.json and SHA256SUMS. See book-releases.md.
+- /reload reloads Lua; new files/assets may require a full client restart. /console scriptErrors 1 enables in-game Lua error reporting.
 
-The manifests declare interface version `90001`. Verify client compatibility before changing API calls or manifest versions.
+## Code and data conventions
 
-## Coding Style & Naming Conventions
+Follow nearby Lua formatting without unrelated reformatting. Keep exported TitanGatheredForeverV3 names and XML/manifest compatibility where relevant. Prefer local helpers. Do not put full recipe source records or development databases into runtime memory.
 
-Follow nearby formatting: existing Lua mixes tabs and four-space indentation, with optional semicolons. Avoid unrelated reformatting. No formatter or linter configuration is provided.
+Preserve existing settings, acquired/produced statistics, per-character coverage and map observations. Keep attempts, completed casts, matched output operations, obtained quantities and complete-source denominators distinct. Unknown evidence must remain unknown. No instance map spots or invented ore/source identities. Catalogue completeness remains false until the documented evidence gates are actually satisfied.
 
-Keep exported `TitanGatheredForeverV3*` names, uppercase constants such as `TG_*`, and existing module prefixes. Prefer local variables and namespace aliases for internal helpers. Keep item/category data in the corresponding English Lua file. Preserve XML callback names and manifest filenames when refactoring.
+## Documentation, commits and review
 
-## Testing Guidelines
+README.md describes current behavior, plan-next-development.md is the continuation roadmap, ref-wow-forever-progress.md records current status/history, and release-notes/ref-unreleased.md records changes since published versioned notes. Historical plans preserve original execution evidence; clearly mark superseded designs.
 
-No automated test framework or coverage target is configured. Validate changes in game with the affected profession modules enabled. Check startup errors, material counts after looting, bank counts, tooltip contents, menu toggles, and persistence after `/reload`. For fixes, document the reproduction steps and observed result.
+Run checks appropriate to changes and document live reproduction/results separately from automated validation. Before source publication, inspect staged files for private data and ignored artifacts. Use concise imperative commit subjects. PR descriptions should state behavior, affected modules, validation and remaining live/client limitations. Do not claim a source push publishes release assets or updates hosting.
 
-## Commit & Pull Request Guidelines
+## Automatic Live Installation
 
-Git history is unavailable in this checkout, so no existing commit convention can be established. Use concise, imperative subjects, for example `Fix mining tooltip counts`. Keep changes focused.
+The user explicitly authorizes installing every completed addon update and new version into `/Applications/World of Warcraft/_forever_/Interface/AddOns` automatically. Do not leave tested runtime changes only in the source checkout or ask for this task authorization again.
 
-Pull requests should describe the behavior changed, affected modules, client and Titan Panel versions, and validation performed. Link relevant issues and include screenshots for visible tooltip or menu changes.
+- Run `python3 tools/check.py`, preview with `python3 tools/install.py --addons-dir '/Applications/World of Warcraft/_forever_/Interface/AddOns'`, then apply the same command with `--apply` after checks pass.
+- Use the installer so the previous candidate is backed up and unrelated addons, enablement and SavedVariables are preserved. Do not edit live files directly or change them while implementation is incomplete.
+- Verify the installed runtime files against the source candidate after installation. If they already match exactly, report the verified state instead of making an identical installation.
+- Respect sandbox approval requirements. Report installation failures or missing destinations clearly; do not claim a source-only update is installed.
+- Tell the user to run `/reload` for Lua-only updates or fully restart WoW when new files/assets or manifests require it. Do not close or restart their game automatically.
+- This authorization is for the local game installation. It does not authorize publishing releases, pushing commits or changing hosting.
+
+The matching editor rule is `.cursor/rules/automatic-live-install.mdc`.

@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "recipeMirror": {
+    "url": "https://raw.githubusercontent.com/masterred92/DwarfExplorersBible/541dd23afba02f915a822d11acb19fd4c24df83e/Data.lua",
+    "commit": "541dd23afba02f915a822d11acb19fd4c24df83e",
+    "sha256": "b9587a044d57ff3f1213caae50c15e23f2da1dc45edcba683c068fecf539bec4",
+    "numericRecipeSHA256": "ba3885c6b7c97d49d0dda943154f5ed5b80c0e9695f58786f993f08711656a5c",
+    "recipeCount": 1971,
+    "sourceBuild": null,
+    "retrieved": "2026-11-07",
+    "generatorURL": "https://github.com/masterred92/DwarfExplorersBible/blob/541dd23afba02f915a822d11acb19fd4c24df83e/tools/gen_data.py",
+    "comparison": "All normalized spell IDs, output item IDs, professions and reagent quantities match the captured base snapshot.",
+    "limitations": [
+      "The mirror and generator identify version 1.60.1 but no exact extraction build.",
+      "Output quantities, difficulty fields and vendor data are outside the normalized-fact comparison.",
+      "Client-table facts do not establish live obtainability or full coverage."
+    ]
+  },
+  "clientTables": {
+    "product": "wowf",
+    "clientVersion": "1.60.1",
+    "build": "70862",
+    "method": "create-item-reagents-v1",
+    "retrieved": "2026-11-07",
+    "recipeCount": 1971,
+    "numericRecipeSHA256": "ba3885c6b7c97d49d0dda943154f5ed5b80c0e9695f58786f993f08711656a5c",
+    "tables": {
+      "ItemSparse": {
+        "url": "https://wago.tools/db2/ItemSparse/csv?product=wowf&build=1.60.1.70862",
+        "responseFilename": "ItemSparse.1.60.1.70862.csv",
+        "sha256": "d175e5ef9f8a2ce87c232351eca34cdf6a9c672a5a3f4dd12d2f72bdcd380eda"
+      },
+      "SkillLineAbility": {
+        "url": "https://wago.tools/db2/SkillLineAbility/csv?product=wowf&build=1.60.1.70862",
+        "responseFilename": "SkillLineAbility.1.60.1.70862.csv",
+        "sha256": "13ef58a08253125e3e9dca642a39bc480187987e90cfbe5c8be30e1ab3c8be0a"
+      },
+      "SpellEffect": {
+        "url": "https://wago.tools/db2/SpellEffect/csv?product=wowf&build=1.60.1.70862",
+        "responseFilename": "SpellEffect.1.60.1.70862.csv",
+        "sha256": "cc8f167fe246b495294b560196f6c59439f703e8f937ddb6acd81157bd5f8b9c"
+      },
+      "SpellReagents": {
+        "url": "https://wago.tools/db2/SpellReagents/csv?product=wowf&build=1.60.1.70862",
+        "responseFilename": "SpellReagents.1.60.1.70862.csv",
+        "sha256": "f37423f667c09a6aaada6f05bed12e6d307fe15b3596944e132492f7f1dc9cc8"
+      }
+    },
+    "limitations": [
+      "Build attribution is the public CSV endpoint and its Content-Disposition response filename, not a local client extraction.",
+      "Only CREATE_ITEM effect 24, nonzero trade-skill category, supported skill IDs, positive reagents and outputs present in ItemSparse are compared.",
+      "Output quantities, difficulty, vendor fields, supplementary output-free enchantments and live obtainability are outside this crosscheck."
+    ]
+  }
+}

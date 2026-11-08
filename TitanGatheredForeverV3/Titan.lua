@@ -135,6 +135,7 @@ function Titan.Menu(owner)
                 ns.settings.categories[key] = ns.settings.categories[key] == false
                 ns.Catalog.Rebuild(ns.settings)
                 ns.UpdateGathering()
+                ns.Reports.Refresh()
                 Titan.page = 1; Titan.Refresh()
             end)
         end
@@ -150,6 +151,14 @@ function Titan.Menu(owner)
             end
         end
         if #modules == 0 then professions:CreateTitle('Enable a Gathered profession addon in the AddOns screen.') end
+        root:CreateButton('Icon appearance...', function() ns.IconConfig.Show() end)
+        local flights = root:CreateButton('Flight points')
+        flights:CreateCheckbox('Show flight points', function() return ns.settings.flightPoints end, function()
+            ns.settings.flightPoints = not ns.settings.flightPoints
+            ns.FlightPaths.Update()
+        end)
+        flights:CreateTitle('World map: your faction and neutral flight points')
+        flights:CreateTitle('Discovery status is shown in the tooltip')
         local gathering = root:CreateButton('Gathering map')
         local function mapToggle(parent, label, key)
             parent:CreateCheckbox(label, function() return ns.settings[key] end, function()
@@ -201,10 +210,45 @@ function Titan.Menu(owner)
         local reports = root:CreateButton('History and sources')
         reports:CreateButton('Lifetime materials', function() ns.Reports.Show('history') end)
         reports:CreateButton('Observed chances', function() ns.Reports.Show('chances') end)
+        reports:CreateButton('Profession actions', function() ns.Reports.Show('actions') end)
+        reports:CreateButton('Crafting and cooking', function() ns.Reports.Show('production') end)
+        reports:CreateButton('Export statistics',function()ns.ExportView.Show()end)
+        reports:CreateButton('Plan selected recipe reagents',function()
+            if ns.Crafting.selectedID then ns.CraftingView.Show(ns.Crafting.selectedID,1)
+            else ns.Print('Select a profession recipe or use /tgf recipe <recipeID> [operations].')end
+        end)
         reports:CreateDivider()
         reports:CreateCheckbox('Record lifetime history', function() return ns.settings.recordHistory end, function()
             ns.settings.recordHistory = not ns.settings.recordHistory; ns.UpdateGathering()
         end)
+        reports:CreateCheckbox('Record profession actions', function() return ns.settings.recordActions end, function()
+            ns.settings.recordActions = not ns.settings.recordActions; ns.UpdateGathering()
+        end)
+        reports:CreateCheckbox('Record production', function() return ns.settings.recordProduction end, function()
+            ns.settings.recordProduction = not ns.settings.recordProduction; ns.UpdateGathering()
+        end)
+        local production = reports:CreateButton('Production recording by profession')
+        for _, module in ipairs(modules) do
+            local kind=module.id
+            if ns.Production.labels[kind] then
+                production:CreateCheckbox('Record ' .. module.label .. ' production',
+                    function() return ns.settings.productionProfessions[kind] ~= false end, function()
+                        ns.settings.productionProfessions[kind] = ns.settings.productionProfessions[kind] == false
+                        ns.UpdateGathering()
+                    end)
+            end
+        end
+        local actions = reports:CreateButton('Action recording by profession')
+        for _, module in ipairs(modules) do
+            local kind=module.id
+            if ns.Actions.labels[kind] then
+                actions:CreateCheckbox('Record ' .. ns.Actions.labels[kind] .. ' actions',
+                    function() return ns.settings.actionProfessions[kind] ~= false end, function()
+                        ns.settings.actionProfessions[kind] = ns.settings.actionProfessions[kind] == false
+                        ns.UpdateGathering()
+                    end)
+            end
+        end
         toggle(display, 'History in item tooltips', 'historyTooltips')
         toggle(reports, 'Include rare loot', 'recordRare')
         local recording = reports:CreateButton('Recording by profession')

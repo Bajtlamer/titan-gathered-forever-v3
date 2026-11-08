@@ -29,7 +29,7 @@ end
 function Mini:CreatePin()
     local pin = CreateFrame('Button', nil, self.overlay)
     pin:SetSize(14, 14)
-    ns.PinStyle.Apply(pin)
+    ns.PinStyle.Apply(pin, 'minimap')
     pin:SetScript('OnEnter', function(button)
         GameTooltip:SetOwner(button, 'ANCHOR_LEFT')
         GameTooltip:AddLine(ns.Style.ItemName(button.node.itemID))
@@ -66,16 +66,19 @@ function Mini:Refresh()
         or not number(width) or not number(height) or not number(radius) or not number(facing)
         or width <= 0 or height <= 0 or radius <= 0 then self:HidePins(); return end
     local halfWidth, halfHeight = self.minimap:GetWidth() / 2, self.minimap:GetHeight() / 2
-    local cosine, sine, visible, groups = math.cos(facing), math.sin(facing), 0, {}
+    local style = ns.PinStyle.Get('minimap')
+    local extent = style.size / 2 * (style.shape == 'square' and math.sqrt(2) or 1) * (style.border and 1.1 or 1)
+    local clip = math.min(0.85, math.max(0, 1 - extent / math.min(halfWidth, halfHeight)))
+    local cosine, sine, visible = math.cos(facing), math.sin(facing), 0
     for _, node in ipairs(self.controller:List(mapID)) do
         local east, north = (node.x - x) * width, (y - node.y) * height
         local dx, dy = (east * cosine + north * sine) / radius, (-east * sine + north * cosine) / radius
-        local offset = ns.PinStyle.Offset(groups, node, 18)
-        local px, py = dx * halfWidth + offset, dy * halfHeight
-        -- Include the separated material icon in the circular clipping check.
-        if halfWidth > 0 and halfHeight > 0 and (px / halfWidth)^2 + (py / halfHeight)^2 <= 0.85^2 then
+        local px, py = dx * halfWidth, dy * halfHeight
+        if halfWidth > 0 and halfHeight > 0 and (px / halfWidth)^2 + (py / halfHeight)^2 <= clip^2 then
             visible = visible + 1
             local pin = self.pins[visible] or self:CreatePin()
+            pin:SetSize(style.size, style.size)
+            ns.PinStyle.Apply(pin, 'minimap')
             pin.node = node
             pin:ClearAllPoints()
             pin:SetPoint('CENTER', self.overlay, 'CENTER', px, py)

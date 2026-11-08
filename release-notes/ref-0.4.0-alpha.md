@@ -1,5 +1,7 @@
 # Titan Gathered Forever v3 0.4.0-alpha
 
+Historical versioned release notes. Subsequent development is recorded in [the unreleased changelog](ref-unreleased.md); the current source update does not republish these release assets.
+
 TGF v3 helps crafters understand material uses, current inventory, acquisition locations and personally observed results. This alpha introduces per-character lifetime acquisition totals and source-rate reports, with an optional combined view.
 
 - Open `/tgf history` for obtained-item totals and `/tgf chances` for observed source rates with sample counts.

@@ -8,7 +8,7 @@ This is an alpha. Automated checks pass against simulated host APIs, but history
 2. Extract `dist/TitanGatheredForeverV3-0.4.1-alpha.zip` into the Forever client's `Interface/AddOns/` directory. It contains the shared `TitanGatheredForeverV3` core, twelve separate profession addon folders, and an optional `TitanGatheredForeverV3_Auction` addon. Individual core/module downloads are also available under `dist/modules/`.
 3. Replace the old addon folders with their new counterparts; do not merge leftover legacy Lua/XML files into the new folders. Preserve the normal core-plus-profession addon layout.
 4. In WoW's AddOns screen, enable Titan Panel, the Gathered core and only the profession addons you want. Disabled addons load no database. Enable Auction Items separately if wanted. Log in and enable the `TitanGatheredForeverV3` broker entry in Titan's settings if needed.
-5. Run `/console scriptErrors 1`, then `/tgf status`. Confirm client `1.60.1.70790` and the expected catalogue counts. Record the actual installed Titan version.
+5. Run `/console scriptErrors 1`, then `/tgf status`. Record the actual live client version/build/interface and installed Titan version. Latest captured installation metadata is `1.60.1.70862`; this is separate from live API verification. Check interface `16001` and the declared catalogue counts without assuming installation metadata certifies compatibility.
 
 ## Confirm counts
 
@@ -66,15 +66,15 @@ Before claiming full coverage, obtain a build-matched recipe/material export and
 
 ## Confirm icon styling and panel caption
 
-1. Confirm both world-map and nearby minimap resource icons have circular item art, a thin golden border and a subtle shadow down/right. Zoom the world map and confirm all decoration stays proportional and readable.
+1. With default appearance settings, confirm world-map and minimap material icons have circular item art without borders, filled backplates or shadows. Use `/tgf icons` to select Full image or an optional Thin gold outline. Zoom the map and confirm the selected appearance stays proportional and readable.
 2. Confirm the Titan caption shows the addon name and `0.4.1-alpha`, without a material count. Loot or move items: the caption should keep the version while tooltip counts update.
 
 
 ## Confirm Skinning and material controls
 
-1. Enable the Skinning addon/category and map switch. Skin an outdoor creature and take its leather or hide. Confirm an icon for the obtained material on the world map and nearby minimap. When two supported materials drop, both icons should remain visible with a small separation.
+1. Enable the Skinning addon/category and map switch. Skin an outdoor creature and take its leather or hide. Confirm an icon for the obtained material on the world map and nearby minimap. When two supported materials drop at one position, their markers must share that exact position, even if their images overlap. Changing observation counts must not move them.
 2. Test interrupted Skinning, untaken loot, ordinary corpse loot without Skinning and ordinary corpse loot immediately after a Skinning cast. Unrelated loot must not create a spot; capture the event/source sequence if it does.
-3. Gather or skin inside a dungeon and raid. No new observations should be saved. Test entering an instance between cast and loot. Previously saved outdoor spots should remain intact.
+3. Gather or skin inside a dungeon and raid. No new map spots should be saved; eligible acquired history may still record instance loot. Test entering an instance between cast and loot. Previously saved outdoor spots should remain intact.
 4. Open Gathering map > Map materials. Each loaded gathering profession should have individual material checkboxes and Show all / Hide all. Hide one material: its icons should disappear from both maps while other materials remain. Gather it while hidden, then show it again and confirm the observation was retained.
 5. Test Show all and Hide all for each profession, then reload and confirm preferences persist. Disable the entire profession map switch: its icons should disappear and further gathering should not record. Re-enable it and confirm prior observations return.
 6. Disable a profession addon and reload. Its material submenu and icons should be absent, without affecting other professions. Confirm the master switch and independent world/minimap switches still work.
@@ -121,3 +121,107 @@ Record exact spell/item IDs and event order when fishing or disenchanting fails.
 3. Disable the previous-generation addon folders. Enable the new Titan broker entry. Its caption should display the official name and 0.4.1-alpha.
 4. Confirm /tgf settings, /tgf history and /tgf chances work. Verify prior history, spots, bank snapshots and preferences survived migration.
 5. Verify map icons use the new icon path, context menu labels say TGF v3, and the map button opens the new spot menu. Reload and confirm persistence in TitanGatheredForeverV3.lua.
+
+## Validate profession actions
+
+This gate is pending real-client execution. Test the candidate in the actual Forever 1.60.1 client with the affected modules and Titan Panel enabled. Record client build, spell IDs and event order for any discrepancy.
+
+1. Open `/tgf actions` and the Profession actions menu entry. Check dragging, Escape, current/combined selection, profession filters, empty states and readable coverage dates. Hovering or clicking an action row must not open an item tooltip/source menu. Confirm older history has not populated guessed action counts.
+2. Mine, gather herbs, skin and disenchant one item each. Every distinct action should add one attempt; successful casts should add one completion. Loot quantity and complete-source samples must retain their earlier independent meanings. Attempt an action that fails, interrupt another, and stop another manually. Check failures and interruptions against the actual emitted events. A stop without stronger evidence must say stopped without confirmed result, not manual cancellation.
+3. Cast Fishing and wait: completion must remain zero until a fishing-loot window opens. Catch fish, catch junk, leave a catch unlooted, cancel early and let a line expire. Repeat with manual loot and autoloot. Verify the client's cast GUID remains stable across launch/channel events. A catch window should add one completion even if no items are taken; opening/closing the same window must not add attempts.
+4. Recast quickly and cast an unrelated spell between a cancelled line and later loot. Verify stale fishing events do not complete an older or newer unrelated action. Compare Fishing counts with actual cast/catch history; delayed fishing loot without a trusted current action must not invent attempts.
+5. Disable map visibility and lifetime history while leaving action recording on: actions should continue. Disable action recording or just its profession, then act again: action counts must stop while enabled source history/maps continue. Re-enable during a pending cast and confirm its late events do not fill the recording gap. Profession category disabling must also stop recording. Ordinary display toggles should preserve pending actions.
+6. Reload with a pending action, then complete a new one. Pending observations should remain unresolved rather than become guessed failures. Confirm saved totals and controls survive reload/relog, older settings/history remain intact and combined values sum across two characters. Coverage starts are per character/profession, with the earliest date shown in the combined view.
+7. Repeat a supported action in an instance. Action recording may continue; it must create no map spot by itself. Inspect history and map counts before and after failed actions and unused fishing catches: no obtained-item quantity or complete-source sample should be invented by the counter.
+
+If Fishing emits a different cast identity at channel start, or a loot window cannot be reliably correlated, retain this release gate and capture the exact sequence before claiming reliable live action coverage.
+
+## Validate crafting and cooking production
+
+This gate is pending real-client execution. Use the local candidate on the actual Forever client, with Titan Panel and the affected profession addons. Record build, recipe ID, cast GUID and operation ID for discrepancies.
+
+1. Open `/tgf production` and Crafting and cooking under History and sources. Check current/combined selection, profession filters, five-row paging, item hovers, clicking a recipe for quantity distributions, readable dates and window layout at your UI scale. Existing history, bags and bank observations must remain intact.
+2. Cook one item, then a queue of several identical recipes. Compare distinct observed starts, completed casts, matched result operations and actual quantities with the native crafting output log. Verify that recipe spell IDs match live recipe metadata and that result operation IDs are positive and distinguish operations. If operation identity is absent, retain the validation gate; do not infer missing output from bag changes.
+3. Craft a recipe that produces multiple units. If available, exercise explicit bonus/multicraft results and variable outputs. Compare item totals and per-operation observed quantity distributions. A quantity larger than one must not itself imply a proc. Proc denominators should include only readable explicit flag observations, not all casts.
+4. Test both result-before-success and success-before-result event sequences if the client emits them. Interrupt or fail a craft, stop a queue midway and check that failed/interrupted attempts produce no counted output. A cast with no matched result can remain completed with zero matched operations; explain any discrepancy using the recorded event sequence.
+5. Test a multi-output recipe and first-craft rewards. Rewards must not become production. Additional outputs can join a bound operation; secondary output arriving first remains unpaired. If distinct recipes share an output and both have pending contexts, ambiguous results must be excluded rather than guessed. Inspect the resulting incomplete coverage.
+6. Turn lifetime history, gathering actions and map display off while production stays on: production must continue. Disable Record production, a production profession, or its category and start crafting; re-enable before success. That cast must not enter production without an enabled observed start. Existing counters remain visible when recording stops.
+7. Pause recording after a cast, then start another recipe producing the same item. Deliver or observe delayed old output if possible. Recent sealed contexts must block attribution to the new cast, even if that temporarily leaves new completed operations without quantities. Repeat across reload/world transitions and confirm preserved totals and recording settings. No old pending result may fill a recording gap.
+8. Verify ordinary loot, purchases, trades and bag/bank transfers never change crafted quantities. Crafting must not add loot-source samples, alter acquired quantities, manufacture current inventory observations or create map spots, including inside instances. Tooltips and Lifetime materials should display crafted quantities separately, including outputs absent from the material catalogue.
+9. If the client supports recrafting, enchant application or salvage, verify each remains excluded. Explicit recipe flags are checked; if a recraft uses ordinary recipe identity, capture that flow before claiming new-item-only coverage. Unknown, protected or unavailable recipe metadata must fail closed.
+10. Produce on a second character, select All characters and verify summed completed/matched operations, output totals, quantity distributions and explicit-field counts. The earliest recording date is combined coverage only; it does not imply continuous measurement for every character.
+
+## Validate contextual crafting assistance
+
+This gate is pending real-client execution on Forever 1.60.1. Record the client build and recipe spell ID when comparing the planner against the native recipe schematic.
+
+1. Select a simple item recipe in the native profession list and use `/tgf recipe`, or Plan selected recipe reagents in the Titan menu. Compare live reagent quantities with the native UI. Open the same plan with `/tgf recipe <recipeID> 3`, More/Fewer, production recipe details and a material's known recipe example. Verify the planned target counts operations rather than output items.
+2. Compare each required/available/missing row and the limiting operation count against hand-calculated quantities. If the same item occupies multiple required slots, its requirements must be summed before capacity is calculated. Check reagent paging, native item hovers, source clicks, dragging, Escape, errors and empty states at your UI scale.
+3. Switch Display > Show bank counts off. The planner and selected-recipe reagent tooltip must use Bags only, without bank quantities or bank observation timestamps. Switch it on, visit the bank and transfer a reagent: the refreshed plan should use Bags + Bank. Close the bank and verify cached estimates and observation time are labeled. Unknown inventory must display zero while withholding a definitive overall material limit.
+4. Plan a recipe with required alternatives, currency, variable quantities or another unsupported required slot. It must say unresolved rather than claim unlimited or positive craftability. Fixed rows can be partial. Optional modifiers and finishing reagents must be explicitly excluded. No-material or partially loaded schematics must not yield an unlimited count.
+5. Test a normal enchantment recipe and an unlearned recipe if live metadata is available. Distinguish a material limit from actual ability to craft. Test recraft, salvage, gathering and dummy contexts: these must remain excluded. Disabled or absent profession modules/categories must not provide an estimate.
+6. Hover a reagent for the selected native recipe. Confirm the added summary is compact and contains the appropriate per-operation deficit and inventory scope. Change recipe, close professions, change data source and leave the world: stale context must not remain. Verify ranked recipes match the actual selected native schematic, not a different rank. If the selection callback or rank identity differs, retain this gate and capture the native event payload.
+7. Click a reagent's source evidence. Rates must identify source and zone, retain instance context, and show complete observed sample counts separately from saved map positions. Selecting a saved-position entry should open its map. World-map/minimap pin tooltips must explicitly state that source/zone observations are not a chance at that coordinate. Lack of complete source samples must never turn saved positions into guessed rates.
+8. With all recording controls off, open and refresh plans. Inventory refresh may update ordinary bag snapshots, but planning itself must create no bank observation, acquired item, produced quantity, action attempt, complete source trial or map spot. Preserve existing settings and saved observations across reload.
+
+## Validate statistics export and copying
+
+This gate is pending real-client execution. Use `/tgf export` and keep copied files outside game/runtime folders.
+
+1. Open by slash command and menu. Confirm This character and identity off, with no automatic transmission. Copy a small snapshot, save UTF-8 JSON and run `python3 tools/read_export.py <file>`. Check the exact clipboard/save round trip; edit-box retention is insufficient.
+2. Confirm default JSON omits names, character GUIDs, raw event IDs, coordinates, inventory and arbitrary labels/keys. Numeric game IDs, map IDs and timestamps remain. Opt into identity and verify only documented fields are added. Turn it off, close/reopen and reload: new snapshots must default off.
+3. Generate a large combined export. Test scrolling, selection, Ctrl+C/Cmd+C, Previous/Next and saving all parts. Reconstruct in reverse order and compare counts/distributions with reports. Missing/duplicate/mixed/edited parts must fail. A truncation warning blocks Select text; do not manually copy rejected content.
+4. Generate, then gather/craft while the window stays open. Parts must remain from the original snapshot until regeneration. Do not mix Generate actions or scope/identity changes. Accidental typing should restore the generated part.
+5. Compare characters with unequal sample sizes. Combined rates must sum eligible counts, not percentages. Check excluded-material policies, zero-hit groups and partial quantities separately from complete-source outcomes.
+6. Check action/production first observations, unresolved results and matched operations. Acquisition start timestamps remain unknown. Old spots must not become guessed counters. No uninterrupted coverage or server probability claims.
+7. Close and verify buffer/focus clearing. Export must not seal collectors, change history, add spots, scan bank or alter recording settings. Unsupported future schemas remain unavailable without breaking identity export.
+8. Verify Escape, dragging, key handling and layout. The reader checks transport/version/selection; independently assess statistical accuracy through the collection checklists.
+
+## Validate catalogue corrections on the current build
+
+1. Confirm actual GetBuildInfo. Installation metadata captured build 70862; the recipe mirror has no extraction build. Version/interface acceptance is not full catalogue certification.
+2. Enable core and Fishing with Alchemy/Cooking disabled. Check 6358, 6359, 6522, 13422, 13755, 13888 and 13893: counts and consuming uses must remain. Enable consuming modules and confirm no duplicate counts or examples.
+3. Fish supported materials and inspect history/source controls. Outdoor observations may create maps; instance catches may contribute to history but never instance map positions. Retain the earlier Fishing event-order gate.
+4. Collect exact-build recipe/profession/material evidence separately from membership. Preserve unresolved IDs and review associations rather than deleting by inference. Follow book-catalogue-reconciliation.md for provenance and regeneration.
+
+## Faction-aware flight points, local candidate
+
+1. The updated 0.4.1-alpha candidate was installed on 2026-11-07, including this feature. Restart WoW to load it; close the client before subsequent replacements. Keep Titan Panel enabled and disable the previous addon generation.
+2. Open the Titan menu, Flight points, and enable Show flight points. Disable gathering markers and profession addons to confirm flight points work independently.
+3. On an Alliance character, browse a zone with known Alliance, Horde and neutral flight masters. Only Alliance and neutral addon markers should appear. Repeat on Horde, including a character with different discovered routes. No discovery status should carry between characters.
+4. Confirm all exposed undiscovered locations remain visible. With default appearance settings, flight markers retain native artwork without added borders; discovery status is shown in tooltip text. Hover a marker to verify its name, faction and explicit status. Compare several locations and discoveries with the client flight map. Native markers should not receive a duplicate addon icon; applied flight appearance settings may change their size, shape and optional outline; their usual click behavior should remain functional.
+5. Discover a new route and open/close its taxi map. The world-map discovery tooltip should update without a reload. Change zones/maps, zoom and resize the map; verify icon alignment and visibility. Check that empty maps do not retain markers from another map.
+6. Turn Show flight points off: addon icons and tooltip additions disappear, while ordinary Blizzard flight markers retain their standard behavior. Reload and confirm the toggle persists. Reenable and verify the faction/discovery filter again.
+7. Record missing locations, wrong factions, incorrect discovery status, appearance mismatches or Lua errors with character faction, map name/ID and client build. The live API supplies the locations; an empty response is not proof the map has no flight masters. No static all-world completeness claim is made.
+
+## Exact map positions and image transparency correction
+
+The screenshot report showed a row of co-located material images over large joined gold discs. The previous renderer deliberately displaced equal-coordinate pins and added filled circular rims plus multiple shadows. Both were removed for gathering markers. World-map and minimap positions now use only the recorded/projected coordinates; nearby markers are not spread into a row. Existing saved observations and counts are preserved.
+
+1. Repeatedly gather at the same position, including drops of different supported materials. Check the world map and minimap: marker centers should stay at the saved/projected position as counts increase. No artificial horizontal separation should appear.
+2. Browse a dense area at several zoom levels. Gathering markers should have no addon-created gold plates, background fills or shadow halos. With default settings their images have a circular alpha crop with transparent corners; Full image disables this crop. Source alpha inside the circle remains transparent.
+3. Overlapping markers can obscure each other. This is intentional under the exact-location requirement; do not add offsets to make each image visible. Use the existing material visibility filters when inspecting one material.
+4. With default settings, verify flight markers have no addon outline or background. An explicitly enabled Thin gold outline should follow the chosen shape without a filled center. Their discovered/undiscovered/unknown status remains in the tooltip. Check the native marker's click/tooltip behavior as well.
+5. Distinguish native artwork from addon decoration: an opaque background baked into a source item image remains opaque. Renderer changes do not create background-free cutouts. The user confirmed retaining WoW's existing images without addon borders; no replacement artwork is part of this correction.
+
+This correction was installed into live WoW on 2026-11-07. Restart WoW to load the updated files, keep the screenshot as the before state and repeat these checks. Close the client before subsequent replacements.
+
+## Icon appearance window
+
+1. Open `/tgf icons`, or Titan menu > Icon appearance. Confirm a compact draggable window with World map, Minimap and Flights selectors and sample previews. Opening the window must not change map appearance.
+2. Select World map. Increase size, choose Full image and optionally Thin gold border. The sample should show all source artwork. Select Circle and confirm the corners are cropped rather than assuming a larger circle can show a square image in full.
+3. Click Apply. Open the world map and verify image size/shape/outline immediately changes without moving icon centers or restoring the former horizontal separation. Minimap settings remain independent. Enabling an outline must never add a filled backdrop.
+4. Change the draft again, then Cancel or close with the window button/Escape. Reopen and confirm only the last applied settings remain. Reset group should restore only that draft group until Apply is clicked.
+5. Configure large Full image minimap markers. Walk near the map's edge and check that no image corners or outline extend outside its circular boundary. Rotate and zoom the minimap and verify positions remain correct.
+6. Change flight size/shape/outline, Apply, and compare native and addon-created flight points. Confirm native clicks still work, discovery tooltips remain correct, and faction filtering is unchanged. Disable flight points: native markers should return to their normal scale/shape, while addon-created markers disappear. Reenable and change displayed maps to exercise pooled native pins.
+7. Reload and verify all applied groups persist. Test with only the shared core and Titan, without profession modules; the window and flight controls should still open. Confirm no material/history/action/export data changes from appearance editing.
+
+Default material appearance remains 14 px, Circle and no border; flight sample/default addon markers are 18 px, Full image and no border. Native flight markers retain standard styling until appearance settings are applied. Alpha outline assets are 32-bit TGA with transparent centers; no item artwork is replaced. Live UI/native-provider behavior still requires this acceptance pass.
+
+## Mining vein marker identity
+
+1. Mine a vein yielding ore plus stone and/or a gem. Take the loot in different orders. The map should show the primary ore at the recorded position, not a stone/gem covering it. Repeated gathers should update that ore marker without adding byproduct icons there.
+2. Check lifetime quantities and source rates for every output. Stones and gems must still be counted; marker choice must not remove them from history or observations.
+3. Take only stone, leaving ore unclaimed, then close loot. Do not create an invented ore marker from that partial receipt. Reopen and take the actual ore; it should create the proper ore pin while preserving the earlier stone quantity.
+4. Existing legacy byproduct pins within the established merge radius of a recorded primary ore are hidden from world/minimap display. They remain in saved data and clear/count operations. A standalone old pin is retained when there is no ore evidence nearby. Do not silently relabel it to a guessed ore.
+5. Ordinary material Loot locations remain supported, including mining reagents obtained outside a confirmed mining cast. Known scarce mining resources retain their existing fallback priority when no primary ore is observed. Appearance settings, faction-aware flights and marker coordinates are unchanged.

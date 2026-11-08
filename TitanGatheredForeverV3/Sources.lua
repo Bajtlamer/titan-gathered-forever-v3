@@ -81,6 +81,20 @@ function Sources.SettingsChanged()
     Sources.recordingSignature=signature
 end
 
+local function miningMarker(items)
+    local module = ns.Catalog.modules.Mining
+    local resources = module and module.gatheringResources or {}
+    local chosen, priority
+    for id, quantity in pairs(items) do
+        local rank = resources[id]
+        if type(rank) == 'number' and rank >= 0 and rank < math.huge and type(quantity) == 'number' and quantity > 0
+            and (not chosen or rank < priority or (rank == priority and id < chosen)) then
+            chosen, priority = id, rank
+        end
+    end
+    return chosen
+end
+
 function Sources.Record(e)
     local character=ns.characterID or UnitGUID('player')
     if Sources.Track(e.kind)then
@@ -108,6 +122,9 @@ function Sources.Record(e)
     local inside, context = IsInInstance()
     local outdoor = ns.IsPublic(inside) and ns.IsPublic(context) and inside == false and context == 'none'
     if outdoor and e.kind~='Enchanting'and e.mapID and e.mapID>0 and e.x and e.y then
+        -- Keep every output in history, but give a mining source one resource
+        -- marker. Otherwise stones/gems can cover the ore at the same point.
+        local miningItem = e.kind == 'Mining' and miningMarker(e.items)
         for id in pairs(e.items)do
             if e.kind=='Loot'then
                 local matched=false
@@ -116,7 +133,8 @@ function Sources.Record(e)
                     if module and module.items[id]and Sources.Enabled(m.id)and not(e.suppressMaps and e.suppressMaps[m.id])then ns.gathering:Record(m.id,id,e);matched=true end
                 end
                 if not matched and not ns.Catalog.Get(id)and Sources.Enabled('Rare')and not(e.suppressMaps and e.suppressMaps.Rare)then ns.gathering:Record('Rare',id,e)end
-            elseif Sources.Enabled(e.kind)and not(e.suppressMaps and e.suppressMaps[e.kind])then ns.gathering:Record(e.kind,id,e)end
+            elseif Sources.Enabled(e.kind)and (e.kind~='Mining'or id==miningItem)
+                and not(e.suppressMaps and e.suppressMaps[e.kind])then ns.gathering:Record(e.kind,id,e)end
         end
     end
     ns.Map.Update();ns.Minimap.Update()

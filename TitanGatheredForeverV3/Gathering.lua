@@ -194,8 +194,23 @@ function Gathering:List(mapID)
     local result = {}
     local nodes = self.saved.maps[mapID]
     if type(nodes) ~= 'table' then return result end
+    local mining = self.resources('Mining') or {}
+    local ores = {}
     for _, node in ipairs(nodes) do
-        if validNode(node) and node.mapID == mapID and self.enabled(node.kind, node.itemID) then result[#result + 1] = node end
+        if validNode(node) and node.mapID == mapID and node.kind == 'Mining' and mining[node.itemID] == 0 then
+            ores[#ores + 1] = node
+        end
+    end
+    for _, node in ipairs(nodes) do
+        local covered = false
+        if validNode(node) and node.mapID == mapID and node.kind == 'Mining' and mining[node.itemID] ~= 0 then
+            for _, ore in ipairs(ores) do
+                if (ore.x - node.x)^2 + (ore.y - node.y)^2 <= 0.0025^2 then covered = true; break end
+            end
+        end
+        -- Older candidates saved every mining drop. Prefer a recorded ore at
+        -- that spot without deleting byproduct observations or guessing ore.
+        if not covered and validNode(node) and node.mapID == mapID and self.enabled(node.kind, node.itemID) then result[#result + 1] = node end
         if #result == 500 then break end
     end
     return result

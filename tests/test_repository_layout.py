@@ -32,6 +32,6 @@ class RepositoryLayoutTests(unittest.TestCase):
                         if line.strip() and not line.startswith('#')}
             expected.add(manifest.name)
             if addon == CORE:
-                expected.add('Artwork/TitanOre.tga')
+                expected.update({'Artwork/TitanOre.tga', 'Artwork/PinOutlineCircle.tga', 'Artwork/PinOutlineSquare.tga'})
             actual = {p.relative_to(addon).as_posix() for p in addon.rglob('*') if p.is_file()}
             self.assertEqual(actual, expected, name)

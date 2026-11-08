@@ -46,4 +46,42 @@ test('history profession filters include observed uncatalogued outputs',function
  ns.history:Observe('a','Alice',{id='fish',kind='Fishing',source='catch',mapID=1,at=101,complete=true,items={[6291]=1}})
  local rows=ns.Reports.Rows('history','a','Fishing');eq(#rows,1);eq(rows[1].itemID,6291)
 end)
+test('actions report shows coverage and counts without item interactions',function()
+ assert(loadfile('TitanGatheredForeverV3/Actions.lua'))('TGF v3',ns)
+ local character='a'
+ ns.actions=ns.Actions.New({}, {Character=function()return character end,Name=function()return character end,
+  Timestamp=function()return 100 end,Now=function()return 100 end,Enabled=function()return true end})
+ ns.actions:Cast('UNIT_SPELLCAST_SUCCEEDED','player','one',13262)
+ character='b';ns.actions:Cast('UNIT_SPELLCAST_FAILED','player','two',13262)
+ ns.Reports.Show('actions');local w=ns.Reports.windows.actions;assert(w and w:IsShown())
+ assert(w.rows[1].name.text:find('Disenchanting',1,true));assert(w.rows[1].detail.text:find('1 attempts',1,true))
+ assert(w.rows[1].detail.text:find('1 completed',1,true));assert(w.rows[1].detail.text:find('Recording began',1,true))
+ GameTooltip.item=nil;w.rows[1].scripts.OnEnter(w.rows[1]);eq(GameTooltip.item,nil)
+ w.scope.scripts.OnClick();assert(w.rows[1].detail.text:find('2 attempts',1,true))
+ assert(w.rows[1].detail.text:find('1 failed',1,true))
+ w.filter='Cooking';ns.Reports.Update(w);eq(w.rows[1]:IsShown(),false)
+end)
+test('production report distinguishes completions matched results and explicit flag denominators',function()
+ assert(loadfile('TitanGatheredForeverV3/Production.lua'))('TGF v3',ns)
+ ns.production=ns.Production.New({}, {Character=function()return'a'end,Name=function()return'A'end,
+  Timestamp=function()return 100 end,Now=function()return 100 end,Enabled=function()return true end,Public=function()return true end,
+  Recipe=function(id)return{recipeID=id,name='Cook '..id,kind='Cooking',outputItemID=2680,outputIDs={[2680]=true}}end})
+ for i=1,6 do
+  ns.production:Cast('UNIT_SPELLCAST_START','player','c'..i,2500+i)
+  ns.production:Cast('UNIT_SPELLCAST_SUCCEEDED','player','c'..i,2500+i)
+  ns.production:Result({operationID=i,itemID=2680,itemGUID='Item-output',quantity=2,firstCraftReward=false,isEnchant=false,bonusCraft=false,multicraft=0})
+ end
+ ns.Reports.Show('production');local w=ns.Reports.windows.production;assert(w and w:IsShown());eq(#w.rows,5)
+ assert(w.rows[1].name.text:find('Cook 2501',1,true));assert(w.rows[1].detail.text:find('1 completed',1,true))
+ assert(w.rows[1].detail.text:find('1 matched',1,true));assert(w.rows[1].detail.text:find('0 / 1',1,true))
+ w.page=2;ns.Reports.Update(w);assert(w.rows[1].name.text:find('Cook 2506',1,true));eq(w.rows[2]:IsShown(),false)
+ local titles={};MenuUtil={CreateContextMenu=function(_,fn)
+  local menu={CreateTitle=function(_,v)titles[#titles+1]=v end,SetScrollMode=function()end};fn({},menu)
+ end}
+ w.rows[1].scripts.OnClick(w.rows[1]);local found=false
+ for _,v in ipairs(titles)do if v:find('2 items in 1 operations',1,true)then found=true end end;assert(found)
+ local rows=ns.Reports.Rows('history','a','Cooking');local output
+ for _,r in ipairs(rows)do if r.itemID==2680 then output=r end end
+ assert(output);eq(output.quantity,0);eq(output.crafted,12)
+end)
 print('PASS '..passed..' history/report window checks')

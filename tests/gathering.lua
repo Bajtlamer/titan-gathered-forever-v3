@@ -201,4 +201,11 @@ test('clear cancels a matching pending gather and persists the removal', functio
     eq(c:Clear(1, 'Mining'), 1); eq(c.cast, nil)
     local restored = fixture(c.saved); eq(#restored:List(1), 0)
 end)
+test('legacy co-located mining byproducts do not cover recorded ore and saved data remains intact',function()
+    local function point(id,x)return{mapID=1,x=x,y=.6,kind='Mining',itemID=id,count=1,lastSeen=100}end
+    local saved={maps={[1]={point(2770,.4),point(2835,.4001),point(1210,.4),point(249391,.4),point(2835,.7)}}}
+    local c=fixture(saved);local nodes=c:List(1)
+    eq(#nodes,2);eq(nodes[1].itemID,2770);eq(nodes[2].itemID,2835);eq(nodes[2].x,.7)
+    eq(#saved.maps[1],5);eq(c:Count(1,'Mining'),5)
+end)
 print('PASS ' .. passed .. ' gathering observation tests')

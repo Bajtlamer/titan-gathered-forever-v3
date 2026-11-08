@@ -8,6 +8,7 @@ function ns.Settings.Initialize(saved)
     if type(settings.showZero) ~= 'boolean' then settings.showZero = false end
     if type(settings.showBank) ~= 'boolean' then settings.showBank = true end
     if type(settings.debugMode) ~= 'boolean' then settings.debugMode = false end
+    if type(settings.flightPoints) ~= 'boolean' then settings.flightPoints = true end
     settings.showTotal = nil
     if type(settings.itemTooltips) ~= 'boolean' then settings.itemTooltips = true end
     if type(settings.categories) ~= 'table' then settings.categories = {} end
@@ -15,6 +16,10 @@ function ns.Settings.Initialize(saved)
         if type(settings[key]) ~= 'boolean' then settings[key] = true end
     end
     if type(settings.recordHistory) ~= 'boolean' then settings.recordHistory = true end
+    if type(settings.recordActions) ~= 'boolean' then settings.recordActions = true end
+    if type(settings.recordProduction) ~= 'boolean' then settings.recordProduction = true end
+    if type(settings.productionProfessions) ~= 'table' then settings.productionProfessions = {} end
+    if type(settings.actionProfessions) ~= 'table' then settings.actionProfessions = {} end
     if type(settings.recordRare) ~= 'boolean' then settings.recordRare = true end
     if type(settings.historyTooltips) ~= 'boolean' then settings.historyTooltips = true end
     if type(settings.mapProfessions) ~= 'table' then settings.mapProfessions = {} end
@@ -35,5 +40,7 @@ function ns.Settings.Initialize(saved)
     if type(saved.characters) ~= 'table' then saved.characters = {} end
     if type(saved.gathering) ~= 'table' then saved.gathering = {} end
     if type(saved.history) ~= 'table' then saved.history = {} end
+    if type(saved.actions) ~= 'table' then saved.actions = {} end
+    if type(saved.production) ~= 'table' then saved.production = {} end
     return saved, settings
 end
