@@ -3,6 +3,31 @@ local History = {}; History.__index = History; ns.History = History
 
 function History.New(saved)
     if type(saved.characters) ~= 'table' then saved.characters = {} end
+    for _,c in pairs(saved.characters)do
+        local known
+        for itemID,item in pairs(c.items or {})do
+            if item.acquisitions==nil then
+                if not known then
+                    known={}
+                    for _,group in pairs(c.groups or {})do
+                        for id,output in pairs(group.items or {})do known[id]=(known[id]or 0)+(output.hits or 0)end
+                    end
+                    -- Complete valid receipts are already counted in hits.
+                    -- Retained partial/invalidated receipts are additional
+                    -- known sources, but expired old partials are unknowable.
+                    for _,receipt in pairs(c.recent or {})do
+                        if not receipt.complete or receipt.scopeChanged then
+                            for id,quantity in pairs(receipt.items or {})do
+                                if quantity>0 then known[id]=(known[id]or 0)+1 end
+                            end
+                        end
+                    end
+                end
+                item.acquisitions=known[itemID]or 0
+                item.acquisitionsIncomplete=(item.quantity or 0)>0
+            end
+        end
+    end
     return setmetatable({ saved = saved, revision = 0 }, History)
 end
 
@@ -33,7 +58,8 @@ function History:Observe(character, name, e)
     g.trialScopes = g.trialScopes or { all=g.trials }
     for itemID, quantity in pairs(e.items) do
         if type(itemID)=='number' and itemID>0 and type(quantity)=='number' and quantity>0 then
-            local item = c.items[itemID] or { quantity=0 }; c.items[itemID]=item
+            local item = c.items[itemID] or { quantity=0, acquisitions=0, acquisitionsIncomplete=false }; c.items[itemID]=item
+            if not receipt.items[itemID] then item.acquisitions=item.acquisitions+1 end
             item.quantity, item.lastSeen, item.mapID, item.x, item.y = item.quantity+quantity, e.at, e.mapID, e.x, e.y
             local output = g.items[itemID] or { hits=0, quantity=0 }; g.items[itemID]=output
             output.quality = (e.qualities and e.qualities[itemID]) or output.quality
@@ -64,8 +90,10 @@ function History:Totals(character)
     for id,c in pairs(self.saved.characters) do
         if not character or character==id then
             for itemID,item in pairs(c.items) do
-                local row=items[itemID] or { itemID=itemID, quantity=0, lastSeen=0 }; items[itemID]=row
+                local row=items[itemID] or { itemID=itemID, quantity=0, acquisitions=0, acquisitionsIncomplete=false, lastSeen=0 }; items[itemID]=row
                 row.quantity=row.quantity+item.quantity
+                row.acquisitions=row.acquisitions+item.acquisitions
+                row.acquisitionsIncomplete=row.acquisitionsIncomplete or item.acquisitionsIncomplete==true
                 if (item.lastSeen or 0)>=row.lastSeen then
                     row.lastSeen,row.mapID,row.x,row.y=item.lastSeen or 0,item.mapID,item.x,item.y
                 end

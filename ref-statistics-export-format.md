@@ -52,7 +52,7 @@ Objects and record arrays are deterministic. Empty lists use [], not {}. Strings
 
 history.status is available or unavailable. startTimestampRecorded is false because the acquisition model does not retain a trustworthy first-observed time. Last observation is never substituted for measurement start.
 
-items contains itemID, acquired quantity and optional lastSeen. Acquired quantities include partial loot and exclude separately recorded crafted output and current holdings.
+items contains itemID, acquired quantity and optional lastSeen. Acquired quantities include partial loot and exclude separately recorded crafted output and current holdings. New acquired-item records also contain acquisitions (one occurrence per item per observed source receipt, including partial loot) and acquisitionsIncomplete. When true, acquisitions is a lower bound: migration recovered completed-source item hits and positive-item receipts still retained outside complete valid samples, but older expired partial receipts cannot be reconstructed. A zero incomplete count means unknown occurrence history, not proof the item was never obtained. Combined occurrence totals sum characters and retain any incomplete flag. Older exports omit these additive schema-1 fields; absence means occurrence coverage is unavailable. Production item totals do not use these acquired-source fields.
 
 sourceGroups retains all groups, including zero-hit/zero-complete-source observations. Each contains an export-local ref, kind, normalized source, mapID, instanceType, completeSources, optional lastSeen, trialPolicies and outcomes.
 

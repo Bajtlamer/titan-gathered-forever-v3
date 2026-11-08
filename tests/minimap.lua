@@ -121,4 +121,15 @@ test('large square corners and enabled outlines do not cross the circular minima
     ns.Minimap.instance:Refresh();assert(ns.Minimap.instance.visibleCount==0,'Outline overflows the minimap')
     ns.settings.iconAppearance=nil
 end)
+test('outdoor PvP markers render and provide a tooltip without an item ID',function()
+    state.x,state.y,state.radius,state.rotate=.5,.5,100,false
+    nodes={{mapID=1412,x=.501,y=.5,kind='PvP',count=3,honorEstimate=60,lastSeen=100}}
+    ns.settings.iconAppearance=nil;ns.Minimap.instance:Refresh()
+    local pin=assert(ns.Minimap.instance.pins[1]);assert(pin.shown)
+    assert(pin.icon=='Interface\\Icons\\INV_Sword_04')
+    local lines={};GameTooltip.AddLine=function(_,line)lines[#lines+1]=line end
+    pin.scripts.OnEnter(pin)
+    local count=false;for _,line in ipairs(lines)do if line:find('3 honorable kills',1,true)then count=true end end
+    assert(count,'PvP minimap tooltip omitted its total')
+end)
 print('PASS ' .. passed .. ' minimap icon projection, rotation, zoom, reuse and toggle checks')

@@ -115,6 +115,9 @@ function ns.UpdateGathering()
     end
     if ns.settings.recordProduction then frame:RegisterEvent('TRADE_SKILL_ITEM_CRAFTED_RESULT')
     else frame:UnregisterEvent('TRADE_SKILL_ITEM_CRAFTED_RESULT') end
+    for _,event in ipairs({'CHAT_MSG_COMBAT_HONOR_GAIN','PLAYER_DEAD','PLAYER_PVP_KILLS_CHANGED','PLAYER_PVP_RANK_CHANGED'})do
+        frame:RegisterEvent(event)
+    end
     ns.Map.Attach()
     ns.Map.Update()
     ns.Minimap.Attach()
@@ -207,6 +210,28 @@ local function start()
         Timestamp=time, Now=GetTime, Enabled=ns.Production.Enabled, Public=ns.IsPublic,
         Recipe=ns.Production.Recipe, Changed=function() ns.Reports.Refresh() end,
     })
+    local pvpAPI=gatheringAPI()
+    pvpAPI.Character=function()return ns.characterID end
+    pvpAPI.Name=function()return UnitName and UnitName('player')or ns.characterID end
+    pvpAPI.LifetimeStats=function()
+        if not GetPVPLifetimeStats then return end
+        local honorableKills,highestRank=GetPVPLifetimeStats()
+        return honorableKills,highestRank
+    end
+    pvpAPI.RankName=function(rank)
+        if not GetPVPRankInfo then return end
+        return GetPVPRankInfo(rank,'player')
+    end
+    pvpAPI.CurrentRank=function()
+        if not UnitPVPRank then return end
+        local rank=UnitPVPRank('player')
+        if type(rank)~='number' then return end
+        local name
+        if GetPVPRankInfo then name=GetPVPRankInfo(rank,'player') end
+        return rank,type(name)=='string' and name or nil
+    end
+    pvpAPI.Changed=function()ns.Reports.Refresh()end
+    ns.pvp=ns.PvP.New(ns.db.pvp,pvpAPI)
     local observationAPI = gatheringAPI()
     local outdoor = observationAPI.CanRecord
     observationAPI.CanRecord = function(kind) return ns.Sources.Track(kind) or outdoor(kind) end
@@ -272,7 +297,7 @@ local function start()
             ns.Titan.page = math.max(1, ns.Titan.page + (command == 'next' and 1 or -1))
             ns.Titan.Refresh(); return
         end
-        if command == 'history' or command == 'chances' or command == 'actions' or command == 'production' then ns.Reports.Show(command); return end
+        if command == 'history' or command == 'chances' or command == 'actions' or command == 'production' or command == 'pvp' then ns.Reports.Show(command); return end
         if command == 'settings' then ns.Titan.Menu(UIParent); return end
         local help = 'Commands: /tgf settings, /tgf icons, /tgf refresh, /tgf next, /tgf prev, /tgf history, /tgf chances, /tgf actions, /tgf production, /tgf recipe <recipeID> [operations], /tgf export, /tgf status.'
         if command ~= 'status' and not ns.settings.debugMode then ns.Print(help); return end
@@ -310,6 +335,35 @@ frame:SetScript('OnEvent', function(_, event, ...)
     if event == 'PLAYER_LOGIN' then start(); return end
     if not ns.inventory then return end
     if event=='TRADE_SKILL_DATA_SOURCE_CHANGING'or event=='TRADE_SKILL_CLOSE'or event=='PLAYER_LEAVING_WORLD'then ns.Crafting.Select(nil)end
+    if event=='CHAT_MSG_COMBAT_HONOR_GAIN'then
+        local args={...};local message=args[1]
+        local inside,instanceType=IsInInstance()
+        local position
+        if inside==false and instanceType=='none'then position=gatheringAPI().Position()end
+        local lineID=args[11]
+        local observation={context=inside==false and instanceType=='none'and'none'or instanceType,
+            eventToken=ns.IsPublic(lineID)and tostring(lineID)or nil}
+        if position then observation.mapID,observation.x,observation.y=position.mapID,position.x,position.y end
+        local result=ns.pvp:HonorMessage(message,observation)
+        if result and result.position then
+            ns.gathering:RecordPvP(result.position,result.estimatedHonor)
+            ns.Map.Update();ns.Minimap.Update()
+        end
+        ns.Reports.Refresh();return
+    elseif event=='PLAYER_DEAD'then
+        local recap=C_DeathRecap
+        if recap and recap.GetRecapEvents then
+            local ok,events=pcall(recap.GetRecapEvents)
+            if ok then
+                local _,instanceType=IsInInstance()
+                ns.pvpDeathSerial=(ns.pvpDeathSerial or 0)+1
+                if ns.pvp:DeathRecap(events,instanceType,tostring(ns.pvpDeathSerial))then ns.Reports.Refresh()end
+            end
+        end
+        return
+    elseif event=='PLAYER_PVP_KILLS_CHANGED'or event=='PLAYER_PVP_RANK_CHANGED'then
+        ns.Reports.Refresh();return
+    end
     if event:match('^UNIT_SPELLCAST_') then
         local unit, castGUID, spellID = ...
         if ns.IsPublic(unit) and ns.IsPublic(castGUID) and ns.IsPublic(spellID) then

@@ -128,10 +128,10 @@ function Gathering:Finalize()
 end
 
 local mapKinds = { Mining=true, Herbs=true, Skinning=true, Fishing=true, Cooking=true, Alchemy=true,
-    Blacksmithing=true, Engineering=true, FirstAid=true, Leatherworking=true, Tailoring=true, Rare=true }
+    Blacksmithing=true, Engineering=true, FirstAid=true, Leatherworking=true, Tailoring=true, Rare=true, PvP=true }
 local function validNode(node)
     return positionValid(node) and mapKinds[node.kind]
-        and type(node.itemID) == 'number' and node.itemID > 0 and node.itemID == math.floor(node.itemID)
+        and (node.kind=='PvP'or(type(node.itemID) == 'number' and node.itemID > 0 and node.itemID == math.floor(node.itemID)))
         and type(node.count) == 'number' and node.count > 0 and type(node.lastSeen) == 'number'
 end
 
@@ -188,6 +188,34 @@ function Gathering:Record(kind, itemID, position)
                           kind = kind, itemID = itemID, count = 1, lastSeen = self.api.Timestamp() }
     self:Status('recorded ' .. kind .. ' item ' .. itemID .. ' on map ' .. position.mapID)
     if self.changed then self.changed() end
+end
+
+function Gathering:RecordPvP(position,honorEstimate)
+    if not positionValid(position)then return false end
+    local nodes=self.saved.maps[position.mapID]
+    if type(nodes)~='table'then nodes={};self.saved.maps[position.mapID]=nodes end
+    for index=#nodes,1,-1 do
+        if not validNode(nodes[index])or nodes[index].mapID~=position.mapID then table.remove(nodes,index)end
+    end
+    for _,node in ipairs(nodes)do
+        if node.kind=='PvP'and(node.x-position.x)^2+(node.y-position.y)^2<=0.0025^2 then
+            node.count=node.count+1;node.lastSeen=self.api.Timestamp()
+            if type(honorEstimate)=='number'and honorEstimate>=0 and honorEstimate<math.huge then
+                node.honorEstimate=(node.honorEstimate or 0)+honorEstimate
+            end
+            if self.changed then self.changed()end
+            return true
+        end
+    end
+    while #nodes>=500 do
+        local oldest=1
+        for index,node in ipairs(nodes)do if(node.lastSeen or 0)<(nodes[oldest].lastSeen or 0)then oldest=index end end
+        table.remove(nodes,oldest)
+    end
+    nodes[#nodes+1]={mapID=position.mapID,x=position.x,y=position.y,kind='PvP',count=1,lastSeen=self.api.Timestamp(),
+        honorEstimate=type(honorEstimate)=='number'and honorEstimate>=0 and honorEstimate<math.huge and honorEstimate or 0}
+    if self.changed then self.changed()end
+    return true
 end
 
 function Gathering:List(mapID)

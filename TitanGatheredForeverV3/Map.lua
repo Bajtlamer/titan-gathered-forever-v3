@@ -57,7 +57,8 @@ function Map:Nodes(mapID)
                     local x, y = left + node.x * (right - left), top + node.y * (bottom - top)
                     if x >= 0 and x <= 1 and y >= 0 and y <= 1 then
                         result[#result + 1] = { x = x, y = y, itemID = node.itemID, kind = node.kind, mapID = sourceMap,
-                            count = node.count, sourceX = node.x, sourceY = node.y }
+                            count = node.count, honorEstimate = node.honorEstimate, lastSeen = node.lastSeen,
+                            sourceX = node.x, sourceY = node.y }
                         if #result >= 500 then return result end
                     end
                 end
@@ -77,12 +78,24 @@ function Map:CreatePin()
     pin:SetScript('OnEnter', function(button)
         local node = button.node
         GameTooltip:SetOwner(button, 'ANCHOR_RIGHT')
-        GameTooltip:AddLine(ns.Style.ItemName(node.itemID))
-        GameTooltip:AddLine(ns.PinStyle.Label(node.kind))
-        GameTooltip:AddLine(string.format('Observed %d times near %.1f, %.1f', node.count,
-            (node.sourceX or node.x) * 100, (node.sourceY or node.y) * 100))
-        for _, line in ipairs(ns.PinStyle.HistoryLines(node)) do GameTooltip:AddLine(line) end
-        GameTooltip:AddLine('Recorded near your gathering position.')
+        if node.kind == 'PvP' then
+            GameTooltip:AddLine(ns.PinStyle.Label(node.kind))
+            GameTooltip:AddLine('Open-world PvP honorable kills')
+            GameTooltip:AddLine(string.format('%d honorable kills', node.count or 0))
+            if node.honorEstimate and node.honorEstimate > 0 then
+                GameTooltip:AddLine(string.format('Estimated honor: %d', node.honorEstimate))
+            end
+            GameTooltip:AddLine(string.format('Recorded near %.1f, %.1f',
+                (node.sourceX or node.x) * 100, (node.sourceY or node.y) * 100))
+            if node.lastSeen then GameTooltip:AddLine('Last seen: ' .. date('%Y-%m-%d %H:%M', node.lastSeen)) end
+        else
+            GameTooltip:AddLine(ns.Style.ItemName(node.itemID))
+            GameTooltip:AddLine(ns.PinStyle.Label(node.kind))
+            GameTooltip:AddLine(string.format('Observed %d times near %.1f, %.1f', node.count,
+                (node.sourceX or node.x) * 100, (node.sourceY or node.y) * 100))
+            for _, line in ipairs(ns.PinStyle.HistoryLines(node)) do GameTooltip:AddLine(line) end
+            GameTooltip:AddLine('Recorded near your gathering position.')
+        end
         GameTooltip:Show()
     end)
     pin:SetScript('OnLeave', function() GameTooltip:Hide() end)

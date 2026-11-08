@@ -8,7 +8,7 @@ local function contains(lines, needle)
 end
 
 local function fixture(interface, saved, noBroker, noModules)
-    local state = { timers = {}, frames = {}, requested = {}, clock = 100, menu = nil,
+    local state = { timers = {}, frames = {}, requested = {}, clock = 100, menu = nil, deathRecap = nil,
                     itemNames = { [2589] = 'Localized Cloth', [765] = 'Localized Herb' },
                     slots = {}, tabs = { { ID = 6 } }, bankReads = 0, skills = {},
                     loot = { { itemID = 2770, sources = { 'GameObject-0-1-2-3-1731-9', 1 } } },
@@ -59,6 +59,8 @@ local function fixture(interface, saved, noBroker, noModules)
     _G.GetTime = function() return state.clock end
     _G.IsFishingLoot = function() return state.fishing == true end
     _G.IsInInstance = function() return state.inInstance == true, state.instanceType or 'none' end
+    _G.C_DeathRecap={GetRecapEvents=function()return state.deathRecap end}
+    _G.COMBATLOG_HONORGAIN = '%s dies, honorable kill Rank: %s (Estimated Honor Points: %d)'
     _G.date = function(_, timestamp) return 'observed-' .. timestamp end
     _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS = 5
     _G.Enum = { BankType = { Character = 0 }, TooltipDataType = { Item = 0 }, BagIndex = { Characterbanktab = -2 } }
@@ -129,6 +131,8 @@ local function fixture(interface, saved, noBroker, noModules)
         function root:CreateCheckbox(label, selected, callback)
             root.checkboxes[plain(label)] = { selected = selected, callback = callback }
             root.paths[plain(label)] = table.concat(self.path, '/')
+            root.checkboxesByPath = root.checkboxesByPath or {}
+            root.checkboxesByPath[table.concat(self.path, '/') .. '/' .. plain(label)] = root.checkboxes[plain(label)]
             return self
         end
         function root:CreateRadio(label, selected, callback)
@@ -147,7 +151,7 @@ local function fixture(interface, saved, noBroker, noModules)
     end }
     local ns = {}
     for _, path in ipairs({ 'Localization/enUS.lua', 'Style.lua', 'Data/Metadata.lua', 'Catalog.lua',
-                            'Settings.lua', 'Professions.lua', 'Inventory.lua', 'Gathering.lua', 'History.lua', 'Actions.lua', 'Production.lua', 'Crafting.lua', 'Export.lua', 'Observations.lua', 'Sources.lua', 'PinStyle.lua', 'IconConfig.lua', 'FlightPaths.lua', 'Map.lua', 'Minimap.lua',
+                            'Settings.lua', 'Professions.lua', 'Inventory.lua', 'Gathering.lua', 'History.lua', 'Actions.lua', 'PvP.lua', 'Production.lua', 'Crafting.lua', 'Export.lua', 'Observations.lua', 'Sources.lua', 'PinStyle.lua', 'IconConfig.lua', 'FlightPaths.lua', 'Map.lua', 'Minimap.lua',
                             'Tooltips.lua', 'Reports.lua', 'CraftingView.lua', 'Titan.lua', 'Core.lua' }) do
         assert(loadfile('TitanGatheredForeverV3/' .. path))('TitanGatheredForeverV3', ns)
     end
@@ -196,6 +200,29 @@ test('initializes a Forever-only broker after player identity is ready', functio
     eq(ns.inventory:Get(2589).bags, 3)
     eq(ns.inventory:Get(2589).bankState, 'unknown')
     eq(s.broker.text, '0.1.0-alpha')
+end)
+
+test('honor-confirmed outdoor PvP creates a spot while BG awards only update PvP summary data',function()
+    local s,ns=fixture();s:Start()
+    local honor='Enemy dies, honorable kill Rank: Private (Estimated Honor Points: 42)'
+    s:Event('CHAT_MSG_COMBAT_HONOR_GAIN',honor,'','','','','','','','','','line-1')
+    local nodes=ns.gathering.saved.maps[1];eq(#nodes,1);eq(nodes[1].kind,'PvP');eq(nodes[1].itemID,nil)
+    eq(ns.pvp:Snapshot('Player-1-A').worldKills,1);eq(ns.pvp:Snapshot('Player-1-A').worldHonorEstimate,42)
+    s:Event('CHAT_MSG_COMBAT_HONOR_GAIN','You have been awarded 30 honor points.')
+    eq(#nodes,1);eq(ns.pvp:Snapshot('Player-1-A').worldKills,1)
+    s.inInstance=true;s.instanceType='pvp'
+    s:Event('CHAT_MSG_COMBAT_HONOR_GAIN',honor,'','','','','','','','','','line-2')
+    eq(#nodes,1);eq(ns.pvp:Snapshot('Player-1-A').worldKills,1)
+    eq(ns.pvp:Snapshot('Player-1-A').battlegroundKills,1)
+    eq(ns.pvp:Snapshot('Player-1-A').battlegroundHonorEstimate,42)
+    ns.settings.mapPvP=false;eq(ns.Sources.Enabled('PvP'),false)
+    ns.settings.mapPvP=true;eq(ns.Sources.Enabled('PvP'),true)
+    s.deathRecap={{{sourceName='Enemy',sourceFlags=0x00000440,overkill=3}}}
+    s:Event('PLAYER_DEAD')
+    eq(ns.pvp:Snapshot('Player-1-A').deaths.battleground,1)
+    s.deathRecap={{{sourceName='Wolf',sourceFlags=0x00000840,overkill=12}}}
+    s:Event('PLAYER_DEAD')
+    eq(ns.pvp:Snapshot('Player-1-A').deaths.total,1)
 end)
 
 test('rejects other client interfaces', function()
@@ -531,17 +558,76 @@ test('skinning-only addon records corpse materials and exposes persistent per-ma
     s.broker.OnClick({}, 'RightButton')
     assert(s.menu.checkboxes['Skinning spots'])
     s.menu.checkboxes['Light Leather'].callback()
-    eq(ns.settings.mapItems.Skinning[2318], false)
+    eq(ns.settings.mapItemVisibility[2318], false)
     eq(#ns.gathering:List(1), 1); eq(#ns.db.gathering.maps[1], 2)
     eq(ns.GatheringEnabled('Skinning'), true)
     s, ns = skinFixture(TitanGatheredForeverV3DB)
-    eq(ns.settings.mapItems.Skinning[2318], false); eq(#ns.gathering:List(1), 1)
+    eq(ns.settings.mapItemVisibility[2318], false); eq(#ns.gathering:List(1), 1)
     s.broker.OnClick({}, 'RightButton'); s.menu.buttons['Gathering map/Map materials/Skinning/Show all materials']()
     eq(#ns.gathering:List(1), 2)
     s.menu.buttons['Gathering map/Map materials/Skinning/Hide all materials'](); eq(#ns.gathering:List(1), 0)
     eq(#ns.db.gathering.maps[1], 2)
     s.menu.buttons['Gathering map/Map materials/Skinning/Show all materials'](); s.menu.checkboxes['Skinning spots'].callback()
     eq(#ns.gathering:List(1), 0); eq(ns.eventFrame.events.UNIT_SPELLCAST_SUCCEEDED, true) -- History remains active with map recording off.
+end)
+
+local function clothMenu(state, profession)
+    state.broker.OnClick({}, 'RightButton')
+    return state.menu.checkboxesByPath['Gathering map/Map materials/' .. profession .. '/Localized Cloth']
+end
+
+test('shared material checkboxes and bulk actions affect spots from either profession', function()
+    local s, ns = fixture(); s:Start()
+    ns.gathering:Record('FirstAid', 2589, { mapID=1, x=.1, y=.2 })
+    ns.gathering:Record('Tailoring', 2589, { mapID=1, x=.7, y=.8 })
+    ns.gathering:Record('Tailoring', 4306, { mapID=1, x=.3, y=.4 })
+    clothMenu(s, 'First Aid').callback()
+    eq(#ns.gathering:List(1), 1); eq(ns.gathering:List(1)[1].itemID, 4306)
+    eq(clothMenu(s, 'Tailoring').selected(), false)
+    clothMenu(s, 'Tailoring').callback()
+    eq(clothMenu(s, 'First Aid').selected(), true); eq(#ns.gathering:List(1), 3)
+    s.menu.buttons['Gathering map/Map materials/First Aid/Hide all materials']()
+    eq(#ns.gathering:List(1), 1); eq(clothMenu(s, 'Tailoring').selected(), false)
+    s.menu.buttons['Gathering map/Map materials/Tailoring/Show all materials']()
+    eq(#ns.gathering:List(1), 3)
+    s.menu.buttons['Gathering map/Map materials/Tailoring/Hide all materials']()
+    eq(#ns.gathering:List(1), 0)
+    s.menu.buttons['Gathering map/Map materials/First Aid/Show all materials']()
+    eq(#ns.gathering:List(1), 2)
+    eq(#ns.db.gathering.maps[1], 3)
+    ns.settings.mapProfessions.Tailoring = false
+    eq(#ns.gathering:List(1), 1); eq(ns.gathering:List(1)[1].kind, 'FirstAid')
+    ns.settings.mapProfessions.FirstAid = false
+    eq(#ns.gathering:List(1), 0)
+end)
+
+test('shared material migration preserves hidden choices and later edits across reloads', function()
+    local saved = { schema=1, settings={ mapItems={ FirstAid={[2589]=true}, Tailoring={[2589]=false} } } }
+    local s, ns = fixture(nil, saved); s:Start()
+    ns.gathering:Record('FirstAid', 2589, { mapID=1, x=.1, y=.2 })
+    ns.gathering:Record('Tailoring', 2589, { mapID=1, x=.7, y=.8 })
+    eq(#ns.gathering:List(1), 0)
+    eq(clothMenu(s, 'First Aid').selected(), false)
+    clothMenu(s, 'First Aid').callback()
+    eq(#ns.gathering:List(1), 2)
+    s, ns = fixture(nil, saved); s:Start()
+    eq(clothMenu(s, 'Tailoring').selected(), true); eq(#ns.gathering:List(1), 2)
+    clothMenu(s, 'Tailoring').callback()
+    s, ns = fixture(nil, saved); s:Start()
+    eq(clothMenu(s, 'First Aid').selected(), false); eq(#ns.gathering:List(1), 0)
+    eq(#ns.db.gathering.maps[1], 2)
+end)
+
+test('hidden shared materials still record observations and history for later display', function()
+    local s, ns = fixture(); s:Start()
+    clothMenu(s, 'Tailoring').callback()
+    s.loot = { { itemID=2589, sources={'Creature-0-1-2-3-123-55',2} } }
+    s:Event('LOOT_READY'); s:Event('LOOT_SLOT_CLEARED',1); s:Event('LOOT_CLOSED')
+    eq(#ns.gathering:List(1), 0)
+    eq(ns.history:Total(UnitGUID('player'),2589), 2)
+    eq(ns.gathering:Count(1,'FirstAid'), 1); eq(ns.gathering:Count(1,'Tailoring'), 1)
+    clothMenu(s, 'First Aid').callback()
+    eq(#ns.gathering:List(1), 2)
 end)
 
 test('runtime rejects dungeon and raid observations and clears pending gathers on zone transitions', function()

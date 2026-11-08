@@ -27,10 +27,12 @@ end
 local function location(row)
     return integer(row.mapID)and row.mapID or 0,contexts[row.instanceType]and row.instanceType or'unknown'
 end
-local function items(model,character)
+local function items(model,character,acquired)
     local rows=Export.Array()
     if model then for _,row in ipairs(model:Totals(character))do
-        rows[#rows+1]={itemID=row.itemID,quantity=row.quantity,lastSeen=row.lastSeen}
+        local item={itemID=row.itemID,quantity=row.quantity,lastSeen=row.lastSeen}
+        if acquired then item.acquisitions,item.acquisitionsIncomplete=row.acquisitions,row.acquisitionsIncomplete end
+        rows[#rows+1]=item
     end end
     return rows
 end
@@ -45,7 +47,7 @@ local function rates(model,character)
 end
 local function history(model,character,aggregate)
     local h={status=model and'available'or'unavailable',startTimestampRecorded=false,
-        items=items(model,character),rates=rates(model,character)}
+        items=items(model,character,true),rates=rates(model,character)}
     if aggregate then return h end
     h.policies,h.sourceGroups=Export.Array(),Export.Array()
     local c=model and model.saved.characters[character];if not c then return h end
@@ -94,6 +96,13 @@ local function feature(model,character,production)
         for _,field in ipairs(production and productionFields or actionFields)do r[field]=row[field]end
         if production then
             r.unresolved=row.attempts-row.completed-row.failed-row.interrupted;r.outputs=Export.Array()
+            r.reagentUse=Export.Array();r.reagentCoverageBegan=row.reagentCoverageBegan
+            r.reagentUnsupportedCasts=row.reagentUnsupportedCasts or 0
+            local reagentIDs={};for itemID in pairs(row.reagentUse or{})do reagentIDs[#reagentIDs+1]=itemID end
+            table.sort(reagentIDs)
+            for _,itemID in ipairs(reagentIDs)do
+                r.reagentUse[#r.reagentUse+1]={itemID=itemID,estimatedQuantity=row.reagentUse[itemID]}
+            end
             local ids={};for id in pairs(row.outputs)do ids[#ids+1]=id end;table.sort(ids)
             for _,id in ipairs(ids)do local output=row.outputs[id];local distribution=Export.Array()
                 local quantities={};for quantity,count in pairs(output.distribution)do if count>0 then quantities[#quantities+1]=quantity end end
@@ -124,11 +133,12 @@ function Export.Build(sources,options)
             catalogueSourceSHA256=sources.sourceSHA256},
         selection={scope=scope,includeIdentity=identity,characterCount=0},
         definitions={acquiredQuantities='Observed acquisitions, including partial loot; exclude crafted output and current inventory.',
+            acquisitionOccurrences='One per item per observed source receipt, including partial loot; acquisitionsIncomplete marks a lower bound reconstructed from older retained evidence, not a complete lifetime count.',
             sourceSamples='Complete observed loot sources; item denominators depend on recording policy.',
             sourceGroupQuantities='Quantities from complete eligible source samples; partial quantities exist only in acquired totals.',
             rates='Hits / eligible complete source samples, grouped by source, zone and instance context; not server probabilities.',
             actions='Observed profession actions; fishing completion requires a catch window, other completion means spell success.',
-            production='Observed enabled starts and cast results; matched output operations differ from completed casts.',
+            production='Observed enabled starts and cast results; matched output operations differ from completed casts. reagentUse estimates fixed required item reagents once per completed cast, excludes unsupported requirements and optional modifiers, and begins at reagentCoverageBegan; reagentUnsupportedCasts counts completed recipes whose required reagent use could not be estimated.',
             procs='Explicit readable bonus/multicraft flags; use their known-field denominators.',
             coverageIntervalsRecorded=false,historyIntroducedIn='0.4.0',
             coordinatesIncluded=false,rawReceiptsIncluded=false,inventoryIncluded=false},

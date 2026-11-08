@@ -28,6 +28,7 @@ local function frame(parent)
     return f
 end
 CreateFrame = function(_, _, parent) return frame(parent) end
+date = function(_, timestamp) return tostring(timestamp) end
 C_Item = { GetItemIconByID = function(id) return id + 1000 end }
 GameTooltip = { SetOwner = function() end, AddLine = function() end, Show = function() end, Hide = function() end }
 local ns = { settings = { gatheringMap = true }, IsPublic = function() return true end,
@@ -126,4 +127,13 @@ assert(skins[1].width*canvas:GetEffectiveScale()==28,'World-map appearance size 
 assert(skins[1].texture.mask==nil,'Full-image selection left the circular crop attached')
 assert(skins[1].x==500 and skins[1].y==-300,'Appearance changed a saved marker position')
 ns.settings.iconAppearance=nil
+points[#points+1]={mapID=1,x=.42,y=.61,kind='PvP',count=3,honorEstimate=60,lastSeen=200}
+world.mapID=1
+map:Refresh(true)
+assert(map.visibleCount==2 and map.pins[2].shown,'PvP kill node was not rendered on the world map')
+assert(map.pins[2].icon=='Interface\\Icons\\INV_Sword_04','PvP marker did not use a distinct weapon icon')
+local lines={};GameTooltip.AddLine=function(_,line)lines[#lines+1]=line end
+map.pins[2].scripts.OnEnter(map.pins[2])
+local found=false;for _,line in ipairs(lines)do if line:find('3 honorable kills',1,true)then found=true end end
+assert(found,'PvP marker tooltip omitted its count')
 print('PASS 15 map rendering, scaling, projection, lifecycle, reuse, toggle and gathering-material checks')

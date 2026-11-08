@@ -26,6 +26,7 @@ commands = [
     [runtime, 'tests/export.lua'],
     [runtime, 'tests/export_view.lua'],
     [runtime, 'tests/observations.lua'],
+    [runtime, 'tests/pvp.lua'],
     [runtime, 'tests/reports.lua'],
     [runtime, 'tests/map.lua'],
     [runtime, 'tests/flight_paths.lua'],

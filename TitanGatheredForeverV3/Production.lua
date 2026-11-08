@@ -41,7 +41,11 @@ function Production.Recipe(recipeID)
             if integer(id)then ids[id]=true end
         end
     end
-    return {recipeID=recipeID,kind=kind,name=info.name,outputItemID=schematic.outputItemID,outputIDs=ids}
+    local reagents,reagentsSupported
+    local craftingRecipe=ns.Crafting and ns.Crafting.Read(recipeID)
+    if craftingRecipe then reagents,reagentsSupported=ns.Crafting.FixedReagents(craftingRecipe)end
+    return {recipeID=recipeID,kind=kind,name=info.name,outputItemID=schematic.outputItemID,
+        outputIDs=ids,reagents=reagents,reagentsSupported=reagentsSupported==true}
 end
 function Production.Enabled(kind)
     local s=ns.settings
@@ -59,6 +63,7 @@ end
 function Production.New(saved,api)
     if not saved.schema then saved.schema=1 end
     if saved.schema==1 and type(saved.characters)~='table' then saved.characters={} end
+    if saved.schema==1 and not saved.reagentCoverageBegan then saved.reagentCoverageBegan=api.Timestamp()end
     local self=setmetatable({saved=saved,api=api,operations={},operationOrder={}},Production)
     self:Pause();return self
 end
@@ -82,18 +87,39 @@ function Production:Cast(event,unit,guid,recipeID)
         if not c then c={name=self.api.Name(),recipes={},items={},recent={},order={}};self.saved.characters[character]=c end
         local row=c.recipes[recipeID]
         if not row then
-            row={recipeID=recipeID,kind=recipe.kind,name=recipe.name,itemID=recipe.outputItemID,began=self.api.Timestamp(),outputs={}}
+            row={recipeID=recipeID,kind=recipe.kind,name=recipe.name,itemID=recipe.outputItemID,began=self.api.Timestamp(),
+                outputs={},reagentUse={},reagentUnsupportedCasts=0,reagentCoverageBegan=self.saved.reagentCoverageBegan}
             for _,key in ipairs(counters)do row[key]=0 end
             c.recipes[recipeID]=row
         end
-        receipt={recipeID=recipeID,kind=recipe.kind,outputIDs=recipe.outputIDs,at=self.api.Now(),timestamp=self.api.Timestamp(),pending={},seen={},outputs={}}
+        local reagentMap,reagentsSupported
+        if recipe.reagentsSupported==true and type(recipe.reagents)=='table' then
+            reagentMap={};reagentsSupported=true
+            for itemID,quantity in pairs(recipe.reagents)do
+                if not integer(itemID)or not integer(quantity)then reagentMap=nil;reagentsSupported=false;break end
+                reagentMap[itemID]=quantity
+            end
+            if not next(reagentMap or {})then reagentMap=nil;reagentsSupported=false end
+        end
+        receipt={recipeID=recipeID,kind=recipe.kind,outputIDs=recipe.outputIDs,reagents=reagentMap,
+            reagentsSupported=reagentsSupported==true,at=self.api.Now(),timestamp=self.api.Timestamp(),pending={},seen={},outputs={}}
         c.recent[guid]=receipt;c.order[#c.order+1]=guid;row.attempts=row.attempts+1
         if #c.order>1024 then c.recent[table.remove(c.order,1)]=nil end
     end
     if not self.api.Enabled(receipt.kind) then return end
     local row=c.recipes[recipeID];row.lastSeen=self.api.Timestamp()
     local outcome=outcomes[event]
-    if outcome and not receipt.outcome then receipt.outcome=outcome;row[outcome]=row[outcome]+1 end
+    if outcome and not receipt.outcome then
+        receipt.outcome=outcome;row[outcome]=row[outcome]+1
+        if outcome=='completed'then
+            if receipt.reagentsSupported then
+                for itemID,quantity in pairs(receipt.reagents)do
+                    row.reagentUse=row.reagentUse or{}
+                    row.reagentUse[itemID]=(row.reagentUse[itemID]or 0)+quantity
+                end
+            else row.reagentUnsupportedCasts=(row.reagentUnsupportedCasts or 0)+1 end
+        end
+    end
     if receipt.outcome=='completed' then self:Flush(c,receipt)
     elseif receipt.outcome then receipt.pending={} end
     self:Changed()
@@ -177,11 +203,19 @@ function Production:Rows(character)
         for recipeID,source in pairs(c.recipes)do
             local key=source.kind..':'..recipeID;local row=combined[key]
             if not row then
-                row={recipeID=recipeID,kind=source.kind,name=source.name,itemID=source.itemID,began=source.began,outputs={}}
+                row={recipeID=recipeID,kind=source.kind,name=source.name,itemID=source.itemID,began=source.began,
+                    outputs={},reagentUse={},reagentUnsupportedCasts=0,reagentCoverageBegan=source.reagentCoverageBegan}
                 for _,counter in ipairs(counters)do row[counter]=0 end;combined[key]=row
             end
             row.began=math.min(row.began,source.began)
             for _,counter in ipairs(counters)do row[counter]=row[counter]+source[counter]end
+            row.reagentUnsupportedCasts=row.reagentUnsupportedCasts+(source.reagentUnsupportedCasts or 0)
+            if source.reagentCoverageBegan then
+                row.reagentCoverageBegan=math.min(row.reagentCoverageBegan or source.reagentCoverageBegan,source.reagentCoverageBegan)
+            end
+            for itemID,quantity in pairs(source.reagentUse or{})do
+                row.reagentUse[itemID]=(row.reagentUse[itemID]or 0)+quantity
+            end
             for itemID,output in pairs(source.outputs)do
                 local t=row.outputs[itemID]or{quantity=0,hits=0,distribution={}};row.outputs[itemID]=t
                 t.quantity=t.quantity+output.quantity;t.hits=t.hits+output.hits
@@ -212,4 +246,26 @@ function Production:Total(character,itemID)
         if (not character or id==character)and c.items[itemID]then quantity=quantity+c.items[itemID].quantity end
     end
     return quantity
+end
+function Production:ReagentUsage(character)
+    local usage,unsupported={},0
+    for _,recipe in ipairs(self:Rows(character))do
+        unsupported=unsupported+(recipe.reagentUnsupportedCasts or 0)
+        for itemID,quantity in pairs(recipe.reagentUse or{})do
+            local row=usage[itemID]or{itemID=itemID,quantity=0,professions={},coverageBegan=self.saved.reagentCoverageBegan,incomplete=false}
+            usage[itemID]=row;row.quantity=row.quantity+quantity
+            row.professions[recipe.kind]=(row.professions[recipe.kind]or 0)+quantity
+        end
+    end
+    local rows={}
+    for _,row in pairs(usage)do
+        local leading,maximum
+        for kind,quantity in pairs(row.professions)do
+            if not maximum or quantity>maximum or(quantity==maximum and kind<leading)then leading,maximum=kind,quantity end
+        end
+        row.leading, row.share=leading,maximum/row.quantity*100
+        rows[#rows+1]=row
+    end
+    table.sort(rows,function(a,b)return a.itemID<b.itemID end)
+    return rows,{coverageBegan=self.saved.reagentCoverageBegan,unsupportedCasts=unsupported}
 end

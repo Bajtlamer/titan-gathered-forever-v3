@@ -32,10 +32,19 @@ function Mini:CreatePin()
     ns.PinStyle.Apply(pin, 'minimap')
     pin:SetScript('OnEnter', function(button)
         GameTooltip:SetOwner(button, 'ANCHOR_LEFT')
-        GameTooltip:AddLine(ns.Style.ItemName(button.node.itemID))
-        GameTooltip:AddLine(ns.PinStyle.Label(button.node.kind))
-        GameTooltip:AddLine('Previously gathered here; the resource may not have respawned.')
-        for _, line in ipairs(ns.PinStyle.HistoryLines(button.node)) do GameTooltip:AddLine(line) end
+        if button.node.kind == 'PvP' then
+            GameTooltip:AddLine(ns.PinStyle.Label(button.node.kind))
+            GameTooltip:AddLine('Open-world PvP honorable kills')
+            GameTooltip:AddLine(string.format('%d honorable kills', button.node.count or 0))
+            if button.node.honorEstimate and button.node.honorEstimate > 0 then
+                GameTooltip:AddLine(string.format('Estimated honor: %d', button.node.honorEstimate))
+            end
+        else
+            GameTooltip:AddLine(ns.Style.ItemName(button.node.itemID))
+            GameTooltip:AddLine(ns.PinStyle.Label(button.node.kind))
+            GameTooltip:AddLine('Previously gathered here; the resource may not have respawned.')
+            for _, line in ipairs(ns.PinStyle.HistoryLines(button.node)) do GameTooltip:AddLine(line) end
+        end
         GameTooltip:Show()
     end)
     pin:SetScript('OnLeave', function() GameTooltip:Hide() end)

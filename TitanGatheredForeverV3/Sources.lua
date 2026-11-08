@@ -1,36 +1,45 @@
 local _, ns = ...
 local Sources={};ns.Sources=Sources
-local switches={Mining='mapMining',Herbs='mapHerbs',Skinning='mapSkinning',Fishing='mapFishing',Rare='mapRare'}
+local switches={Mining='mapMining',Herbs='mapHerbs',Skinning='mapSkinning',Fishing='mapFishing',Rare='mapRare',PvP='mapPvP'}
 function Sources.Categories(includeSaved)
     local result={}
     for _,m in ipairs(ns.Catalog.Modules())do
         if m.id~='Enchanting' and m.kind=='profession'then result[#result+1]={id=m.id,label=m.label}end
     end
     if includeSaved and ns.gathering then
-        local present={Rare=true};for _,c in ipairs(result)do present[c.id]=true end
+        local present={Rare=true,PvP=true};for _,c in ipairs(result)do present[c.id]=true end
         for _,nodes in pairs(ns.gathering.saved.maps)do if type(nodes)=='table'then for _,node in ipairs(nodes)do
             if not present[node.kind]then result[#result+1]={id=node.kind,label=node.kind=='Herbs'and'Herbalism'or node.kind};present[node.kind]=true end
         end end end
     end
     result[#result+1]={id='Rare',label='Rare loot'}
+    result[#result+1]={id='PvP',label='PvP'}
     return result
+end
+function Sources.MaterialVisible(itemID)
+    return ns.settings.mapItemVisibility[itemID] ~= false
+end
+function Sources.SetMaterialVisible(itemID,visible)
+    ns.settings.mapItemVisibility[itemID] = visible == true
 end
 function Sources.Enabled(kind,itemID)
     local s=ns.settings;if not s or not s.gatheringMap or kind=='Enchanting'then return false end
+    if kind=='PvP'then return s.mapPvP==true end
     if kind~='Rare'then
         if not ns.Catalog.modules[kind]or s.categories[kind]==false then return false end
     end
     if switches[kind]then if not s[switches[kind]]then return false end
     elseif s.mapProfessions[kind]==false then return false end
-    return not itemID or not s.mapItems[kind]or s.mapItems[kind][itemID]~=false
+    return not itemID or Sources.MaterialVisible(itemID)
 end
 function Sources.ToggleKey(kind)return switches[kind]end
 function Sources.Items(kind)
+    if kind=='PvP'then return{}end
     local result={};local m=ns.Catalog.modules[kind]
     for id in pairs(m and (m.gatheringResources or m.items)or{})do result[id]=true end
     if ns.history then for id in pairs(ns.history:ItemsFor(kind))do result[id]=true end end
     if ns.gathering then for _,nodes in pairs(ns.gathering.saved.maps)do
-        if type(nodes)=='table'then for _,node in ipairs(nodes)do if node.kind==kind then result[node.itemID]=true end end end
+        if type(nodes)=='table'then for _,node in ipairs(nodes)do if node.kind==kind and node.itemID then result[node.itemID]=true end end end
     end end
     return result
 end
@@ -42,7 +51,7 @@ end
 function Sources.Active(kind)
     if Sources.Track(kind)then return true end
     if kind=='Loot'then
-        for _,m in ipairs(Sources.Categories())do if Sources.Enabled(m.id)then return true end end
+        for _,m in ipairs(Sources.Categories())do if m.id~='PvP'and Sources.Enabled(m.id)then return true end end
         return false
     end
     return Sources.Enabled(kind)

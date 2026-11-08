@@ -4,9 +4,9 @@ Updated 2026-11-08. Current roadmap: [plan-next-development.md](plan-next-develo
 
 ## Current state
 
-The installed development candidate retains manifest version 0.4.1-alpha. It contains the shared core, twelve profession addons and Auction Items, with 56 allowlisted runtime files. The latest local installation was byte-verified against source and backed up. Current verification passes 360 checks (76 Python,284 Lua) and compilation of every shipped Lua file. Source commit/push is authorized by the current user request; no new version tag or release publication is part of it.
+The installed development candidate retains manifest version 0.4.1-alpha. It contains the shared core, twelve profession addons and Auction Items, with 57 allowlisted runtime files. The PvP candidate was byte-verified against source and the previous installation is backed up under `Interface/.tgf-v3-backups/candidate-zza0heza`. The branch passes 391 automated checks and compiles every shipped Lua file with Lua 5.1 semantics. PR creation is in progress. Source commit/push is authorized by the current user request; no new version tag or release publication is part of it.
 
-Implemented features include profession action counters, crafting/cooking production, fixed-reagent recipe planning, manual JSON export/reconstruction, faction-aware flight points and the small icon appearance window. Each is integrated with independent settings and preserves earlier acquired history. See the focused plans for API evidence, review findings and regression fixes.
+Implemented features include profession action counters, crafting/cooking production, fixed-reagent recipe planning, manual JSON export/reconstruction, faction-aware flight points, the small icon appearance window and the PvP Board with outdoor kill spots. Each is integrated with independent settings and preserves earlier acquired history. The PvP client totals, rank functions, honor events and death-recap attribution still require live Forever-client acceptance. The user should run `/reload` to load this Lua-only update. See the focused plans for API evidence, review findings and regression fixes.
 
 Map markers use exact recorded/projected coordinates and original WoW artwork. World-map materials, minimap materials and flight points have separate size/shape/optional Thin gold outline settings. Mining prefers ore rather than a covering byproduct; all output quantities remain in statistics. Legacy byproduct observations are retained, and unmatched standalone points are not guessed into ore.
 
@@ -15,7 +15,8 @@ Catalogue evidence remains partial: 532 supported items, 1,973 combined recipe r
 ## Live feedback and open work
 
 - The user confirms the icon configurator works and the revised borderless/exact-position map appearance improved. Optional outlines were subsequently changed from white to gold at their request.
-- Partial artwork clipping/offset, especially Linen Cloth, is still reported in every shape/size and with or without borders. Root cause is unconfirmed. No speculative texture/offset fix was deployed. The user is taking more time to test; obtain a current screenshot/reproduction.
+- The user confirms shared Linen Cloth visibility works across First Aid and Tailoring. Cloth artwork currently looks correct; leave the earlier clipping/overlap report under observation without a speculative texture/offset change.
+- A later screenshot confirmed overlapping report titles, descriptions and rows. The user confirms the compact report list changed, then requested per-item lifetime loot/gather occurrence totals in addition to quantities. The occurrence correction is covered below; detailed live event and layout acceptance remains open.
 - Real-client action/production event order, bank readiness, clipboard export round trips, native flight styling and full persistence/combined-character flows still need the live checklist.
 - Catalogue coverage and availability are separate evidence work; current checks do not certify all server content.
 
@@ -23,9 +24,39 @@ Catalogue evidence remains partial: 532 supported items, 1,973 combined recipe r
 
 Automatically install each completed, verified runtime update into /Applications/World of Warcraft/_forever_/Interface/AddOns using tools/install.py, retaining backups and checking installed bytes. This is recorded in AGENTS.md and .cursor/rules/automatic-live-install.mdc. Preserve SavedVariables, other addons and the user's control of the running game. Use /reload for Lua-only updates and a full restart when new files/assets require it. An identical verified installation does not need another backup/replacement.
 
-The latest installed candidate is retained in the client; the immediately preceding folders are backed up under Interface/.tgf-v3-backups/candidate-7untgdf_. No account data was committed or edited directly, and no hosting change or new release tag was created.
+The latest installed candidate is retained in the client; the immediately preceding folders are backed up under Interface/.tgf-v3-backups/candidate-bqc6q0b1. No account data was committed or edited directly, and no hosting change or new release tag was created.
 
 ## Implementation and installation history
+
+### Lifetime acquisition occurrences installed, 2026-11-08
+
+After confirming the compact report list changed, the user requested the lifetime number of times each item was looted or gathered. The report previously exposed acquired quantity without a per-item source occurrence total. Added Times obtained beside quantity: one occurrence per item per observed source receipt, including partial loot. Additional stacks or partial deliveries within that receipt do not add another occurrence. Empty outcomes and failed casts do not create item occurrences. Casting actions, completed-source samples and crafted output remain separate.
+
+History stores additive per-item acquisitions and acquisitionsIncomplete fields. Legacy migration recovers completed-source item hits plus retained positive partial/invalidated receipts, without counting valid completed receipts twice. Because old partial receipts may have expired, legacy counts remain lower bounds: N+ when some evidence remains, otherwise Unknown. Reloads retain the migrated counters; current/combined views sum counts and propagate uncertainty. Receipt deduplication retains the existing bounded 1024-source history limitation. The acquired-item JSON export includes both fields additively within schema 1; production items do not receive acquired-source counters.
+
+The initial regression failed because occurrence counts were missing. Four new history tests cover partial deliveries, complete duplicates, migration/unknown history, reload, receipt eviction and combined uncertainty. Report/export regressions cover distinct columns, lower-bound display and acquired-only fields. All 372 checks (76 Python,296 Lua), shipped Lua compilation and whitespace checks pass. Independent review found no important or critical issues. Real-client occurrence semantics and event timing remain a live acceptance gate.
+
+Installer preview and apply completed; all 56 runtime files across fourteen addons match source exactly, with no extra installed files. Previous folders are backed up under Interface/.tgf-v3-backups/candidate-bqc6q0b1. No SavedVariables were edited directly. Run /reload and compare Times obtained with quantity after looting/gathering. Version remains 0.4.1-alpha; no commit, source push, tag or publication was performed.
+
+### Compact report layout installed, 2026-11-08
+
+User screenshot showed Lifetime materials, Observed chances and Profession actions rendering on top of one another. Reports.Show kept every report visible at nearly identical positions. The user approved exclusive report visibility, compact columns and wrapped source descriptions. Opening a report now hides the others, including the production report, while retaining each report’s character scope, profession filter and page.
+
+The window is now 960 by 560 with 930 pixels of content width. Lifetime columns separate material, obtained quantity, crafted quantity and last obtained location. Chances separate material, observed percentage, hits/samples, obtained quantity and source/zone. Actions separate all outcome counts and recording start; stopped results and gaps remain explicit in the description. Production retains its detailed result format. Reusable rows measure wrapped text and paginate within the content area above the footer. Extremely long text is bounded within a page; item tooltips and source menus remain available. Statistics, SavedVariables and item/source identities were not rewritten.
+
+A lifecycle regression reproduced the overlapping windows before implementation. The ten report scenarios now cover exclusive visibility, retained report state, column values, acquired/crafted separation, wrapped long names/sources, all-entry pagination, empty views and bounds, native item hover and production detail interactions. Full verification passes 366 checks (76 Python,290 Lua), shipped Lua compilation and whitespace checks. Independent review found no actionable issues. Live font wrapping, readability and native interaction acceptance remain pending.
+
+Installer preview and apply completed successfully. All 56 runtime files across fourteen addons were byte-verified against source, with no extra installed files. Previous folders are backed up under Interface/.tgf-v3-backups/candidate-38za0z8r. Run /reload, then open the reports in succession and inspect the new columns. Version remains 0.4.1-alpha; no commit, push, new release tag or publication was performed.
+
+### Shared material visibility installed, 2026-11-08
+
+User screenshots and follow-up testing showed that Linen Cloth spots could be independently hidden under First Aid and Tailoring. Ordinary material loot is recorded under each consuming profession, and the old item filters were also keyed by profession. The user approved one shared visibility setting per item, accessible from either submenu.
+
+Added item-ID-keyed visibility preferences and shared checkbox/bulk callbacks. Show all and Hide all apply globally to materials in that submenu; profession-wide switches remain independent. Any explicit legacy hidden material migrates to hidden globally unless a shared choice already exists. Later shared choices survive reloads. Existing spot records, coordinates, counts, history and collection while hidden remain intact. This correction does not deduplicate overlapping markers or establish a texture-clipping cause.
+
+The new regression failed before implementation because hiding First Aid cloth left Tailoring cloth visible. Three new integration scenarios cover both submenu paths, shared bulk actions, mixed legacy settings, reload persistence, independent profession gates and continued recording/history while hidden. All 363 checks (76 Python,287 Lua), shipped Lua compilation and whitespace checks pass. Independent review found no actionable issues.
+
+Installer preview and apply completed; all 56 runtime files across fourteen addons were byte-verified against source with no extra installed files. Previous folders are retained under Interface/.tgf-v3-backups/candidate-p1l5kps8. No SavedVariables were edited directly. Run /reload, then toggle Linen Cloth under First Aid and Tailoring to validate the shared live behavior. No commits, source push, version tag or publication were performed.
 
 ### Gold icon outlines installed, 2026-11-08
 

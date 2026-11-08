@@ -1,4 +1,5 @@
 local ns = {}
+ C_Item={GetItemIconByID=function(id)return id and id+1000 end}
 assert(loadfile('TitanGatheredForeverV3/PinStyle.lua'))('TitanGatheredForeverV3', ns)
 local function pin()
     local p = { width = 14, height = 14, regions = {}, hooks = {} }
@@ -46,4 +47,6 @@ assert(not flight.texture.mask,'Native flight artwork must retain its original s
 local allocated=#borderFrames;ns.PinStyle.Apply(flight,true)
 assert(#borderFrames==allocated and #borderFrames==0,'Borderless flight pin allocated a decoration frame')
 assert(ns.PinStyle.Label('Skinning')=='TGF v3 Skinning area')
+assert(ns.PinStyle.Label('PvP')=='TGF v3 PvP kill spot')
+assert(ns.PinStyle.Icon(nil,'PvP')=='Interface\\Icons\\INV_Sword_04')
 print('PASS 9 image alpha, transparent border and pooled pin checks')

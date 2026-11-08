@@ -16,6 +16,7 @@ Inventory.lua
 Gathering.lua
 History.lua
 Actions.lua
+PvP.lua
 Production.lua
 Crafting.lua
 Export.lua

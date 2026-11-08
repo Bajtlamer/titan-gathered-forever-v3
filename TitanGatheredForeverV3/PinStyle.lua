@@ -1,15 +1,22 @@
 local _, ns = ...
 local PinStyle = {}
 ns.PinStyle = PinStyle
-local labels = { Mining = 'TGF v3 Mining spot', Herbs = 'TGF v3 Herbalism spot', Skinning = 'TGF v3 Skinning area', Fishing = 'TGF v3 Fishing spot', Rare = 'TGF v3 Rare loot' }
+local labels = { Mining = 'TGF v3 Mining spot', Herbs = 'TGF v3 Herbalism spot', Skinning = 'TGF v3 Skinning area', Fishing = 'TGF v3 Fishing spot', Rare = 'TGF v3 Rare loot', PvP = 'TGF v3 PvP kill spot' }
 local icons = { Mining = 'Interface\\Icons\\Trade_Mining', Herbs = 'Interface\\Icons\\Trade_Herbalism',
-                Skinning = 'Interface\\Icons\\INV_Misc_Pelt_Wolf_01' }
+                Skinning = 'Interface\\Icons\\INV_Misc_Pelt_Wolf_01', PvP = 'Interface\\Icons\\INV_Sword_04' }
 
 function PinStyle.Label(kind) return labels[kind] or ('TGF v3 ' .. kind .. ' material source') end
-function PinStyle.Icon(itemID, kind) return C_Item.GetItemIconByID(itemID) or icons[kind] or 'Interface\\Icons\\INV_Misc_Bag_10' end
+function PinStyle.Icon(itemID, kind)
+    if kind == 'PvP' then return icons.PvP end
+    if type(itemID) == 'number' and C_Item and C_Item.GetItemIconByID then
+        return C_Item.GetItemIconByID(itemID) or icons[kind] or 'Interface\\Icons\\INV_Misc_Bag_10'
+    end
+    return icons[kind] or 'Interface\\Icons\\INV_Misc_Bag_10'
+end
 
 function PinStyle.HistoryLines(node)
     local lines={}
+    if node.kind == 'PvP' or not node.itemID then return lines end
     if not ns.history or not ns.Reports then return lines end
     for _,row in ipairs(ns.history:Rates((ns.characterID or UnitGUID('player')),node.itemID))do
         if row.mapID==node.mapID and (row.kind==node.kind or row.kind=='Loot') then
