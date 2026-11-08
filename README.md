@@ -10,15 +10,15 @@ Website: [titan-gathered.com](https://www.titan-gathered.com/).
 
 The current development candidate retains version `0.4.1-alpha` and targets **WoW Forever 1.60.1, interface 16001**, with Titan Panel installed separately. It is installed in the local test client. The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); they do not represent a new tagged release. Other WoW editions are outside this project's scope.
 
-Validation: **360 automated checks pass**, plus Lua 5.1 compilation of every shipped Lua file. The user confirms the icon configurator works; the full [live acceptance checklist](book-wow-forever-validation.md) remains open.
+Validation: **372 automated checks pass**, plus Lua 5.1 compilation of every shipped Lua file. The user confirms the icon configurator works; the full [live acceptance checklist](book-wow-forever-validation.md) remains open.
 
 Implemented:
 
 - Profession-use information and current Bags, Bank and Total counts in item tooltips, including recipe-material item tooltips. Disabling Bank also hides Total.
 - Learned profession skill ranks, item rarity colors and organized Titan configuration menus.
-- Per-character lifetime obtained-item totals, with an optional combined-character view.
+- Per-character lifetime obtained-item totals, with an optional combined-character view. Reports open one at a time and retain their own scope, filter and page. Lifetime materials, observed chances and profession actions use compact columns with wrapped rows and pagination. Lifetime materials separate obtained quantity from Times obtained, counting distinct observed source receipts containing the item, including partial loot. Older incomplete occurrence totals show a + lower bound or Unknown when no evidence remains.
 - Observed acquisition rates for readable loot sources, including mining and herbalism byproducts, skinning, fishing and supported ordinary material drops.
-- Outdoor world-map and minimap source icons, controlled by profession and material. Clearing map spots preserves lifetime statistics. Material icons use the original WoW artwork, default to no border, and remain centered at recorded/projected coordinates, including when markers overlap. Appearance is configurable.
+- Outdoor world-map and minimap source icons, controlled by profession and material. Material visibility is shared across profession menus: toggling Linen Cloth under either First Aid or Tailoring affects all eligible cloth spots on both maps. Show all / Hide all applies to the selected submenu’s materials across professions; profession-wide switches remain independent. Clearing map spots preserves lifetime statistics. Material icons use the original WoW artwork, default to no border, and remain centered at recorded/projected coordinates, including when markers overlap. Appearance is configurable.
 - Mining map markers prioritize primary ore rather than stones/gems. All outputs remain in statistics; old overlapping byproduct pins are hidden only where ore is recorded.
 - Disenchanting outcomes grouped by input item when its identity is readable. Enchanting creates no map spots.
 - Separate per-character action counters for Mining, Herbalism, Skinning, Fishing and Disenchanting, with combined reports and independent recording controls. Real-client event order remains under validation.

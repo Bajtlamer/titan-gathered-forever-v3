@@ -11,8 +11,10 @@ local function result(op,item,qty)
 end
 local function fixture(saved)
  local s={clock=100,character='a',enabled=true,secret={},recipes={
-  [2536]={recipeID=2536,name='Spiced Wolf Meat',kind='Cooking',outputItemID=2680,outputIDs={[2680]=true}},
-  [1000]={recipeID=1000,name='Other recipe',kind='Alchemy',outputItemID=2680,outputIDs={[2680]=true}}}}
+  [2536]={recipeID=2536,name='Spiced Wolf Meat',kind='Cooking',outputItemID=2680,outputIDs={[2680]=true},
+   reagents={[2672]=2,[159]=1},reagentsSupported=true},
+  [1000]={recipeID=1000,name='Other recipe',kind='Alchemy',outputItemID=2680,outputIDs={[2680]=true},
+   reagents={[2672]=3},reagentsSupported=true}}}
  local p=ns.Production.New(saved or {},{Now=function()return s.clock end,Timestamp=function()return s.clock end,
   Character=function()return s.character end,Name=function()return s.character end,Enabled=function()return s.enabled end,
   Public=function(v)return v~=s.secret end,Recipe=function(id)return s.recipes[id]end})
@@ -28,6 +30,7 @@ end)
 test('queued repeated recipes preserve operations and variable output distribution',function()
  local p=fixture();for i,q in ipairs({2,2,5})do cast(p,'START','c'..i);cast(p,'SUCCEEDED','c'..i);p:Result(result(i,2680,q))end
  local r=p:Rows()[1];eq(r.completed,3);eq(r.matched,3);eq(r.quantity,9)
+ eq(r.reagentUse[2672],6);eq(r.reagentUse[159],3);eq(r.reagentUnsupportedCasts,0)
  eq(r.outputs[2680].hits,3);eq(r.outputs[2680].distribution[2],2);eq(r.outputs[2680].distribution[5],1)
 end)
 test('output before success waits for cast confirmation',function()
@@ -111,5 +114,22 @@ end)
 test('secondary output before primary binding remains unattributed',function()
  local p=fixture();complete(p);p:Result(result(1,9999,1));p:Result(result());eq(p:Total('a',9999),0)
  eq(p:Total('a',2680),2)
+end)
+test('unsupported recipe requirements count an explicit coverage gap without guessing reagent use',function()
+ local p,s=fixture();s.recipes[2536].reagentsSupported=false
+ complete(p,'unsupported');p:Result(result())
+ local row=p:Rows('a')[1]
+ eq(row.completed,1);eq(next(row.reagentUse),nil);eq(row.reagentUnsupportedCasts,1)
+ local rows,metadata=p:ReagentUsage('a')
+ eq(#rows,0);eq(metadata.unsupportedCasts,1);eq(metadata.coverageBegan,100)
+end)
+test('reagent usage totals preserve profession shares and character scopes',function()
+ local p,s=fixture();complete(p,'one',2536);complete(p,'two',2536)
+ complete(p,'three',1000);s.character='b';complete(p,'four',1000)
+ local a=p:ReagentUsage('a');eq(#a,2);eq(a[1].itemID,159);eq(a[2].itemID,2672)
+ eq(a[2].quantity,7);eq(a[2].professions.Cooking,4);eq(a[2].professions.Alchemy,3)
+ eq(a[2].leading,'Cooking');assert(math.abs(a[2].share-4/7*100)<0.00001)
+ local combined=p:ReagentUsage(nil);eq(combined[2].quantity,10);eq(combined[2].professions.Alchemy,6)
+ assert(math.abs(combined[2].share-60)<0.00001)
 end)
 print('PASS '..passed..' crafting production checks')

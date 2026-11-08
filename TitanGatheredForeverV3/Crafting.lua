@@ -43,6 +43,15 @@ function Crafting.Plan(recipeID,operations)
     if not recipe then return {rows={},issues={},error='Recipe unavailable, unsupported, or profession addon/category disabled.'}end
     return Crafting.Compute(recipe,ns.inventory,ns.settings.showBank,operations or 1)
 end
+function Crafting.FixedReagents(recipe)
+    if not recipe then return nil,false end
+    local inventory={Get=function()return{bags=0,bank=0,bagsState='current',bankState='current'}end}
+    local plan=Crafting.Compute(recipe,inventory,false,1)
+    if plan.error or #plan.issues>0 or #plan.rows==0 then return nil,false end
+    local reagents={}
+    for _,row in ipairs(plan.rows)do reagents[row.itemID]=row.perOperation end
+    return reagents,true
+end
 function Crafting.Select(info,native)
     Crafting.selectedID=nil
     if native and readable(info,{'recipeID','nextRecipeID'})then

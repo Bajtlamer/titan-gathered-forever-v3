@@ -28,6 +28,18 @@ function ns.Settings.Initialize(saved)
     for _, kind in ipairs({ 'Mining', 'Herbs', 'Skinning', 'Fishing', 'Cooking', 'Alchemy', 'Blacksmithing', 'Engineering', 'FirstAid', 'Leatherworking', 'Tailoring', 'Rare' }) do
         if type(settings.mapItems[kind]) ~= 'table' then settings.mapItems[kind] = {} end
     end
+    if type(settings.mapItemVisibility) ~= 'table' then settings.mapItemVisibility = {} end
+    -- Migrate hidden materials once per item. Explicit shared choices take
+    -- precedence on later reloads, including showing an old hidden material.
+    for _, items in pairs(settings.mapItems) do
+        if type(items) == 'table' then
+            for itemID, visible in pairs(items) do
+                if type(itemID) == 'number' and visible == false and settings.mapItemVisibility[itemID] == nil then
+                    settings.mapItemVisibility[itemID] = false
+                end
+            end
+        end
+    end
     for old, current in pairs({ ['First Aid'] = 'FirstAid', Herbalism = 'Herbs', Other = 'Auction' }) do
         if settings.categories[current] == nil and type(settings.categories[old]) == 'boolean' then
             settings.categories[current] = settings.categories[old]

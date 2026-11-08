@@ -23,6 +23,7 @@ function Reports.Matches(itemID,filter,kind)
 end
 function Reports.Rows(mode,character,filter)
     local result={}
+    if mode=='reagentUsage'then return ns.production:ReagentUsage(character)end
     if mode=='actions' then
         for _,row in ipairs(ns.actions:Rows(character)) do
             if not filter or row.kind==filter then result[#result+1]=row end
@@ -60,6 +61,76 @@ end
 local function button(frame,label,x,y,width,callback)
     local b=CreateFrame('Button',nil,frame,'UIPanelButtonTemplate');b:SetSize(width,22)
     b:SetPoint('TOPLEFT',frame,'TOPLEFT',x,y);b:SetText(label);b:SetScript('OnClick',callback);return b
+end
+local layouts={
+    history={{'Material',0,225},{'Lifetime obtained',235,115},{'Last loot or gather',360,570}},
+    chances={{'Material',0,195},{'Observed',205,70},{'Hits / samples',285,105},{'Items',400,75},{'Source and zone',485,445}},
+    actions={{'Profession',0,140},{'Attempts',150,65},{'Completed',225,75},{'Failed',310,55},
+        {'Interrupted',375,85},{'Stopped',470,70},{'Unresolved',550,85},{'Recording began',645,285}},
+    production={{'Recipe',0,230},{'Recorded results',240,690}},
+    reagentUsage={{'Reagent',0,250},{'Estimated used',260,150},{'Leading profession',420,220},{'Share of tracked use',650,280}},
+}
+local contentTop,contentBottom=132,510
+local function cells(frame,mode,font,y)
+    local result={}
+    for i,column in ipairs(layouts[mode])do result[i]=text(frame,font,column[2],y,column[3])end
+    return result
+end
+local function values(mode,row)
+    if mode=='production'then
+        local began=date and date('%Y-%m-%d',row.began)or tostring(row.began)
+        return {row.name,string.format('%d attempts, %d completed, %d matched result operations\n%d items; bonus flags %d / %d, multicraft flags %d / %d\nFirst recorded: %s; click for output quantities',
+            row.attempts,row.completed,row.matched,row.quantity,row.bonusHits,row.bonusKnown,row.multicraftHits,row.multicraftKnown,began)}
+    elseif mode=='actions'then
+        local began=date and date('%Y-%m-%d %H:%M',row.began)or tostring(row.began)
+        return {labels[row.kind],row.attempts,row.completed,row.failed,row.interrupted,row.stopped,row.unresolved,began}
+    elseif mode=='chances'then
+        return {ns.Style.ItemName(row.itemID),string.format('%.1f%%',row.percent),
+            string.format('%d / %d',row.hits,row.trials),row.quantity,Reports.Source(row)}
+    elseif mode=='reagentUsage'then
+        return {ns.Style.ItemName(row.itemID),row.quantity,ns.Production.labels[row.leading],string.format('%.1f%%',row.share)}
+    end
+    local location=Reports.Zone(row.mapID)
+    if row.x and row.y then location=location..string.format(' (%.1f, %.1f)',row.x*100,row.y*100)end
+    return {ns.Style.ItemName(row.itemID),row.quantity+(row.crafted or 0),
+        row.quantity>0 and location or 'No loot or gather location'}
+end
+function Reports.ReagentDetails(owner,row)
+    MenuUtil.CreateContextMenu(owner,function(_,root)
+        root:CreateTitle(ns.Style.ItemName(row.itemID)..': '..row.quantity..' estimated items used')
+        root:CreateTitle('Profession use, as a share of this reagent total')
+        local kinds={};for kind in pairs(row.professions)do kinds[#kinds+1]=kind end
+        table.sort(kinds,function(a,b)
+            local left,right=row.professions[a],row.professions[b]
+            if left~=right then return left>right end
+            return a<b
+        end)
+        for _,kind in ipairs(kinds)do
+            local quantity=row.professions[kind]
+            root:CreateTitle(string.format('%s: %d (%.1f%%)',ns.Production.labels[kind],quantity,quantity/row.quantity*100))
+        end
+        root:CreateTitle('Estimate uses fixed required recipe reagents per completed tracked craft.')
+        root:CreateTitle('Optional modifiers and unsupported required slots are excluded.')
+        root:SetScrollMode(350)
+    end)
+end
+local function pagesFor(window,rows)
+    local pages={{}}
+    local page,used=pages[1],0
+    for _,row in ipairs(rows)do
+        local columns=values(window.mode,row)
+        local height=16
+        for i,value in ipairs(columns)do
+            local measure=window.measure.cells[i];measure:SetText(value)
+            height=math.max(height,measure:GetStringHeight())
+        end
+        height=math.min(contentBottom-contentTop,height+6)
+        if #page>0 and (#page==#window.rows or used+height>contentBottom-contentTop)then
+            page={};pages[#pages+1]=page;used=0
+        end
+        page[#page+1]={data=row,values=columns,height=height};used=used+height
+    end
+    return pages
 end
 function Reports.ItemSources(owner,itemID,character)
     local rates=ns.history:Rates(character,itemID)
@@ -112,35 +183,29 @@ end
 function Reports.Update(window)
     if not ns.history then return end
     local character=not window.combined and (ns.characterID or UnitGUID('player'))or nil
-    local rows=Reports.Rows(window.mode,character,window.filter)
-    local pageSize=#window.rows
-    local pages=math.max(1,math.ceil(#rows/pageSize));window.page=math.min(pages,math.max(1,window.page))
+    local rows,metadata=Reports.Rows(window.mode,character,window.filter)
+    if window.mode=='reagentUsage'then
+        local coverage=metadata.coverageBegan and(date and date('%Y-%m-%d',metadata.coverageBegan)or tostring(metadata.coverageBegan))or'unknown'
+        window.note:SetText(string.format('Estimated from fixed required reagents per completed craft. Coverage since %s. Percent is share of this reagent\'s tracked use. Unsupported recipes are excluded%s',
+            coverage,metadata.unsupportedCasts>0 and string.format('; %d completed recipes had unsupported required reagents',metadata.unsupportedCasts)or''))
+        window.empty:SetText(#rows==0 and'No supported reagent use is recorded in this coverage period.'or'')
+    end
+    local pages=pagesFor(window,rows)
+    window.page=math.min(#pages,math.max(1,window.page))
     window.scope:SetText(window.combined and 'All characters' or 'This character')
     local module=window.filter and ns.Catalog.modules[window.filter]
     window.filterButton:SetText(module and module.label or (window.mode=='actions' and labels[window.filter])
         or (window.mode=='production'and ns.Production.labels[window.filter]) or 'All professions')
-    window.pageText:SetText(string.format('Page %d / %d - %d entries',window.page,pages,#rows))
+    window.pageText:SetText(string.format('Page %d / %d - %d entries',window.page,#pages,#rows))
+    local y=contentTop
     for i,view in ipairs(window.rows)do
-        local row=rows[(window.page-1)*pageSize+i];view.data=row;view.character=character
-        if row then
-            view:Show();view.name:SetText(window.mode=='actions' and labels[row.kind] or window.mode=='production'and row.name or ns.Style.ItemName(row.itemID))
-            if window.mode=='production' then
-                local began=date and date('%Y-%m-%d',row.began)or tostring(row.began)
-                view.detail:SetText(string.format('%d attempts, %d completed, %d matched result operations\n%d items; bonus flags %d / %d, multicraft flags %d / %d\nFirst recorded: %s; click for output quantities',
-                    row.attempts,row.completed,row.matched,row.quantity,row.bonusHits,row.bonusKnown,row.multicraftHits,row.multicraftKnown,began))
-            elseif window.mode=='actions' then
-                local began=date and date('%Y-%m-%d %H:%M',row.began) or tostring(row.began)
-                view.detail:SetText(string.format('%d attempts, %d completed, %d failed, %d interrupted\n%d stopped without confirmed result, %d unresolved\nRecording began: %s; gaps are not reconstructed',
-                    row.attempts,row.completed,row.failed,row.interrupted,row.stopped,row.unresolved,began))
-            elseif window.mode=='chances'then
-                view.detail:SetText(string.format('%.1f%% (%d / %d samples), %d items\n%s',row.percent,row.hits,row.trials,row.quantity,Reports.Source(row)))
-            else
-                local location=Reports.Zone(row.mapID)
-                if row.x and row.y then location=location..string.format(' (%.1f, %.1f)',row.x*100,row.y*100)end
-                view.detail:SetText(row.crafted and string.format('%d obtained lifetime; %d crafted separately\n%s',row.quantity,row.crafted,
-                    row.quantity>0 and 'Last obtained: '..location or 'No acquired-loot observations')
-                    or string.format('%d obtained lifetime\nLast obtained: %s',row.quantity,location))
+        local entry=pages[window.page][i];view.data=entry and entry.data;view.character=character
+        if entry then
+            view:ClearAllPoints();view:SetPoint('TOPLEFT',window,'TOPLEFT',15,-y);view:SetHeight(entry.height)
+            for column,value in ipairs(entry.values)do
+                view.cells[column]:SetHeight(entry.height-6);view.cells[column]:SetText(value)
             end
+            view:Show();y=y+entry.height
         else view:Hide()end
     end
     window.empty:SetText(#rows==0 and (window.mode=='production'and'No recipe operations recorded for this view. Earlier inventory cannot reconstruct production.'
@@ -148,23 +213,29 @@ function Reports.Update(window)
         or 'No recorded observations for this view yet. History starts with this version.')or'')
 end
 function Reports.Show(mode)
-    mode=(mode=='chances' or mode=='actions' or mode=='production') and mode or 'history'
+    mode=(mode=='chances' or mode=='actions' or mode=='production' or mode=='reagentUsage') and mode or 'history'
     local w=Reports.windows[mode]
     if not w then
-        local name='TitanGatheredForeverV3'..(mode=='chances'and'Chances'or mode=='actions'and'Actions'or mode=='production'and'Production'or'History')..'Window'
+        local name='TitanGatheredForeverV3'..(mode=='chances'and'Chances'or mode=='actions'and'Actions'or mode=='production'and'Production'
+            or mode=='reagentUsage'and'ReagentUsage'or'History')..'Window'
         w=CreateFrame('Frame',name,UIParent,'BasicFrameTemplateWithInset');Reports.windows[mode]=w
         if UISpecialFrames then table.insert(UISpecialFrames,name)end
         w.mode,w.page,w.rows=mode,1,{}
-        w:SetSize(800,560);w:SetPoint('CENTER',UIParent,'CENTER',mode=='chances'and 35 or-35,0)
+        w:SetSize(960,560);w:SetPoint('CENTER',UIParent,'CENTER',0,0)
         w:SetClampedToScreen(true);w:SetMovable(true);w:EnableMouse(true);w:RegisterForDrag('LeftButton')
         w:SetScript('OnDragStart',function(self)self:StartMoving()end)
         w:SetScript('OnDragStop',function(self)self:StopMovingOrSizing()end)
-        w.TitleText:SetText(mode=='production'and'TGF v3 Crafting and cooking'or mode=='chances'and'TGF v3 Observed acquisition chances'or mode=='actions'and'TGF v3 Profession actions'or'TGF v3 Lifetime material history')
-        local note=text(w,'GameFontHighlightSmall',15,-33,765)
-        note:SetText(mode=='production'and'Completed casts and matched output results are separate. Proc flags use readable-field counts, not all casts. No server probability claim.'
-            or mode=='actions'and'Observed casts, separate from loot samples and quantities. Fishing completion means a catch window; other completion means spell success.'
+        w:SetScript('OnHide',function()GameTooltip:Hide()end)
+        w.TitleText:SetText(mode=='production'and'TGF v3 Crafting and cooking'
+            or mode=='reagentUsage'and'TGF v3 Reagent usage estimates'
+            or mode=='chances'and'TGF v3 Observed acquisition chances'
+            or mode=='actions'and'TGF v3 Profession actions'or'TGF v3 Lifetime material history')
+        local note=text(w,'GameFontHighlightSmall',15,-33,930);w.note=note
+        note:SetText(mode=='reagentUsage'and'Estimated reagent consumption by item and profession. Click a row for the profession breakdown.'
+            or mode=='production'and'Completed casts and matched output results are separate. Proc flags use readable-field counts, not all casts. No server probability claim.'
+            or mode=='actions'and'Fishing completion means a catch window; other completion means spell success. Stopped means no confirmed result; gaps are not reconstructed.'
             or mode=='chances'and'Observed outcomes / complete looted sources, grouped by source and zone. Not a probability at a map coordinate. Click for sources.'
-            or'Obtained items, separate from current inventory. Clearing map spots preserves history. Click for sources.')
+            or'Lifetime obtained combines acquired quantities and recorded crafted outputs. Current inventory is separate. Click for source details.')
         w.scope=button(w,'This character',15,-65,150,function()w.combined=not w.combined;w.page=1;Reports.Update(w)end)
         w.filterButton=button(w,'All professions',175,-65,190,function(owner)
             MenuUtil.CreateContextMenu(owner,function(_,root)
@@ -188,13 +259,18 @@ function Reports.Show(mode)
                 end
             end)
         end)
-        local tall=mode=='actions'or mode=='production'
-        for i=1,(tall and 5 or 10) do
-            local row=CreateFrame('Button',nil,w);row:SetSize(765,tall and 70 or 37)
-            row:SetPoint('TOPLEFT',w,'TOPLEFT',15,-100-(i-1)*(tall and 78 or 40))
-            row.name=text(row,'GameFontNormal',0,0,230);row.detail=text(row,'GameFontHighlightSmall',240,0,520)
+        if mode=='reagentUsage'then w.filterButton:Hide()end
+        local header=CreateFrame('Frame',nil,w);header:SetSize(930,30);header:SetPoint('TOPLEFT',w,'TOPLEFT',15,-100)
+        w.headers=cells(header,mode,'GameFontNormalSmall',0)
+        for i,column in ipairs(layouts[mode])do w.headers[i]:SetText(column[1])end
+        w.measure=CreateFrame('Frame',nil,w);w.measure.cells=cells(w.measure,mode,'GameFontHighlightSmall',0);w.measure:Hide()
+        for i=1,(mode=='production'and 5 or 16) do
+            local row=CreateFrame('Button',nil,w);row:SetSize(930,22)
+            row.cells=cells(row,mode,'GameFontHighlightSmall',0)
+            row.name=row.cells[1];row.detail=mode=='production'and row.cells[2]or nil
             row:SetScript('OnClick',function(self)
-                if mode=='production'and self.data then Reports.ProductionDetails(self,self.data)
+                if mode=='reagentUsage'and self.data then Reports.ReagentDetails(self,self.data)
+                elseif mode=='production'and self.data then Reports.ProductionDetails(self,self.data)
                 elseif self.data and self.data.itemID then Reports.ItemSources(self,self.data.itemID,self.character)end
             end)
             row:SetScript('OnEnter',function(self)
@@ -202,11 +278,12 @@ function Reports.Show(mode)
             end)
             row:SetScript('OnLeave',function()GameTooltip:Hide()end);w.rows[i]=row
         end
-        w.empty=text(w,'GameFontHighlight',15,-110,760)
+        w.empty=text(w,'GameFontHighlight',15,-contentTop,930)
         button(w,'Previous',15,-520,100,function()w.page=w.page-1;Reports.Update(w)end)
         button(w,'Next',125,-520,100,function()w.page=w.page+1;Reports.Update(w)end)
-        w.pageText=text(w,'GameFontHighlightSmall',245,-525,520)
+        w.pageText=text(w,'GameFontHighlightSmall',245,-525,690)
     end
+    for _,window in pairs(Reports.windows)do if window~=w then window:Hide()end end
     Reports.Update(w);w:Show()
 end
 function Reports.Refresh()

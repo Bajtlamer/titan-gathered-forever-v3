@@ -7,7 +7,7 @@ Updated 2026-11-08. This is the current continuation roadmap. Focused plans pres
 - Repository: https://github.com/Bajtlamer/titan-gathered-forever-v3, branch main. This update prepares the accumulated work for a source commit and push; it does not create a release tag.
 - Development candidate: 0.4.1-alpha, WoW Forever 1.60.1, interface 16001. Latest captured installation build: 70862. The live API/build compatibility gate remains explicit.
 - Fourteen runtime addon folders: shared core, twelve professions and Auction Items. The current runtime package has 56 files. Development tools, tests, catalogue evidence and documentation stay outside these folders.
-- All 360 automated checks pass, plus shipped Lua compilation. The candidate is installed locally and was byte-verified against source. The user confirms the icon configurator works; broader live acceptance is pending.
+- All 372 automated checks pass, plus shipped Lua compilation. The candidate is installed locally and was byte-verified against source. The user confirms the icon configurator works; broader live acceptance is pending.
 - Changelog: [unreleased development updates](release-notes/ref-unreleased.md). Current implementation and installation history: [progress](ref-wow-forever-progress.md).
 
 ## Standing constraints
@@ -57,7 +57,38 @@ The small icon window provides independent world/minimap/flight size, shape and 
 
 ## Immediate next steps
 
-1. Let the user continue testing. Obtain a current screenshot/reproduction of the reported Linen Cloth artwork clipping/offset in Full image mode. It occurs across shapes and sizes according to the user. Do not claim the cause is confirmed or deploy a guessed offset fix.
+### Lifetime acquisition occurrences, installed 2026-11-08
+
+The user confirmed the compact lists changed but still needs how many times each item was looted or gathered. Add Times obtained beside obtained quantity, counting one occurrence per item per observed source receipt, including partial loot. Multiple stacks or later partial deliveries from that receipt must not increase the count again. Counts are not cast attempts or complete-source rate denominators.
+
+Persist an additive per-item acquisition count. For legacy items recover a lower bound from completed item-hit aggregates and retained partial/invalidated receipts; mark the result incomplete because older partial receipts may have expired. Never infer occurrences from quantities, inventory or map spot counts. Combined views sum counts and retain any incomplete-history marker. Export the acquired-item count and uncertainty additively, leaving production totals and schema-1 framing unchanged.
+
+- [x] Add failing model regressions for partial receipt deduplication, migration, reload/receipt eviction and combined uncertainty, plus report/export regressions.
+- [x] Implement History.lua tracking and migration, Reports.lua Times obtained column and Export.lua acquired-only fields.
+- [x] Run full checks, review, document semantics, automatically install and byte-verify the completed update. All 372 checks and Lua compilation pass; independent review found no important issues. All 56 installed files match source, with previous folders under Interface/.tgf-v3-backups/candidate-bqc6q0b1. Live occurrence-count acceptance awaits /reload.
+
+### Compact report layout correction, installed 2026-11-08
+
+User screenshot confirms overlapping report titles, descriptions and rows. The user approved showing one report at a time while retaining independent filters, scope and page. Use columns for Lifetime (material, obtained, crafted, last location), Chances (material, observed chance, hits/samples, quantity, source/zone) and Actions (profession, attempts, completed, failed, interrupted, stopped without confirmation, unresolved, recording start). Keep the production detail format and include it in exclusive report visibility. Preserve item hovers, source menus, production details, statistical meanings and saved data.
+
+Use a 960 by 560 window, a 930-pixel content width, compact rows, wrapped text and height-aware pagination within the content area. Extremely long text is bounded by the content area; native item tooltips and source menus retain access to full item/source information. Do not claim live visual acceptance from simulated rendering tests.
+
+- [x] Reproduce overlapping windows with a failing lifecycle regression; replace old tests that require simultaneous windows with retained-state expectations.
+- [x] Add failing column/value and wrapped-row pagination regressions, including long names/sources, page bounds, empty views and production switching.
+- [x] Implement Reports.lua layout and exclusive visibility, run report tests and all checks, review changes and update documentation.
+- [x] Preview and apply the installer, verify all runtime bytes, and request /reload for live acceptance. All 366 checks and shipped Lua compilation pass; independent review found no actionable issues. All 56 installed runtime files match source. Previous folders: Interface/.tgf-v3-backups/candidate-38za0z8r. Live visual acceptance remains pending.
+
+### Shared material visibility correction, installed 2026-11-08
+
+The user approved one visibility setting per item, accessible from every profession submenu containing that material. Category-specific filters currently split Linen Cloth observations between First Aid and Tailoring. Use an item-ID-keyed preference instead of synchronizing separate copies. Profession-wide switches remain independent. Retain all observations, coordinates, counts and history; this correction does not resolve icon overlap or prove a texture defect.
+
+Migration keeps a material hidden if any legacy profession filter explicitly hid it, unless an existing shared preference already supplies the value. Keep legacy settings for compatibility, but do not consult them after migration. Show all and Hide all affect the materials listed in the selected submenu globally.
+
+- [x] Add failing integration regressions for both profession submenu paths, historical spots stored under either category, shared bulk actions, migration conflicts, reload persistence and independent profession switches.
+- [x] Update Settings.lua migration, Sources.lua material accessors and Titan.lua menu callbacks; preserve recording while a material is hidden.
+- [x] Run the focused LuaJIT suite, full tools/check.py, review the diff, update current documentation, preview and apply tools/install.py, then verify installed runtime bytes. All 363 checks pass; all 56 installed files match source. Backup: Interface/.tgf-v3-backups/candidate-p1l5kps8. Live shared-filter acceptance awaits /reload.
+
+1. Validate Times obtained against item quantity after a gather, partial loot/reopening and /reload; verify lower bounds for older data. The user confirms the report layout changed. Continue the compact-layout checklist: open Lifetime materials, Observed chances and Profession actions in succession, confirm exclusive visibility and retained filters/pages, then check wrapping, page controls and item interactions. Shared Linen Cloth visibility is confirmed working by the user. The cloth artwork currently looks correct; monitor further experience without a speculative texture or coordinate-offset change.
 2. Exercise the affected live checklists in book-wow-forever-validation.md, prioritizing production results, fishing/disenchant timing, bank updates, export round trips and native flight styling/persistence.
 3. Continue evidence-backed catalogue reconciliation. Keep incomplete release gates explicit.
 4. Fix confirmed defects with regressions, run the full checks and automatically install verified runtime changes with backups.

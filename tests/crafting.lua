@@ -84,6 +84,20 @@ test('source evidence keeps zone trials separate from saved positions',function(
  ns.gathering={saved={maps={[1]={{itemID=2672},{itemID=2672},{itemID=159}}}}}
  local e=ns.Crafting.Evidence(2672,'a');eq(e.rates[1].trials,20);eq(e.spots[1].positions,2);eq(e.spots[1].mapID,1)
 end)
+test('fixed reagent snapshot aggregates repeated item slots and ignores optional modifiers',function()
+ local optional=slot(999,3,3);optional.reagentType=0;optional.required=false
+ local reagents,supported=ns.Crafting.FixedReagents(recipe({slot(2672,2),slot(2672,3,2),optional}))
+ eq(supported,true);eq(reagents[2672],5);eq(reagents[999],nil)
+end)
+test('fixed reagent snapshot rejects unresolved required alternatives, currencies and variable quantities',function()
+ local alternative=slot(2672);alternative.reagents={{itemID=2672},{itemID=2673}}
+ local currency=slot(2672);currency.reagents={{currencyID=10}};currency.dataSlotType=3
+ local variable=slot(2672);variable.variableQuantities={{reagent={itemID=2672},quantity=2}}
+ for _,invalid in ipairs({alternative,currency,variable})do
+  local reagents,supported=ns.Crafting.FixedReagents(recipe({invalid}))
+  eq(reagents,nil);eq(supported,false)
+ end
+end)
 local function liveAPI()
  ns.settings={showBank=false,categories={}};ns.Catalog={modules={Cooking={}}}
  C_TradeSkillUI={GetRecipeInfo=function(id)return{recipeID=id,name='Recipe',learned=false,isRecraft=false,

@@ -189,19 +189,20 @@ function Titan.Menu(owner)
                     menu:SetScrollMode(300)
                     local function redraw() ns.Map.Update(); ns.Minimap.Update() end
                     menu:CreateButton('Show all materials', function()
-                        ns.settings.mapItems[kind] = {}; redraw()
+                        for itemID in pairs(resources) do ns.Sources.SetMaterialVisible(itemID, true) end
+                        redraw()
                     end)
                     menu:CreateButton('Hide all materials', function()
-                        for itemID in pairs(resources) do ns.settings.mapItems[kind][itemID] = false end
+                        for itemID in pairs(resources) do ns.Sources.SetMaterialVisible(itemID, false) end
                         redraw()
                     end)
                     local ids = {}; for itemID in pairs(resources) do ids[#ids + 1] = itemID end
                     table.sort(ids)
                     for _, itemID in ipairs(ids) do
                         menu:CreateCheckbox(ns.Style.ItemName(itemID), function()
-                            return ns.settings.mapItems[kind][itemID] ~= false
+                            return ns.Sources.MaterialVisible(itemID)
                         end, function()
-                            ns.settings.mapItems[kind][itemID] = ns.settings.mapItems[kind][itemID] == false
+                            ns.Sources.SetMaterialVisible(itemID, not ns.Sources.MaterialVisible(itemID))
                             redraw()
                         end)
                     end
@@ -212,6 +213,7 @@ function Titan.Menu(owner)
         reports:CreateButton('Observed chances', function() ns.Reports.Show('chances') end)
         reports:CreateButton('Profession actions', function() ns.Reports.Show('actions') end)
         reports:CreateButton('Crafting and cooking', function() ns.Reports.Show('production') end)
+        reports:CreateButton('Reagent use estimates', function() ns.Reports.Show('reagentUsage') end)
         reports:CreateButton('Export statistics',function()ns.ExportView.Show()end)
         reports:CreateButton('Plan selected recipe reagents',function()
             if ns.Crafting.selectedID then ns.CraftingView.Show(ns.Crafting.selectedID,1)

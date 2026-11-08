@@ -15,6 +15,12 @@ function Sources.Categories(includeSaved)
     result[#result+1]={id='Rare',label='Rare loot'}
     return result
 end
+function Sources.MaterialVisible(itemID)
+    return ns.settings.mapItemVisibility[itemID] ~= false
+end
+function Sources.SetMaterialVisible(itemID,visible)
+    ns.settings.mapItemVisibility[itemID] = visible == true
+end
 function Sources.Enabled(kind,itemID)
     local s=ns.settings;if not s or not s.gatheringMap or kind=='Enchanting'then return false end
     if kind~='Rare'then
@@ -22,7 +28,7 @@ function Sources.Enabled(kind,itemID)
     end
     if switches[kind]then if not s[switches[kind]]then return false end
     elseif s.mapProfessions[kind]==false then return false end
-    return not itemID or not s.mapItems[kind]or s.mapItems[kind][itemID]~=false
+    return not itemID or Sources.MaterialVisible(itemID)
 end
 function Sources.ToggleKey(kind)return switches[kind]end
 function Sources.Items(kind)

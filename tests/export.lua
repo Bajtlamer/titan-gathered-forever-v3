@@ -10,6 +10,19 @@ test('current scope excludes other characters and retains partial lifetime quant
  eq(h.rates[1].itemID,2770);eq(h.rates[1].hits,1);eq(h.rates[1].eligibleCompleteSources,2)
  eq(h.sourceGroups[1].completeSources,2);eq(h.sourceGroups[1].outcomes[1].quantity,0)
 end)
+test('acquired item exports include source occurrence counts with explicit uncertainty',function()
+ local d=ns.Export.Build(f.sources,{scope='combined'})
+ local a=d.characters[1].history.items[1]
+ eq(a.itemID,1210);eq(a.quantity,3);eq(a.acquisitions,1);eq(a.acquisitionsIncomplete,false)
+ local combined=d.combined.history.items[2]
+ eq(combined.itemID,2770);eq(combined.acquisitions,2);eq(combined.quantity,3)
+ eq(combined.acquisitionsIncomplete,false)
+ eq(d.characters[1].production.items[1].acquisitions,nil)
+ local item=f.saved.history.characters['Player-private-A'].items[1210]
+ item.acquisitionsIncomplete=true
+ eq(ns.Export.Build(f.sources,{}).characters[1].history.items[1].acquisitionsIncomplete,true)
+ item.acquisitionsIncomplete=false
+end)
 test('default privacy excludes nested keys labels receipts positions and identity',function()
  local text=ns.Export.Encode(ns.Export.Build(f.sources,{scope='combined'}))
  for _,value in ipairs({'Player-private','Private','private-','0.123','0.456','recent','sealed','itemGUID','castGUID'})do
@@ -50,6 +63,7 @@ test('production retains matched denominators explicit flags and output distribu
  eq(r.attempts,3);eq(r.completed,2);eq(r.matched,2);eq(r.quantity,6);eq(r.unresolved,1)
  eq(r.multicraftKnown,2);eq(r.multicraftHits,1);eq(r.bonusKnown,2);eq(r.bonusHits,1)
  eq(r.outputs[1].itemID,2680);eq(r.outputs[1].distribution[1].quantity,2);eq(r.outputs[1].distribution[2].operations,1)
+ eq(r.reagentCoverageBegan,100);eq(r.reagentUnsupportedCasts,2);eq(#r.reagentUse,0)
 end)
 test('snapshot creation and encoding never seal collectors or mutate saved state',function()
  local before=f.saved.actions.characters['Player-private-A'].recent['private-cast-pending']
