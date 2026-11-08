@@ -338,12 +338,13 @@ test('right-click menu toggles actual settings', function()
     assert(s.menu.checkboxes['Auction items'])
 end)
 
-test('private Titan summary labels all counts and does not repeat shared reagents', function()
+test('private Titan summary omits confusing count labels and does not repeat shared reagents', function()
     local s, ns = fixture(); s:Start()
     s:Event('BANKFRAME_OPENED'); s:Flush()
     s.broker.OnEnter({})
     local tip = ns.Titan.tooltip
-    assert(contains(tip.lines, 'Bags / Bank / Total'))
+    assert(not contains(tip.lines, 'Bags / Bank / Total'))
+    assert(contains(tip.lines, 'Material'))
     local occurrences = 0
     for _, line in ipairs(tip.lines) do
         if line:find('Localized Cloth', 1, true) then occurrences = occurrences + 1 end
@@ -417,7 +418,7 @@ test('bags-only configuration hides bank, sum, timestamps and bank-only rows', f
     eq(#ns.Titan.Rows(), 0)
     ns.settings.showZero = true
     s.broker.OnEnter({})
-    assert(contains(ns.Titan.tooltip.lines, 'Material Bags'))
+    assert(contains(ns.Titan.tooltip.lines, 'Material'))
     assert(not contains(ns.Titan.tooltip.lines, 'Bank'))
     assert(not contains(ns.Titan.tooltip.lines, 'Total'))
 end)
@@ -430,8 +431,8 @@ test('total always follows bank and has no independent configuration toggle', fu
     assert(contains(tip.lines, 'Bank: 0'))
     assert(contains(tip.lines, 'Total: 3'))
     s.broker.OnEnter({})
-    assert(contains(ns.Titan.tooltip.lines, 'Bags / Bank'))
-    assert(contains(ns.Titan.tooltip.lines, ' / Total'))
+    assert(not contains(ns.Titan.tooltip.lines, 'Bags / Bank'))
+    assert(not contains(ns.Titan.tooltip.lines, ' / Total'))
     s.broker.OnClick({}, 'RightButton')
     eq(s.menu.checkboxes['Show total counts'], nil)
 end)
@@ -467,7 +468,7 @@ test('summary restores learned skills, rarity names and colored section separato
     assert(colored, 'Material rarity color missing')
 end)
 
-test('summary separates skills from material columns and omits the redundant addon header', function()
+test('summary separates skills from materials and omits the redundant addon header', function()
     local s, ns = fixture(); s:Start()
     s.skills[186] = { name = 'Mining', rank = 75, maxRank = 150 }
     s.broker.OnEnter({})
@@ -475,7 +476,7 @@ test('summary separates skills from material columns and omits the redundant add
     local heading
     for index, line in ipairs(lines) do
         assert(not plain(line):find(ns.L.title, 1, true), 'Redundant addon header remains')
-        if plain(line):find('Material Bags', 1, true) then heading = index end
+        if plain(line):find('Material', 1, true) then heading = index end
     end
     assert(heading and lines[heading - 1] == ' ', 'Missing rule between skills and material columns')
 end)

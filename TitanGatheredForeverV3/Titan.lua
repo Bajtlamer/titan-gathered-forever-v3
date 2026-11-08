@@ -36,8 +36,7 @@ function Titan.Show(owner)
         end
         ns.Style.Separator(tooltip)
     end
-    tooltip:AddDoubleLine(ns.Style.Text(ns.Style.gold, 'Material'),
-        ns.Style.Text(ns.Style.gold, ns.Tooltips.CountHeading()), 1, 1, 1, 1, 1, 1)
+    tooltip:AddLine(ns.Style.Text(ns.Style.gold, 'Material'))
     local rows = Titan.Rows()
     local limit = ns.settings.rowsPerPage
     local pages = math.max(1, math.ceil(#rows / limit))

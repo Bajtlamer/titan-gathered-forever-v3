@@ -18,10 +18,6 @@ function Tooltips.BankObservation(count)
     end
 end
 
-function Tooltips.CountHeading()
-    if not ns.settings.showBank then return 'Bags' end
-    return 'Bags / Bank / Total'
-end
 function Tooltips.ShowCount(value)
     return ns.settings.showZero or (type(value)=='number' and value~=0)
 end
