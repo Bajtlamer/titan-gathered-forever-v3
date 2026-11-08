@@ -29,11 +29,10 @@ end
 function Tooltips.CountValues(count)
     count = Tooltips.DisplayCounts(count)
     if ns.settings.showBank then
-        local values = {
-            Tooltips.ShowCount(count.bags) and ns.Style.Count(count.bags, 'bags') or '',
-            Tooltips.ShowCount(count.bank) and ns.Style.Count(count.bank, 'bank') or '',
-            Tooltips.ShowCount(count.total) and ns.Style.Count(count.total, 'total') or '',
-        }
+        local values = {}
+        if Tooltips.ShowCount(count.bags) then values[#values + 1] = ns.Style.Count(count.bags, 'bags') end
+        if Tooltips.ShowCount(count.bank) then values[#values + 1] = ns.Style.Count(count.bank, 'bank') end
+        if Tooltips.ShowCount(count.total) then values[#values + 1] = ns.Style.Count(count.total, 'total') end
         return table.concat(values, ' / ')
     end
     return Tooltips.ShowCount(count.bags) and ns.Style.Count(count.bags, 'bags') or ''

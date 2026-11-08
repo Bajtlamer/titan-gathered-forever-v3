@@ -15,7 +15,7 @@ Validation: **391 automated checks pass**, plus Lua 5.1 compilation of every shi
 Implemented:
 
 - Profession-use information and current Bags, Bank and Total counts in item tooltips, including recipe-material item tooltips. Disabling Bank also hides Total.
-- Display > Show items with zero counts controls zero-valued inventory fields in Titan summaries and item tooltips. With it off, zero Bank values are omitted while positive Bank values remain; Show bank counts still controls Bank and Total together.
+- Display > Show items with zero counts controls zero-valued inventory fields in Titan summaries and item tooltips. With it off, zero values and their separators are omitted (for example, `3 / 3`); positive Bank values remain, and Show bank counts still controls Bank and Total together.
 - Learned profession skill ranks, item rarity colors and organized Titan configuration menus.
 - Per-character lifetime obtained-item totals, with an optional combined-character view. Reports open one at a time and retain their own scope, filter and page. Lifetime materials, observed chances and profession actions use compact columns with wrapped rows and pagination. Lifetime materials separate obtained quantity from Times obtained, counting distinct observed source receipts containing the item, including partial loot. Older incomplete occurrence totals show a + lower bound or Unknown when no evidence remains.
 - Observed acquisition rates for readable loot sources, including mining and herbalism byproducts, skinning, fishing and supported ordinary material drops.
