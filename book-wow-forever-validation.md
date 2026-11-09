@@ -265,3 +265,5 @@ The user deferred these checks on 2026-11-09. Automated results do not replace t
 4. Switch character scope, filter, page and report, then return. Expansion stays per-window, scope/filter/page remain independent, and combined percentages use summed hits/trials rather than averaged percentages. Check for overlap at the normal UI scale.
 
 These live checks remain deferred; automated model/layout tests cannot confirm client text rendering.
+
+If the game retains old addon version metadata after /reload, fully restart WoW to refresh the updated manifests. Do not restart the user's game automatically.

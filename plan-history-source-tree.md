@@ -16,7 +16,7 @@ In-game lifetime materials retain a compact parent item row with quantity and a 
 - [x] Run source/package, PHP, local smoke and responsive browser checks; review, update PR, back up and deploy website first.
 - [x] Add failing report regressions for expansion/collapse, all source access, independent probabilities, unknown evidence, page bounds and report state; implement tree and version 0.4.2-alpha.
 - [x] Run full addon checks, automatically install with backup and byte verification. Publish source branch/PR, build new versioned package set and release notes.
-- [ ] Refresh website downloads and matching instructions to addon 0.4.2-alpha, website 1.1.1; test all current/legacy archives, update PR and deploy with backup.
+- [x] Refresh website downloads and matching instructions to addon 0.4.2-alpha, website 1.1.1; test all current/legacy archives, update PR and deploy with backup.
 
 ## Constraints
 
@@ -29,3 +29,7 @@ Website 1.1.0 shipped first from a4988cf, with twelve independently generated ar
 The old lifetime source-summary regression failed before implementation. The new parent/child tree passes nineteen report checks, including all fifty sources on bounded continuation pages, separate 50%/100% denominators, combined 2/3 rates, unknown evidence and collapse/page bounds. Full checks: 408 (76 Python, 332 Lua), plus every shipped Lua compilation. Independent review found no critical/important issue; native font rendering remains a live gate.
 
 Installed 0.4.2-alpha automatically with the safe installer after checks/review. All 57 runtime files across fourteen addons match the new package byte-for-byte. Previous candidate: Interface/.tgf-v3-backups/candidate-yndg5ybt. Built fifteen new versioned ZIPs and matching downloads.json/SHA256SUMS under dist/releases/0.4.2-alpha. No SavedVariables were edited. /reload is required for live acceptance.
+
+Final website version 1.1.1 deployed from 4710c69. Live checks passed for all 38 ZIPs: fifteen current 0.4.2-alpha, fifteen preserved 0.4.1-alpha and eight legacy archives. Server SHA256SUMS passed for all new archives and downloads.json; browser checks passed at 320/390/768/1440 pixels. Pre-1.1.1 protected rollback backup: /opt/titan-gathered-backups/20261109T222433Z. Website PR #1 and addon PR #2 remain open, preserving both main branches.
+
+The user can /reload to load the Lua source-tree changes. A full WoW restart refreshes cached manifest/version metadata if the panel still reports v0.4.1. No game restart was performed automatically.

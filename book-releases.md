@@ -38,7 +38,7 @@ Hard termination or power loss can also interrupt automatic recovery. After conf
 3. Fetch the configured remote and check ancestry before pushing. Commit the reviewed source and documentation, then push the intended branch without force. A push to main runs verification/packaging CI; only a version tag invokes the publication job.
 4. Verify the remote branch resolves to the new commit and report the commit and check results. Do not claim that a source push has published updated downloadable assets or changed the website.
 
-The manifest can remain 0.4.1-alpha while preparing this unreleased source update. Assign and synchronize a new version only when an actual release is requested.
+Increment and synchronize the patch prerelease version for every completed runtime update, as required by the user. Source/test iterations and documentation-only evidence commits are not separate deployed updates. Version tags and GitHub release publication still require separate authorization.
 
 ## Prepare a version
 

@@ -24,7 +24,7 @@ Catalogue evidence remains partial: 532 supported items, 1,973 combined recipe r
 
 Automatically install each completed, verified runtime update into /Applications/World of Warcraft/_forever_/Interface/AddOns using tools/install.py, retaining backups and checking installed bytes. This is recorded in AGENTS.md and .cursor/rules/automatic-live-install.mdc. Preserve SavedVariables, other addons and the user's control of the running game. Use /reload for Lua-only updates and a full restart when new files/assets require it. An identical verified installation does not need another backup/replacement.
 
-The latest installed candidate is retained in the client; the immediately preceding folders are backed up under Interface/.tgf-v3-backups/candidate-eqi9ea04. No account data was committed or edited directly, and no hosting change or new release tag was created.
+The latest 0.4.2-alpha candidate is retained in the client; the immediately preceding folders are backed up under Interface/.tgf-v3-backups/candidate-yndg5ybt. No account data was committed or edited directly, and no hosting change or new release tag was created.
 
 ## Implementation and installation history
 
