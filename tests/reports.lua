@@ -35,6 +35,7 @@ end
 CreateFrame=function()return frame()end;UIParent=frame();UISpecialFrames={};UnitGUID=function()return'a'end
 C_Map={GetMapInfo=function(id)return{name='Zone '..id}end};GameTooltip={SetOwner=function()end,SetItemByID=function(self,id)self.item=id end,Show=function()end,Hide=function()end}
 local ns={ItemName=function(id)return'Item '..id end,Style={ItemName=function(id)return'Item '..id end},Catalog={modules={Cooking={label='Cooking',items={[769]=true}}}}}
+ns.Style.MenuNote=function(root,value)return root:CreateTitle(value)end
 ns.Production={labels={Tailoring='Tailoring',FirstAid='First Aid'}}
 ns.Catalog.Modules=function()return{{id='Cooking',label='Cooking'}}end
 assert(loadfile('TitanGatheredForeverV3/History.lua'))('TGF v3',ns);assert(loadfile('TitanGatheredForeverV3/Reports.lua'))('TGF v3',ns)
@@ -50,18 +51,18 @@ test('switching reports hides previous content and preserves independent scope a
  ns.Reports.Show('history');assert(h:IsShown()and not c:IsShown())
  eq(_G.height,nil)
  eq(h.rows[1].cells[2].text,'2')
- h.scope.scripts.OnClick();eq(h.rows[1].cells[2].text,'5');eq(h.rows[1].cells[3].text,'Zone 1 (40.0, 60.0)');eq(c.combined,nil)
+ h.scope.scripts.OnClick();eq(h.rows[1].cells[2].text,'5');eq(h.rows[1].cells[3].text,'Loot - Zone 1: 100.0% (2/2)');eq(c.combined,nil)
  h.filter='Cooking';ns.Reports.Update(h)
  ns.Reports.Show('chances');eq(c.rows[1].cells[2].text,'100.0%');eq(c.rows[1].cells[3].text,'1 / 1')
  ns.Reports.Show('history');eq(h.filter,'Cooking');eq(h.combined,true);eq(h.rows[1].cells[2].text,'5')
  h.filter=nil;h.scope.scripts.OnClick();eq(#UISpecialFrames,2)
 end)
-test('lifetime values use a total column and loot/gather coordinates at the right of the row',function()
+test('lifetime values replace the last location with observed source chances',function()
  local w=ns.Reports.windows.history
- eq(w.headers[2].text,'Lifetime obtained');eq(w.headers[3].text,'Last loot or gather');eq(w.headers[4],nil)
+ eq(w.headers[2].text,'Lifetime obtained');eq(w.headers[3].text,'Observed drop chance');eq(w.headers[4],nil)
  local r=w.rows[1]
  eq(r.cells[1].text,'Item 769');eq(r.cells[2].text,'2')
- eq(r.cells[3].text,'Zone 1 (40.0, 60.0)')
+ eq(r.cells[3].text,'Loot - Zone 1: 100.0% (1/1)')
  assert(r.cells[3].point[4]>300);assert(r.height<37)
 end)
 test('global reagent report shows leading profession share and opens full breakdown',function()
@@ -89,7 +90,7 @@ test('lifetime obtained quantity includes the item crafted output total',functio
  ns.production={Totals=function()return{{itemID=769,quantity=12},{itemID=2680,quantity=7}}end}
  ns.Reports.Show('history');local w=ns.Reports.windows.history
  eq(w.headers[2].text,'Lifetime obtained')
- eq(w.headers[3].text,'Last loot or gather');eq(w.headers[4],nil)
+ eq(w.headers[3].text,'Observed drop chance');eq(w.headers[4],nil)
  local rows={};for _,row in ipairs(w.rows)do if row.data then rows[row.data.itemID]=row end end
  eq(rows[769].cells[2].text,'14')
  eq(rows[2680].cells[2].text,'7')
@@ -101,7 +102,7 @@ test('lifetime list shows quantities without an extra source occurrence counter'
   groups={old={kind='Loot',source='123',mapID=1,trials=1,items={[769]={hits=1,quantity=2}}}}}}})
  ns.Reports.Show('history');local w=ns.Reports.windows.history
  eq(w.rows[1].cells[2].text,'8');eq(w.rows[2].cells[2].text,'3')
- eq(w.headers[3].text,'Last loot or gather')
+ eq(w.headers[3].text,'Observed drop chance')
  ns.history=previous;ns.Reports.Update(w)
 end)
 test('report rows filter by consuming profession and source kind',function()
@@ -147,11 +148,12 @@ test('production report distinguishes completions matched results and explicit f
   ns.production:Cast('UNIT_SPELLCAST_SUCCEEDED','player','c'..i,2500+i)
   ns.production:Result({operationID=i,itemID=2680,itemGUID='Item-output',quantity=2,firstCraftReward=false,isEnchant=false,bonusCraft=false,multicraft=0})
  end
- ns.Reports.Show('production');local w=ns.Reports.windows.production;assert(w and w:IsShown());eq(#w.rows,5)
+ ns.Reports.Show('production');local w=ns.Reports.windows.production;assert(w and w:IsShown());eq(#w.rows,16)
  assert(not ns.Reports.windows.actions:IsShown())
- assert(w.rows[1].name.text:find('Cook 2501',1,true));assert(w.rows[1].detail.text:find('1 completed',1,true))
- assert(w.rows[1].detail.text:find('1 matched',1,true));assert(w.rows[1].detail.text:find('0 / 1',1,true))
- w.page=2;ns.Reports.Update(w);assert(w.rows[1].name.text:find('Cook 2506',1,true));eq(w.rows[2]:IsShown(),false)
+ assert(w.rows[1].name.text:find('Cook 2501',1,true));eq(w.rows[1].cells[2].text,'1');eq(w.rows[1].cells[3].text,'1')
+ eq(w.rows[1].cells[4].text,'100.0%');eq(w.rows[1].cells[5].text,'1')
+ eq(w.rows[1].cells[6].text,'2');eq(w.rows[1].cells[7].text,'0.0% (0/1)')
+ eq(w.rows[1].cells[8].text,'0.0% (0/1)');assert(w.rows[6]:IsShown());assert(w.rows[1].height<37)
  local titles={};MenuUtil={CreateContextMenu=function(_,fn)
   local menu={CreateTitle=function(_,v)titles[#titles+1]=v end,SetScrollMode=function()end};fn({},menu)
  end}
@@ -166,7 +168,7 @@ test('crafted-only lifetime rows show the total without inventing a loot locatio
  local found
  for _,r in ipairs(w.rows)do if r.data and r.data.itemID==2680 then found=r end end
  assert(found);eq(found.cells[2].text,'12')
- eq(found.cells[3].text,'No loot or gather location')
+ eq(found.cells[3].text,'Unknown')
 end)
 test('wrapped report rows paginate without overlap lost entries or resetting another report page',function()
  local original=ns.Reports.Rows
@@ -216,5 +218,21 @@ test('PvP Board keeps client totals separate from addon tracked outdoor estimate
  assert(w.note.text:find('cannot be reconstructed',1,true))
  assert(not w.filterButton:IsShown()or w.filterButton.hidden~=false)
  ns.Reports.Show('history');assert(not w:IsShown())
+end)
+test('source presentation omits internal IDs and keeps readable names',function()
+ eq(ns.Reports.Source({kind='Mining',source='656333',mapID=1}),'Mining - Zone 1')
+ eq(ns.Reports.Source({kind='Loot',source='123',sourceName='Wolf',mapID=1}),'Loot - Wolf - Zone 1')
+end)
+test('lifetime chances retain distinct source denominators and zero outcomes',function()
+ local previous=ns.history
+ ns.history=ns.History.New({})
+ ns.history:Observe('a','A',{id='yes',kind='Mining',source='1',mapID=1,at=1,complete=true,items={[769]=4}})
+ ns.history:Observe('a','A',{id='no',kind='Mining',source='1',mapID=1,at=2,complete=true,items={}})
+ ns.history:Observe('a','A',{id='other',kind='Loot',source='2',mapID=1,at=3,complete=true,items={[769]=1}})
+ ns.Reports.Show('history');local w=ns.Reports.windows.history
+ local value=w.rows[1].cells[3].text
+ assert(value:find('Mining - Zone 1: 50.0% (1/2)',1,true))
+ assert(value:find('Loot - Zone 1: 100.0% (1/1)',1,true))
+ ns.history=previous;ns.Reports.Update(w)
 end)
 print('PASS '..passed..' history/report window checks')

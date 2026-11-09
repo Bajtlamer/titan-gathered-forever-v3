@@ -28,8 +28,7 @@ function Tooltips.CountValues(count)
         local values = {}
         if Tooltips.ShowCount(count.bags) then values[#values + 1] = ns.Style.Count(count.bags, 'bags') end
         if Tooltips.ShowCount(count.bank) then values[#values + 1] = ns.Style.Count(count.bank, 'bank') end
-        if Tooltips.ShowCount(count.total) then values[#values + 1] = ns.Style.Count(count.total, 'total') end
-        return table.concat(values, ' / ')
+        return table.concat(values, '/')
     end
     return Tooltips.ShowCount(count.bags) and ns.Style.Count(count.bags, 'bags') or ''
 end
@@ -43,14 +42,18 @@ function Tooltips.Lines(itemID)
     if ns.Crafting then reagent,plan=ns.Crafting.Context(itemID)end
     if not record and (not ns.history or ns.history:Total(character, itemID) == 0)and crafted==0 and not reagent then return {} end
     record = record or { professions = {}, recipes = {}, recipeCounts = {}, uses = {} }
-    local lines = {}
+    local lines, notes = {}, {}
+    local function note(value)
+        lines[#lines + 1] = value
+        notes[#lines] = true
+    end
     for _, profession in ipairs(record.professions) do
         local count = record.recipeCounts[profession] or 0
         lines[#lines + 1] = ns.Style.Text(ns.Style.gold, 'Reagent for ')
             .. ns.Style.Text(ns.Style.cyan, profession)
             .. ns.Style.Text(ns.Style.gray, string.format(' (%d recipes).', count))
     end
-    for _, use in ipairs(record.uses) do lines[#lines + 1] = ns.Style.Text(ns.Style.note, use.reason) end
+    for _, use in ipairs(record.uses) do note(ns.Style.Text(ns.Style.note, use.reason)) end
     -- A small sample gives a concrete use without overwhelming the native item tooltip.
     for index = 1, math.min(2, #record.recipes) do
         local info = C_Spell.GetSpellInfo(record.recipes[index])
@@ -68,21 +71,21 @@ function Tooltips.Lines(itemID)
         if Tooltips.ShowCount(counts.bank) then
             lines[#lines + 1] = ns.Style.Text(ns.Style.gold, 'Bank: ') .. ns.Style.Count(counts.bank, 'bank')
         end
-        if Tooltips.ShowCount(counts.total) then
+        if counts.bags>0 and counts.bank>0 then
             lines[#lines + 1] = ns.Style.Text(ns.Style.gold, 'Total: ') .. ns.Style.Count(counts.total, 'total')
         end
     end
     if observed.bagsState == 'cached' then
-        lines[#lines + 1] = ns.Style.Text(ns.Style.gray, 'Bag refresh incomplete; showing last observed counts.')
+        note(ns.Style.Text(ns.Style.gray, 'Bag refresh incomplete; showing last observed counts.'))
     end
     local observation = Tooltips.BankObservation(observed)
-    if observation then lines[#lines + 1] = ns.Style.Text(ns.Style.gray, observation) end
+    if observation then note(ns.Style.Text(ns.Style.gray, observation)) end
     if reagent then
         lines[#lines+1]=false
         lines[#lines+1]=ns.Style.Text(ns.Style.violet,string.format('For %s: %d per operation; missing %d (%s)',
             plan.name,reagent.perOperation,reagent.missing,plan.scope))
-        lines[#lines+1]=ns.Style.Text(ns.Style.gray,plan.craftable and string.format('Material limit: %d operations%s. /tgf recipe',
-            plan.craftable,plan.cached and' (cached estimate)'or'')or'Material limit unavailable; inventory or recipe requirements unresolved. /tgf recipe')
+        note(ns.Style.Text(ns.Style.gray,plan.craftable and string.format('Material limit: %d operations%s. /tgf recipe',
+            plan.craftable,plan.cached and' (cached estimate)'or'')or'Material limit unavailable; inventory or recipe requirements unresolved. /tgf recipe'))
     end
     if ns.settings.historyTooltips and ns.history then
         if crafted>0 then
@@ -100,7 +103,7 @@ function Tooltips.Lines(itemID)
                 lines[#lines + 1] = ns.Style.Text(ns.Style.note, string.format('%s: %.1f%% (%d / %d samples)',
                     ns.Reports.Source(row), row.percent, row.hits, row.trials))
             end
-            lines[#lines + 1] = ns.Style.Text(ns.Style.gray, 'Observed complete loot samples, not guaranteed drop rates. /tgf history')
+            note(ns.Style.Text(ns.Style.gray, 'Observed complete loot samples, not guaranteed drop rates. /tgf history'))
         end
         if #sources == 0 and ns.gathering then
             local found = 0
@@ -116,7 +119,7 @@ function Tooltips.Lines(itemID)
             end
         end
     end
-    return lines
+    return lines, notes
 end
 
 function Tooltips.Append(tooltip, data)
@@ -133,8 +136,11 @@ function Tooltips.Append(tooltip, data)
     if tooltip.tgForeverItemID == data.id then return end
     tooltip.tgForeverItemID = data.id
     ns.Style.Separator(tooltip)
-    for _, line in ipairs(Tooltips.Lines(data.id)) do
-        if line == false then ns.Style.Separator(tooltip) else tooltip:AddLine(line, 1, 1, 1, true) end
+    local lines, notes = Tooltips.Lines(data.id)
+    for index, line in ipairs(lines) do
+        if line == false then ns.Style.Separator(tooltip)
+        elseif notes[index] then ns.Style.Note(tooltip, line)
+        else tooltip:AddLine(line, 1, 1, 1, true) end
     end
 end
 

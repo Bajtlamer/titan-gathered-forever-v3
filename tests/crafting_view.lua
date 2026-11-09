@@ -25,6 +25,7 @@ end}
 local ns={IsPublic=function()return true end,settings={showBank=false,categories={}},
  ItemName=function(id)return'Item '..id end,Style={ItemName=function(id)return'Item '..id end},
  Catalog={modules={Cooking={}},Get=function()return{recipes={2536}}end}}
+ns.Style.MenuNote=function(root,value)return root:CreateTitle(value)end
 local slots={}
 for i=1,7 do slots[i]={slotIndex=i,dataSlotIndex=i,reagentType=1,required=true,quantityRequired=1,
  reagents={{itemID=1000+i}},variableQuantities={},dataSlotType=1}end

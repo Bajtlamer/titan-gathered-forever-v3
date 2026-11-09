@@ -12,9 +12,9 @@ This is an alpha. Automated checks pass against simulated host APIs, but history
 
 ## Confirm counts
 
-1. Before first visiting the bank, hover a tracked material. Bags should match carried stacks, Bank should show zero and Total should equal Bags. Neither the item tooltip nor the Titan summary should display unknown or a bank-visit reminder.
-2. Open the personal bank with known quantities of that material in bags and bank. Verify separate Bags, Bank and Total values and the invariant `Total = Bags + Bank`.
-2a. With Show bank counts enabled and Show items with zero counts disabled, verify a zero Bank value is omitted from both Titan summaries and item tooltips, while positive Bags, Bank and Total values remain visible. If all inventory values are zero, no zero-valued count lines should appear. Enable zero-count display and confirm the zeros return. Disable Show bank counts and confirm Bank and Total are hidden regardless of their values.
+1. Before first visiting the bank, hover a tracked material. Bags should match carried stacks. With zero display off, omit Bank and Total when there is no bank quantity. Neither the item tooltip nor the Titan summary should display unknown or a bank-visit reminder.
+2. Open the personal bank with known quantities of that material in bags and bank. Verify separate Bags, Bank and Total values in the item tooltip and the invariant `Total = Bags + Bank`. The Titan summary shows only `bags/bank`, without spaces or a total.
+2a. With Show bank counts enabled and Show items with zero counts disabled, verify a zero Bank value is omitted from both Titan summaries and item tooltips, while positive Bags and Bank values remain visible. Total is shown only when both bags and bank contain the item. If all inventory values are zero, no zero-valued count lines should appear. Enable zero-count display and confirm the zeros return. Disable Show bank counts and confirm Bank and Total are hidden regardless of their values.
 3. Move a partial stack into the bank, then withdraw some. Wait for the inventory event batch to settle. Total should remain unchanged by either transfer.
 4. Move every bank stack out. Confirm a known bank count of zero rather than a retained old quantity.
 5. Close the bank. Its count should remain visible with a last-observed timestamp.
@@ -68,7 +68,7 @@ Before claiming full coverage, obtain a build-matched recipe/material export and
 ## Confirm icon styling and panel caption
 
 1. With default appearance settings, confirm world-map and minimap material icons have circular item art without borders, filled backplates or shadows. Use `/tgf icons` to select Full image or an optional Thin gold outline. Zoom the map and confirm the selected appearance stays proportional and readable.
-2. Confirm the Titan caption shows the addon name and `0.4.1-alpha`, without a material count. Loot or move items: the caption should keep the version while tooltip counts update.
+2. Confirm the Titan caption is `TG3 Forever - v0.4.1`, without a material count. Loot or move items: the caption should keep the version while tooltip counts update.
 
 
 ## Confirm Skinning and material controls
@@ -102,7 +102,7 @@ Before claiming full coverage, obtain a build-matched recipe/material export and
 
 1. Run /reload. Open Lifetime materials, Observed chances, Profession actions and Crafting and cooking in succession. Only the selected report should remain visible: no overlapping titles, descriptions or rows. Close with the button and Escape, then reopen.
 2. In each report change character scope, profession filter and page where enough data exists. Switch to another report, then return. Scope/filter/page should remain independent, with pages clamped only when the selected data no longer fills them.
-3. Check Lifetime columns: material, obtained quantity, Times obtained, crafted and last obtained location. One gather yielding four items must add four to quantity and one to Times obtained. Reopen a partially looted source and obtain more of the same item: quantity increases but the occurrence count stays one for that source/item. Empty sources and failed/cancelled casts do not increment the item occurrence count. Check persistence after /reload and the combined-character sum. Legacy lower bounds show N+ with the at-least explanation; no recovered occurrence evidence shows Unknown. Clearing map spots must not reset either history value. Crafted-only materials must show zero obtained and no acquired-loot location. Chance percentage, hits/samples and item quantity must remain separate. Action attempts, completed, failed, interrupted, stopped without confirmation, unresolved and recording start must remain distinct.
+3. Check Lifetime columns: Material, Lifetime obtained and Observed drop chance. Obtained combines acquired and recorded crafted quantities. Chances retain separate source/zone percentages and hit/sample counts, matching the tooltip; missing complete evidence shows Unknown. Combined scope sums hits/samples before calculating percentages. Click a row for all sources. Internal source IDs must not appear. Clearing map spots must not reset history. Acquisition occurrences remain in stored/exported evidence even though the compact list does not expose a separate column. Action attempts, completed, failed, interrupted, stopped without confirmation, unresolved and recording start remain distinct.
 4. Test long item/source names, large counts, multiple pages and empty filters at the normal UI scale. Text should wrap inside its column, adjacent rows should not overlap, and the last row should stay above the footer. Extremely long source text can be bounded within a page; click the item to inspect its full source information.
 5. Hover an item for its native tooltip and click it for sources. Confirm source map actions and production output-detail menus still work. Switch or close the report while hovering: a stale item tooltip should not remain visible.
 
@@ -127,7 +127,7 @@ Record exact spell/item IDs and event order when fishing or disenchanting fails.
 
 1. With WoW closed, back up and migrate the old account SavedVariables using the README instructions. Confirm the original file remains intact.
 2. Install the new core and selected renamed profession folders. Confirm their AddOns titles begin Titan Gathered Forever v3 and dependencies resolve against the new core.
-3. Disable the previous-generation addon folders. Enable the new Titan broker entry. Its caption should display the official name and 0.4.1-alpha.
+3. Disable the previous-generation addon folders. Enable the new Titan broker entry. Its panel caption should display `TG3 Forever - v0.4.1`; the manifest retains the official name and 0.4.1-alpha.
 4. Confirm /tgf settings, /tgf history and /tgf chances work. Verify prior history, spots, bank snapshots and preferences survived migration.
 5. Verify map icons use the new icon path, context menu labels say TGF v3, and the map button opens the new spot menu. Reload and confirm persistence in TitanGatheredForeverV3.lua.
 
@@ -149,7 +149,7 @@ If Fishing emits a different cast identity at channel start, or a loot window ca
 
 This gate is pending real-client execution. Use the local candidate on the actual Forever client, with Titan Panel and the affected profession addons. Record build, recipe ID, cast GUID and operation ID for discrepancies.
 
-1. Open `/tgf production` and Crafting and cooking under History and sources. Check current/combined selection, profession filters, five-row paging, item hovers, clicking a recipe for quantity distributions, readable dates and window layout at your UI scale. Existing history, bags and bank observations must remain intact.
+1. Open `/tgf production` and Crafting and cooking under History and sources. Check current/combined selection, profession filters, compact columns and height-aware paging, clicking a recipe for quantity distributions and recording dates, and window layout at your UI scale. Existing history, bags and bank observations must remain intact.
 2. Cook one item, then a queue of several identical recipes. Compare distinct observed starts, completed casts, matched result operations and actual quantities with the native crafting output log. Verify that recipe spell IDs match live recipe metadata and that result operation IDs are positive and distinguish operations. If operation identity is absent, retain the validation gate; do not infer missing output from bag changes.
 3. Craft a recipe that produces multiple units. If available, exercise explicit bonus/multicraft results and variable outputs. Compare item totals and per-operation observed quantity distributions. A quantity larger than one must not itself imply a proc. Proc denominators should include only readable explicit flag observations, not all casts.
 4. Test both result-before-success and success-before-result event sequences if the client emits them. Interrupt or fail a craft, stop a queue midway and check that failed/interrupted attempts produce no counted output. A cast with no matched result can remain completed with zero matched operations; explain any discrepancy using the recorded event sequence.
@@ -198,7 +198,7 @@ This gate is pending real-client execution. Use `/tgf export` and keep copied fi
 1. The updated 0.4.1-alpha candidate was installed on 2026-11-07, including this feature. Restart WoW to load it; close the client before subsequent replacements. Keep Titan Panel enabled and disable the previous addon generation.
 2. Open the Titan menu, Flight points, and enable Show flight points. Disable gathering markers and profession addons to confirm flight points work independently.
 3. On an Alliance character, browse a zone with known Alliance, Horde and neutral flight masters. Only Alliance and neutral addon markers should appear. Repeat on Horde, including a character with different discovered routes. No discovery status should carry between characters.
-4. Confirm all exposed undiscovered locations remain visible. With default appearance settings, flight markers retain native artwork without added borders; discovery status is shown in tooltip text. Hover a marker to verify its name, faction and explicit status. Compare several locations and discoveries with the client flight map. Native markers should not receive a duplicate addon icon; applied flight appearance settings may change their size, shape and optional outline; their usual click behavior should remain functional.
+4. Confirm all exposed undiscovered locations remain visible. With default appearance settings, flight markers retain native artwork without added borders; green indicates a confirmed visit, amber a client-reported undiscovered route and gray unconfirmed discovery. Discovery is also shown in tooltip text. Hover a marker to verify its name, faction and explicit status. Compare several locations and discoveries with the client flight map. Native markers should not receive a duplicate addon icon; applied flight appearance settings may change their size, shape and optional outline; their usual click behavior should remain functional.
 5. Discover a new route and open/close its taxi map. The world-map discovery tooltip should update without a reload. Change zones/maps, zoom and resize the map; verify icon alignment and visibility. Check that empty maps do not retain markers from another map.
 6. Turn Show flight points off: addon icons and tooltip additions disappear, while ordinary Blizzard flight markers retain their standard behavior. Reload and confirm the toggle persists. Reenable and verify the faction/discovery filter again.
 7. Record missing locations, wrong factions, incorrect discovery status, appearance mismatches or Lua errors with character faction, map name/ID and client build. The live API supplies the locations; an empty response is not proof the map has no flight masters. No static all-world completeness claim is made.
@@ -245,3 +245,13 @@ Default material appearance remains 14 px, Circle and no border; flight sample/d
 6. Toggle PvP spot visibility, reload, reopen the map and confirm settings and observations persist. Use the map's TGF v3 spots menu to clear PvP spots for that map only; lifetime/client totals and other map nodes must remain.
 
 Automated tests cover host-side event parsing, context routing, missing APIs, persistence, map/minimap rendering and clearing. They do not replace the live acceptance steps above.
+
+
+## Interface refinements, deferred live acceptance
+
+The user deferred these checks on 2026-11-09. Automated results do not replace them.
+
+1. Confirm small explanatory text (bank observation, sample caveats, right-click help and source-menu notes), normal-size item counts, and no small-font leakage after hovering a different native item.
+2. Confirm crafting Completed % equals completed casts divided by observed attempts, including unresolved attempts. Bonus/multicraft percentages use their displayed readable-field counts; zero known fields show Unknown.
+3. Without opening the world map first, interact with a flight master and open its taxi map. Only that current node becomes green/Discovered. Reachable remote nodes do not become confirmed. Close the taxi map, browse other maps and reload; verify visits persist by character. Legacy routes remain unconfirmed until visited again. Check native marker colors restore on disabling flight points and when frames are reused.
+4. Disable Record PvP lifetime history. New kills/deaths and PvP spots stop; existing data, native lifetime totals, acquisition history and map visibility settings remain intact. Re-enable, reload and check persistence.

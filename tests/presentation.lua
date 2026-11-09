@@ -52,4 +52,19 @@ assert(rows[1].name == 'Localized Mining' and rows[1].rank == 75 and rows[1].max
 assert(rows[2].name == 'Localized Cooking' and rows[2].secondary == true)
 learned[186].rank = 76
 assert(ns.Professions.Rows()[1].rank == 76, 'Skill rank did not update')
-print('PASS 8 rarity, separator and learned-profession checks')
+local titleFont
+local description = {AddInitializer=function(_,fn)
+    fn({fontString={SetFontObject=function(_,font)titleFont=font end}})
+end}
+ns.Style.MenuNote({CreateTitle=function(_,value)assert(value=='Explanation');return description end},'Explanation')
+assert(titleFont=='GameFontHighlightSmall','Informational menu titles should use small fonts')
+local region={font='OriginalFont'}
+function region:GetFontObject()return self.font end
+function region:SetFontObject(font)self.font=font end
+local originalAddLine=tip.AddLine
+function tip:AddLine(value)originalAddLine(self,value);_G['TestTipTextLeft'..#lines]=region end
+ns.Style.Note(tip,'Small explanatory note')
+assert(region.font=='GameFontHighlightSmall')
+tip.hooks.OnTooltipCleared(tip)
+assert(region.font=='OriginalFont','Tooltip recycling leaked a small font into native item content')
+print('PASS 10 rarity, separator and learned-profession checks')

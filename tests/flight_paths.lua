@@ -32,6 +32,8 @@ local function frame(parent)
         function r:SetPoint() end
         function r:SetTexture(v) self.texture=v end
         function r:SetAtlas(v) self.atlas=v end
+        function r:SetVertexColor(...) self.vertex={...} end
+        function r:GetVertexColor() return unpack(self.vertex or {1,1,1,1}) end
         function r:SetColorTexture(...) self.color={...} end
         function r:AddMaskTexture(mask) self.mask=mask end
         function r:RemoveMaskTexture() self.mask=nil end
@@ -45,13 +47,19 @@ end
 CreateFrame=function(_,_,parent) return frame(parent) end
 GetTime=function() return clock end
 UnitFactionGroup=function() return faction end
+local character='a'
+UnitGUID=function()return character end
+C_Map={GetBestMapForUnit=function()return 1 end,GetMapInfo=function()return{parentMapID=0}end}
+Enum={FlightPathState={Current=0,Reachable=1,Unreachable=2}}
+local taxiRows={}
 local apiCalls=0
-C_TaxiMap={GetTaxiNodesForMap=function(mapID) apiCalls=apiCalls+1; return rows[mapID] or {} end}
+C_TaxiMap={GetTaxiNodesForMap=function(mapID) apiCalls=apiCalls+1; return rows[mapID] or {} end,
+    GetAllTaxiNodes=function()return taxiRows end}
 GameTooltip={lines={}, SetOwner=function(self,p) self.owner=p;self.lines={} end,
     GetOwner=function(self)return self.owner end, AddLine=function(self,line)self.lines[#self.lines+1]=line end,
     Show=function(self)self.shown=true end, Hide=function(self)self.shown=false;self.owner=nil end}
 local secret={}
-local ns={settings={flightPoints=true,gatheringMap=false},IsPublic=function(v)return v~=secret end}
+local ns={db={flightVisits={a={[1]=true,[4]=true}}},settings={flightPoints=true,gatheringMap=false},IsPublic=function(v)return v~=secret end}
 assert(loadfile('TitanGatheredForeverV3/PinStyle.lua'))('TitanGatheredForeverV3',ns)
 local source=loadfile('TitanGatheredForeverV3/FlightPaths.lua')
 assert(source, 'Faction-aware flight points are not implemented')
@@ -69,6 +77,8 @@ function world:EnumeratePinsByTemplate(template)
 end
 local map
 local function reset()
+    ns.FlightPaths.tracker=nil
+    character='a';taxiRows={};ns.db.flightVisits={a={[1]=true,[4]=true}}
     faction='Alliance';rows={[1]={node(1,2,false),node(2,2,true),node(3,1,true),node(4,0,false)}}
     native={};ns.settings.flightPoints=true;world.mapID=1;world:Show();canvas.width=1000;canvas.height=600;canvas.scale=1
     map=ns.FlightPaths.New(world)
@@ -83,7 +93,7 @@ test('Horde faction and unavailable faction do not expose Alliance',function()
     faction=secret;list=ns.FlightPaths.Read(1);eq(#list,1)
 end)
 test('missing malformed and restricted discovery flags remain unknown',function()
-    faction='Alliance';rows[1]={node(1,2,nil),node(2,2,'false'),node(3,2,secret)}
+    ns.db.flightVisits={};faction='Alliance';rows[1]={node(1,2,nil),node(2,2,'false'),node(3,2,secret)}
     for _,n in ipairs(ns.FlightPaths.Read(1))do eq(n.status,'unknown')end
 end)
 test('malformed positions IDs and faction values are excluded',function()
@@ -104,15 +114,15 @@ test('borderless flight artwork retains tooltip discovery states',function()
     assert(not known.rim and not unknown.rim,'Flight markers still have an addon border')
     known.scripts.OnEnter(known);eq(GameTooltip.lines[3],'Discovered')
     unknown.scripts.OnEnter(unknown);eq(GameTooltip.lines[2],'Alliance flight point');eq(GameTooltip.lines[3],'Undiscovered')
-    rows[1]={node(1,2,nil)};map:Refresh(true);map.pins[1].scripts.OnEnter(map.pins[1]);eq(GameTooltip.lines[3],'Discovery status unavailable')
+    ns.db.flightVisits={};rows[1]={node(1,2,nil)};map:Refresh(true);map.pins[1].scripts.OnEnter(map.pins[1]);eq(GameTooltip.lines[3],'Discovery not confirmed')
 end)
 test('discovery updates and faction changes immediately refresh status and refilter',function()
-    reset();rows[1][2].isUndiscovered=false;map.events.scripts.OnEvent(map.events,'TAXI_NODE_STATUS_CHANGED')
+    reset();rows[1][2].isUndiscovered=false;taxiRows={{nodeID=2,state=0}};map.events.scripts.OnEvent(map.events,'TAXIMAP_OPENED')
     eq(map.pins[2].node.status,'discovered');faction='Horde';map:Refresh();eq(map.visibleCount,2);eq(map.pins[1].node.nodeID,3)
 end)
 test('an open tooltip updates when its flight point becomes discovered',function()
     reset();local pin=map.pins[2];pin.scripts.OnEnter(pin);eq(GameTooltip.lines[3],'Undiscovered')
-    rows[1][2].isUndiscovered=false;map.events.scripts.OnEvent(map.events,'TAXI_NODE_STATUS_CHANGED')
+    rows[1][2].isUndiscovered=false;taxiRows={{nodeID=2,state=0}};map.events.scripts.OnEvent(map.events,'TAXIMAP_OPENED')
     eq(GameTooltip.lines[3],'Discovered')
 end)
 test('toggle removes own markers without changing gathering or data',function()
@@ -168,7 +178,7 @@ test('hovered native tooltip cannot retain addon status after a change or remova
         reset();local pin=frame(world);pin:Show();pin.poiInfo={nodeID=2};native={pin};map:Refresh()
         GameTooltip:SetOwner(pin);GameTooltip:AddLine('Native flight name');pin.hooks.OnEnter(pin)
         eq(GameTooltip.lines[#GameTooltip.lines],'Flight point: Undiscovered')
-        if action=='discovery'then rows[1][2].isUndiscovered=false
+        if action=='discovery'then rows[1][2].isUndiscovered=false;ns.db.flightVisits.a[2]=true
         elseif action=='disable'then ns.settings.flightPoints=false
         else pin.poiInfo={nodeID=999}end
         map:Refresh(true)
@@ -184,6 +194,62 @@ test('flight appearance updates native and custom markers then restores native s
     eq(map.pins[1].width,28);assert(map.pins[1].texture.mask);eq(ns.PinStyle.Get('world').size,14)
     ns.settings.flightPoints=false;map:Refresh();eq(pin:GetScale(),1);eq(pin.Texture.mask,nil)
     ns.settings.iconAppearance=nil
+end)
+test('map-wide false discovery flags cannot invent confirmed visits',function()
+ reset();ns.db.flightVisits={};map:Refresh(true)
+ eq(map.pins[1].node.status,'unknown');eq(map.pins[2].node.status,'undiscovered')
+ rows[1][2].isUndiscovered=false;map.events.scripts.OnEvent(map.events,'TAXI_NODE_STATUS_CHANGED')
+ eq(map.pins[2].node.status,'unknown')
+end)
+test('only interacting with the current flight master confirms discovery per character',function()
+ reset();ns.db.flightVisits={};world:Hide();ns.settings.flightPoints=false
+ taxiRows={{nodeID=1,state=0},{nodeID=2,state=1},{nodeID=4,state=2}}
+ map.events.scripts.OnEvent(map.events,'TAXI_NODE_STATUS_CHANGED');eq(ns.db.flightVisits.a,nil)
+ map.events.scripts.OnEvent(map.events,'TAXIMAP_OPENED')
+ assert(ns.db.flightVisits.a[1]);eq(ns.db.flightVisits.a[2],nil);eq(ns.db.flightVisits.a[4],nil)
+ ns.settings.flightPoints=true;world:Show();map:Refresh(true);eq(map.pins[1].node.status,'discovered')
+ character='b';map:Refresh(true);eq(map.pins[1].node.status,'unknown')
+ character='a';map=ns.FlightPaths.New(world);eq(map.pins[1].node.status,'discovered')
+end)
+test('taxi close rejects later status notifications and unready or ambiguous current data',function()
+ reset();ns.db.flightVisits={};taxiRows={};map.events.scripts.OnEvent(map.events,'TAXIMAP_OPENED')
+ taxiRows={{nodeID=2,state=0}};map.events.scripts.OnEvent(map.events,'TAXI_NODE_STATUS_CHANGED')
+ assert(ns.db.flightVisits.a[2]);map.events.scripts.OnEvent(map.events,'TAXIMAP_CLOSED')
+ taxiRows={{nodeID=4,state=0}};map.events.scripts.OnEvent(map.events,'TAXI_NODE_STATUS_CHANGED')
+ eq(ns.db.flightVisits.a[4],nil)
+ ns.db.flightVisits={};taxiRows={{nodeID=1,state=0},{nodeID=2,state=0}}
+ map.events.scripts.OnEvent(map.events,'TAXIMAP_OPENED');eq(ns.db.flightVisits.a,nil)
+ taxiRows={{nodeID=secret,state=0},{nodeID=3,state=secret}}
+ map.events.scripts.OnEvent(map.events,'TAXI_NODE_STATUS_CHANGED');eq(ns.db.flightVisits.a,nil)
+end)
+test('flight textures distinguish statuses and restore native tint on disable and reuse',function()
+ reset();rows[1][4].isUndiscovered=nil;ns.db.flightVisits.a[4]=nil;map:Refresh(true)
+ local known,unknown,unconfirmed=map.pins[1].texture.vertex,map.pins[2].texture.vertex,map.pins[3].texture.vertex
+ assert(known[2]>known[1]);assert(unknown[1]>unknown[2]);eq(unconfirmed[1],unconfirmed[2])
+ local pin=frame(world);pin.Texture=pin:CreateTexture();pin.Texture:SetVertexColor(.3,.4,.5,.6)
+ pin.poiInfo={nodeID=1};pin:Show();native={pin};map:Refresh(true)
+ assert(pin.Texture.vertex[2]>pin.Texture.vertex[1]);ns.settings.flightPoints=false;map:Refresh()
+ eq(pin.Texture.vertex[1],.3);eq(pin.Texture.vertex[4],.6)
+ ns.settings.flightPoints=true;map:Refresh();pin.poiInfo={nodeID=999};map:Refresh()
+ eq(pin.Texture.vertex[2],.4)
+end)
+test('flight master visits are observed before the world map is ever loaded',function()
+ reset();WorldMapFrame=nil;ns.FlightPaths.instance=nil;ns.FlightPaths.tracker=nil;ns.db.flightVisits={}
+ ns.FlightPaths.Attach();eq(ns.FlightPaths.instance,nil)
+ local tracker=ns.FlightPaths.tracker;assert(tracker and tracker.events)
+ taxiRows={{nodeID=2,state=0}};tracker.events.scripts.OnEvent(tracker.events,'TAXIMAP_OPENED')
+ assert(ns.db.flightVisits.a[2]);WorldMapFrame=world;ns.FlightPaths.Attach()
+ eq(ns.FlightPaths.instance.pins[2].node.status,'discovered')
+ eq(ns.FlightPaths.instance.events,tracker.events)
+end)
+test('native recoloring during pin reuse or removal survives addon cleanup',function()
+ reset();local pin=frame(world);pin.Texture=pin:CreateTexture();pin.Texture:SetVertexColor(.3,.4,.5,.6)
+ pin.poiInfo={nodeID=1};pin:Show();native={pin};map:Refresh(true)
+ pin.Texture:SetVertexColor(.9,.8,.7,.6);pin.poiInfo={nodeID=2};map:Refresh(true)
+ ns.settings.flightPoints=false;map:Refresh();eq(pin.Texture.vertex[1],.9)
+ ns.settings.flightPoints=true;map:Refresh()
+ pin.Texture:SetVertexColor(.2,.3,.4,.5);pin.poiInfo={nodeID=999};map:Refresh()
+ eq(pin.Texture.vertex[1],.2);eq(pin.Texture.vertex[4],.5)
 end)
 local failures=0
 for _,t in ipairs(tests)do

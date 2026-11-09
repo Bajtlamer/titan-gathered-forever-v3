@@ -32,7 +32,7 @@ local function fixture(interface, saved, noBroker, noModules)
         function f:GetWidth() return 360 end
         function f:AddLine(text)
             self.lines[#self.lines + 1] = text
-            _G[tooltipName .. 'TextLeft' .. #self.lines] = {}
+            _G[tooltipName .. 'TextLeft' .. #self.lines] = {SetFontObject=function(region,font)region.font=font end}
         end
         function f:AddDoubleLine(left, right) self:AddLine(left .. ' ' .. right) end
         function f:CreateTexture()
@@ -199,7 +199,7 @@ test('initializes a Forever-only broker after player identity is ready', functio
     eq(s.brokerName, 'TitanGatheredForeverV3')
     eq(ns.inventory:Get(2589).bags, 3)
     eq(ns.inventory:Get(2589).bankState, 'unknown')
-    eq(s.broker.text, '0.1.0-alpha')
+    eq(s.broker.label, 'TG3 Forever');eq(s.broker.text, '- v0.1.0')
 end)
 
 test('honor-confirmed outdoor PvP creates a spot while BG awards only update PvP summary data',function()
@@ -248,7 +248,7 @@ test('inventory events coalesce and bank closure preserves snapshots', function(
     eq(ns.inventory:Get(2589).bank, 7)
 end)
 
-test('unvisited bank hides its zero count while total includes carried items', function()
+test('unvisited bank omits redundant total and zero bank count', function()
     local s, ns = fixture(); s:Start()
     local tip = CreateFrame('GameTooltip')
     s.post(tip, { id = 2589 })
@@ -256,10 +256,10 @@ test('unvisited bank hides its zero count while total includes carried items', f
     assert(contains(tip.lines, 'Tailoring'))
     assert(contains(tip.lines, 'Bags: 3'))
     assert(not contains(tip.lines, 'Bank: 0'))
-    assert(contains(tip.lines, 'Total: 3'))
+    assert(not contains(tip.lines, 'Total:'))
     assert(not contains(tip.lines, 'unknown'))
     s.broker.OnEnter({})
-    assert(contains(ns.Titan.tooltip.lines, '3 / 3'))
+    assert(contains(ns.Titan.tooltip.lines, 'Localized Cloth 3'))
     assert(not contains(ns.Titan.tooltip.lines, 'unknown'))
     assert(not contains(ns.Titan.tooltip.lines, 'Visit your personal bank'))
     eq(ns.inventory:Get(2589).bankState, 'unknown')
@@ -270,20 +270,20 @@ test('zero-count setting hides zero inventory values in the summary and item too
     local s,ns=fixture();s:Start()
     local tip=CreateFrame('GameTooltip');s.post(tip,{id=2589})
     assert(not contains(tip.lines,'Bank: 0'))
-    assert(contains(tip.lines,'Bags: 3'));assert(contains(tip.lines,'Total: 3'))
+    assert(contains(tip.lines,'Bags: 3'));assert(not contains(tip.lines,'Total:'))
     s.broker.OnEnter({})
     assert(not contains(ns.Titan.tooltip.lines,'3 / 0 / 3'))
-    assert(contains(ns.Titan.tooltip.lines,'3 / 3'))
+    assert(contains(ns.Titan.tooltip.lines,'Localized Cloth 3'))
     s:Event('BANKFRAME_OPENED');s:Flush()
     tip:ClearLines();s.post(tip,{id=2589})
     assert(contains(tip.lines,'Bags: 3'));assert(contains(tip.lines,'Bank: 7'));assert(contains(tip.lines,'Total: 10'))
     s.broker.OnEnter({})
-    assert(contains(ns.Titan.tooltip.lines,'3 / 7 / 10'))
+    assert(contains(ns.Titan.tooltip.lines,'3/7'))
     s.bags[0]={};s:Event('BAG_UPDATE_DELAYED');s:Flush()
     tip:ClearLines();s.post(tip,{id=2589})
     assert(not contains(tip.lines,'Bags: 0'));assert(not contains(tip.lines,'Bank: 0'));assert(not contains(tip.lines,'Total: 0'))
     s.broker.OnEnter({})
-    assert(not contains(ns.Titan.tooltip.lines,'0 / 0 / 0'))
+    assert(not contains(ns.Titan.tooltip.lines,'0/0'))
 end)
 
 test('repeated callbacks append once and tooltip recycling resets the section', function()
@@ -302,9 +302,9 @@ test('unavailable initial bag and bank zeros stay hidden until zero display is e
     assert(not contains(tip.lines, 'Total: 0'))
     assert(not contains(tip.lines, 'unknown'))
     ns.settings.showZero = true;tip:ClearLines();s.post(tip,{id=2589})
-    assert(contains(tip.lines,'Bags: 0'));assert(contains(tip.lines,'Bank: 0'));assert(contains(tip.lines,'Total: 0'))
+    assert(contains(tip.lines,'Bags: 0'));assert(contains(tip.lines,'Bank: 0'));assert(not contains(tip.lines,'Total:'))
     s.broker.OnEnter({})
-    assert(contains(ns.Titan.tooltip.lines, '0 / 0 / 0'))
+    assert(contains(ns.Titan.tooltip.lines, '0/0'))
     assert(not contains(ns.Titan.tooltip.lines, 'unknown'))
     eq(ns.inventory.bags, nil); eq(ns.inventory.character.bank, nil)
 end)
@@ -350,7 +350,7 @@ test('private Titan summary omits confusing count labels and does not repeat sha
         if line:find('Localized Cloth', 1, true) then occurrences = occurrences + 1 end
     end
     eq(occurrences, 1)
-    assert(contains(tip.lines, '3 / 7 / 10'))
+    assert(contains(tip.lines, '3/7'))
     s.broker.OnLeave(); eq(tip:IsShown(), false)
 end)
 
@@ -370,7 +370,7 @@ end)
 
 test('core-only startup shows the version and explains how to enable profession addons', function()
     local s, ns = fixture(nil, nil, nil, true); s:Start()
-    eq(s.broker.text, '0.1.0-alpha')
+    eq(s.broker.label, 'TG3 Forever');eq(s.broker.text, '- v0.1.0')
     eq(next(ns.Items), nil)
     eq(next(ns.Recipes), nil)
     s.broker.OnClick({}, 'RightButton')
@@ -400,10 +400,10 @@ test('empty scanned bags and bank display zero, including the summary', function
     local tip = CreateFrame('GameTooltip'); s.post(tip, { id = 2589 })
     assert(contains(tip.lines, 'Bags: 0'))
     assert(contains(tip.lines, 'Bank: 0'))
-    assert(contains(tip.lines, 'Total: 0'))
+    assert(not contains(tip.lines, 'Total:'))
     s.broker.OnEnter({})
-    assert(contains(ns.Titan.tooltip.lines, '0 / 0 / 0'))
-    eq(s.broker.text, '0.1.0-alpha')
+    assert(contains(ns.Titan.tooltip.lines, '0/0'))
+    eq(s.broker.label, 'TG3 Forever');eq(s.broker.text, '- v0.1.0')
 end)
 
 test('bags-only configuration hides bank, sum, timestamps and bank-only rows', function()
@@ -423,13 +423,13 @@ test('bags-only configuration hides bank, sum, timestamps and bank-only rows', f
     assert(not contains(ns.Titan.tooltip.lines, 'Total'))
 end)
 
-test('total always follows bank and has no independent configuration toggle', function()
+test('redundant totals stay hidden even with zero display enabled', function()
     local s, ns = fixture(); s:Start()
     ns.settings.showZero = true
     ns.settings.showTotal = false
     local tip = CreateFrame('GameTooltip'); s.post(tip, { id = 2589 })
     assert(contains(tip.lines, 'Bank: 0'))
-    assert(contains(tip.lines, 'Total: 3'))
+    assert(not contains(tip.lines, 'Total:'))
     s.broker.OnEnter({})
     assert(not contains(ns.Titan.tooltip.lines, 'Bags / Bank'))
     assert(not contains(ns.Titan.tooltip.lines, ' / Total'))
@@ -1058,6 +1058,51 @@ test('mining marker selection preserves known scarce resources and ordinary mate
     eq(ns.history:Total(UnitGUID('player'),2835),4)
 end)
 
+test('single inventory source suppresses totals and panel counts have no spaced slashes',function()
+ local s,ns=fixture();s:Start();s:Event('BANKFRAME_OPENED');s:Flush()
+ s.bags[0]={};s:Event('BAG_UPDATE_DELAYED');s:Flush()
+ local tip=CreateFrame('GameTooltip');s.post(tip,{id=2589})
+ assert(contains(tip.lines,'Bank: 7'));assert(not contains(tip.lines,'Total:'))
+ ns.settings.showZero=true;tip:ClearLines();s.post(tip,{id=2589})
+ assert(not contains(tip.lines,'Total:'))
+ s.broker.OnEnter({});assert(contains(ns.Titan.tooltip.lines,'0/7'))
+ assert(not contains(ns.Titan.tooltip.lines,' / '))
+end)
+test('supporting tooltip lines use small fonts without shrinking item counts',function()
+ local s,ns=fixture();s:Start()
+ ns.history:Observe(UnitGUID('player'),'A',{id='tip',kind='Mining',source='656333',mapID=1,at=100,complete=true,items={[2589]=1}})
+ s:Event('BANKFRAME_OPENED');s:Flush();s:Event('BANKFRAME_CLOSED');s:Flush()
+ local tip=CreateFrame('GameTooltip');s.post(tip,{id=2589})
+ local found=0
+ for i,line in ipairs(tip.lines)do
+  local region=_G[tip:GetName()..'TextLeft'..i]
+  if plain(line):find('Bank last observed:',1,true)or plain(line):find('Observed complete loot samples',1,true)then
+   eq(region.font,'GameFontHighlightSmall');found=found+1
+  elseif plain(line):find('Bags:',1,true)then assert(region.font~='GameFontHighlightSmall')end
+ end
+ eq(found,2);assert(not contains(tip.lines,'source #'))
+ s.broker.OnEnter({});local panel=ns.Titan.tooltip
+ eq(_G[panel:GetName()..'TextLeft'..panel:NumLines()].font,'GameFontHighlightSmall')
+end)
+test('PvP history recording is independent persistent and preserves existing observations',function()
+ local s,ns=fixture();s:Start();s.broker.OnClick({},'RightButton')
+ local toggle=s.menu.checkboxes['Record PvP lifetime history'];assert(toggle)
+ eq(s.menu.paths['Record PvP lifetime history'],'History and sources');assert(toggle.selected())
+ local honor='Enemy dies, honorable kill Rank: Private (Estimated Honor Points: 42)'
+ s:Event('CHAT_MSG_COMBAT_HONOR_GAIN',honor)
+ eq(ns.pvp:Snapshot(UnitGUID('player')).worldKills,1)
+ toggle.callback();eq(ns.settings.recordPvP,false)
+ s.deathRecap={{{sourceName='Enemy',sourceFlags=0x00000440,overkill=3}}}
+ s:Event('CHAT_MSG_COMBAT_HONOR_GAIN',honor);s:Event('PLAYER_DEAD')
+ eq(ns.pvp:Snapshot(UnitGUID('player')).worldKills,1);eq(ns.pvp:Snapshot(UnitGUID('player')).deaths.total,0)
+ eq(#ns.gathering.saved.maps[1],1)
+ local again,loaded=fixture(16001,TitanGatheredForeverV3DB);again:Start()
+ eq(loaded.settings.recordPvP,false);eq(loaded.pvp:Snapshot(UnitGUID('player')).worldKills,1)
+ again.broker.OnClick({},'RightButton');again.menu.checkboxes['Record PvP lifetime history'].callback()
+ loaded.settings.recordHistory=false
+ again:Event('CHAT_MSG_COMBAT_HONOR_GAIN',honor,'','','','','','','','','','resumed')
+ eq(loaded.pvp:Snapshot(UnitGUID('player')).worldKills,2)
+end)
 for _, entry in ipairs(tests) do
     local ok, err = pcall(entry[2])
     if not ok then io.stderr:write('FAIL ' .. entry[1] .. ': ' .. tostring(err) .. '\n'); os.exit(1) end

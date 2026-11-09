@@ -1,18 +1,18 @@
 # Titan Gathered Forever v3: Next Development Plan
 
-Updated 2026-11-08. This is the current continuation roadmap. Focused plans preserve the initial designs, execution evidence and later corrections; historical instructions do not override this roadmap or AGENTS.md.
+Updated 2026-11-09. This is the current continuation roadmap. Focused plans preserve the initial designs, execution evidence and later corrections; historical instructions do not override this roadmap or AGENTS.md.
 
 ## Current baseline
 
-- Repository: https://github.com/Bajtlamer/titan-gathered-forever-v3, branch main. This update prepares the accumulated work for a source commit and push; it does not create a release tag.
+- Repository: https://github.com/Bajtlamer/titan-gathered-forever-v3, branch main. Interface refinements are installed locally. The follow-up user request authorizes committing and pushing these changes to main; no release tag is requested.
 - Development candidate: 0.4.1-alpha, WoW Forever 1.60.1, interface 16001. Latest captured installation build: 70862. The live API/build compatibility gate remains explicit.
 - Fourteen runtime addon folders: shared core, twelve professions and Auction Items. The current runtime package has 57 files. Development tools, tests, catalogue evidence and documentation stay outside these folders.
-- The PvP feature branch passes 391 automated checks and Lua 5.1 compilation. Its candidate is installed and all 57 runtime files were byte-verified; broader live acceptance remains pending.
+- The current interface candidate passes 405 automated checks and Lua 5.1 compilation. Its candidate is installed and all 57 runtime files were byte-verified; broader live acceptance remains pending.
 - Changelog: [unreleased development updates](release-notes/ref-unreleased.md). Current implementation and installation history: [progress](ref-wow-forever-progress.md).
 
 ## Standing constraints
 
-Preserve separate profession addons, existing settings/history and unrelated addons. Use tools/install.py with preview, backups and verification to install each completed runtime update automatically into the user's Forever AddOns directory. Report installation failures. Do not restart the user's game or edit SavedVariables automatically. Source commits/pushes and release publication require their own user authorization; the current request authorizes commit and push.
+Preserve separate profession addons, existing settings/history and unrelated addons. Use tools/install.py with preview, backups and verification to install each completed runtime update automatically into the user's Forever AddOns directory. Report installation failures. Do not restart the user's game or edit SavedVariables automatically. Source commits/pushes and release publication require their own user authorization; the follow-up request authorizes committing the verified update and pushing main.
 
 Keep attempts, completed casts, matched production results, obtained quantities, complete loot trials and item-hit frequencies distinct. Unknown coverage stays unknown. Never reconstruct unobserved history from inventory or create map coordinates from crafting/disenchanting. Instance observations may contribute to history but do not create map spots.
 
@@ -56,6 +56,10 @@ See plan-catalogue-reconciliation.md, ref-catalogue-reconciliation.md and book-c
 Faction-aware flight points expose current-client locations, including undiscovered routes. The current design uses native artwork and tooltip discovery text. Optional appearance settings now provide a thin gold outline; earlier mandatory green/amber/gray borders were superseded.
 
 The small icon window provides independent world/minimap/flight size, shape and border settings. Apply persists, Cancel/close discards drafts, and Reset group affects the selected draft. Exact coordinates remain unchanged. Mining selects ore rather than a covering stone/gem; history retains all outputs. See plan-flight-points.md and plan-icon-appearance.md.
+
+## Interface refinements requested 2026-11-09
+
+User design reviews and live acceptance are deferred, as explicitly requested. The current interface refinement work is tracked in [plan-interface-refinements.md](plan-interface-refinements.md): lifetime source chances, compact crafting percentages, concise count/caption/source presentation, small explanatory text, independent PvP recording and interaction-confirmed flight visits. These replace earlier layout/discovery presentation requirements without changing historical records or manifest versions. All 405 checks pass, the safe installer completed and all 57 installed files match source. Previous candidate backup: Interface/.tgf-v3-backups/candidate-eqi9ea04. Older checklist entries below retain their original execution evidence; deferred live gates remain open and do not block this authorized implementation.
 
 ## Immediate next steps
 

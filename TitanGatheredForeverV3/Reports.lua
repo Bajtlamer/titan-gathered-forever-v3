@@ -12,7 +12,7 @@ function Reports.Source(row)
         return 'Disenchant: '..(id and ns.ItemName(id)or'unknown input item')
     end
     local source=labels[row.kind]or row.kind
-    if row.kind~='Fishing'then source=source..' - '..(row.sourceName or ('source #'..tostring(row.source)))end
+    if row.kind~='Fishing' and row.sourceName and row.sourceName~='' then source=source..' - '..row.sourceName end
     local context=row.instanceType and row.instanceType~='none'and (' ('..row.instanceType..')')or''
     return source..' - '..Reports.Zone(row.mapID)..context
 end
@@ -50,6 +50,15 @@ function Reports.Rows(mode,character,filter)
         end end
         table.sort(rows,function(a,b)return a.itemID<b.itemID end)
     end
+    if mode=='history' then
+        local rates={}
+        for _,rate in ipairs(ns.history:Rates(character))do
+            rates[rate.itemID]=rates[rate.itemID]or{}
+            local item=rates[rate.itemID]
+            if #item<3 then item[#item+1]=string.format('%s: %.1f%% (%d/%d)',Reports.Source(rate),rate.percent,rate.hits,rate.trials)end
+        end
+        for _,row in ipairs(rows)do row.chances=rates[row.itemID]and table.concat(rates[row.itemID],'; ')or'Unknown'end
+    end
     local obtained=filter and ns.history:ItemsFor(filter,character)or{}
     for _,row in ipairs(rows)do if Reports.Matches(row.itemID,filter,row.kind)or obtained[row.itemID]or craftedKinds[row.itemID]then result[#result+1]=row end end
     return result
@@ -64,11 +73,12 @@ local function button(frame,label,x,y,width,callback)
 end
 local layouts={
     pvp={{'Statistic',0,330},{'Value',345,565}},
-    history={{'Material',0,225},{'Lifetime obtained',235,115},{'Last loot or gather',360,570}},
+    history={{'Material',0,225},{'Lifetime obtained',235,115},{'Observed drop chance',360,570}},
     chances={{'Material',0,195},{'Observed',205,70},{'Hits / samples',285,105},{'Items',400,75},{'Source and zone',485,445}},
     actions={{'Profession',0,140},{'Attempts',150,65},{'Completed',225,75},{'Failed',310,55},
         {'Interrupted',375,85},{'Stopped',470,70},{'Unresolved',550,85},{'Recording began',645,285}},
-    production={{'Recipe',0,230},{'Recorded results',240,690}},
+    production={{'Recipe',0,190},{'Attempts',200,65},{'Completed',275,75},{'Completed %',360,85},
+        {'Matched',455,65},{'Items',530,55},{'Bonus',595,155},{'Multicraft',760,170}},
     reagentUsage={{'Reagent',0,250},{'Estimated used',260,150},{'Leading profession',420,220},{'Share of tracked use',650,280}},
 }
 local contentTop,contentBottom=132,510
@@ -80,9 +90,12 @@ end
 local function values(mode,row)
     if mode=='pvp' then return {row.label,row.value} end
     if mode=='production'then
-        local began=date and date('%Y-%m-%d',row.began)or tostring(row.began)
-        return {row.name,string.format('%d attempts, %d completed, %d matched result operations\n%d items; bonus flags %d / %d, multicraft flags %d / %d\nFirst recorded: %s; click for output quantities',
-            row.attempts,row.completed,row.matched,row.quantity,row.bonusHits,row.bonusKnown,row.multicraftHits,row.multicraftKnown,began)}
+        local function percent(hits,total)
+            return total>0 and string.format('%.1f%% (%d/%d)',hits/total*100,hits,total)or'Unknown'
+        end
+        return {row.name,row.attempts,row.completed,
+            row.attempts>0 and string.format('%.1f%%',row.completed/row.attempts*100)or'Unknown',
+            row.matched,row.quantity,percent(row.bonusHits,row.bonusKnown),percent(row.multicraftHits,row.multicraftKnown)}
     elseif mode=='actions'then
         local began=date and date('%Y-%m-%d %H:%M',row.began)or tostring(row.began)
         return {labels[row.kind],row.attempts,row.completed,row.failed,row.interrupted,row.stopped,row.unresolved,began}
@@ -92,15 +105,12 @@ local function values(mode,row)
     elseif mode=='reagentUsage'then
         return {ns.Style.ItemName(row.itemID),row.quantity,ns.Production.labels[row.leading],string.format('%.1f%%',row.share)}
     end
-    local location=Reports.Zone(row.mapID)
-    if row.x and row.y then location=location..string.format(' (%.1f, %.1f)',row.x*100,row.y*100)end
-    return {ns.Style.ItemName(row.itemID),row.quantity+(row.crafted or 0),
-        row.quantity>0 and location or 'No loot or gather location'}
+    return {ns.Style.ItemName(row.itemID),row.quantity+(row.crafted or 0),row.chances or'Unknown'}
 end
 function Reports.ReagentDetails(owner,row)
     MenuUtil.CreateContextMenu(owner,function(_,root)
         root:CreateTitle(ns.Style.ItemName(row.itemID)..': '..row.quantity..' estimated items used')
-        root:CreateTitle('Profession use, as a share of this reagent total')
+        ns.Style.MenuNote(root,'Profession use, as a share of this reagent total')
         local kinds={};for kind in pairs(row.professions)do kinds[#kinds+1]=kind end
         table.sort(kinds,function(a,b)
             local left,right=row.professions[a],row.professions[b]
@@ -111,8 +121,8 @@ function Reports.ReagentDetails(owner,row)
             local quantity=row.professions[kind]
             root:CreateTitle(string.format('%s: %d (%.1f%%)',ns.Production.labels[kind],quantity,quantity/row.quantity*100))
         end
-        root:CreateTitle('Estimate uses fixed required recipe reagents per completed tracked craft.')
-        root:CreateTitle('Optional modifiers and unsupported required slots are excluded.')
+        ns.Style.MenuNote(root,'Estimate uses fixed required recipe reagents per completed tracked craft.')
+        ns.Style.MenuNote(root,'Optional modifiers and unsupported required slots are excluded.')
         root:SetScrollMode(350)
     end)
 end
@@ -138,9 +148,9 @@ function Reports.ItemSources(owner,itemID,character)
     local rates=ns.history:Rates(character,itemID)
     local evidence=ns.Crafting and ns.Crafting.Evidence(itemID,character)or{spots={}}
     MenuUtil.CreateContextMenu(owner,function(_,root)
-        root:CreateTitle(ns.Style.ItemName(itemID));root:CreateTitle('Observed sources; complete loot samples only')
-        root:CreateTitle('Grouped by source and zone; not a probability at a coordinate.')
-        if #rates==0 then root:CreateTitle('No complete source samples recorded yet.')end
+        root:CreateTitle(ns.Style.ItemName(itemID));ns.Style.MenuNote(root,'Observed sources; complete loot samples only')
+        ns.Style.MenuNote(root,'Grouped by source and zone; not a probability at a coordinate.')
+        if #rates==0 then ns.Style.MenuNote(root,'No complete source samples recorded yet.')end
         for _,r in ipairs(rates)do
             local mapID=r.mapID
             local label=string.format('%s: %.1f%% (%d / %d)',Reports.Source(r),r.percent,r.hits,r.trials)
@@ -168,7 +178,8 @@ function Reports.ProductionDetails(owner,row)
         if ns.CraftingView then root:CreateButton('Plan recipe reagents',function()ns.CraftingView.Show(row.recipeID,1)end)end
         root:CreateTitle(string.format('%d failed, %d interrupted, %d unresolved attempts',row.failed,row.interrupted,
             row.attempts-row.completed-row.failed-row.interrupted))
-        root:CreateTitle('Observed output quantities; unmatched operations are excluded')
+        root:CreateTitle('First recorded: '..(date and date('%Y-%m-%d',row.began)or tostring(row.began)))
+        ns.Style.MenuNote(root,'Observed output quantities; unmatched operations are excluded')
         local ids={};for id in pairs(row.outputs)do ids[#ids+1]=id end;table.sort(ids)
         for _,id in ipairs(ids)do
             local output=row.outputs[id]
@@ -178,7 +189,7 @@ function Reports.ProductionDetails(owner,row)
                 root:CreateTitle(string.format('%d items in %d operations',quantity,output.distribution[quantity]))
             end
         end
-        if #ids==0 then root:CreateTitle('No matched output results yet.')end
+        if #ids==0 then ns.Style.MenuNote(root,'No matched output results yet.')end
         root:SetScrollMode(350)
     end)
 end
@@ -257,10 +268,10 @@ function Reports.Show(mode)
         local note=text(w,'GameFontHighlightSmall',15,-33,930);w.note=note
         note:SetText(mode=='pvp'and'Client lifetime honorable kills and rank are current-character totals across PvP modes. Per-kill honor estimates come only from named honorable-kill events; other honor awards are excluded. Death tracking begins with this version; earlier deaths cannot be reconstructed.'
             or mode=='reagentUsage'and'Estimated reagent consumption by item and profession. Click a row for the profession breakdown.'
-            or mode=='production'and'Completed casts and matched output results are separate. Proc flags use readable-field counts, not all casts. No server probability claim.'
+            or mode=='production'and'Completed % = completed casts / observed attempts, including unresolved attempts. Bonus/multicraft use readable-field counts. Click for output details.'
             or mode=='actions'and'Fishing completion means a catch window; other completion means spell success. Stopped means no confirmed result; gaps are not reconstructed.'
             or mode=='chances'and'Observed outcomes / complete looted sources, grouped by source and zone. Not a probability at a map coordinate. Click for sources.'
-            or'Lifetime obtained combines acquired quantities and recorded crafted outputs. Current inventory is separate. Click for source details.')
+            or'Lifetime obtained combines acquired and crafted quantities. Chances use complete source samples; Unknown means insufficient evidence. Click for all sources.')
         w.scope=button(w,'This character',15,-65,150,function()w.combined=not w.combined;w.page=1;Reports.Update(w)end)
         w.filterButton=button(w,'All professions',175,-65,190,function(owner)
             MenuUtil.CreateContextMenu(owner,function(_,root)
@@ -289,7 +300,7 @@ function Reports.Show(mode)
         w.headers=cells(header,mode,'GameFontNormalSmall',0)
         for i,column in ipairs(layouts[mode])do w.headers[i]:SetText(column[1])end
         w.measure=CreateFrame('Frame',nil,w);w.measure.cells=cells(w.measure,mode,'GameFontHighlightSmall',0);w.measure:Hide()
-        for i=1,(mode=='production'and 5 or mode=='pvp'and 16 or 16) do
+        for i=1,16 do
             local row=CreateFrame('Button',nil,w);row:SetSize(930,22)
             row.cells=cells(row,mode,'GameFontHighlightSmall',0)
             row.name=row.cells[1];row.detail=mode=='production'and row.cells[2]or nil

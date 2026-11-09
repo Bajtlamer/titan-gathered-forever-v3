@@ -50,12 +50,12 @@ function Titan.Show(owner)
     end
     if #rows == 0 then tooltip:AddLine(ns.L.noItems, 1, 1, 1, true) end
     local observation = ns.Tooltips.BankObservation(ns.inventory:Get(0))
-    if observation then tooltip:AddLine(ns.Style.Text(ns.Style.gray, observation), 1, 1, 1, true) end
+    if observation then ns.Style.Note(tooltip, ns.Style.Text(ns.Style.gray, observation)) end
     if ns.inventory:Get(0).bagsState == 'cached' then
-        tooltip:AddLine(ns.Style.Text(ns.Style.gray, 'Bag refresh incomplete; showing last observed counts.'), 1, 1, 1, true)
+        ns.Style.Note(tooltip, ns.Style.Text(ns.Style.gray, 'Bag refresh incomplete; showing last observed counts.'))
     end
-    if pages > 1 then tooltip:AddLine(ns.Style.Text(ns.Style.gray, string.format('Page %d / %d', Titan.page, pages))) end
-    tooltip:AddLine(ns.Style.Text(ns.Style.gray, ns.L.hint), 1, 1, 1, true)
+    if pages > 1 then ns.Style.Note(tooltip, ns.Style.Text(ns.Style.gray, string.format('Page %d/%d', Titan.page, pages))) end
+    ns.Style.Note(tooltip, ns.Style.Text(ns.Style.gray, ns.L.hint))
     tooltip:Show()
 end
 
@@ -67,7 +67,7 @@ end
 function Titan.Refresh()
     if not ns.inventory then return end
     if Titan.broker then
-        Titan.broker.text = Titan.version
+        Titan.broker.text = '- v' .. Titan.version
     end
     if Titan.owner then Titan.Show(Titan.owner) end
 end
@@ -83,7 +83,7 @@ function Titan.ClearSpotsMenu(owner, world)
         local info = C_Map and C_Map.GetMapInfo and C_Map.GetMapInfo(mapID)
         local name = info and info.name or ('Map ' .. mapID)
         root:CreateTitle(name)
-        root:CreateTitle('Only spots saved directly on this map are affected.')
+        ns.Style.MenuNote(root,'Only spots saved directly on this map are affected.')
         for _, category in ipairs(ns.Sources.Categories(true)) do
             local kind, label = category.id, category.label
             local count = ns.gathering:Count(mapID, kind)
@@ -156,8 +156,6 @@ function Titan.Menu(owner)
             ns.settings.flightPoints = not ns.settings.flightPoints
             ns.FlightPaths.Update()
         end)
-        flights:CreateTitle('World map: your faction and neutral flight points')
-        flights:CreateTitle('Discovery status is shown in the tooltip')
         local gathering = root:CreateButton('Gathering map')
         local function mapToggle(parent, label, key)
             parent:CreateCheckbox(label, function() return ns.settings[key] end, function()
@@ -222,6 +220,10 @@ function Titan.Menu(owner)
             else ns.Print('Select a profession recipe or use /tgf recipe <recipeID> [operations].')end
         end)
         reports:CreateDivider()
+        reports:CreateCheckbox('Record PvP lifetime history', function() return ns.settings.recordPvP end, function()
+            ns.settings.recordPvP = not ns.settings.recordPvP
+            ns.Reports.Refresh()
+        end)
         reports:CreateCheckbox('Record lifetime history', function() return ns.settings.recordHistory end, function()
             ns.settings.recordHistory = not ns.settings.recordHistory; ns.UpdateGathering()
         end)
@@ -275,9 +277,10 @@ end
 function Titan.Initialize()
     local ldb = LibStub and LibStub:GetLibrary('LibDataBroker-1.1', true)
     if not ldb then ns.Print(ns.L.missingTitan); return false end
-    Titan.version = C_AddOns.GetAddOnMetadata('TitanGatheredForeverV3', 'Version') or ''
+    local version = C_AddOns.GetAddOnMetadata('TitanGatheredForeverV3', 'Version') or ''
+    Titan.version = version:match('^(%d+%.%d+%.%d+)') or version
     Titan.broker = ldb:NewDataObject('TitanGatheredForeverV3', {
-        type = 'data source', label = ns.L.title, text = Titan.version,
+        type = 'data source', label = 'TG3 Forever', text = '- v' .. Titan.version,
         icon = 'Interface\\AddOns\\TitanGatheredForeverV3\\Artwork\\TitanOre',
         OnEnter = Titan.Show, OnLeave = Titan.Hide,
         OnClick = function(owner, button)

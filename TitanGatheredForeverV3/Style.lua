@@ -7,6 +7,36 @@ function Style.Text(color, text)
     return '|c' .. color .. tostring(text) .. '|r'
 end
 
+-- Resize only addon-owned supporting text, preserving native tooltip fonts.
+function Style.Note(tooltip, value)
+    tooltip:AddLine(value, 1, 1, 1, true)
+    local name = tooltip.GetName and tooltip:GetName()
+    local line = name and _G[name .. 'TextLeft' .. tooltip:NumLines()]
+    if line and line.SetFontObject then
+        if not tooltip.tgfNoteFonts then
+            tooltip.tgfNoteFonts = {}
+            tooltip:HookScript('OnTooltipCleared', function(self)
+                for region, font in pairs(self.tgfNoteFonts) do region:SetFontObject(font) end
+                self.tgfNoteFonts = {}
+            end)
+        end
+        if not tooltip.tgfNoteFonts[line] then
+            tooltip.tgfNoteFonts[line] = line.GetFontObject and line:GetFontObject() or 'GameTooltipText'
+        end
+        line:SetFontObject('GameFontHighlightSmall')
+    end
+end
+
+function Style.MenuNote(parent, value)
+    local description = parent:CreateTitle(value)
+    if description and description.AddInitializer then
+        description:AddInitializer(function(button)
+            if button.fontString then button.fontString:SetFontObject('GameFontHighlightSmall') end
+        end)
+    end
+    return description
+end
+
 function Style.ItemName(itemID)
     local _, _, quality = C_Item.GetItemInfo(itemID)
     local color = ns.IsPublic(quality) and ITEM_QUALITY_COLORS[quality]

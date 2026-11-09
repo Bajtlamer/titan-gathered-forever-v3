@@ -336,6 +336,7 @@ frame:SetScript('OnEvent', function(_, event, ...)
     if not ns.inventory then return end
     if event=='TRADE_SKILL_DATA_SOURCE_CHANGING'or event=='TRADE_SKILL_CLOSE'or event=='PLAYER_LEAVING_WORLD'then ns.Crafting.Select(nil)end
     if event=='CHAT_MSG_COMBAT_HONOR_GAIN'then
+        if ns.settings.recordPvP == false then return end
         local args={...};local message=args[1]
         local inside,instanceType=IsInInstance()
         local position
@@ -351,6 +352,7 @@ frame:SetScript('OnEvent', function(_, event, ...)
         end
         ns.Reports.Refresh();return
     elseif event=='PLAYER_DEAD'then
+        if ns.settings.recordPvP == false then return end
         local recap=C_DeathRecap
         if recap and recap.GetRecapEvents then
             local ok,events=pcall(recap.GetRecapEvents)

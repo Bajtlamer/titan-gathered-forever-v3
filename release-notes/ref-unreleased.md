@@ -1,10 +1,20 @@
 # Unreleased development updates
 
-Updated 2026-11-08. These changes extend the 0.4.1-alpha source and installed development candidate. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-09. These changes extend the 0.4.1-alpha source and installed development candidate. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Interface refinements, 2026-11-09
+
+- Lifetime materials replaces the last-location column with source-specific observed drop chances and hit/sample counts. Unknown evidence stays unknown; row clicks retain all sources.
+- Crafting/cooking uses compact columns for attempts, completions, completion percentage, matched operations, items and bonus/multicraft percentages with readable-field denominators. Output distributions and dates remain in recipe details.
+- Removed unnamed numeric source labels. Item tooltips omit totals unless both bags and bank contribute; the panel omits totals entirely and uses compact `/` separators. Caption: TG3 Forever - v0.4.1.
+- Supporting tooltip/menu explanations use smaller fonts, restoring native tooltip fonts when cleared. Removed the flight-menu explanatory lines.
+- Flight artwork is tinted green for confirmed visits, amber for explicit undiscovered status and gray for unconfirmed discovery. Only opening the taxi map at the current flight master confirms a visit for the current character; false map-wide discovery flags do not. Tracking works before the world map loads. Native interactions and subsequent native tint changes are preserved.
+- Added independent Record PvP lifetime history, preserving prior observations and native lifetime totals. Disabling stops new addon PvP kills/deaths and spots.
+- User reviews and live acceptance are deferred at the user's request. All 405 automated checks pass (76 Python, 329 Lua), with shipped Lua compilation. Safe installation completed; all 57 installed files match source. Backup: Interface/.tgf-v3-backups/candidate-eqi9ea04.
 
 ## Added
 
-- Times obtained in the lifetime material report: one occurrence per item per observed loot/gather source receipt, separate from total quantity, action casts and rate samples. Partial loot counts once per source/item. Older evidence recovers a marked lower bound; missing older occurrence evidence stays Unknown. Counts and coverage flags are included in acquired-item statistics exports.
+- Acquisition occurrence evidence, retained in storage/export after the latest compact report changes: one occurrence per item per observed loot/gather source receipt, separate from total quantity, action casts and rate samples. Partial loot counts once per source/item. Older evidence recovers a marked lower bound; missing older occurrence evidence stays Unknown. Counts and coverage flags are included in acquired-item statistics exports.
 
 - Per-character Mining, Herbalism, Skinning, Fishing and Disenchanting action counters, combined reports and independent recording controls. Fishing launch and confirmed catch are separate outcomes.
 - Crafting/cooking production statistics: observed attempts, completed casts, matched result operations, item quantities/distributions and readable bonus/multicraft denominators.
@@ -34,9 +44,9 @@ Updated 2026-11-08. These changes extend the 0.4.1-alpha source and installed de
 
 ## Verification and installation
 
-`python3 tools/check.py` passes 391 checks: 76 Python and 315 Lua, plus Lua 5.1 compilation of every shipped Lua file. Generated catalogue and outline data are checked, and deterministic runtime packaging is covered. Individual feature reviews and their regression fixes are recorded in the focused plans.
+`python3 tools/check.py` passes 405 checks: 76 Python and 329 Lua, plus Lua 5.1 compilation of every shipped Lua file. Generated catalogue and outline data are checked, and deterministic runtime packaging is covered. Individual feature reviews and their regression fixes are recorded in the focused plans.
 
-The current candidate is installed in the local Forever client. All 57 runtime files across fourteen addons were byte-verified against the source package; the prior candidate is backed up at `Interface/.tgf-v3-backups/candidate-zza0heza`. User feedback confirms the icon configuration window and shared material visibility work. Compact report rendering and PvP behavior await live acceptance. Automated checks and these observations do not certify every live feature.
+The current candidate is installed in the local Forever client. All 57 runtime files across fourteen addons were byte-verified against the source package; the prior candidate is backed up at `Interface/.tgf-v3-backups/candidate-eqi9ea04`. User feedback confirms the icon configuration window and shared material visibility work. Compact report rendering and PvP behavior await live acceptance. Automated checks and these observations do not certify every live feature.
 
 ## Open issues and release gates
 

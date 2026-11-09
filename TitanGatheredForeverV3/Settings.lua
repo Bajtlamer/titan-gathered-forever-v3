@@ -15,6 +15,7 @@ function ns.Settings.Initialize(saved)
     for _, key in ipairs({ 'gatheringMap', 'mapMining', 'mapHerbs', 'mapSkinning', 'mapFishing', 'mapRare', 'mapPvP', 'mapWorld', 'mapMinimap' }) do
         if type(settings[key]) ~= 'boolean' then settings[key] = true end
     end
+    if type(settings.recordPvP) ~= 'boolean' then settings.recordPvP = true end
     if type(settings.recordHistory) ~= 'boolean' then settings.recordHistory = true end
     if type(settings.recordActions) ~= 'boolean' then settings.recordActions = true end
     if type(settings.recordProduction) ~= 'boolean' then settings.recordProduction = true end
@@ -54,6 +55,7 @@ function ns.Settings.Initialize(saved)
     if type(saved.history) ~= 'table' then saved.history = {} end
     if type(saved.actions) ~= 'table' then saved.actions = {} end
     if type(saved.production) ~= 'table' then saved.production = {} end
+    if type(saved.flightVisits) ~= 'table' then saved.flightVisits = {} end
     if type(saved.pvp) ~= 'table' then saved.pvp = {} end
     return saved, settings
 end

@@ -1,10 +1,10 @@
 # WoW Forever Development Progress
 
-Updated 2026-11-08. Current roadmap: [plan-next-development.md](plan-next-development.md). Change summary: [unreleased development updates](release-notes/ref-unreleased.md). Detailed entries below are historical snapshots, including superseded designs and earlier test counts.
+Updated 2026-11-09. Current roadmap: [plan-next-development.md](plan-next-development.md). Change summary: [unreleased development updates](release-notes/ref-unreleased.md). Detailed entries below are historical snapshots, including superseded designs and earlier test counts.
 
 ## Current state
 
-The installed development candidate retains manifest version 0.4.1-alpha. It contains the shared core, twelve profession addons and Auction Items, with 57 allowlisted runtime files. The PvP candidate was byte-verified against source and the previous installation is backed up under `Interface/.tgf-v3-backups/candidate-zza0heza`. The branch passes 391 automated checks and compiles every shipped Lua file with Lua 5.1 semantics. PR creation is in progress. Source commit/push is authorized by the current user request; no new version tag or release publication is part of it.
+The installed development candidate retains manifest version 0.4.1-alpha and the short panel caption TG3 Forever - v0.4.1. It contains the shared core, twelve profession addons and Auction Items, with 57 allowlisted runtime files. All 57 installed files match the source package byte-for-byte. Previous installation: `Interface/.tgf-v3-backups/candidate-eqi9ea04`. The current candidate passes 405 automated checks (76 Python, 329 Lua) and compiles every shipped Lua file with Lua 5.1 semantics. User reviews and live acceptance are deferred at the user's explicit request. The follow-up user request authorizes committing and pushing the verified source update to main. No tag, release assets or hosting changes are requested.
 
 Implemented features include profession action counters, crafting/cooking production, fixed-reagent recipe planning, manual JSON export/reconstruction, faction-aware flight points, the small icon appearance window and the PvP Board with outdoor kill spots. Each is integrated with independent settings and preserves earlier acquired history. The PvP client totals, rank functions, honor events and death-recap attribution still require live Forever-client acceptance. The user should run `/reload` to load this Lua-only update. See the focused plans for API evidence, review findings and regression fixes.
 
@@ -24,9 +24,20 @@ Catalogue evidence remains partial: 532 supported items, 1,973 combined recipe r
 
 Automatically install each completed, verified runtime update into /Applications/World of Warcraft/_forever_/Interface/AddOns using tools/install.py, retaining backups and checking installed bytes. This is recorded in AGENTS.md and .cursor/rules/automatic-live-install.mdc. Preserve SavedVariables, other addons and the user's control of the running game. Use /reload for Lua-only updates and a full restart when new files/assets require it. An identical verified installation does not need another backup/replacement.
 
-The latest installed candidate is retained in the client; the immediately preceding folders are backed up under Interface/.tgf-v3-backups/candidate-bqc6q0b1. No account data was committed or edited directly, and no hosting change or new release tag was created.
+The latest installed candidate is retained in the client; the immediately preceding folders are backed up under Interface/.tgf-v3-backups/candidate-eqi9ea04. No account data was committed or edited directly, and no hosting change or new release tag was created.
 
 ## Implementation and installation history
+
+### Interface refinements installed, 2026-11-09
+
+Replaced the lifetime last-location column with up to three separate source/zone observed drop chances and hit/sample denominators; the full click menu remains available. Removed unnamed numeric source labels. Crafting/cooking now uses compact columns and completion percentages alongside attempts, completions, matched operations and items. Bonus/multicraft percentages retain readable-field denominators; Unknown stays explicit. Quantities, receipts, acquired/produced history and export semantics are preserved.
+
+Item totals appear only when both bags and bank contain the item. Panel counts omit totals, use compact slash separators and keep zero-display behavior. The panel caption is TG3 Forever - v0.4.1. Supporting tooltip/menu notes use small fonts; original tooltip fonts restore on clear. Flight menu explanations are removed. Record PvP lifetime history independently controls new addon kills/deaths and spots, retaining historical observations and native totals.
+
+Flight points use green for interaction-confirmed visits, amber for explicit undiscovered flags and gray for unconfirmed discovery. Only the Current taxi node during a flight-master interaction is persisted per character. Previous visits cannot be reconstructed and require another observed interaction. Tracking exists before the world map loads and remains active with flight display off. Native pin tint updates and click handlers survive decoration/removal. Two lifecycle issues found during independent review were reproduced and fixed with regressions.
+
+Verification: 405 checks, shipped Lua compilation and clean whitespace checks. Safe installer preview/apply succeeded; all 57 runtime files match source across fourteen addons. Backup: Interface/.tgf-v3-backups/candidate-eqi9ea04. Live acceptance is deferred; /reload loads this Lua-only update.
+
 
 ### Lifetime acquisition occurrences installed, 2026-11-08
 

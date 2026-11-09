@@ -4,10 +4,88 @@ Flight.__index = Flight
 ns.FlightPaths = Flight
 
 local factions = { [0] = 'Neutral', [1] = 'Horde', [2] = 'Alliance' }
-local labels = { discovered = 'Discovered', undiscovered = 'Undiscovered', unknown = 'Discovery status unavailable' }
+local labels = { discovered = 'Discovered', undiscovered = 'Undiscovered', unknown = 'Discovery not confirmed' }
 
 local function number(value)
     return ns.IsPublic(value) and type(value) == 'number' and value == value and value > -math.huge and value < math.huge
+end
+
+local colors = { discovered = { .45, 1, .45 }, undiscovered = { 1, .7, .3 }, unknown = { .65, .65, .65 } }
+local function characterID()
+    local id = ns.characterID or (UnitGUID and UnitGUID('player'))
+    if ns.IsPublic(id) and type(id) == 'string' and id ~= '' then return id end
+end
+local function visited(id)
+    local visits = ns.db and ns.db.flightVisits
+    local character = characterID()
+    return character and type(visits) == 'table' and type(visits[character]) == 'table' and visits[character][id] == true
+end
+local function appliedTint(saved)
+    local color = {saved.texture:GetVertexColor()}
+    for index = 1, 4 do if color[index] ~= saved.applied[index] then return false end end
+    return true
+end
+local function restoreTint(pin)
+    local saved = pin.tgfFlightTint
+    if saved then
+        if appliedTint(saved) then saved.texture:SetVertexColor(unpack(saved.color)) end
+        pin.tgfFlightTint = nil
+    end
+end
+local function tint(texture, status)
+    if texture and texture.SetVertexColor then
+        local color = colors[status]
+        texture:SetVertexColor(color[1], color[2], color[3], 1)
+    end
+end
+
+-- Called only during a flight-master interaction, never from map browsing.
+function Flight:ObserveVisit()
+    if not self.taxiOpen or not ns.db or not C_TaxiMap or not C_TaxiMap.GetAllTaxiNodes
+        or not Enum or not Enum.FlightPathState then return end
+    local character = characterID()
+    if not character then return end
+    local maps, seen = {}, {}
+    local function addMap(mapID)
+        if number(mapID) and mapID > 0 and not seen[mapID] then
+            maps[#maps + 1] = mapID; seen[mapID] = true
+        end
+    end
+    if C_Map and C_Map.GetBestMapForUnit then
+        local ok, mapID = pcall(C_Map.GetBestMapForUnit, 'player')
+        if ok then addMap(mapID) end
+    end
+    if FlightMapFrame and FlightMapFrame.GetMapID and FlightMapFrame:IsShown() then
+        addMap(FlightMapFrame:GetMapID())
+    end
+    local current, invalid
+    for index = 1, 12 do
+        local mapID = maps[index]
+        if not mapID then break end
+        local ok, nodes = pcall(C_TaxiMap.GetAllTaxiNodes, mapID)
+        if ok and ns.IsPublic(nodes) and type(nodes) == 'table' then
+            for i, node in ipairs(nodes) do
+                if i > 4096 then invalid = true; break end
+                if ns.IsPublic(node) and type(node) == 'table' and ns.IsPublic(node.state)
+                    and node.state == Enum.FlightPathState.Current then
+                    local id = node.nodeID
+                    if number(id) and id > 0 and id == math.floor(id) then
+                        if current and current ~= id then invalid = true end
+                        current = id
+                    end
+                end
+            end
+        end
+        if C_Map and C_Map.GetMapInfo then
+            local infoOK, info = pcall(C_Map.GetMapInfo, mapID)
+            if infoOK and ns.IsPublic(info) and type(info) == 'table' then addMap(info.parentMapID) end
+        end
+    end
+    if current and not invalid then
+        if type(ns.db.flightVisits) ~= 'table' then ns.db.flightVisits = {} end
+        if type(ns.db.flightVisits[character]) ~= 'table' then ns.db.flightVisits[character] = {} end
+        ns.db.flightVisits[character][current] = true
+    end
 end
 
 local function playerFaction()
@@ -24,9 +102,8 @@ local function readNode(row, faction)
     local x, y = row.position:GetXY()
     if not number(x) or not number(y) or x < 0 or x > 1 or y < 0 or y > 1 then return end
     local status = 'unknown'
-    if ns.IsPublic(row.isUndiscovered) and type(row.isUndiscovered) == 'boolean' then
-        status = row.isUndiscovered and 'undiscovered' or 'discovered'
-    end
+    if visited(id) then status = 'discovered'
+    elseif ns.IsPublic(row.isUndiscovered) and row.isUndiscovered == true then status = 'undiscovered' end
     local name = ns.IsPublic(row.name) and type(row.name) == 'string' and row.name ~= '' and row.name or ('Flight point ' .. id)
     local atlas = ns.IsPublic(row.atlasName) and type(row.atlasName) == 'string' and row.atlasName ~= '' and row.atlasName or 'FlightPath'
     return { nodeID = id, faction = factions[side], x = x, y = y, name = name, atlasName = atlas, status = status }
@@ -76,6 +153,7 @@ function Flight:ClearNative(keep)
         if not keep or not keep[pin] then
             clearNativeTooltip(pin)
             ns.PinStyle.RestoreNative(pin)
+            restoreTint(pin)
             pin.tgfFlightStatus, pin.tgfFlightNodeID = nil, nil
             self.nativePins[pin] = nil
         end
@@ -111,6 +189,15 @@ function Flight:Decorate(pin, node)
     if type(config) == 'table' and type(config.flight) == 'table' then
         ns.PinStyle.Native(pin, ns.PinStyle.Get('flight'), self.world:GetEffectiveScale())
     else ns.PinStyle.RestoreNative(pin) end
+    local texture = pin.Texture
+    if pin.tgfFlightTint and pin.tgfFlightTint.texture ~= texture then restoreTint(pin) end
+    if texture and texture.GetVertexColor and texture.SetVertexColor then
+        if not pin.tgfFlightTint or not appliedTint(pin.tgfFlightTint) then
+            pin.tgfFlightTint = {texture=texture, color={texture:GetVertexColor()}}
+        end
+        tint(texture, node.status)
+        pin.tgfFlightTint.applied = {texture:GetVertexColor()}
+    end
 end
 
 function Flight:NativeNodes(nodes)
@@ -166,11 +253,12 @@ function Flight:Refresh(force)
         self:WatchCanvas(canvas)
     end
     local faction, now = playerFaction(), GetTime()
-    if force or mapID ~= self.mapID or faction ~= self.faction or not self.nodes
+    local character = characterID()
+    if force or mapID ~= self.mapID or faction ~= self.faction or character ~= self.character or not self.nodes
         or (self.status ~= 'ready' and now >= self.retryAt) then
         self.nodes, self.status = Flight.Read(mapID)
         self.retryAt = now + 2
-        self.mapID, self.faction = mapID, faction
+        self.mapID, self.faction, self.character = mapID, faction, character
     end
     local nativeNodes, current = self:NativeNodes(self.nodes)
     self:ClearNative(current)
@@ -191,6 +279,7 @@ function Flight:Refresh(force)
             pin:SetPoint('CENTER', self.overlay, 'TOPLEFT', node.x * width, -node.y * height)
             local ok = pcall(pin.texture.SetAtlas, pin.texture, node.atlasName)
             if not ok then pin.texture:SetAtlas('FlightPath') end
+            tint(pin.texture, node.status)
             pin:Show()
         end
     end
@@ -201,20 +290,36 @@ function Flight:Refresh(force)
     self.visibleCount, self.customCount = #self.nodes, index
 end
 
+-- Tracking exists even before Blizzard's world-map UI is loaded.
+function Flight.StartTracking()
+    if Flight.tracker then return Flight.tracker end
+    local tracker = setmetatable({}, Flight)
+    tracker.events = CreateFrame('Frame')
+    for _, event in ipairs({ 'TAXI_NODE_STATUS_CHANGED', 'TAXIMAP_OPENED', 'TAXIMAP_CLOSED',
+        'PLAYER_ENTERING_WORLD', 'PLAYER_LEAVING_WORLD', 'UNIT_FACTION', 'ZONE_CHANGED_NEW_AREA' }) do
+        tracker.events:RegisterEvent(event)
+    end
+    tracker.events:SetScript('OnEvent', function(_, event, unit)
+        if event == 'UNIT_FACTION' and (not ns.IsPublic(unit) or unit ~= 'player') then return end
+        if event == 'TAXIMAP_OPENED' then tracker.taxiOpen = true
+        elseif event == 'TAXIMAP_CLOSED' or event == 'PLAYER_LEAVING_WORLD' then tracker.taxiOpen = false end
+        if tracker.taxiOpen then tracker:ObserveVisit() end
+        local renderer = tracker.renderer
+        if not renderer then return end
+        if event == 'PLAYER_LEAVING_WORLD' then renderer.suspended = true; renderer.nodes = nil; renderer:Hide(); return end
+        if event == 'PLAYER_ENTERING_WORLD' then renderer.suspended = false end
+        renderer:Refresh(true)
+    end)
+    Flight.tracker = tracker
+    return tracker
+end
+
 function Flight.New(world)
     local self = setmetatable({ world = world, pins = {}, nativePins = {}, watched = {} }, Flight)
     self.overlay = CreateFrame('Frame', nil, world:GetCanvas())
-    self.events = CreateFrame('Frame')
-    for _, event in ipairs({ 'TAXI_NODE_STATUS_CHANGED', 'TAXIMAP_OPENED', 'TAXIMAP_CLOSED',
-        'PLAYER_ENTERING_WORLD', 'PLAYER_LEAVING_WORLD', 'UNIT_FACTION', 'ZONE_CHANGED_NEW_AREA' }) do
-        self.events:RegisterEvent(event)
-    end
-    self.events:SetScript('OnEvent', function(_, event, unit)
-        if event == 'UNIT_FACTION' and (not ns.IsPublic(unit) or unit ~= 'player') then return end
-        if event == 'PLAYER_LEAVING_WORLD' then self.suspended = true; self.nodes = nil; self:Hide(); return end
-        if event == 'PLAYER_ENTERING_WORLD' then self.suspended = false end
-        self:Refresh(true)
-    end)
+    local tracker = Flight.StartTracking()
+    tracker.renderer = self
+    self.events = tracker.events
     local elapsed = 0
     self.overlay:SetScript('OnUpdate', function(_, delta)
         elapsed = elapsed + delta
@@ -227,6 +332,8 @@ function Flight.New(world)
 end
 
 function Flight.Attach()
+    if not ns.settings then return end
+    Flight.StartTracking()
     if not Flight.instance and WorldMapFrame and ns.settings then Flight.instance = Flight.New(WorldMapFrame) end
 end
 
