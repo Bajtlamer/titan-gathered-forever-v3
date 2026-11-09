@@ -1,6 +1,15 @@
 # Unreleased development updates
 
-Updated 2026-11-09. These changes extend the 0.4.1-alpha source and installed development candidate. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-09. These changes describe the 0.4.2-alpha source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Expandable lifetime sources, 0.4.2-alpha
+
+- Compact material parents show quantity and source count, with a dedicated + / - control for individual source rows.
+- Source labels, observed chance and hits/samples have separate columns. All sources are available across pages, with material context repeated on continuation pages.
+- Expansion/collapse preserves report scope/filter state, clamps page bounds and anchors the selected material to visible source evidence. Unknown evidence remains explicit.
+- All fourteen manifests and generator VERSION are synchronized to 0.4.2-alpha. Each completed update now increments its version under the user's standing instruction.
+
+The 0.4.2-alpha candidate is installed and all 57 runtime files match the package byte-for-byte. Previous folders are backed up at Interface/.tgf-v3-backups/candidate-yndg5ybt. Versioned download packages are rebuilt separately from GitHub release/tag publication.
 
 ## Interface refinements, 2026-11-09
 
@@ -44,7 +53,7 @@ Updated 2026-11-09. These changes extend the 0.4.1-alpha source and installed de
 
 ## Verification and installation
 
-`python3 tools/check.py` passes 405 checks: 76 Python and 329 Lua, plus Lua 5.1 compilation of every shipped Lua file. Generated catalogue and outline data are checked, and deterministic runtime packaging is covered. Individual feature reviews and their regression fixes are recorded in the focused plans.
+`python3 tools/check.py` passes 408 checks: 76 Python and 332 Lua, plus Lua 5.1 compilation of every shipped Lua file. Generated catalogue and outline data are checked, and deterministic runtime packaging is covered. Individual feature reviews and their regression fixes are recorded in the focused plans.
 
 The current candidate is installed in the local Forever client. All 57 runtime files across fourteen addons were byte-verified against the source package; the prior candidate is backed up at `Interface/.tgf-v3-backups/candidate-eqi9ea04`. User feedback confirms the icon configuration window and shared material visibility work. Compact report rendering and PvP behavior await live acceptance. Automated checks and these observations do not certify every live feature.
 

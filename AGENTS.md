@@ -44,3 +44,7 @@ The user explicitly authorizes installing every completed addon update and new v
 - This authorization is for the local game installation. It does not authorize publishing releases, pushing commits or changing hosting.
 
 The matching editor rule is `.cursor/rules/automatic-live-install.mdc`.
+
+## Version every completed update
+
+The user requires a version increment for every completed addon update or improvement. Increment the patch version while retaining the current alpha suffix until a different release stage is requested. Synchronize the shared core manifest, generator VERSION and all generated profession manifests before checks, installation and packaging. A source-only edit/test iteration or documentation evidence commit is not a separate deployed update. Website versions are independent and increment for each completed website update. Do not silently overwrite an existing versioned download set with different runtime bytes.

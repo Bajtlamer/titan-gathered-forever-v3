@@ -5,9 +5,9 @@ Updated 2026-11-09. This is the current continuation roadmap. Focused plans pres
 ## Current baseline
 
 - Repository: https://github.com/Bajtlamer/titan-gathered-forever-v3, branch main. Interface refinements are installed locally. The follow-up user request authorizes committing and pushing these changes to main; no release tag is requested.
-- Development candidate: 0.4.1-alpha, WoW Forever 1.60.1, interface 16001. Latest captured installation build: 70862. The live API/build compatibility gate remains explicit.
+- Development candidate: 0.4.2-alpha, WoW Forever 1.60.1, interface 16001. Latest captured installation build: 70862. The live API/build compatibility gate remains explicit.
 - Fourteen runtime addon folders: shared core, twelve professions and Auction Items. The current runtime package has 57 files. Development tools, tests, catalogue evidence and documentation stay outside these folders.
-- The current interface candidate passes 405 automated checks and Lua 5.1 compilation. Its candidate is installed and all 57 runtime files were byte-verified; broader live acceptance remains pending.
+- The current interface candidate passes 408 automated checks and Lua 5.1 compilation. Its candidate is installed and all 57 runtime files were byte-verified; broader live acceptance remains pending.
 - Changelog: [unreleased development updates](release-notes/ref-unreleased.md). Current implementation and installation history: [progress](ref-wow-forever-progress.md).
 
 ## Standing constraints
@@ -61,6 +61,10 @@ The small icon window provides independent world/minimap/flight size, shape and 
 
 User design reviews and live acceptance are deferred, as explicitly requested. The current interface refinement work is tracked in [plan-interface-refinements.md](plan-interface-refinements.md): lifetime source chances, compact crafting percentages, concise count/caption/source presentation, small explanatory text, independent PvP recording and interaction-confirmed flight visits. These replace earlier layout/discovery presentation requirements without changing historical records or manifest versions. All 405 checks pass, the safe installer completed and all 57 installed files match source. Previous candidate backup: Interface/.tgf-v3-backups/candidate-eqi9ea04. Older checklist entries below retain their original execution evidence; deferred live gates remain open and do not block this authorized implementation.
 
+## Expandable lifetime source evidence, 0.4.2-alpha
+
+The user requested readable source evidence instead of multiple sources joined inside one cell. Lifetime material rows now have a dedicated plus/minus control. Expanded sources appear as individual source/zone, Chance and Hits / samples rows. There is no three-source cap; continuation pages repeat material context, and expansion anchors to a page with visible evidence. Quantities, statistics, SavedVariables, combined rates, item hovers and source actions are preserved. Expansion is per-window memory. All 408 automated checks and Lua compilation pass. Live acceptance remains deferred until /reload. See plan-history-source-tree.md.
+
 ## Immediate next steps
 
 ### Lifetime acquisition occurrences, installed 2026-11-08
@@ -111,6 +115,6 @@ The PvP Board separates client lifetime honorable kills and rank from addon-obse
 ## Milestone 7: Release readiness, remains open
 
 - Complete and record the live acceptance checks and resolve or clearly document outstanding defects.
-- Assign a new version only when preparing an actual release; keep manifests and generator synchronized.
+- Increment the patch prerelease version for each completed runtime update, as requested by the user; keep manifests and generator synchronized. Tags and GitHub release publication remain separate actions.
 - Prepare release notes and package the collection plus fourteen individual ZIPs, downloads.json and SHA256SUMS.
 - Publish tags/releases and website uploads only when authorized. A source push or local installation does not publish release assets or change hosting.

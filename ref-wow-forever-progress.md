@@ -4,7 +4,7 @@ Updated 2026-11-09. Current roadmap: [plan-next-development.md](plan-next-develo
 
 ## Current state
 
-The installed development candidate retains manifest version 0.4.1-alpha and the short panel caption TG3 Forever - v0.4.1. It contains the shared core, twelve profession addons and Auction Items, with 57 allowlisted runtime files. All 57 installed files match the source package byte-for-byte. Previous installation: `Interface/.tgf-v3-backups/candidate-eqi9ea04`. The current candidate passes 405 automated checks (76 Python, 329 Lua) and compiles every shipped Lua file with Lua 5.1 semantics. User reviews and live acceptance are deferred at the user's explicit request. The follow-up user request authorizes committing and pushing the verified source update to main. No tag, release assets or hosting changes are requested.
+The installed development candidate uses manifest version 0.4.2-alpha and the short panel caption TG3 Forever - v0.4.2. It contains the shared core, twelve profession addons and Auction Items, with 57 allowlisted runtime files. All 57 installed files match the source package byte-for-byte. Previous installation: `Interface/.tgf-v3-backups/candidate-yndg5ybt`. The current candidate passes 408 automated checks (76 Python, 332 Lua) and compiles every shipped Lua file with Lua 5.1 semantics. User reviews and live acceptance are deferred at the user's explicit request. The follow-up user request authorizes committing and pushing the verified source update to main. No tag, release assets or hosting changes are requested.
 
 Implemented features include profession action counters, crafting/cooking production, fixed-reagent recipe planning, manual JSON export/reconstruction, faction-aware flight points, the small icon appearance window and the PvP Board with outdoor kill spots. Each is integrated with independent settings and preserves earlier acquired history. The PvP client totals, rank functions, honor events and death-recap attribution still require live Forever-client acceptance. The user should run `/reload` to load this Lua-only update. See the focused plans for API evidence, review findings and regression fixes.
 
@@ -27,6 +27,13 @@ Automatically install each completed, verified runtime update into /Applications
 The latest installed candidate is retained in the client; the immediately preceding folders are backed up under Interface/.tgf-v3-backups/candidate-eqi9ea04. No account data was committed or edited directly, and no hosting change or new release tag was created.
 
 ## Implementation and installation history
+
+### Expandable lifetime sources, 0.4.2-alpha
+
+Replaced joined lifetime chance summaries with a compact parent material row and dedicated plus/minus expansion. Every source has a separate label, percentage and hits/samples. All source groups are retained, including more than three; continuation pages repeat the parent material, and the clicked material stays anchored to visible evidence. Collapsing clamps page bounds. Unknown evidence has no expander. Combined percentages continue to use summed complete trials, while item quantities and stored acquired/produced evidence stay unchanged.
+
+The full checker passes 408 checks and all Lua 5.1 compilation. Independent review found no critical/important issue. Very long labels are height-bounded; full source actions/labels remain available through the item menu. Automated tests do not certify client font rendering. Safe installer preview/apply completed; all 57 installed runtime files across fourteen addons match the 0.4.2-alpha package byte-for-byte. Backup: Interface/.tgf-v3-backups/candidate-yndg5ybt. Run /reload for live acceptance.
+
 
 ### Interface refinements installed, 2026-11-09
 

@@ -255,3 +255,13 @@ The user deferred these checks on 2026-11-09. Automated results do not replace t
 2. Confirm crafting Completed % equals completed casts divided by observed attempts, including unresolved attempts. Bonus/multicraft percentages use their displayed readable-field counts; zero known fields show Unknown.
 3. Without opening the world map first, interact with a flight master and open its taxi map. Only that current node becomes green/Discovered. Reachable remote nodes do not become confirmed. Close the taxi map, browse other maps and reload; verify visits persist by character. Legacy routes remain unconfirmed until visited again. Check native marker colors restore on disabling flight points and when frames are reused.
 4. Disable Record PvP lifetime history. New kills/deaths and PvP spots stop; existing data, native lifetime totals, acquisition history and map visibility settings remain intact. Re-enable, reload and check persistence.
+
+
+## Expandable lifetime history, 0.4.2-alpha
+
+1. After /reload, open Lifetime material history. Rows show Material, Lifetime obtained, Observed source, Chance and Hits / samples. Parent quantities remain unchanged and collapsed rows show a source count or Unknown.
+2. Use + to expand an item, then - to collapse. Each child displays exactly one source/zone, its own chance and its own hits/samples. Unknown evidence has no expander. Item hovers and row clicks retain native item tooltips and source actions.
+3. Expand an item with many sources. Every source must remain reachable, and continuation pages must repeat the material name and quantity. Collapse from a continuation header; page bounds must clamp and quantities must remain unchanged. Check long labels through the full source menu.
+4. Switch character scope, filter, page and report, then return. Expansion stays per-window, scope/filter/page remain independent, and combined percentages use summed hits/trials rather than averaged percentages. Check for overlap at the normal UI scale.
+
+These live checks remain deferred; automated model/layout tests cannot confirm client text rendering.
