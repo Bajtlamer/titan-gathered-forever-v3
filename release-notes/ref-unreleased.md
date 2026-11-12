@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.19-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.20-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Trainer filters read after the list is rebuilt, 0.5.20-beta
+
+- The 0.5.19 read did not record Bronk Guzzlegear: the live log showed the list was still empty right after the type filters were switched on. The filters are now switched on, the list is read again 0.3 seconds later (log event TRAINER_FILTER, first result filters-on), and the filters are put back after that read or when the trainer window closes. Still once per opened window.
 
 ## Trainers with nothing left to learn, 0.5.19-beta
 
