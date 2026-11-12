@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.1-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.2-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Trainer and merchant lists read on update, 0.5.2-beta
+
+- Fix from live evidence: the recording log showed TRAINER_SHOW arriving with GetNumTrainerServices returning 0, because the client fills the trainer list a moment later. Trainer and merchant windows are now read again on TRAINER_UPDATE and MERCHANT_UPDATE while they stay open and cleared on TRAINER_CLOSED and MERCHANT_CLOSED. Empty updates are logged once per window and identical repeated saves are not logged again.
 
 ## NPC recording log, 0.5.1-beta
 

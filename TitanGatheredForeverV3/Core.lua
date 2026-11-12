@@ -284,7 +284,8 @@ local function start()
                             'PLAYER_LEAVING_WORLD', 'ITEM_DATA_LOAD_RESULT', 'SKILL_LINES_CHANGED',
                             'TRADE_SKILL_DATA_SOURCE_CHANGING', 'TRADE_SKILL_DATA_SOURCE_CHANGED',
                             'TRADE_SKILL_DETAILS_UPDATE', 'TRADE_SKILL_CLOSE',
-                            'TRAINER_SHOW', 'MERCHANT_SHOW' }) do frame:RegisterEvent(event) end
+                            'TRAINER_SHOW', 'TRAINER_UPDATE', 'TRAINER_CLOSED',
+                            'MERCHANT_SHOW', 'MERCHANT_UPDATE', 'MERCHANT_CLOSED' }) do frame:RegisterEvent(event) end
     -- Shared by the right-click menu and the slash commands so each function has one implementation.
     function ns.ChangeSummaryPage(delta)
         ns.Titan.page = math.max(1, ns.Titan.page + delta)
@@ -392,6 +393,10 @@ frame:SetScript('OnEvent', function(_, event, ...)
     end
     if event == 'TRAINER_SHOW' then ns.npcObserver:TrainerShown(); return end
     if event == 'MERCHANT_SHOW' then ns.npcObserver:MerchantShown(); return end
+    if event == 'TRAINER_UPDATE' then ns.npcObserver:TrainerUpdated(); return end
+    if event == 'TRAINER_CLOSED' then ns.npcObserver:TrainerClosed(); return end
+    if event == 'MERCHANT_UPDATE' then ns.npcObserver:MerchantUpdated(); return end
+    if event == 'MERCHANT_CLOSED' then ns.npcObserver:MerchantClosed(); return end
     if event == 'TRADE_SKILL_DATA_SOURCE_CHANGED' then ns.KnownRecipes.Schedule() end
     if event:match('^UNIT_SPELLCAST_') then
         local unit, castGUID, spellID = ...
