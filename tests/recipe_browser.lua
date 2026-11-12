@@ -8,7 +8,8 @@ C_Item = { GetItemInfo = function(id) return itemNames[id] end }
 local function fresh()
     local ns = { IsPublic = function() return true end, characterID = 'C1', settings = {},
         db = { npcs = {}, knownRecipes = {} },
-        Style = { gold = 'gold', gray = 'gray', Text = function(_, text) return text end },
+        Style = { gold = 'gold', gray = 'gray', green = 'green', white = 'white',
+            Text = function(color, text) return '<' .. color .. '>' .. text .. '</>' end },
         ItemName = function(id) return itemNames[id] or ('Loading ' .. id) end }
     ns.NpcSeed = { npcs = {
         [1] = { n = 'Alchemy Trainer', m = 0, x = 10, y = 20, p = 'Alchemy', t = {
@@ -48,27 +49,74 @@ test('professions never read for the character are reported, not guessed', funct
     eq(#rows, 0); eq(#unread, 2)
 end)
 
+test('a profession filter limits recipes and the professions reported as unread', function()
+    local ns = fresh()
+    ns.KnownRecipes.Record('C1', 'Alchemy', {}, 10)
+    local rows, unread = ns.NpcSources.Unlearned('C1', false, 'Alchemy')
+    for _, row in ipairs(rows) do eq(row.kind, 'Alchemy') end
+    eq(#rows, 3); eq(#unread, 0)   -- Cooking is unread but filtered out
+    rows, unread = ns.NpcSources.Unlearned('C1', false, 'Cooking')
+    eq(#rows, 0); eq(#unread, 1); eq(unread[1], 'Cooking')
+    local all = ns.NpcSources.RecipeKinds
+    eq(#all, 9); eq(all[1], 'Alchemy'); eq(all[#all], 'Tailoring')
+end)
+
 test('browser cells and permissive frame construction', function()
     local ns = fresh()
     ns.KnownRecipes.Record('C1', 'Alchemy', { 'Elixir of Minor Defense' }, 10)
+    local all = {}
     local function frame()
-        return setmetatable({}, { __index = function(_, key)
+        local f = setmetatable({}, { __index = function(_, key)
+            if key == 'SetScript' then
+                return function(self, name, fn)
+                    local scripts = rawget(self, 'scripts') or {}
+                    scripts[name] = fn; rawset(self, 'scripts', scripts)
+                end
+            end
             return function(self, ...)
                 if key:match('^Create') then return frame() end
                 if key == 'GetNumPoints' then return 0 end
                 return self
             end
         end })
+        all[#all + 1] = f
+        return f
     end
     CreateFrame = function() local f = frame(); f.TitleText = frame(); return f end
-    UIParent, UISpecialFrames, GameTooltip = frame(), {}, frame()
+    local shown = { lines = {}, doubles = {} }
+    function shown:SetOwner() end
+    function shown:AddLine(text) self.lines[#self.lines + 1] = text end
+    function shown:AddDoubleLine(left, right) self.doubles[#self.doubles + 1] = { left, right } end
+    function shown:Show() self.visible = true end
+    function shown:Hide() self.visible = false end
+    UIParent, UISpecialFrames, GameTooltip = frame(), {}, shown
     assert(loadfile('TitanGatheredForeverV3/RecipeBrowser.lua'))('TitanGatheredForeverV3', ns)
     local rows = ns.NpcSources.Unlearned('C1', false)
     local cells = ns.RecipeBrowser.Cells(rows[1])
     eq(cells[1], 'Lesser Healing Potion'); eq(cells[2], 'Alchemy'); eq(cells[3], '50'); eq(cells[4], 'Trainer')
-    eq(cells[5], 'Alchemy Trainer (+1)'); eq(cells[6], '5s')
+    eq(cells[5], '<green>Alchemy Trainer</> (+1)'); eq(cells[6], '5s')
     ns.RecipeBrowser.Show()
     ns.RecipeBrowser.Refresh()
+    -- Hovering the NPC column of a row shows where the NPCs are; leaving hides the tooltip.
+    local hit
+    for _, f in ipairs(all) do
+        local scripts = rawget(f, 'scripts')
+        if scripts and scripts.OnEnter and not hit then hit = f end
+    end
+    assert(hit, 'no hover region for the NPC column')
+    hit.scripts.OnEnter(hit)
+    eq(shown.visible, true); eq(shown.lines[1], '<white>Lesser Healing Potion</>')
+    eq(shown.doubles[1][1], '<green>Alchemy Trainer</> <gray>(Trainer)</>')
+    hit.scripts.OnLeave(hit); eq(shown.visible, false)
+    -- Choosing a profession resets paging and is passed to the model.
+    local seen
+    local original = ns.NpcSources.Unlearned
+    ns.NpcSources.Unlearned = function(character, vendorOnly, kind) seen = { character, vendorOnly, kind }; return original(character, vendorOnly, kind) end
+    ns.RecipeBrowser.page = 3
+    ns.RecipeBrowser.SetKind('Cooking')
+    eq(ns.RecipeBrowser.kind, 'Cooking'); eq(ns.RecipeBrowser.page, 1); eq(seen[3], 'Cooking')
+    ns.RecipeBrowser.SetKind(nil)
+    eq(ns.RecipeBrowser.kind, nil); eq(seen[3], nil)
 end)
 
 for _, entry in ipairs(tests) do

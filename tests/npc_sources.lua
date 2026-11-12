@@ -8,8 +8,9 @@ local player = { mapID = 1429, x = 0.1, y = 0.2 }
 C_Map = {
     GetMapPosFromWorldPos = function(_, vector, mapID)
         if mapID == 9999 then return mapID, nil end
-        return mapID, CreateVector2D(vector.x / 100, vector.y / 100)
+        return mapID or 1429, CreateVector2D(vector.x / 100, vector.y / 100)
     end,
+    GetMapInfo = function(id) return { name = 'Zone ' .. id } end,
     GetMapRectOnMap = function() return nil end,
     GetBestMapForUnit = function() return player.mapID end,
     GetPlayerMapPosition = function() return CreateVector2D(player.x, player.y) end,
@@ -180,6 +181,34 @@ test('confirmed data is green, extra costs are noted and an empty list says so',
     t = tip()
     ns.NpcSources.FillTooltip(t, { kind = 'Trainer', npcID = 1 })
     eq(t.lines[#t.lines], '<gray>No recipes recorded yet.</>')
+end)
+
+test('location gives the zone and coordinates, observed first, seed through world coordinates', function()
+    local ns = fresh()
+    local seedLocation = ns.NpcSources.Location(1)
+    eq(seedLocation.zone, 'Zone 1429'); near(seedLocation.x, 10); near(seedLocation.y, 20); eq(seedLocation.confirmed, false)
+    ns.db.npcs[1] = { name = 'T', profession = 'Alchemy', mapID = 1455, x = 0.684, y = 0.545, lastSeen = 1, trainer = {} }
+    local seen = ns.NpcSources.Location(1)
+    eq(seen.zone, 'Zone 1455'); near(seen.x, 68.4); near(seen.y, 54.5); eq(seen.confirmed, true)
+    eq(ns.NpcSources.Location(99), nil)
+    ns.settings.npcAxisSwap = true
+    ns.db.npcs[1] = nil
+    near(ns.NpcSources.Location(1).x, 20)
+end)
+
+test('sources tooltip lists every source with colored names, location and price', function()
+    local ns = fresh()
+    local t = tip()
+    local row = { name = 'Lesser Healing Potion', kind = 'Alchemy', trainer = true, sources = {
+        { npcID = 1, name = 'Alchemy Trainer', role = 'Trainer', price = 500 },
+        { npcID = 2, name = 'Recipe Vendor', role = 'Vendor', price = nil } } }
+    ns.NpcSources.FillSourcesTooltip(t, row)
+    eq(t.lines[1], '<white>Lesser Healing Potion</>')
+    eq(t.doubles[1][1], '<green>Alchemy Trainer</> <gray>(Trainer)</>'); eq(t.doubles[1][2], '5' .. SILVER)
+    eq(t.lines[2], '<gray>Zone 1429 10.0, 20.0, not yet confirmed in game</>')
+    eq(t.doubles[2][1], '<green>Recipe Vendor</> <gray>(Vendor)</>'); eq(t.doubles[2][2], '<gray>price unknown</>')
+    eq(t.lines[#t.lines], '<gray>Click the row to open the map.</>')
+    eq(t.smallLines, 5)
 end)
 
 test('nearest reports the closest visible pin to the player', function()
