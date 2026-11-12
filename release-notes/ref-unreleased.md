@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.14-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.15-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Skill reading shown for rank rows, 0.5.15-beta
+
+- The hover tooltip of the Where column on a profession rank row now starts with "Your <profession> skill is a / b.", the values the addon read from the client, so a wrong choice of rank can be traced to its input.
 
 ## Next profession rank in the unlearned window, 0.5.14-beta
 
