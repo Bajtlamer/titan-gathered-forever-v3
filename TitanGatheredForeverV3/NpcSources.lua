@@ -358,6 +358,7 @@ function Npc.FillSourcesTooltip(tooltip, row)
     local Style = ns.Style
     local function small() if Style.Small then Style.Small(tooltip) end end
     tooltip:AddLine(Style.Text(Style.white, row.name))
+    if row.rankNote then tooltip:AddLine(Style.Text(Style.gray, row.rankNote)); small() end
     local shown = math.min(#row.sources, 6)
     for index = 1, shown do
         local source = row.sources[index]
@@ -444,8 +445,16 @@ function Npc.Unlearned(character, vendorOnly, kindFilter)
             else pending = pending + 1 end
         end
     end
+    local caps = {}
+    if ns.Professions and ns.Professions.Rows then
+        local ok, list = pcall(ns.Professions.Rows)
+        for _, entry in ipairs(ok and type(list) == 'table' and list or {}) do caps[entry.kind] = entry end
+    end
     for kind, best in pairs(ranks) do
         for _, e in ipairs(best.entries) do add(e[1], e[2], kind, e[3], e[4], e[5], 'Trainer', true) end
+        local row = byKey[kind .. '|' .. K.Normalize(best.entries[1][3])]
+        local have = caps[kind]
+        if row and have then row.rankNote = string.format('Your %s skill is %d / %d.', Npc.Label(kind), have.rank, have.maxRank) end
     end
     if vendorOnly then
         local filtered = {}

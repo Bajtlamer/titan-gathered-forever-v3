@@ -398,3 +398,7 @@ Owner report: the Fishing trainer tooltip kept saying the learned status is unkn
 ### Next profession rank in the window, 0.5.14-beta, 2026-11-12
 
 Owner request: show the trainers where the next skill level can be learned once the maximum is reached or learning is possible. NpcSources.Unlearned now adds rank spells as trainer rows: per profession the player has, the lowest tier whose cap (75, 150, 225, 300, 375) exceeds the current skill cap, provided the trainer requirement is not above the current skill. Beyond that only Fishing, Herbs and Skinning joined RecipeKinds. Automated checks pass (npc_sources, recipe_browser updated). The data depends on the seed trainer rows for those professions; live review pending, especially whether Expert and Artisan trainers exist in the seed.
+
+### Skill reading on rank rows, 0.5.15-beta, 2026-11-12
+
+Owner report: with Fishing 75/75 the Warg Deepwater trainer is circled although the owner believes he teaches only up to 75. The saved record of trainer 1683 (observed, 21:56:31, mapID 1432) lists one service, Journeyman Fishing, state available, skill requirement 50 met, cost 500, so the recorded data says he teaches Journeyman. The rank logic already uses rank and maxRank from Professions.Rows (Fishing 75/75 selects Journeyman). To make the input visible, rank rows now show "Your <profession> skill is a / b." at the top of the hover tooltip. Open: what the Warg trainer window really lists for the owner, and which skill reading the tooltip prints.

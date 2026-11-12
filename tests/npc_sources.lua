@@ -218,6 +218,7 @@ test('the window lists the next profession rank where it can be learned', functi
     end
     local rows = rankRows(75, 75)               -- maximum reached: next is Journeyman, two trainers teach it
     eq(#rows, 1); eq(rows[1].name, 'Journeyman Fishing'); eq(rows[1].kind, 'Fishing'); eq(rows[1].trainer, true)
+    eq(rows[1].rankNote, 'Your Fishing skill is 75 / 75.')
     eq(#rows[1].sources, 2); eq(rows[1].price, 400); eq(rows[1].skill, 50); eq(rows[1].canLearn, true)
     eq(#rankRows(150, 80), 0)                    -- Journeyman known, Expert needs 125, the player has 80
     eq(#rankRows(150, 130), 1); eq(rankRows(150, 130)[1].name, 'Expert Fishing')
