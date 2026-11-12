@@ -1,6 +1,11 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.6-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.7-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Debug log file and scrolling recipe list, 0.5.7-beta
+
+- Debug mode now writes to a debug log instead of the chat. The log holds the latest 1,000 lines in the saved variables file TitanGatheredForeverV3.lua, which the client writes on /reload and logout (an addon cannot write any other file). It records important events with readable arguments (player spell casts, loot, trainer and merchant windows, profession windows, bank and world changes, honor events), the status messages the addon already produced, NPC recording outcomes and profession recipe reads. Frequent noise such as bag updates is left out. Diagnostics gained Also show debug messages in chat (off by default) and Clear debug log.
+- The unlearned recipes window scrolls with the mouse wheel or a scroll bar instead of Previous and Next buttons. The range of visible rows is shown, the window returns to the top when the filter changes, and the scroll bar hides when everything fits.
 
 ## Unlearned recipes window: profession filter and NPC tooltip, 0.5.6-beta
 

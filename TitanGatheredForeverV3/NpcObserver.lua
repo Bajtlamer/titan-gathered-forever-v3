@@ -61,6 +61,13 @@ function Obs:Log(event, result, details)
         if ok and type(probe) == 'table' then entry.probe = probe end
     end
     log[#log + 1] = entry
+    if ns.DebugLog then
+        local parts = { event, result }
+        for _, key in ipairs({ 'npc', 'profession', 'services', 'recipes', 'first' }) do
+            if entry[key] ~= nil then parts[#parts + 1] = key .. '=' .. tostring(entry[key]) end
+        end
+        ns.DebugLog.Add('npc', table.concat(parts, ' '))
+    end
     while #log > 12 do table.remove(log, 1) end
 end
 

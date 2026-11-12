@@ -153,7 +153,7 @@ local function fixture(interface, saved, noBroker, noModules)
     end }
     local ns = {}
     for _, path in ipairs({ 'Localization/enUS.lua', 'Style.lua', 'Data/Metadata.lua', 'Data/NpcSeed.lua', 'Catalog.lua',
-                            'Settings.lua', 'Professions.lua', 'KnownRecipes.lua', 'Inventory.lua', 'Gathering.lua', 'History.lua', 'Actions.lua', 'PvP.lua', 'Production.lua', 'Crafting.lua', 'Export.lua', 'Observations.lua', 'Sources.lua', 'NpcSources.lua', 'NpcObserver.lua', 'PinStyle.lua', 'IconConfig.lua', 'FlightPaths.lua', 'Map.lua', 'Minimap.lua',
+                            'Settings.lua', 'DebugLog.lua', 'Professions.lua', 'KnownRecipes.lua', 'Inventory.lua', 'Gathering.lua', 'History.lua', 'Actions.lua', 'PvP.lua', 'Production.lua', 'Crafting.lua', 'Export.lua', 'Observations.lua', 'Sources.lua', 'NpcSources.lua', 'NpcObserver.lua', 'PinStyle.lua', 'IconConfig.lua', 'FlightPaths.lua', 'Map.lua', 'Minimap.lua',
                             'Tooltips.lua', 'Reports.lua', 'CraftingView.lua', 'RecipeBrowser.lua', 'Titan.lua', 'Core.lua' }) do
         assert(loadfile('TitanGatheredForeverV3/' .. path))('TitanGatheredForeverV3', ns)
     end
@@ -721,21 +721,45 @@ test('runtime rejects dungeon and raid observations and clears pending gathers o
     eq(#ns.gathering:List(1), 0)
 end)
 
-test('debug mode defaults off, gates messages immediately and persists through reload', function()
+test('debug mode defaults off, writes to the saved log instead of chat and persists through reload', function()
     local s, ns = fixture(); s:Start()
-    eq(ns.settings.debugMode, false)
+    eq(ns.settings.debugMode, false); eq(ns.settings.debugChat, false)
     eq(#s.messages, 0)
-    ns.Debug('hidden debug message'); eq(#s.messages, 0)
+    ns.Debug('hidden debug message'); eq(#s.messages, 0); eq(#ns.db.debugLog, 0)
     s.broker.OnClick({}, 'RightButton')
     local toggle = assert(s.menu.checkboxes['Debug mode'], 'Debug checkbox missing')
     eq(toggle.selected(), false); toggle.callback(); eq(ns.settings.debugMode, true)
-    ns.Debug('visible debug message'); eq(s.message, 'visible debug message')
+    ns.Debug('logged debug message')
+    eq(#s.messages, 0)   -- the physical log only, not the chat
+    eq(#ns.db.debugLog, 1); assert(ns.db.debugLog[1]:find(' debug logged debug message', 1, true))
+    local chat = assert(s.menu.checkboxes['Also show debug messages in chat'], 'chat repeat checkbox missing')
+    eq(chat.selected(), false); chat.callback(); eq(ns.settings.debugChat, true)
+    ns.Debug('visible debug message'); eq(s.message, 'visible debug message'); eq(#ns.db.debugLog, 2)
+    chat.callback(); eq(ns.settings.debugChat, false)
     local saved = TitanGatheredForeverV3DB
-    s, ns = fixture(nil, saved); s:Start(); eq(ns.settings.debugMode, true)
+    s, ns = fixture(nil, saved); s:Start(); eq(ns.settings.debugMode, true); eq(#ns.db.debugLog, 2)
     s.broker.OnClick({}, 'RightButton'); s.menu.checkboxes['Debug mode'].callback()
-    local before = #s.messages
-    ns.Debug('hidden again'); eq(#s.messages, before)
+    local before, logged = #s.messages, #ns.db.debugLog
+    ns.Debug('hidden again'); eq(#s.messages, before); eq(#ns.db.debugLog, logged)
     s, ns = fixture(nil, TitanGatheredForeverV3DB); s:Start(); eq(ns.settings.debugMode, false)
+end)
+
+test('debug mode logs important events and the log can be cleared from the menu', function()
+    local s, ns = fixture(); s:Start()
+    s:Event('BANKFRAME_OPENED'); s:Flush()
+    eq(#ns.db.debugLog, 0)   -- nothing is written while debug mode is off
+    ns.settings.debugMode = true
+    s:Event('BANKFRAME_CLOSED'); s:Event('BAG_UPDATE_DELAYED'); s:Flush()
+    local found = false
+    for _, line in ipairs(ns.db.debugLog) do
+        if line:find(' event BANKFRAME_CLOSED', 1, true) then found = true end
+        assert(not line:find('BAG_UPDATE_DELAYED', 1, true), 'noisy event was logged')
+    end
+    assert(found, 'bank event was not logged')
+    s.broker.OnClick({}, 'RightButton')
+    local clear = assert(s.menu.buttons['Clear debug log'], 'clear button missing')
+    s.messages = {}
+    clear(); eq(#ns.db.debugLog, 0); assert(s.message:find('Debug log cleared', 1, true))
 end)
 
 test('explicit status works with debug disabled while normal commands stay quiet', function()
@@ -749,8 +773,11 @@ test('explicit status works with debug disabled while normal commands stay quiet
     SlashCmdList.TITANGATHEREDFOREVERV3('status')
     eq(#s.messages, before + 4); assert(s.message:find('Gathering map:', 1, true))
     ns.settings.debugMode = true
-    before = #s.messages; SlashCmdList.TITANGATHEREDFOREVERV3('')
-    eq(#s.messages, before + 4)
+    before = #s.messages
+    local logged = #ns.db.debugLog
+    SlashCmdList.TITANGATHEREDFOREVERV3('')
+    eq(#s.messages, before)               -- the debug status goes to the log, not the chat
+    eq(#ns.db.debugLog, logged + 4)
 end)
 
 test('configuration checkboxes are grouped in submenus', function()

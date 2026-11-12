@@ -8,6 +8,7 @@ function ns.Settings.Initialize(saved)
     if type(settings.showZero) ~= 'boolean' then settings.showZero = false end
     if type(settings.showBank) ~= 'boolean' then settings.showBank = true end
     if type(settings.debugMode) ~= 'boolean' then settings.debugMode = false end
+    if type(settings.debugChat) ~= 'boolean' then settings.debugChat = false end
     if type(settings.flightPoints) ~= 'boolean' then settings.flightPoints = true end
     settings.showTotal = nil
     if type(settings.itemTooltips) ~= 'boolean' then settings.itemTooltips = true end
@@ -64,6 +65,7 @@ function ns.Settings.Initialize(saved)
     if type(saved.pvp) ~= 'table' then saved.pvp = {} end
     if type(saved.npcs) ~= 'table' then saved.npcs = {} end
     if type(saved.npcLog) ~= 'table' then saved.npcLog = {} end
+    if type(saved.debugLog) ~= 'table' then saved.debugLog = {} end
     if type(saved.knownRecipes) ~= 'table' then saved.knownRecipes = {} end
     return saved, settings
 end

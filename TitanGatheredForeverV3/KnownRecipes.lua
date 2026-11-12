@@ -61,7 +61,10 @@ function K.Scan()
         end
     end
     local now = time and time() or 0
-    for kind, names in pairs(byKind) do K.Record(ns.characterID, kind, names, now) end
+    for kind, names in pairs(byKind) do
+        K.Record(ns.characterID, kind, names, now)
+        if ns.DebugLog then ns.DebugLog.Add('recipes', kind .. ' read, ' .. #names .. ' learned recipes') end
+    end
     if ns.RecipeBrowser and ns.RecipeBrowser.Refresh then ns.RecipeBrowser.Refresh() end
 end
 
