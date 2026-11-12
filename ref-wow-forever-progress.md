@@ -322,3 +322,7 @@ Live validation (open, separate from automated checks):
 - [ ] Opening each profession window marks recipes as known; the Unlearned recipes window reflects it.
 - [ ] Tooltip text, the 15-line cap and the menu toggles behave as designed; no Lua errors with /console scriptErrors 1.
 
+### Menu covers every parameterless command, 0.4.13-alpha, 2026-11-12
+
+The right-click menu gained Refresh inventory and Show status report (Diagnostics), Next and Previous summary page (Display), and Find nearest trainer or vendor pin plus a Swap map axes checkbox (Trainers and recipe vendors, Pin placement). Slash commands and menu share one implementation (ns.ShowStatus, ns.ChangeSummaryPage, ns.NpcNearest, ns.NpcToggleAxes). Only /tgf recipe <recipeID> [operations] stays documented, because it needs a parameter; other commands still work as undocumented shortcuts. tools/check.py and the pin outline check pass, including a new integration test for the menu entries. Installed with tools/install.py, all 64 installed files match the source and all 14 manifests read 0.4.13-alpha. Previous folders: Interface/.tgf-v3-backups/candidate-kwogl7e0. Lua-only changes to existing files plus no new files, so /reload is enough.
+
