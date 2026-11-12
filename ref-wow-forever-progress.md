@@ -422,3 +422,7 @@ Live finding: Bronk Guzzlegear (npc 1702) stayed "Not yet confirmed in game". Th
 ## 0.5.20-beta, delayed read after the trainer filters change
 
 Live log after 0.5.19: Bronk (npc 1702) still returned GetNumTrainerServices=0, with the type filters available/unavailable/used = true/true/false when probed (after the toggle and restore). The list is therefore not rebuilt synchronously. The observer now logs filters-on, reads again after 0.3 s (event TRAINER_FILTER) and restores the filters afterwards or on close. Pending live check: Bronk recorded as saved, and the player's trainer filter back to its previous state.
+
+## 0.5.21-beta, trainer filter diagnostics
+
+Live log after 0.5.20: filters-on was logged for Bronk (npc 1702), but the probe still showed used=false and the delayed TRAINER_FILTER read still returned 0 services. Either SetTrainerServiceTypeFilter(name, 1) is not accepted by this client or the empty list has another cause. 0.5.21 tries 1 then true and writes the client answers into the filters-on log entry (field first). Pending live check of that report.

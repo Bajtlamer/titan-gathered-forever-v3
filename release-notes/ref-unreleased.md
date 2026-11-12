@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.20-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.21-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Trainer filter diagnostics, 0.5.21-beta
+
+- The live log after 0.5.20 showed the "Already known" filter still off after the addon tried to switch it on, and the delayed read still found no services. The addon now tries the value 1 and then true, reports what the client answered (the "first" field of the filters-on entry in the NPC recording log) and restores the filter whichever value took effect. This is a diagnostic step: if Bronk is still not recorded, the report shows whether the filter call is accepted at all.
 
 ## Trainer filters read after the list is rebuilt, 0.5.20-beta
 
