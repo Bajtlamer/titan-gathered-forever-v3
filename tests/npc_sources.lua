@@ -186,6 +186,23 @@ test('recipes of a profession that was never read say the learned status is unkn
     assert(t.lines[#t.lines]:find('Learned status unknown', 1, true) and t.lines[#t.lines]:find('Alchemy', 1, true))
 end)
 
+test('rank spells are known by the skill cap and never ask for a profession window', function()
+    local ns = fresh()
+    ns.NpcSeed.npcs[9] = { n = 'Angler', m = 0, x = 1, y = 1, p = 'Fishing',
+        t = { { 7733, 'Apprentice Fishing', 100, 1, 0 }, { 7734, 'Journeyman Fishing', 500, 50, 0 }, { 7620, 'Expert Fishing', 5000, 125, 0 } } }
+    ns.KnownRecipes = { IsKnown = function() return nil end }
+    ns.Professions = { Rows = function() return { { kind = 'Fishing', rank = 80, maxRank = 150 } } end }
+    local t = tip()
+    ns.NpcSources.FillTooltip(t, { kind = 'Trainer', npcID = 9 })
+    eq(t.doubles[1][1], '<gray>Apprentice Fishing</> <gray>(1)</> <green>learned</>')
+    eq(t.doubles[2][1], '<gray>Journeyman Fishing</> <gray>(50)</> <green>learned</>')
+    eq(t.doubles[3][1], '<white>Expert Fishing</> <red>(125)</>')   -- skill 80 is below 125
+    eq(#t.lines, 4)
+    ns.Professions = { Rows = function() return {} end }
+    t = tip(); ns.NpcSources.FillTooltip(t, { kind = 'Trainer', npcID = 9 })
+    eq(t.doubles[1][1], '<white>Apprentice Fishing</> <red>(1)</>')
+end)
+
 test('a required skill above the player rank is red and unknown requirements stay neutral', function()
     local ns = fresh()
     ns.Professions = { Rows = function() return { { kind = 'Alchemy', rank = 60 } } end }
