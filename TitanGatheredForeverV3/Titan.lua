@@ -306,6 +306,7 @@ function Titan.Menu(owner)
         toggle(diagnostics, 'Debug mode', 'debugMode')
         diagnostics:CreateButton('Refresh inventory', function() ns.ScheduleRefresh() end)
         diagnostics:CreateButton('Show status report', function() ns.ShowStatus(true) end)
+        diagnostics:CreateButton('Show NPC recording log', function() ns.NpcObserver.PrintLog() end)
     end)
 end
 

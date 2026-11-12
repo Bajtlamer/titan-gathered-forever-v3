@@ -8,7 +8,7 @@ Website: [titan-gathered.com](https://www.titan-gathered.com/).
 
 ## Current beta
 
-The current development candidate is version `0.5.0-beta` and targets **WoW Forever 1.60.1, interface 16001**, with Titan Panel installed separately. It is installed in the local test client. The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); they do not represent a new tagged release. Other WoW editions are outside this project's scope.
+The current development candidate is version `0.5.1-beta` and targets **WoW Forever 1.60.1, interface 16001**, with Titan Panel installed separately. It is installed in the local test client. The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); they do not represent a new tagged release. Other WoW editions are outside this project's scope.
 
 Validation: all Python and Lua suites pass, plus Lua 5.1 compilation of every shipped Lua file. The user confirms the icon configurator works; the full [live acceptance checklist](book-wow-forever-validation.md) remains open.
 
@@ -113,7 +113,7 @@ Everything that needs no parameter is in the right-click menu of the Titan entry
 - Icon appearance: the small icon appearance window.
 - Trainers and recipe vendors: map toggles, profession filter, Unlearned recipes, and Pin placement (find the nearest pin, swap map axes if pins look mirrored).
 - History and sources: Lifetime materials, Observed chances, Profession actions, Crafting and cooking, PvP Board, Export statistics and recording switches.
-- Diagnostics: Debug mode, Refresh inventory and Show status report.
+- Diagnostics: Debug mode, Refresh inventory, Show status report and Show NPC recording log (why the last trainer or merchant windows did or did not record, with raw client answers).
 
 A command is only needed when it takes a parameter:
 

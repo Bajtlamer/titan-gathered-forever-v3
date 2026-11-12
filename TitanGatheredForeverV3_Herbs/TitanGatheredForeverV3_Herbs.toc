@@ -1,7 +1,7 @@
 ## Interface: 16001
 ## Title: Titan Gathered Forever v3: Herbalism
 ## Notes: Optional Herbalism material catalogue for Titan Gathered Forever v3.
-## Version: 0.5.0-beta
+## Version: 0.5.1-beta
 ## Dependencies: Titan, TitanGatheredForeverV3
 
 Data.lua

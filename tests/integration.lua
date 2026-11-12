@@ -359,7 +359,7 @@ test('menu offers every chat function that needs no parameter', function()
     local s, ns = fixture(); s:Start()
     s.broker.OnClick({}, 'RightButton')
     local buttons = s.menu.buttons
-    for _, label in ipairs({ 'Refresh inventory', 'Show status report', 'Next summary page', 'Previous summary page',
+    for _, label in ipairs({ 'Refresh inventory', 'Show status report', 'Show NPC recording log', 'Next summary page', 'Previous summary page',
         'Find nearest trainer or vendor pin', 'Unlearned recipes...' }) do
         assert(type(buttons[label]) == 'function', 'menu lacks ' .. label)
     end
@@ -377,6 +377,9 @@ test('menu offers every chat function that needs no parameter', function()
     before = #s.messages
     buttons['Find nearest trainer or vendor pin']()
     assert(#s.messages > before, 'nearest pin gave no feedback')
+    before = #s.messages
+    buttons['Show NPC recording log']()
+    assert(#s.messages == before + 1 and s.message:find('No NPC recording attempts yet', 1, true), 'empty log not explained')
     local scheduled, original = 0, ns.ScheduleRefresh
     ns.ScheduleRefresh = function() scheduled = scheduled + 1 end
     buttons['Refresh inventory'](); eq(scheduled, 1)

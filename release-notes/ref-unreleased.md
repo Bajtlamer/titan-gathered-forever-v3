@@ -1,6 +1,11 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.0-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.1-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## NPC recording log, 0.5.1-beta
+
+- Live test: a trainer window was opened but its pin kept the tooltip line Not yet confirmed in game. Every trainer and merchant recording attempt is now logged with its outcome (saved, no-npc, no-services, no-profession, no-recipes, disabled) and the raw answers of the client trainer and merchant APIs, for the last 12 attempts. Diagnostics > Show NPC recording log prints it. The log is stored in SavedVariables as npcLog and does not affect statistics.
+- This is a diagnostic step: it finds why recording failed on Forever 1.60.1. Recording behavior itself is unchanged.
 
 ## Beta stage, 0.5.0-beta
 

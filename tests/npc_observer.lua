@@ -3,7 +3,9 @@ local function test(name, fn) tests[#tests + 1] = { name, fn } end
 local function eq(actual, expected) assert(actual == expected, 'expected ' .. tostring(expected) .. ', got ' .. tostring(actual)) end
 
 local function fresh(api)
-    local ns = { IsPublic = function() return true end, settings = { recordNpcs = true }, db = { npcs = {} } }
+    local ns = { IsPublic = function() return true end, settings = { recordNpcs = true }, db = { npcs = {}, npcLog = {} },
+        printed = {} }
+    ns.Print = function(message) ns.printed[#ns.printed + 1] = message end
     ns.NpcSources = { Invalidate = function() ns.invalidated = (ns.invalidated or 0) + 1 end }
     assert(loadfile('TitanGatheredForeverV3/NpcObserver.lua'))('TitanGatheredForeverV3', ns)
     local base = { Enabled = function() return ns.settings.recordNpcs end, Now = function() return 1234 end,
@@ -87,6 +89,50 @@ test('trainer and vendor data for one npc are kept together', function()
         MerchantRecipes = function() return { { itemID = 5, kind = 'Cooking' } } end })
     observer:TrainerShown(); observer:MerchantShown()
     eq(ns.db.npcs[3167].profession, 'Cooking'); eq(#ns.db.npcs[3167].trainer, 1); eq(#ns.db.npcs[3167].vendor, 1)
+end)
+
+test('every trainer attempt is logged with the reason it did or did not record', function()
+    local services = {}
+    local npc = nil
+    local ns, observer = fresh({ Npc = function() return npc end, TrainerServices = function() return services end })
+    local function last() return ns.db.npcLog[#ns.db.npcLog] end
+    observer:TrainerShown(); eq(last().result, 'no-npc'); eq(last().event, 'TRAINER_SHOW')
+    npc = { id = 3167, name = 'Trainer Bob', mapID = 1429, x = 0.4, y = 0.5 }
+    observer:TrainerShown(); eq(last().result, 'no-services'); eq(last().services, 0)
+    services = { { name = 'Heal', cost = 10 }, { name = 'Smite', cost = 20 } }
+    observer:TrainerShown(); eq(last().result, 'no-profession'); eq(last().services, 2); eq(last().first, 'Heal')
+    services = { { name = 'A', cost = 1, skillName = 'Alchemy', skillRank = 1 } }
+    observer:TrainerShown(); eq(last().result, 'saved'); eq(last().profession, 'Alchemy'); eq(last().npc, 3167)
+    ns.settings.recordNpcs = false
+    observer:TrainerShown(); eq(last().result, 'disabled')
+    eq(#ns.db.npcLog, 5)
+end)
+
+test('merchant attempts are logged too', function()
+    local rows = {}
+    local ns, observer = fresh({ MerchantRecipes = function() return rows end })
+    local function last() return ns.db.npcLog[#ns.db.npcLog] end
+    observer:MerchantShown(); eq(last().event, 'MERCHANT_SHOW'); eq(last().result, 'no-recipes')
+    rows = { { itemID = 100, kind = 'Alchemy' } }
+    observer:MerchantShown(); eq(last().result, 'saved'); eq(last().recipes, 1)
+end)
+
+test('the log keeps only the latest entries and attaches raw api probes', function()
+    local ns, observer = fresh({ Probe = function(which) return { 'probe-' .. which } end })
+    for _ = 1, 15 do observer:TrainerShown() end
+    eq(#ns.db.npcLog, 12)
+    eq(ns.db.npcLog[12].probe[1], 'probe-trainer')
+end)
+
+test('printing the log summarises every entry or says there is none', function()
+    local ns, observer = fresh({ Probe = function() return { 'GetNumTrainerServices=function' } end })
+    ns.NpcObserver.PrintLog(); eq(ns.printed[1], 'No NPC recording attempts yet. Open a trainer or merchant window first.')
+    observer:TrainerShown()
+    ns.printed = {}
+    ns.NpcObserver.PrintLog()
+    assert(ns.printed[1]:find('TRAINER_SHOW', 1, true) and ns.printed[1]:find('saved', 1, true) == nil)
+    assert(ns.printed[1]:find('no-services', 1, true), ns.printed[1])
+    assert(ns.printed[2]:find('GetNumTrainerServices=function', 1, true))
 end)
 
 for _, entry in ipairs(tests) do

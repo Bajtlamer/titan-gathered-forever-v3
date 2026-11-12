@@ -63,6 +63,7 @@ function ns.Settings.Initialize(saved)
     if type(saved.flightVisits) ~= 'table' then saved.flightVisits = {} end
     if type(saved.pvp) ~= 'table' then saved.pvp = {} end
     if type(saved.npcs) ~= 'table' then saved.npcs = {} end
+    if type(saved.npcLog) ~= 'table' then saved.npcLog = {} end
     if type(saved.knownRecipes) ~= 'table' then saved.knownRecipes = {} end
     return saved, settings
 end
