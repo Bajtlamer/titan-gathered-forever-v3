@@ -104,7 +104,7 @@ function Browser.Refresh()
     Browser.total = #rows
     Browser.offset = Browser.Clamp(Browser.offset, Browser.total)
     w.filter:SetText(Browser.vendorOnly and 'Vendor only' or 'All unlearned')
-    w.kindButton:SetText(Browser.kind and ns.NpcSources.Label(Browser.kind) or 'All professions')
+    w.kindButton.Sync()
     w.rangeText:SetText(Browser.RangeText(Browser.offset, Browser.total))
     for index = 1, ROWS do
         local line = w.lines[index]
@@ -145,15 +145,11 @@ function Browser.Show()
         w.filter = button(w, 'All unlearned', 15, -65, 150, function()
             Browser.vendorOnly = not Browser.vendorOnly; Browser.offset = 0; Browser.Refresh()
         end)
-        w.kindButton = button(w, 'All professions', 175, -65, 190, function(owner)
-            MenuUtil.CreateContextMenu(owner, function(_, root)
-                root:CreateButton('All professions', function() Browser.SetKind(nil) end)
-                for _, kind in ipairs(ns.NpcSources.RecipeKinds) do
-                    local id = kind
-                    root:CreateButton(ns.NpcSources.Label(id), function() Browser.SetKind(id) end)
-                end
-            end)
-        end)
+        w.kindButton = ns.Nav.Dropdown(w, 175, -65, 190, function()
+            local list = { { value = false, label = 'All professions' } }
+            for _, kind in ipairs(ns.NpcSources.RecipeKinds) do list[#list + 1] = { value = kind, label = ns.NpcSources.Label(kind) } end
+            return list
+        end, function() return Browser.kind or false end, function(value) Browser.SetKind(value or nil) end)
         w.rangeText = text(w, 'GameFontHighlightSmall', 380, -70, 300)
         text(w, 'GameFontNormalSmall', 690, -70, 50):SetText('Search')
         local search = CreateFrame('EditBox', nil, w, 'InputBoxTemplate')

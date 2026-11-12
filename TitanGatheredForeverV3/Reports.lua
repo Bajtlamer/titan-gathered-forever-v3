@@ -293,9 +293,7 @@ function Reports.Update(window)
         window.anchorItem=nil
     end
     window.scope:SetText(window.combined and 'All characters' or 'This character')
-    local module=window.filter and ns.Catalog.modules[window.filter]
-    window.filterButton:SetText(module and module.label or (window.mode=='actions' and labels[window.filter])
-        or (window.mode=='production'and ns.Production.labels[window.filter]) or 'All professions')
+    window.filterButton.Sync()
     if window.group then window.group:SetText(window.grouped and'Grouped by item'or'All sources')end
     window.empty:SetText(#rows==0 and (window.searchText and window.searchText~=''and'Nothing matches this search.'
         or window.mode=='reagentUsage'and'No supported reagent use is recorded in this coverage period.'
@@ -361,28 +359,18 @@ function Reports.Show(mode)
             or mode=='chances'and'Observed outcomes / complete looted sources, grouped by source and zone. Not a probability at a map coordinate. Click for sources.'
             or'Lifetime obtained combines acquired and crafted quantities. Use + to expand individual sources. Chances use complete samples; Unknown means insufficient evidence. Click an item for source actions.')
         w.scope=button(w,'This character',15,-65,150,function()w.combined=not w.combined;w.offset=0;Reports.Update(w)end)
-        w.filterButton=button(w,'All professions',175,-65,190,function(owner)
-            MenuUtil.CreateContextMenu(owner,function(_,root)
-                root:CreateButton('All professions',function()w.filter=nil;w.offset=0;Reports.Update(w)end)
-                if mode=='actions' then
-                    for _,id in ipairs({'Mining','Herbs','Skinning','Fishing','Enchanting'}) do
-                        local kind=id
-                        root:CreateButton(labels[kind],function()w.filter=kind;w.offset=0;Reports.Update(w)end)
-                    end
-                elseif mode=='production'then
-                    local kinds={};for kind in pairs(ns.Production.labels)do kinds[#kinds+1]=kind end;table.sort(kinds)
-                    for _,id in ipairs(kinds)do
-                        local kind=id
-                        root:CreateButton(ns.Production.labels[kind],function()w.filter=kind;w.offset=0;Reports.Update(w)end)
-                    end
-                else
-                    for _,module in ipairs(ns.Catalog.Modules())do
-                        local id=module.id
-                        root:CreateButton(module.label,function()w.filter=id;w.offset=0;Reports.Update(w)end)
-                    end
-                end
-            end)
-        end)
+        w.filterButton=ns.Nav.Dropdown(w,175,-65,190,function()
+            local list={{value=false,label='All professions'}}
+            if mode=='actions' then
+                for _,id in ipairs({'Mining','Herbs','Skinning','Fishing','Enchanting'}) do list[#list+1]={value=id,label=labels[id]}end
+            elseif mode=='production'then
+                local kinds={};for kind in pairs(ns.Production.labels)do kinds[#kinds+1]=kind end;table.sort(kinds)
+                for _,id in ipairs(kinds)do list[#list+1]={value=id,label=ns.Production.labels[id]}end
+            else
+                for _,module in ipairs(ns.Catalog.Modules())do list[#list+1]={value=module.id,label=module.label}end
+            end
+            return list
+        end,function()return w.filter or false end,function(value)w.filter=value or nil;w.offset=0;Reports.Update(w)end)
         if mode=='reagentUsage'or mode=='pvp'then w.filterButton:Hide()end
         if mode=='chances'then
             w.group=button(w,'All sources',375,-65,140,function()w.grouped=not w.grouped;w.offset=0;w.expanded={};Reports.Update(w)end)

@@ -1,6 +1,11 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.16-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.17-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Combo boxes and classic tabs, 0.5.17-beta
+
+- The profession filter in the recipes window and in the statistics tabs is now a Blizzard style combo box (a drop down showing the selected choice) instead of a button that opens a menu. It falls back to the previous button and menu when the client has no drop down template.
+- The tabs are classic panel tabs hanging below the window. When the client lacks the panel tab template they fall back to the button row used before, so the window always opens. Both the look of the drop down and of the tabs await live review, because the templates could not be checked outside the game.
 
 ## Character level for profession ranks, 0.5.16-beta
 

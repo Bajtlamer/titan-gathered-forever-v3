@@ -64,7 +64,32 @@ function Nav.Frame(window, id)
     window:SetSize(Nav.WIDTH, Nav.HEIGHT)
     window:SetScript('OnDragStart', function(self) self:StartMoving() end)
     window:SetScript('OnDragStop', function(self) self:StopMovingOrSizing(); Nav.Remember(self) end)
-    window.tabButtons = {}
+    Nav.Tabs(window, id)
+end
+
+-- Classic panel tabs hanging below the window (PanelTabButtonTemplate); plain buttons inside the window when the
+-- client does not provide them, so the window never fails to open.
+local function panelTabs(window, id)
+    local previous
+    window.Tabs = {}
+    for index, tab in ipairs(Nav.tabs) do
+        local b = CreateFrame('Button', nil, window, 'PanelTabButtonTemplate')
+        b:SetID(index)
+        b:SetText(tab.label)
+        if previous then b:SetPoint('LEFT', previous, 'RIGHT', -16, 0)
+        else b:SetPoint('TOPLEFT', window, 'BOTTOMLEFT', 15, 2) end
+        local target = tab.id
+        b:SetScript('OnClick', function() if target ~= id then Nav.Open(target) end end)
+        window.Tabs[index] = b
+        window.tabButtons[target] = b
+        previous = b
+        if target == id then window.activeTab = index end
+    end
+    PanelTemplates_SetNumTabs(window, #Nav.tabs)
+    PanelTemplates_SetTab(window, window.activeTab or 1)
+end
+
+local function buttonTabs(window, id)
     local x = 15
     for _, tab in ipairs(Nav.tabs) do
         local b = CreateFrame('Button', nil, window, 'UIPanelButtonTemplate')
@@ -77,6 +102,54 @@ function Nav.Frame(window, id)
         window.tabButtons[target] = b
         x = x + 136
     end
+end
+
+function Nav.Tabs(window, id)
+    window.tabButtons = {}
+    if PanelTemplates_SetNumTabs and PanelTemplates_SetTab and pcall(panelTabs, window, id) then return end
+    for _, b in pairs(window.tabButtons) do b:Hide() end
+    window.tabButtons = {}
+    buttonTabs(window, id)
+end
+
+-- A combo box in the Blizzard style: a drop down showing the selected choice. options() returns the list of
+-- { value = ..., label = ... }; get() the current value; set(value) applies a choice. Falls back to a button with
+-- a context menu when the client has no drop down template. The returned frame has Sync() to show a value that
+-- was changed from code.
+function Nav.Dropdown(parent, x, y, width, options, get, set)
+    local function labelOf()
+        local current = get()
+        for _, option in ipairs(options()) do if option.value == current then return option.label end end
+        return ''
+    end
+    local ok, drop = pcall(CreateFrame, 'DropdownButton', nil, parent, 'WowStyle1DropdownTemplate')
+    if ok and drop and drop.SetupMenu then
+        drop:SetPoint('TOPLEFT', parent, 'TOPLEFT', x, y)
+        drop:SetWidth(width)
+        drop:SetupMenu(function(_, root)
+            for _, option in ipairs(options()) do
+                local value = option.value
+                root:CreateRadio(option.label, function() return get() == value end, function() set(value) end)
+            end
+            if root.SetScrollMode then root:SetScrollMode(350) end
+        end)
+        drop.Sync = function() if drop.GenerateMenu then drop:GenerateMenu() end end
+        return drop
+    end
+    local b = CreateFrame('Button', nil, parent, 'UIPanelButtonTemplate')
+    b:SetSize(width, 22)
+    b:SetPoint('TOPLEFT', parent, 'TOPLEFT', x, y)
+    b:SetScript('OnClick', function(owner)
+        MenuUtil.CreateContextMenu(owner, function(_, root)
+            for _, option in ipairs(options()) do
+                local value = option.value
+                root:CreateButton(option.label, function() set(value); b.Sync() end)
+            end
+        end)
+    end)
+    b.Sync = function() b:SetText(labelOf()) end
+    b.Sync()
+    return b
 end
 
 -- A vertical scroll bar. scrollTo(offset) receives the dragged position; wheel(delta) the mouse wheel over the bar.
