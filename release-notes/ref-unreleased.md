@@ -1,6 +1,11 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.3-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.4-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Trainer and vendor tooltip layout, 0.5.4-beta
+
+- The skill is now in brackets right after the recipe name, for example Boiled Clams (50), and the right side shows only the price in the classic format of gold, silver and copper numbers followed by their coin icons. Unknown skills read (?) and unknown prices read price unknown. An extra cost is noted as + extra cost.
+- A rule separates the NPC header from the recipe list. Colors separate the three kinds of text: gold is the NPC name, white is the recipe list, gray is additional information (role, confirmation, and N more), and green marks confirmation and known recipes.
 
 ## Merchant price and recipe diagnostics, 0.5.3-beta
 
