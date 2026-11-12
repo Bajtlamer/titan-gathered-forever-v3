@@ -442,3 +442,7 @@ Live report on 0.5.23: the filter returned to off after closing, but the window 
 ## 0.5.25-beta, C stack overflow fixed
 
 Live error on 0.5.24 when a Mining trainer was opened: C stack overflow in NpcObserver.lua (Log, ReadTrainer, TrainerUpdated, RestoreFilters in a loop). The client delivers TRAINER_UPDATE inside SetTrainerServiceTypeFilter. 0.5.25 ignores nested reads and clears the changed filter list before restoring. Pending live check: Mining trainer opens without an error and is recorded.
+
+## 0.5.26-beta, filters touched only for an empty update
+
+Live log on 0.5.25: the Mining trainer (npc 5392) was recorded without an error, but the filters were also switched for it (filters-on on SHOW, 15 services saved, then 10 on the restore). TRAINER_SHOW is always empty. 0.5.26 switches the filters only when TRAINER_UPDATE is still empty. Pending live check: Mining trainer saved with the player's filters (no filters-on entry), Bronk still recorded.

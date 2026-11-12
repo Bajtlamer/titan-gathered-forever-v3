@@ -115,7 +115,9 @@ function Obs:ReadTrainerNow(event)
             if self.emptyTrainerLogged then return end
             self.emptyTrainerLogged = true
         end
-        if self.api.EnableFilters and self.api.EnableFilters() then
+        -- TRAINER_SHOW always reports an empty list because the client fills it a moment later; only an empty
+        -- list on the update that follows can mean that the filters hide every service.
+        if event ~= 'TRAINER_SHOW' and self.api.EnableFilters and self.api.EnableFilters() then
             -- Probably a trainer with nothing left to teach: the window hides known services. Read again once the
             -- client has rebuilt the list. The filters go back right after that read (or when the window closes).
             self:Log(event, 'filters-on', { npc = npc.id, services = 0, first = table.concat(self.api.filterReport or {}, ' | ') })
