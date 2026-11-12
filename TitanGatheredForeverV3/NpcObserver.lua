@@ -107,8 +107,7 @@ function Obs:ReadTrainer(event)
         end
         if self.api.EnableFilters and self.api.EnableFilters() then
             -- Probably a trainer with nothing left to teach: the window hides known services. Read again once the
-            -- client has rebuilt the list. The filters stay on while the window is open (putting them back at once
-            -- made the list flash and empty) and are restored when it closes.
+            -- client has rebuilt the list. The filters go back right after that read (or when the window closes).
             self:Log(event, 'filters-on', { npc = npc.id, services = 0, first = table.concat(self.api.filterReport or {}, ' | ') })
             self.api.After(0.3, function()
                 if self.trainerOpen then self:ReadTrainer('TRAINER_FILTER') end
@@ -136,6 +135,8 @@ function Obs:ReadTrainer(event)
     end
     self:Save(npc, { profession = profession, trainer = rows })
     self:Log(event, 'saved', { npc = npc.id, profession = profession, services = #rows })
+    -- Filters switched on for this read go back at once: the player's window shows what it normally shows.
+    if self.api.RestoreFilters then self.api.RestoreFilters() end
 end
 
 function Obs:TrainerShown()

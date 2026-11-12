@@ -217,11 +217,11 @@ test('a fully known trainer is read again with the filters on and the filters ar
     eq(filters.used, 1); eq(table.concat(sets, ','), 'used=true')
     later()                               -- the delayed read
     eq(#ns.db.npcs[1702].trainer, 2)
-    eq(filters.used, 1)                   -- stays on while the window is open, so the list does not flash
-    observer:TrainerUpdated()             -- a refresh does not toggle again
-    eq(#sets, 1)
+    eq(filters.used, 0)                   -- the player's filter is back right after the read
+    eq(#sets, 2)
+    observer:TrainerUpdated()             -- the refresh after the restore does not toggle again
+    eq(#sets, 2)
     observer:TrainerClosed()
-    eq(filters.used, 0)                   -- the player's filter is back
     eq(#sets, 2)
     observer:TrainerShown()               -- a new window tries again
     eq(#sets, 3); later()

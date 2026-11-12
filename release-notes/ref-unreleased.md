@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.23-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.24-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Trainer filters restored right after the read, 0.5.24-beta
+
+- Keeping the filters on until the window closed (0.5.23) left the trainer window showing already known services, which is not what the player's filter says. The filters are now restored right after the successful read, in the same handler, so any flash lasts a moment. The close of the window still restores them as a fallback.
 
 ## No flashing trainer list, 0.5.23-beta
 
