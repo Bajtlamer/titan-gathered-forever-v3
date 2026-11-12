@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.25-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.26-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Trainer filters touched only when needed, 0.5.26-beta
+
+- The client always reports an empty trainer list on the opening event and fills it on the update that follows, so the 0.5.25 read switched the player's type filters on for every trainer. They are now switched only when the list is still empty after that update, which is the case of a trainer with nothing left to teach (Bronk Guzzlegear). Other trainers, for example the Mining trainer, are read with the player's own filters as before.
 
 ## Fix: C stack overflow when a trainer opens, 0.5.25-beta
 

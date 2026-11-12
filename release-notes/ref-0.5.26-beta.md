@@ -1,4 +1,4 @@
-# Titan Gathered Forever v3 0.5.25-beta
+# Titan Gathered Forever v3 0.5.26-beta
 
 First beta. It contains everything since the last built download set, 0.4.2-alpha. Per-step history is in ref-unreleased.md. This text is the changelog for the website; the release itself is not published yet.
 

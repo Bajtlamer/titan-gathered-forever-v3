@@ -216,6 +216,8 @@ test('a fully known trainer is read again with the filters on and the filters ar
     api.Probe = nil; api.Now = function() return 1 end
     observer = ns.NpcObserver.New(api)
     observer:TrainerShown()
+    eq(#sets, 0)                          -- an empty list on SHOW is normal: the client fills it later
+    observer:TrainerUpdated()
     eq(ns.db.npcs[1702], nil)            -- nothing yet: the list is rebuilt after the filters change
     eq(filters.used, 1); eq(table.concat(sets, ','), 'used=true')
     later()                               -- the delayed read
@@ -227,6 +229,7 @@ test('a fully known trainer is read again with the filters on and the filters ar
     observer:TrainerClosed()
     eq(#sets, 2)
     observer:TrainerShown()               -- a new window tries again
+    observer:TrainerUpdated()
     eq(#sets, 3); later()
     observer:TrainerClosed()              -- closing restores the filters
     eq(filters.used, 0)
