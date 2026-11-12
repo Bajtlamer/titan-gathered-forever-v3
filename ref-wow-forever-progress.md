@@ -430,3 +430,7 @@ Live log after 0.5.20: filters-on was logged for Bronk (npc 1702), but the probe
 ## 0.5.22-beta, Bronk recorded
 
 Live log after 0.5.21: SetTrainerServiceTypeFilter(name, 1) fails with "Missing on/off parameter", SetTrainerServiceTypeFilter(name, true) works. After the delayed read Bronk (npc 1702) was saved with 11 Engineering services. 0.5.22 uses true and false only. Pending live check: the player's "Already known" filter is back to off after the window closes.
+
+## 0.5.23-beta, trainer list no longer flashes
+
+Live report (screenshot, 0.5.21): the Bronk window showed several services and then emptied. This was the addon switching the type filters on for the read and back at once; it is not a client bug. 0.5.23 keeps the filters on until the trainer window closes. Pending live check that the filter is back off after closing.
