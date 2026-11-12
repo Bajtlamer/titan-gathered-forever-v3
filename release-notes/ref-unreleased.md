@@ -1,6 +1,11 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.11-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.12-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Learned status in trainer and vendor tooltips, 0.5.12-beta
+
+- A recipe the character already knows is dimmed (gray name) and tagged "learned" in green, so the white rows are the ones still worth learning. This replaces the earlier small "(known)" tag.
+- When the professions of the listed recipes were never read for this character, the tooltip ends with a gray note "Learned status unknown: open the profession window once (Cooking, ...)". Previously such rows looked the same as unlearned ones.
 
 ## One window with tabs, scrolling lists, search and grouping, 0.5.11-beta
 
