@@ -11,10 +11,12 @@ end
 function View.Refresh()
     local w=View.window;if not w or not w:IsShown()then return end
     local plan=ns.Crafting.Plan(w.recipeID,w.operations);w.plan=plan
-    local pages=math.max(1,math.ceil(#plan.rows/6));w.page=math.min(pages,math.max(1,w.page))
+    local last=math.max(0,#plan.rows-6);w.offset=math.min(last,math.max(0,math.floor(w.offset+0.5)))
     w.TitleText:SetText('TGF v3 Recipe reagents'..(plan.name and': '..plan.name or''))
     w.target:SetText(w.operations..' planned operations')
-    w.pageText:SetText(string.format('Page %d / %d; click a reagent for observed sources',w.page,pages))
+    w.pageText:SetText(#plan.rows==0 and'Click a reagent for observed sources'
+        or string.format('Showing %d-%d of %d reagents; click a reagent for observed sources',w.offset+1,math.min(#plan.rows,w.offset+6),#plan.rows))
+    ns.Nav.SyncScrollbar(w.slider,w.offset,last)
     if plan.error then w.summary:SetText(plan.error);w.note:SetText('Use /tgf recipe <recipeID> [operations], or select a supported profession recipe.')
     else
         local limit=plan.craftable and string.format('Material limit: %d operations%s',plan.craftable,plan.cached and' (cached estimate)'or'')
@@ -30,7 +32,7 @@ function View.Refresh()
     end
     local character=ns.characterID or UnitGUID('player')
     for i,row in ipairs(w.rows)do
-        local data=plan.rows[(w.page-1)*6+i];row.data=data
+        local data=plan.rows[w.offset+i];row.data=data
         if data then
             row:Show();row.name:SetText(ns.Style.ItemName(data.itemID))
             local evidence=ns.Crafting.Evidence(data.itemID,character)
@@ -48,7 +50,7 @@ function View.Show(recipeID,operations)
         local name='TitanGatheredForeverV3RecipeWindow'
         w=CreateFrame('Frame',name,UIParent,'BasicFrameTemplateWithInset');View.window=w
         if UISpecialFrames then table.insert(UISpecialFrames,name)end
-        w.rows={};w:SetSize(820,600);w:SetPoint('CENTER',UIParent,'CENTER',0,0)
+        w.rows={};w:SetSize(845,600);w:SetPoint('CENTER',UIParent,'CENTER',0,0)
         w:SetClampedToScreen(true);w:SetMovable(true);w:EnableMouse(true);w:RegisterForDrag('LeftButton')
         w:SetScript('OnDragStart',function(self)self:StartMoving()end)
         w:SetScript('OnDragStop',function(self)self:StopMovingOrSizing()end)
@@ -70,10 +72,12 @@ function View.Show(recipeID,operations)
             end)
             row:SetScript('OnLeave',function()GameTooltip:Hide()end)
         end
-        button(w,'Previous',15,-560,100,function()w.page=w.page-1;View.Refresh()end)
-        button(w,'Next',125,-560,100,function()w.page=w.page+1;View.Refresh()end)
-        w.pageText=text(w,'GameFontHighlightSmall',245,-565,550)
+        local function scrollTo(offset)w.offset=offset;View.Refresh()end
+        w.slider=ns.Nav.Scrollbar(w,15+785+8,-155,6*62-8,scrollTo,function(delta)scrollTo(w.offset-delta*2)end)
+        w:EnableMouseWheel(true)
+        w:SetScript('OnMouseWheel',function(_,delta)scrollTo(w.offset-delta*2)end)
+        w.pageText=text(w,'GameFontHighlightSmall',15,-565,785)
     end
-    w.recipeID,w.operations,w.page=recipeID,operations or 1,1
+    w.recipeID,w.operations,w.offset=recipeID,operations or 1,0
     ns.Crafting.Select({recipeID=recipeID});w:Show();View.Refresh()
 end

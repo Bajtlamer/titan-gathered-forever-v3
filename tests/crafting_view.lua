@@ -4,10 +4,12 @@ local function test(n,f)local ok,e=pcall(f);if not ok then error(n..': '..e)end;
 local function region()return{SetPoint=function()end,SetWidth=function()end,SetJustifyH=function()end,SetText=function(self,v)self.text=v end}end
 local function frame()
  local f={scripts={},shown=false,TitleText=region(),buttons={}}
- for _,m in ipairs({'SetSize','SetPoint','SetClampedToScreen','SetMovable','EnableMouse','RegisterForDrag','StartMoving','StopMovingOrSizing'})do f[m]=function()end end
+ for _,m in ipairs({'SetSize','SetPoint','ClearAllPoints','SetOrientation','SetMinMaxValues','SetValueStep','SetObeyStepOnDrag','SetThumbTexture','EnableMouseWheel','SetValue','SetColorTexture','SetAllPoints','SetClampedToScreen','SetMovable','EnableMouse','RegisterForDrag','StartMoving','StopMovingOrSizing'})do f[m]=function()end end
  function f:SetScript(k,fn)self.scripts[k]=fn end
  function f:SetText(v)self.text=v end
  function f:CreateFontString()return region()end
+ function f:CreateTexture()return{SetAllPoints=function()end,SetColorTexture=function()end}end
+ function f:GetThumbTexture()return{SetSize=function()end}end
  function f:Show()self.shown=true end
  function f:Hide()self.shown=false end
  function f:IsShown()return self.shown end
@@ -34,7 +36,7 @@ C_TradeSkillUI={GetRecipeInfo=function(id)if id==2536 then return{recipeID=id,na
  GetProfessionInfoByRecipeID=function()return{professionID=185}end,
  GetRecipeSchematic=function(id)return{recipeID=id,recipeType=1,isRecraft=false,reagentSlotSchematics=slots}end}
 ns.inventory={Get=function(_,id)return{bags=id-1000,bagsState='current',bank=10,bankState='cached',bankObservedAt=100}end}
-for _,file in ipairs({'History.lua','Crafting.lua','Reports.lua','CraftingView.lua'})do assert(loadfile('TitanGatheredForeverV3/'..file))('TGF v3',ns)end
+for _,file in ipairs({'History.lua','Crafting.lua','Navigation.lua','Reports.lua','CraftingView.lua'})do assert(loadfile('TitanGatheredForeverV3/'..file))('TGF v3',ns)end
 ns.history=ns.History.New({})
 ns.history:Observe('a','A',{id='one',kind='Mining',source='123',mapID=4,at=100,complete=true,items={[1001]=1}})
 ns.gathering={saved={maps={[4]={{itemID=1001,kind='Mining',x=.5,y=.5}}}}}
@@ -46,9 +48,10 @@ test('planner shows deficits material limit scope and source evidence',function(
  eq(ns.history:Total('a',1001),1)
 end)
 test('planner paging and error states hide stale rows',function()
- local w=ns.CraftingView.window;w.page=2;ns.CraftingView.Refresh();eq(w.rows[1].data.itemID,1007);eq(w.rows[2]:IsShown(),false)
+ local w=ns.CraftingView.window;w.offset=6;ns.CraftingView.Refresh();eq(w.offset,1);eq(w.rows[1].data.itemID,1002);eq(w.rows[6].data.itemID,1007)
+ w.offset=0;ns.CraftingView.Refresh();eq(w.rows[1].data.itemID,1001);assert(w.pageText.text:find('1-6 of 7',1,true))
  ns.CraftingView.Show(999,1);assert(w.summary.text:find('unavailable',1,true));eq(w.rows[1]:IsShown(),false)
- ns.CraftingView.Show(2536,3);eq(w.page,1);eq(w.rows[1]:IsShown(),true)
+ ns.CraftingView.Show(2536,3);eq(w.offset,0);eq(w.rows[1]:IsShown(),true)
 end)
 test('planner reagent click exposes rates saved positions and contextual recipe links',function()
  local row=ns.CraftingView.window.rows[1];row.scripts.OnClick(row)

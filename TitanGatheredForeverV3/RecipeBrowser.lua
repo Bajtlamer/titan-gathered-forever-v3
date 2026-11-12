@@ -94,6 +94,13 @@ function Browser.Refresh()
     local w = Browser.window
     if not w or not w:IsShown() then return end
     local rows, unread, pending = ns.NpcSources.Unlearned(ns.characterID, Browser.vendorOnly, Browser.kind)
+    if Browser.searchText and Browser.searchText ~= '' then
+        local needle, kept = Browser.searchText:lower(), {}
+        for _, row in ipairs(rows) do
+            if tostring(row.name):lower():find(needle, 1, true) then kept[#kept + 1] = row end
+        end
+        rows = kept
+    end
     Browser.total = #rows
     Browser.offset = Browser.Clamp(Browser.offset, Browser.total)
     w.filter:SetText(Browser.vendorOnly and 'Vendor only' or 'All unlearned')
@@ -109,13 +116,7 @@ function Browser.Refresh()
             line:Show()
         else line:Hide() end
     end
-    -- The scroll bar mirrors the offset without feeding it back.
-    local last = math.max(0, Browser.total - ROWS)
-    Browser.syncing = true
-    w.slider:SetMinMaxValues(0, last)
-    w.slider:SetValue(Browser.offset)
-    Browser.syncing = false
-    if last > 0 then w.slider:Show() else w.slider:Hide() end
+    ns.Nav.SyncScrollbar(w.slider, Browser.offset, math.max(0, Browser.total - ROWS))
     local notes = {}
     if #unread > 0 then
         local names = {}
@@ -134,11 +135,9 @@ function Browser.Show()
         w = CreateFrame('Frame', name, UIParent, 'BasicFrameTemplateWithInset')
         Browser.window = w
         if UISpecialFrames then table.insert(UISpecialFrames, name) end
-        w:SetSize(960, 560)
         w:SetPoint('CENTER', UIParent, 'CENTER', 0, 0)
         w:SetClampedToScreen(true); w:SetMovable(true); w:EnableMouse(true); w:RegisterForDrag('LeftButton')
-        w:SetScript('OnDragStart', function(self) self:StartMoving() end)
-        w:SetScript('OnDragStop', function(self) self:StopMovingOrSizing() end)
+        ns.Nav.Frame(w, 'recipes')
         w:SetScript('OnHide', function() GameTooltip:Hide() end)
         w.TitleText:SetText('TGF v3 Unlearned recipes')
         local note = text(w, 'GameFontHighlightSmall', 15, -33, 930)
@@ -156,6 +155,20 @@ function Browser.Show()
             end)
         end)
         w.rangeText = text(w, 'GameFontHighlightSmall', 380, -70, 300)
+        text(w, 'GameFontNormalSmall', 690, -70, 50):SetText('Search')
+        local search = CreateFrame('EditBox', nil, w, 'InputBoxTemplate')
+        w.search = search
+        search:SetSize(150, 22); search:SetPoint('TOPLEFT', w, 'TOPLEFT', 745, -65); search:SetAutoFocus(false)
+        search:SetScript('OnEscapePressed', function(self) self:ClearFocus() end)
+        search:SetScript('OnTextChanged', function(self, user)
+            if not user then return end
+            Browser.searchText, Browser.offset = self:GetText(), 0
+            Browser.Refresh()
+        end)
+        button(w, 'Clear', 905, -65, 60, function()
+            search:SetText(''); search:ClearFocus(); Browser.searchText, Browser.offset = nil, 0
+            Browser.Refresh()
+        end)
         local header = CreateFrame('Frame', nil, w)
         header:SetSize(ROW_WIDTH, 30); header:SetPoint('TOPLEFT', w, 'TOPLEFT', 15, -100)
         for _, column in ipairs(columns) do text(header, 'GameFontNormalSmall', column[2], 0, column[3]):SetText(column[1]) end
@@ -184,23 +197,12 @@ function Browser.Show()
         -- Classic scrolling: the mouse wheel anywhere over the window, and a scroll bar on the right.
         w:EnableMouseWheel(true)
         w:SetScript('OnMouseWheel', function(_, delta) Browser.Scroll(-delta * WHEEL_STEP) end)
-        local slider = CreateFrame('Slider', nil, w)
-        w.slider = slider
-        slider:SetOrientation('VERTICAL')
-        slider:SetPoint('TOPLEFT', w, 'TOPLEFT', 15 + ROW_WIDTH + 6, -132)
-        slider:SetSize(16, ROWS * ROW_HEIGHT)
-        slider:SetMinMaxValues(0, 0); slider:SetValueStep(1); slider:SetObeyStepOnDrag(true)
-        local track = slider:CreateTexture(nil, 'BACKGROUND')
-        track:SetAllPoints(slider); track:SetColorTexture(0, 0, 0, 0.35)
-        slider:SetThumbTexture('Interface\\Buttons\\UI-ScrollBar-Knob')
-        slider:GetThumbTexture():SetSize(16, 24)
-        slider:EnableMouseWheel(true)
-        slider:SetScript('OnMouseWheel', function(_, delta) Browser.Scroll(-delta * WHEEL_STEP) end)
-        slider:SetScript('OnValueChanged', function(_, value)
-            if not Browser.syncing then Browser.ScrollTo(value) end
-        end)
+        w.slider = ns.Nav.Scrollbar(w, 15 + ROW_WIDTH + 8, -132, ROWS * ROW_HEIGHT, function(value)
+            Browser.ScrollTo(value)
+        end, function(delta) Browser.Scroll(-delta * WHEEL_STEP) end)
         w.footer = text(w, 'GameFontHighlightSmall', 15, -520, 930)
     end
+    ns.Nav.Activate('recipes', w)
     w:Show()
     Browser.Refresh()
 end

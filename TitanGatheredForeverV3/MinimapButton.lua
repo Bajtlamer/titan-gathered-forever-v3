@@ -2,7 +2,7 @@ local _, ns = ...
 local Button = {}
 ns.MinimapButton = Button
 
--- A round button on the minimap edge: left click toggles the unlearned recipes window, right click opens the
+-- A round button on the minimap edge: left click toggles the recipes and statistics window, right click opens the
 -- addon menu, dragging moves it around the minimap. Same look and placement rules as other Titan plugins.
 local DEFAULT_ANGLE, OFFSET = 205, 22
 
@@ -62,12 +62,12 @@ function Button.Attach()
     button:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
     button:RegisterForDrag('LeftButton')
     button:SetScript('OnClick', function(self, which)
-        if which == 'RightButton' then ns.Titan.Menu(self) else ns.RecipeBrowser.Toggle() end
+        if which == 'RightButton' then ns.Titan.Menu(self) else ns.Nav.Toggle() end
     end)
     button:SetScript('OnEnter', function(self)
         GameTooltip:SetOwner(self, 'ANCHOR_LEFT')
         GameTooltip:AddLine(ns.Style.Text(ns.Style.gold, 'Titan Gathered Forever v3'))
-        GameTooltip:AddLine(ns.Style.Text(ns.Style.gray, 'Left click: unlearned recipes'))
+        GameTooltip:AddLine(ns.Style.Text(ns.Style.gray, 'Left click: recipes and statistics'))
         GameTooltip:AddLine(ns.Style.Text(ns.Style.gray, 'Right click: settings menu'))
         GameTooltip:AddLine(ns.Style.Text(ns.Style.gray, 'Drag: move around the minimap'))
         GameTooltip:Show()

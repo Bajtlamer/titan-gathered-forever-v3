@@ -120,6 +120,7 @@ end)
 test('recipes the player cannot learn yet are red in the list', function()
     local ns = fresh()
     installFrames()
+    assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TitanGatheredForeverV3', ns)
     assert(loadfile('TitanGatheredForeverV3/RecipeBrowser.lua'))('TitanGatheredForeverV3', ns)
     local row = { name = 'Lesser Healing Potion', kind = 'Alchemy', skill = 50, trainer = true, price = 500,
         sources = { { npcID = 1, name = 'Alchemy Trainer', role = 'Trainer', price = 500 } } }
@@ -147,6 +148,7 @@ test('clicking a row opens the map at the first source and marks every source', 
     ns.Map = { Update = function() updates = updates + 1 end }
     ns.Minimap = { Update = function() updates = updates + 1 end }
     installFrames()
+    assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TitanGatheredForeverV3', ns)
     assert(loadfile('TitanGatheredForeverV3/RecipeBrowser.lua'))('TitanGatheredForeverV3', ns)
     local B = ns.RecipeBrowser
     B.Show()
@@ -174,6 +176,7 @@ end)
 test('the toolbar button toggles the window', function()
     local ns = fresh()
     installFrames()
+    assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TitanGatheredForeverV3', ns)
     assert(loadfile('TitanGatheredForeverV3/RecipeBrowser.lua'))('TitanGatheredForeverV3', ns)
     local B = ns.RecipeBrowser
     B.Toggle()                                   -- not created yet: opens
@@ -191,6 +194,7 @@ test('browser cells, hover tooltip and profession filter', function()
     local ns = fresh()
     ns.KnownRecipes.Record('C1', 'Alchemy', { 'Elixir of Minor Defense' }, 10)
     local all, shown = installFrames()
+    assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TitanGatheredForeverV3', ns)
     assert(loadfile('TitanGatheredForeverV3/RecipeBrowser.lua'))('TitanGatheredForeverV3', ns)
     local rows = ns.NpcSources.Unlearned('C1', false)
     local cells = ns.RecipeBrowser.Cells(rows[1])
@@ -222,6 +226,7 @@ end)
 test('the visible range reads naturally', function()
     local ns = fresh()
     installFrames()
+    assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TitanGatheredForeverV3', ns)
     assert(loadfile('TitanGatheredForeverV3/RecipeBrowser.lua'))('TitanGatheredForeverV3', ns)
     local B = ns.RecipeBrowser
     eq(B.RangeText(0, 40), 'Showing 1-16 of 40'); eq(B.RangeText(24, 40), 'Showing 25-40 of 40')
@@ -233,6 +238,7 @@ test('the list scrolls with the mouse wheel and a scroll bar instead of paging',
     local ns = big()
     ns.KnownRecipes.Record('C1', 'Alchemy', {}, 10)
     local all = installFrames()
+    assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TitanGatheredForeverV3', ns)
     assert(loadfile('TitanGatheredForeverV3/RecipeBrowser.lua'))('TitanGatheredForeverV3', ns)
     local B = ns.RecipeBrowser
     B.Show()
@@ -250,6 +256,14 @@ test('the list scrolls with the mouse wheel and a scroll bar instead of paging',
     for _, f in ipairs(all) do if scriptsOf(f).OnValueChanged then slider = f end end
     assert(slider, 'no scroll bar')
     scriptsOf(slider).OnValueChanged(slider, 10); eq(B.offset, 10); eq(w.lines[1].row.name, 'Spell 11')
+    -- Typing in the search box keeps only matching recipes and starts at the top.
+    local box
+    for _, f in ipairs(all) do if scriptsOf(f).OnTextChanged then box = f end end
+    assert(box, 'no search box')
+    B.Scroll(5)
+    scriptsOf(box).OnTextChanged({ GetText = function() return 'spell 2' end }, true)
+    eq(B.total, 10); eq(B.offset, 0); eq(w.lines[1].row.name, 'Spell 20')
+    scriptsOf(box).OnTextChanged({ GetText = function() return '' end }, true); eq(B.total, 40)
     -- Changing the filter or the source mode returns to the top.
     B.SetKind('Alchemy'); eq(B.offset, 0)
     B.Scroll(5); B.SetKind('Cooking'); eq(B.offset, 0); eq(rawget(w.lines[1], 'row'), nil)

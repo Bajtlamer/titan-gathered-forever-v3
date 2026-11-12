@@ -48,7 +48,7 @@ local function env(settings)
     local ns = { settings = settings or { showMinimapButton = true, minimapButtonAngle = 205 }, IsPublic = function() return true end,
         Style = { gold = 'gold', gray = 'gray', Text = function(color, text) return '<' .. color .. '>' .. text .. '</>' end },
         calls = { browser = 0 } }
-    ns.RecipeBrowser = { Toggle = function() ns.calls.browser = ns.calls.browser + 1 end }
+    ns.Nav = { Toggle = function() ns.calls.browser = ns.calls.browser + 1 end }
     ns.Titan = { Menu = function(owner) ns.calls.menuOwner = owner end }
     assert(loadfile('TitanGatheredForeverV3/MinimapButton.lua'))('TitanGatheredForeverV3', ns)
     return ns, lines
@@ -95,7 +95,7 @@ test('the tooltip explains the clicks', function()
     eq(lines.owner, button); eq(lines.shown, true)
     eq(lines[1], '<gold>Titan Gathered Forever v3</>')
     local text = table.concat(lines, '|')
-    assert(text:find('Left click', 1, true) and text:find('unlearned recipes', 1, true))
+    assert(text:find('Left click', 1, true) and text:find('recipes and statistics', 1, true))
     assert(text:find('Right click', 1, true) and text:find('Drag', 1, true))
     button.scripts.OnLeave(button); eq(lines.shown, false)
 end)
