@@ -16,6 +16,11 @@ function ns.Settings.Initialize(saved)
         if type(settings[key]) ~= 'boolean' then settings[key] = true end
     end
     if type(settings.recordPvP) ~= 'boolean' then settings.recordPvP = true end
+    if type(settings.mapTrainers) ~= 'boolean' then settings.mapTrainers = true end
+    if type(settings.mapRecipeVendors) ~= 'boolean' then settings.mapRecipeVendors = true end
+    if type(settings.recordNpcs) ~= 'boolean' then settings.recordNpcs = true end
+    if type(settings.npcAxisSwap) ~= 'boolean' then settings.npcAxisSwap = false end
+    if type(settings.mapNpcProfessions) ~= 'table' then settings.mapNpcProfessions = {} end
     if type(settings.recordHistory) ~= 'boolean' then settings.recordHistory = true end
     if type(settings.recordActions) ~= 'boolean' then settings.recordActions = true end
     if type(settings.recordProduction) ~= 'boolean' then settings.recordProduction = true end
@@ -57,5 +62,7 @@ function ns.Settings.Initialize(saved)
     if type(saved.production) ~= 'table' then saved.production = {} end
     if type(saved.flightVisits) ~= 'table' then saved.flightVisits = {} end
     if type(saved.pvp) ~= 'table' then saved.pvp = {} end
+    if type(saved.npcs) ~= 'table' then saved.npcs = {} end
+    if type(saved.knownRecipes) ~= 'table' then saved.knownRecipes = {} end
     return saved, settings
 end

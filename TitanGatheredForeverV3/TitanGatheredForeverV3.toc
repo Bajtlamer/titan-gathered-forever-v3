@@ -9,9 +9,11 @@
 Localization/enUS.lua
 Style.lua
 Data/Metadata.lua
+Data/NpcSeed.lua
 Catalog.lua
 Settings.lua
 Professions.lua
+KnownRecipes.lua
 Inventory.lua
 Gathering.lua
 History.lua
@@ -23,6 +25,8 @@ Export.lua
 ExportView.lua
 Observations.lua
 Sources.lua
+NpcSources.lua
+NpcObserver.lua
 PinStyle.lua
 IconConfig.lua
 FlightPaths.lua
@@ -31,5 +35,6 @@ Minimap.lua
 Tooltips.lua
 Reports.lua
 CraftingView.lua
+RecipeBrowser.lua
 Titan.lua
 Core.lua

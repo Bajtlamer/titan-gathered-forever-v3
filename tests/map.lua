@@ -136,4 +136,21 @@ local lines={};GameTooltip.AddLine=function(_,line)lines[#lines+1]=line end
 map.pins[2].scripts.OnEnter(map.pins[2])
 local found=false;for _,line in ipairs(lines)do if line:find('3 honorable kills',1,true)then found=true end end
 assert(found,'PvP marker tooltip omitted its count')
+-- Trainer and recipe vendor pins share the overlay, use their own icons and the NPC tooltip.
+local npcFilled
+ns.NpcSources={Enabled=function()return true end,
+    List=function(mapID)return {{kind='Trainer',npcID=7,mapID=mapID,x=.55,y=.5,profession='Alchemy'}}end,
+    FillTooltip=function(_,node)npcFilled=node.npcID end}
+map:Refresh(true)
+local npcPin
+for _,pin in ipairs(map.pins)do if pin.shown and pin.icon=='Interface\\Icons\\INV_Misc_Book_11'then npcPin=pin end end
+assert(npcPin,'trainer pin was not rendered on the world map')
+assert(npcPin.x==.55*canvas.width,'trainer pin was not projected onto the canvas')
+npcPin.scripts.OnEnter(npcPin)
+assert(npcFilled==7,'trainer pin did not use the NPC tooltip')
+ns.settings.gatheringMap=false;map:Refresh(true)
+npcPin=nil
+for _,pin in ipairs(map.pins)do if pin.shown and pin.icon=='Interface\\Icons\\INV_Misc_Book_11'then npcPin=pin end end
+assert(npcPin,'NPC pins must not depend on the gathering map switch')
+ns.settings.gatheringMap=true;ns.NpcSources=nil;map:Refresh(true)
 print('PASS 15 map rendering, scaling, projection, lifecycle, reuse, toggle and gathering-material checks')

@@ -273,6 +273,7 @@ local function start()
         return inputs
     end
     ns.observations = ns.Observations.New(observationAPI)
+    ns.npcObserver = ns.NpcObserver.New(ns.NpcObserver.DefaultAPI())
     ns.UpdateGathering()
     ns.FlightPaths.Attach()
     ns.Tooltips.Initialize()
@@ -282,7 +283,8 @@ local function start()
                             'BANK_TABS_CHANGED', 'PLAYERBANKSLOTS_CHANGED', 'PLAYER_ENTERING_WORLD',
                             'PLAYER_LEAVING_WORLD', 'ITEM_DATA_LOAD_RESULT', 'SKILL_LINES_CHANGED',
                             'TRADE_SKILL_DATA_SOURCE_CHANGING', 'TRADE_SKILL_DATA_SOURCE_CHANGED',
-                            'TRADE_SKILL_DETAILS_UPDATE', 'TRADE_SKILL_CLOSE' }) do frame:RegisterEvent(event) end
+                            'TRADE_SKILL_DETAILS_UPDATE', 'TRADE_SKILL_CLOSE',
+                            'TRAINER_SHOW', 'MERCHANT_SHOW' }) do frame:RegisterEvent(event) end
     SlashCmdList.TITANGATHEREDFOREVERV3 = function(command)
         if command=='icons' then ns.IconConfig.Show(); return end
         if command=='export'then ns.ExportView.Show();return end
@@ -292,6 +294,21 @@ local function start()
             if not id then ns.Print('Usage: /tgf recipe <recipeID> [operations], or select a recipe and use /tgf recipe.');return end
             ns.CraftingView.Show(tonumber(id),tonumber(target)or 1);return
         end
+        if command == 'npc' or command == 'npc swap' then
+            if command == 'npc swap' then
+                ns.settings.npcAxisSwap = not ns.settings.npcAxisSwap
+                ns.NpcSources.Invalidate(); ns.Map.Update(); ns.Minimap.Update()
+                ns.Print('NPC world axes swapped: ' .. tostring(ns.settings.npcAxisSwap))
+            end
+            local node, distance, mapID = ns.NpcSources.Nearest()
+            if node then
+                local record = ns.NpcSources.Record(node.npcID)
+                ns.Print(string.format('Nearest NPC pin on map %s: %s (%s), %.1f%% of the map away; axis swap %s.',
+                    tostring(mapID), record.name, node.kind, distance * 100, tostring(ns.settings.npcAxisSwap)))
+            else ns.Print('No visible NPC pin on this map.') end
+            return
+        end
+        if command == 'recipes' then ns.RecipeBrowser.Show(); return end
         if command == 'refresh' then ns.ScheduleRefresh(); return end
         if command == 'next' or command == 'prev' then
             ns.Titan.page = math.max(1, ns.Titan.page + (command == 'next' and 1 or -1))
@@ -299,7 +316,7 @@ local function start()
         end
         if command == 'history' or command == 'chances' or command == 'actions' or command == 'production' or command == 'pvp' then ns.Reports.Show(command); return end
         if command == 'settings' then ns.Titan.Menu(UIParent); return end
-        local help = 'Commands: /tgf settings, /tgf icons, /tgf refresh, /tgf next, /tgf prev, /tgf history, /tgf chances, /tgf actions, /tgf production, /tgf recipe <recipeID> [operations], /tgf export, /tgf status.'
+        local help = 'Commands: /tgf settings, /tgf icons, /tgf refresh, /tgf next, /tgf prev, /tgf history, /tgf chances, /tgf actions, /tgf production, /tgf recipe <recipeID> [operations], /tgf export, /tgf npc, /tgf npc swap, /tgf recipes, /tgf status.'
         if command ~= 'status' and not ns.settings.debugMode then ns.Print(help); return end
         local report = command == 'status' and ns.Print or ns.Debug
         local count = ns.inventory:Get(0)
@@ -366,6 +383,9 @@ frame:SetScript('OnEvent', function(_, event, ...)
     elseif event=='PLAYER_PVP_KILLS_CHANGED'or event=='PLAYER_PVP_RANK_CHANGED'then
         ns.Reports.Refresh();return
     end
+    if event == 'TRAINER_SHOW' then ns.npcObserver:TrainerShown(); return end
+    if event == 'MERCHANT_SHOW' then ns.npcObserver:MerchantShown(); return end
+    if event == 'TRADE_SKILL_DATA_SOURCE_CHANGED' then ns.KnownRecipes.Schedule() end
     if event:match('^UNIT_SPELLCAST_') then
         local unit, castGUID, spellID = ...
         if ns.IsPublic(unit) and ns.IsPublic(castGUID) and ns.IsPublic(spellID) then
@@ -402,6 +422,7 @@ frame:SetScript('OnEvent', function(_, event, ...)
         if not ns.IsPublic(itemID) or type(itemID) ~= 'number' then return end
         if success then pendingItems[itemID] = nil else pendingItems[itemID] = false end
         ns.Reports.Refresh()
+        ns.RecipeBrowser.Refresh()
     end
     ns.ScheduleRefresh()
 end)

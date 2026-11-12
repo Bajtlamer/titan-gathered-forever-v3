@@ -41,7 +41,7 @@ function Map:Hide()
     self.visibleCount = 0
 end
 
-function Map:Nodes(mapID)
+function Map:GatheringNodes(mapID)
     local result = {}
     for _, node in ipairs(self.controller:List(mapID)) do result[#result + 1] = node end
     if #result >= 500 then return result end
@@ -68,6 +68,15 @@ function Map:Nodes(mapID)
     return result
 end
 
+function Map:Nodes(mapID)
+    local result = {}
+    if ns.settings.gatheringMap then result = self:GatheringNodes(mapID) end
+    if ns.NpcSources and ns.NpcSources.Enabled() then
+        for _, node in ipairs(ns.NpcSources.List(mapID)) do result[#result + 1] = node end
+    end
+    return result
+end
+
 function Map:CreatePin()
     local pin = CreateFrame('Button', nil, self.overlay)
     -- The native scroll-frame drawing pass covers MEDIUM addon children even
@@ -78,6 +87,11 @@ function Map:CreatePin()
     pin:SetScript('OnEnter', function(button)
         local node = button.node
         GameTooltip:SetOwner(button, 'ANCHOR_RIGHT')
+        if node.npcID and ns.NpcSources then
+            ns.NpcSources.FillTooltip(GameTooltip, node)
+            GameTooltip:Show()
+            return
+        end
         if node.kind == 'PvP' then
             GameTooltip:AddLine(ns.PinStyle.Label(node.kind))
             GameTooltip:AddLine('Open-world PvP honorable kills')
@@ -107,7 +121,8 @@ function Map:CreatePin()
 end
 
 function Map:Refresh(force)
-    if not ns.settings.gatheringMap or ns.settings.mapWorld == false or not self.world:IsShown() then self:Hide(); return end
+    local npcs = ns.NpcSources and ns.NpcSources.Enabled()
+    if not (ns.settings.gatheringMap or npcs) or ns.settings.mapWorld == false or not self.world:IsShown() then self:Hide(); return end
     local mapID, canvas = self.world:GetMapID(), self.world:GetCanvas()
     if not mapID or not canvas then self:Hide(); return end
     local width, height = canvas:GetWidth(), canvas:GetHeight()

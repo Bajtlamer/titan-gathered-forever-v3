@@ -162,6 +162,26 @@ function Titan.Menu(owner)
             ns.settings.flightPoints = not ns.settings.flightPoints
             ns.FlightPaths.Update()
         end)
+        local npcs = root:CreateButton('Trainers and recipe vendors')
+        local function redrawNpcs() ns.Map.Update(); ns.Minimap.Update() end
+        npcs:CreateCheckbox('Show profession trainers', function() return ns.settings.mapTrainers ~= false end, function()
+            ns.settings.mapTrainers = ns.settings.mapTrainers == false; redrawNpcs()
+        end)
+        npcs:CreateCheckbox('Show recipe vendors', function() return ns.settings.mapRecipeVendors ~= false end, function()
+            ns.settings.mapRecipeVendors = ns.settings.mapRecipeVendors == false; redrawNpcs()
+        end)
+        npcs:CreateCheckbox('Record trainers and vendors when I open their window', function() return ns.settings.recordNpcs ~= false end, function()
+            ns.settings.recordNpcs = ns.settings.recordNpcs == false
+        end)
+        local npcProfessions = npcs:CreateButton('Profession filter')
+        npcProfessions:SetScrollMode(300)
+        for _, kind in ipairs(ns.NpcSources.Kinds) do
+            local id = kind
+            npcProfessions:CreateCheckbox(ns.NpcSources.Label(id) .. ' pins', function() return ns.settings.mapNpcProfessions[id] ~= false end, function()
+                ns.settings.mapNpcProfessions[id] = ns.settings.mapNpcProfessions[id] == false; redrawNpcs()
+            end)
+        end
+        npcs:CreateButton('Unlearned recipes...', function() ns.RecipeBrowser.Show() end)
         local gathering = root:CreateButton('Gathering map')
         local function mapToggle(parent, label, key)
             parent:CreateCheckbox(label, function() return ns.settings[key] end, function()
