@@ -33,6 +33,18 @@ function Npc.Coin(copper)
     return table.concat(parts, ' ')
 end
 
+-- Classic client money format: number followed by its gold, silver or copper icon.
+local coinIcons = { gold = '|TInterface\\MoneyFrame\\UI-GoldIcon:0:0:2:0|t',
+    silver = '|TInterface\\MoneyFrame\\UI-SilverIcon:0:0:2:0|t', copper = '|TInterface\\MoneyFrame\\UI-CopperIcon:0:0:2:0|t' }
+function Npc.CoinIcons(copper)
+    local gold, silver, rest = math.floor(copper / 10000), math.floor(copper / 100) % 100, copper % 100
+    local parts = {}
+    if gold > 0 then parts[#parts + 1] = gold .. coinIcons.gold end
+    if silver > 0 then parts[#parts + 1] = silver .. coinIcons.silver end
+    if rest > 0 or #parts == 0 then parts[#parts + 1] = rest .. coinIcons.copper end
+    return table.concat(parts, ' ')
+end
+
 -- Merge one NPC. Observed values replace seed values; missing evidence stays nil.
 function Npc.Record(npcID)
     local seed, saw = seedNpcs()[npcID], observed()[npcID]
@@ -169,6 +181,8 @@ function Npc.Nearest()
     return best, bestDistance, mapID
 end
 
+-- Tooltip colours: gold is the NPC name, white the list entries, gray (and green when confirmed) the
+-- additional information. The header is separated from the list by a rule.
 function Npc.FillTooltip(tooltip, node)
     local record = Npc.Record(node.npcID)
     if not record then return end
@@ -180,13 +194,14 @@ function Npc.FillTooltip(tooltip, node)
     else
         role, rows = 'Recipe vendor', record.vendor or {}
     end
-    tooltip:AddLine(role)
+    tooltip:AddLine(Style.Text(Style.gray, role))
     if record.confirmed then
         local when = record.lastSeen and date and (' ' .. date('%Y-%m-%d', record.lastSeen)) or ''
-        tooltip:AddLine('Confirmed in game' .. when)
+        tooltip:AddLine(Style.Text(Style.green, 'Confirmed in game' .. when))
     else
         tooltip:AddLine(Style.Text(Style.gray, 'Not yet confirmed in game'))
     end
+    if Style.Separator then Style.Separator(tooltip) else tooltip:AddLine(' ') end
     local ordered = {}
     for _, row in ipairs(rows) do ordered[#ordered + 1] = row end
     table.sort(ordered, function(a, b)
@@ -201,16 +216,17 @@ function Npc.FillTooltip(tooltip, node)
         local row = ordered[index]
         local name = row.itemID and ns.ItemName(row.itemID) or row.name or 'Unknown recipe'
         local known = ns.KnownRecipes and ns.KnownRecipes.IsKnown(ns.characterID, row.kind or record.profession, name)
-        if known == true then name = name .. ' (known)' end
-        local skill = row.skill and ('Skill ' .. row.skill) or 'Skill unknown'
-        local price
-        if row.itemID then price = row.price and Npc.Coin(row.price) or 'price unknown'
-        else price = row.cost and Npc.Coin(row.cost) or 'cost unknown' end
-        if row.extendedCost then price = price .. ' + extra cost' end
-        tooltip:AddDoubleLine(name, skill .. ', ' .. price)
+        local left = Style.Text(Style.white, name) .. ' ' .. Style.Text(Style.gray, '(' .. (row.skill or '?') .. ')')
+        if known == true then left = left .. ' ' .. Style.Text(Style.green, '(known)') end
+        local amount = row.itemID and row.price or row.cost
+        local right
+        if amount then right = Npc.CoinIcons(amount)
+        else right = Style.Text(Style.gray, row.itemID and 'price unknown' or 'cost unknown') end
+        if row.extendedCost then right = right .. ' ' .. Style.Text(Style.gray, '+ extra cost') end
+        tooltip:AddDoubleLine(left, right)
     end
-    if #ordered > shown then tooltip:AddLine(string.format('and %d more', #ordered - shown)) end
-    if #ordered == 0 then tooltip:AddLine('No recipes recorded yet.') end
+    if #ordered > shown then tooltip:AddLine(Style.Text(Style.gray, string.format('and %d more', #ordered - shown))) end
+    if #ordered == 0 then tooltip:AddLine(Style.Text(Style.gray, 'No recipes recorded yet.')) end
 end
 
 -- Item recipe name for matching, or nil while the client is still loading the item.

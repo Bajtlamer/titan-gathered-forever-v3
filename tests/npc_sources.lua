@@ -18,7 +18,9 @@ C_Map = {
 local function fresh()
     local ns = { IsPublic = function() return true end, characterID = 'C1',
         settings = { mapNpcProfessions = {} }, db = { npcs = {} },
-        Style = { gold = 'gold', gray = 'gray', Text = function(_, text) return text end },
+        Style = { gold = 'gold', gray = 'gray', white = 'white', green = 'green',
+            Text = function(color, text) return '<' .. color .. '>' .. text .. '</>' end,
+            Separator = function(tooltip) tooltip:AddLine('---') end },
         ItemName = function(id) return 'Recipe: Item' .. id end }
     ns.NpcSeed = { npcs = {
         [1] = { n = 'Alchemy Trainer', m = 0, x = 10, y = 20, p = 'Alchemy',
@@ -102,6 +104,19 @@ test('toggles and profession filter control visibility', function()
     assert(nodes[1] ~= nil)
 end)
 
+local GOLD = '|TInterface\\MoneyFrame\\UI-GoldIcon:0:0:2:0|t'
+local SILVER = '|TInterface\\MoneyFrame\\UI-SilverIcon:0:0:2:0|t'
+local COPPER = '|TInterface\\MoneyFrame\\UI-CopperIcon:0:0:2:0|t'
+
+test('coin icons follow the classic gold silver copper format', function()
+    local ns = fresh()
+    eq(ns.NpcSources.CoinIcons(12000), '1' .. GOLD .. ' 20' .. SILVER)
+    eq(ns.NpcSources.CoinIcons(10101), '1' .. GOLD .. ' 1' .. SILVER .. ' 1' .. COPPER)
+    eq(ns.NpcSources.CoinIcons(5), '5' .. COPPER)
+    eq(ns.NpcSources.CoinIcons(0), '0' .. COPPER)
+    eq(ns.NpcSources.CoinIcons(500), '5' .. SILVER)
+end)
+
 test('coin text', function()
     local ns = fresh()
     eq(ns.NpcSources.Coin(12000), '1g 20s'); eq(ns.NpcSources.Coin(0), '0c')
@@ -119,17 +134,23 @@ test('vendor tooltip lists recipes with skill and price and marks unconfirmed da
     local ns = fresh()
     local t = tip()
     ns.NpcSources.FillTooltip(t, { kind = 'RecipeVendor', npcID = 2 })
-    eq(t.lines[1], 'Recipe Vendor'); eq(t.lines[2], 'Recipe vendor'); eq(t.lines[3], 'Not yet confirmed in game')
-    eq(t.doubles[1][1], 'Recipe: Item100'); eq(t.doubles[1][2], 'Skill 225, 1g 20s')
-    eq(t.doubles[2][1], 'Recipe: Item101'); eq(t.doubles[2][2], 'Skill unknown, price unknown')
+    eq(t.lines[1], '<gold>Recipe Vendor</>')           -- vendor name
+    eq(t.lines[2], '<gray>Recipe vendor</>')            -- additional information
+    eq(t.lines[3], '<gray>Not yet confirmed in game</>')
+    eq(t.lines[4], '---')                               -- separator between the header and the list
+    eq(t.doubles[1][1], '<white>Recipe: Item100</> <gray>(225)</>')   -- list entry, skill in brackets after the name
+    eq(t.doubles[1][2], '1' .. GOLD .. ' 20' .. SILVER)               -- right side: price only
+    eq(t.doubles[2][1], '<white>Recipe: Item101</> <gray>(?)</>')
+    eq(t.doubles[2][2], '<gray>price unknown</>')
+    eq(#t.lines, 4)
 end)
 
 test('trainer tooltip shows profession, skill and cost', function()
     local ns = fresh()
     local t = tip()
     ns.NpcSources.FillTooltip(t, { kind = 'Trainer', npcID = 1 })
-    eq(t.lines[2], 'Alchemy trainer')
-    eq(t.doubles[1][1], 'Elixir of Minor Defense'); eq(t.doubles[1][2], 'Skill 1, 1s')
+    eq(t.lines[2], '<gray>Alchemy trainer</>')
+    eq(t.doubles[1][1], '<white>Elixir of Minor Defense</> <gray>(1)</>'); eq(t.doubles[1][2], '1' .. SILVER)
 end)
 
 test('tooltip is capped at fifteen recipes and marks known ones', function()
@@ -140,8 +161,23 @@ test('tooltip is capped at fifteen recipes and marks known ones', function()
     ns.KnownRecipes = { IsKnown = function(_, _, name) return name == 'Recipe: Item201' end }
     local t = tip()
     ns.NpcSources.FillTooltip(t, { kind = 'RecipeVendor', npcID = 5 })
-    eq(#t.doubles, 15); eq(t.doubles[1][1], 'Recipe: Item201 (known)')
-    eq(t.lines[#t.lines], 'and 5 more')
+    eq(#t.doubles, 15); eq(t.doubles[1][1], '<white>Recipe: Item201</> <gray>(1)</> <green>(known)</>')
+    eq(t.doubles[2][1], '<white>Recipe: Item202</> <gray>(2)</>')
+    eq(t.lines[#t.lines], '<gray>and 5 more</>')
+end)
+
+test('confirmed data is green, extra costs are noted and an empty list says so', function()
+    local ns = fresh()
+    ns.db.npcs[2] = { name = 'Seen Vendor', mapID = 1429, x = 0.2, y = 0.3, lastSeen = 1,
+        vendor = { { itemID = 100, kind = 'Alchemy', price = 500, skill = 225, extendedCost = true } } }
+    local t = tip()
+    ns.NpcSources.FillTooltip(t, { kind = 'RecipeVendor', npcID = 2 })
+    eq(t.lines[1], '<gold>Seen Vendor</>'); eq(t.lines[3], '<green>Confirmed in game</>')
+    eq(t.doubles[1][2], '5' .. SILVER .. ' <gray>+ extra cost</>')
+    ns.db.npcs[1] = { name = 'Empty Trainer', profession = 'Alchemy', mapID = 1429, x = 0.5, y = 0.6, lastSeen = 1, trainer = {} }
+    t = tip()
+    ns.NpcSources.FillTooltip(t, { kind = 'Trainer', npcID = 1 })
+    eq(t.lines[#t.lines], '<gray>No recipes recorded yet.</>')
 end)
 
 test('nearest reports the closest visible pin to the player', function()
