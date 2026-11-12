@@ -5,7 +5,7 @@ Updated 2026-11-09. This is the current continuation roadmap. Focused plans pres
 ## Current baseline
 
 - Repository: https://github.com/Bajtlamer/titan-gathered-forever-v3, branch main. Interface refinements are installed locally. The follow-up user request authorizes committing and pushing these changes to main; no release tag is requested.
-- Development candidate: 0.4.2-alpha, WoW Forever 1.60.1, interface 16001. Latest captured installation build: 70862. The live API/build compatibility gate remains explicit.
+- Development candidate: 0.5.0-beta (beta since 2026-11-12; earlier 0.4.x versions were alpha), WoW Forever 1.60.1, interface 16001. Latest captured installation build: 70862. The live API/build compatibility gate remains explicit.
 - Fourteen runtime addon folders: shared core, twelve professions and Auction Items. The current runtime package has 57 files. Development tools, tests, catalogue evidence and documentation stay outside these folders.
 - The current interface candidate passes 408 automated checks and Lua 5.1 compilation. Its candidate is installed and all 57 runtime files were byte-verified; broader live acceptance remains pending.
 - Changelog: [unreleased development updates](release-notes/ref-unreleased.md). Current implementation and installation history: [progress](ref-wow-forever-progress.md).

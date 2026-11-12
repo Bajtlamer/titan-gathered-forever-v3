@@ -1,6 +1,11 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.4.13-alpha source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.0-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Beta stage, 0.5.0-beta
+
+- The project leaves alpha. The version is 0.5.0-beta: the feature set (gathering and production history, crafting plans, statistics export, flight points, trainer and recipe vendor pins, unlearned recipes window and a menu that covers every parameterless command) is complete for this stage, and the remaining work is live acceptance and fixes. Several live validation checklists stay open, so beta here means feature complete with unverified client behavior, not verified on every client path.
+- Version-only change: no runtime behavior differs from 0.4.13-alpha. Earlier versioned notes and downloads keep their alpha names.
 
 ## Menu covers every parameterless command, 0.4.13-alpha
 
