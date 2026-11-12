@@ -1,6 +1,15 @@
 # Unreleased development updates
 
-Updated 2026-11-10. These changes describe the 0.4.11-alpha source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.4.12-alpha source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Trainers and recipe vendors, 0.4.12-alpha
+
+- Optional map pins show profession trainers and recipe vendors on the world map and minimap. The menu has toggles for each, a per-profession filter and a switch for recording NPCs when their window opens. The pins work independently of the gathering map switch.
+- Vendor tooltips list recipes with the minimum profession level and price. Trainer tooltips list trainable recipes with skill and cost. Recipes you know are marked once that profession window has been read.
+- A new Unlearned recipes window (menu or /tgf recipes) lists unlearned recipes with a Trainer or Vendor source, with a filter for vendor-only recipes. Professions whose recipes were never read for the character are named instead of guessed.
+- Seed data comes from CMaNGOS classic-db (GPL-3.0, see NOTICE) and is labelled not yet confirmed in game until you visit the NPC. Observed data replaces seed data. Unknown skills and prices are shown as unknown. Instances never get pins.
+- /tgf npc names the nearest pin and /tgf npc swap flips the world axes if pins appear mirrored.
+- LICENSE and NOTICE are packaged with the core addon. New files require a full client restart. tools/check.py no longer waits on stdin.
 
 ## Learned profession colors, 0.4.10-alpha
 

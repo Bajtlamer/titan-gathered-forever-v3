@@ -105,13 +105,15 @@ The tool changes the old `TitanGathered2ForeverDB` assignment to `TitanGatheredF
 
 ## Use TGF v3
 
-Right-click the Titan entry for Display, Professions, Additional items, Icon appearance, Flight points, Gathering map, History and sources, and Diagnostics settings. History recording and map visibility have separate controls.
+Right-click the Titan entry for Display, Professions, Additional items, Icon appearance, Flight points, Trainers and recipe vendors, Gathering map, History and sources, and Diagnostics settings. History recording and map visibility have separate controls.
 
 - `/tgf icons`: small icon appearance window with separate World map, Minimap and Flights settings.
 - `/tgf history`: lifetime materials window.
 - `/tgf chances`: observed acquisition rates and source samples.
 - `/tgf actions`: observed profession attempts and results.
 - `/tgf production`: crafting/cooking recipe operations and observed outputs.
+- `/tgf recipes`: window of unlearned recipes with a trainer or vendor source.
+- `/tgf npc` and `/tgf npc swap`: name the nearest trainer or vendor pin; flip the world axes if pins look mirrored.
 - `/tgf recipe <recipeID> [operations]`: reagent plan for a recipe; omit the ID after selecting a native profession recipe.
 - `/tgf export`: versioned statistics snapshot for manual copying.
 - `/tgf settings`: configuration menu.
@@ -124,6 +126,10 @@ Click a material in a report for its recorded sources. Use **TGF v3 spots** on t
 History and sources includes Record profession actions and Action recording by profession. These switches are independent of lifetime item history and map visibility. Recording requires the corresponding profession addon and enabled profession category. Disabling a module retains its recorded counts for later reporting.
 
 Record production and Production recording by profession control crafting/cooking independently. The corresponding addon and profession category must be enabled. Turning off item-history or map display does not stop production recording; disabling a production module retains its prior statistics.
+
+## Trainers and recipe vendors
+
+Trainers and Recipe vendors are separate map switches in the menu, with a per-profession filter, and they work on the world map and minimap without the gathering map. Pins start from a bundled Classic seed and show as not yet confirmed in game until you open that NPC's window, which records its recipes, required skill and price. Observed data replaces seed data, and unknown values stay unknown. Vendor tooltips list recipes with the minimum profession level and price, and mark recipes you know once that profession window has been opened. The Unlearned recipes window lists recipes you have not learned and shows whether a trainer or only a vendor provides them. Pins never appear in instances.
 
 ## Plan recipe materials
 
@@ -185,3 +191,7 @@ Tagged GitHub releases use the same build and verification pipeline. Runtime ZIP
 Report the client and Titan versions, TGF v3 version, affected item/spell IDs, expected results, observed results and reproduction steps. Visible UI changes benefit from screenshots. Run the full checks and the relevant [in-game validation steps](book-wow-forever-validation.md).
 
 Recipe evidence includes the documented [DwarfExplorersBible client-table mirror](https://github.com/masterred92/DwarfExplorersBible/blob/main/Data.lua), supplementary Forever spell references and curated uses retained in `catalogue/`. Titan Panel is an external dependency. Original artwork and upstream material retain their attribution; this README does not assign a new blanket license to third-party content.
+
+## License and notices
+
+The repository is licensed under GPL-3.0, see [LICENSE](LICENSE). The planned trainer and recipe vendor seed is derived from CMaNGOS classic-db data under the same license and with its non-commercial fair-use basis, see [NOTICE](NOTICE). World of Warcraft is a trademark of Blizzard Entertainment, and this project is not affiliated with it.
