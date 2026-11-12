@@ -103,7 +103,7 @@ function Browser.Refresh()
     end
     Browser.total = #rows
     Browser.offset = Browser.Clamp(Browser.offset, Browser.total)
-    w.filter:SetText(Browser.vendorOnly and 'Vendor only' or 'All unlearned')
+    w.filter.Sync()
     w.kindButton.Sync()
     w.rangeText:SetText(Browser.RangeText(Browser.offset, Browser.total))
     for index = 1, ROWS do
@@ -142,8 +142,10 @@ function Browser.Show()
         w.TitleText:SetText('TGF v3 Unlearned recipes')
         local note = text(w, 'GameFontHighlightSmall', 15, -33, 930)
         note:SetText('Unlearned recipes with a known trainer or vendor source. Red recipes need more skill than you have yet. Seed data is Classic and not confirmed in game until you visit the NPC. Scroll with the mouse wheel; hover an NPC name to see where to find them; click a row to open the map.')
-        w.filter = button(w, 'All unlearned', 15, -65, 150, function()
-            Browser.vendorOnly = not Browser.vendorOnly; Browser.offset = 0; Browser.Refresh()
+        w.filter = ns.Nav.Dropdown(w, 15, -65, 150, function()
+            return { { value = false, label = 'All unlearned' }, { value = true, label = 'Vendor only' } }
+        end, function() return Browser.vendorOnly and true or false end, function(value)
+            Browser.vendorOnly, Browser.offset = value, 0; Browser.Refresh()
         end)
         w.kindButton = ns.Nav.Dropdown(w, 175, -65, 190, function()
             local list = { { value = false, label = 'All professions' } }

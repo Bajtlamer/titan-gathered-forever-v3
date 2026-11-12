@@ -239,6 +239,9 @@ test('the list scrolls with the mouse wheel and a scroll bar instead of paging',
     ns.KnownRecipes.Record('C1', 'Alchemy', {}, 10)
     local all = installFrames()
     assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TitanGatheredForeverV3', ns)
+    local sets = {}
+    local realDropdown = ns.Nav.Dropdown
+    ns.Nav.Dropdown = function(parent, x, y, width, options, get, set) sets[#sets + 1] = { options = options, get = get, set = set }; return realDropdown(parent, x, y, width, options, get, set) end
     assert(loadfile('TitanGatheredForeverV3/RecipeBrowser.lua'))('TitanGatheredForeverV3', ns)
     local B = ns.RecipeBrowser
     B.Show()
@@ -268,8 +271,12 @@ test('the list scrolls with the mouse wheel and a scroll bar instead of paging',
     B.SetKind('Alchemy'); eq(B.offset, 0)
     B.Scroll(5); B.SetKind('Cooking'); eq(B.offset, 0); eq(rawget(w.lines[1], 'row'), nil)
     B.SetKind(nil); B.Scroll(5)
-    scriptsOf(w.filter).OnClick(w.filter); eq(B.offset, 0)
-    eq(B.vendorOnly, true)
+    local source = sets[1]    -- the first combo box is the source filter
+    eq(#source.options(), 2); eq(source.get(), false)
+    source.set(true); eq(B.offset, 0); eq(B.vendorOnly, true); eq(source.get(), true)
+    local kind = sets[2]
+    eq(kind.options()[1].label, 'All professions'); assert(#kind.options() == 13)
+    kind.set('Alchemy'); eq(B.kind, 'Alchemy'); eq(kind.get(), 'Alchemy'); kind.set(false); eq(B.kind, nil)
 end)
 
 for _, entry in ipairs(tests) do

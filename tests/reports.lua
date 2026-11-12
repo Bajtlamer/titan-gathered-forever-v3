@@ -38,6 +38,11 @@ local function frame()
 end
 CreateFrame=function()return frame()end;UIParent=frame();UISpecialFrames={};UnitGUID=function()return'a'end
 C_Map={GetMapInfo=function(id)return{name='Zone '..id}end};GameTooltip={SetOwner=function()end,SetItemByID=function(self,id)self.item=id end,Show=function()end,Hide=function()end}
+local function pick(control,label)
+ local previous=MenuUtil;local actions={}
+ MenuUtil={CreateContextMenu=function(owner,fn)fn(owner,{CreateButton=function(_,l,cb)actions[l]=cb end})end}
+ control.scripts.OnClick(control);MenuUtil=previous;actions[label]()
+end
 local ns={ItemName=function(id)return'Item '..id end,Style={ItemName=function(id)return'Item '..id end},Catalog={modules={Cooking={label='Cooking',items={[769]=true}}}}}
 ns.Style.MenuNote=function(root,value)return root:CreateTitle(value)end
 ns.Production={labels={Tailoring='Tailoring',FirstAid='First Aid'}}
@@ -55,11 +60,11 @@ test('switching reports hides previous content and preserves independent scope a
  ns.Reports.Show('history');assert(h:IsShown()and not c:IsShown())
  eq(_G.height,nil)
  eq(h.rows[1].cells[2].text,'2')
- h.scope.scripts.OnClick();eq(h.rows[1].cells[2].text,'5');eq(h.rows[1].cells[3].text,'1 source');eq(c.combined,nil)
+ pick(h.scope,'All characters');eq(h.rows[1].cells[2].text,'5');eq(h.rows[1].cells[3].text,'1 source');eq(c.combined,nil)
  h.filter='Cooking';ns.Reports.Update(h)
  ns.Reports.Show('chances');eq(c.rows[1].cells[2].text,'100.0%');eq(c.rows[1].cells[3].text,'1 / 1')
  ns.Reports.Show('history');eq(h.filter,'Cooking');eq(h.combined,true);eq(h.rows[1].cells[2].text,'5')
- h.filter=nil;h.scope.scripts.OnClick();eq(#UISpecialFrames,2)
+ h.filter=nil;pick(h.scope,'This character');eq(#UISpecialFrames,2)
 end)
 test('lifetime values replace the last location with observed source chances',function()
  local w=ns.Reports.windows.history
@@ -82,7 +87,7 @@ test('global reagent report shows leading profession share and opens full breakd
  eq(w.rows[1].cells[1].text,'Item 159');eq(w.rows[1].cells[2].text,'100')
  eq(w.rows[1].cells[3].text,'Tailoring');eq(w.rows[1].cells[4].text,'75.0%')
  assert(w.note.text:find('Coverage since 100',1,true));assert(w.note.text:find('2 completed recipes',1,true))
- w.scope.scripts.OnClick();eq(selected,nil);eq(w.scope.text,'All characters')
+ pick(w.scope,'All characters');eq(selected,nil);eq(w.scope.text,'All characters')
  local previousMenu=MenuUtil;local titles={};MenuUtil={CreateContextMenu=function(_,fn)
   fn({}, {CreateTitle=function(_,value)titles[#titles+1]=value end,SetScrollMode=function()end})
  end}
@@ -139,7 +144,7 @@ test('actions report shows coverage and counts without item interactions',functi
  eq(cells[4].text,'0');eq(cells[5].text,'0');eq(cells[6].text,'0');eq(cells[7].text,'0')
  assert(cells[8].text~='');assert(w.note.text:find('gaps',1,true))
  GameTooltip.item=nil;w.rows[1].scripts.OnEnter(w.rows[1]);eq(GameTooltip.item,nil)
- w.scope.scripts.OnClick();eq(cells[2].text,'2');eq(cells[4].text,'1')
+ pick(w.scope,'All characters');eq(cells[2].text,'2');eq(cells[4].text,'1')
  w.filter='Cooking';ns.Reports.Update(w);eq(w.rows[1]:IsShown(),false)
 end)
 test('production report distinguishes completions matched results and explicit flag denominators',function()
@@ -232,14 +237,14 @@ test('chances can be grouped by item with expandable sources',function()
  ns.Reports.Rows=function(mode,...)if mode=='chances'then return rows end;return original(mode,...)end
  ns.Reports.Show('chances');local w=ns.Reports.windows.chances
  eq(w.rows[3]:IsShown(),true);eq(w.group.text,'All sources')
- w.group.scripts.OnClick()
+ pick(w.group,'Grouped by item')
  eq(w.group.text,'Grouped by item');eq(w.rows[3]:IsShown(),false)
  eq(w.rows[1].cells[4].text,'5');eq(w.rows[1].cells[5].text,'2 sources');eq(w.rows[2].cells[5].text,'1 source')
  assert(w.rows[1].expand:IsShown())
  w.rows[1].expand.scripts.OnClick(w.rows[1].expand)
  eq(w.rows[2].data.sourceRate.kind,'Mining');eq(w.rows[2].cells[2].text,'50.0%');eq(w.rows[3].cells[3].text,'1 / 1')
  eq(w.rows[4].data.itemID,8);assert(not w.rows[2].expand:IsShown())
- w.group.scripts.OnClick();eq(w.rows[3]:IsShown(),true);eq(w.rows[3].cells[1].text,'Item 8')
+ pick(w.group,'All sources');eq(w.rows[3]:IsShown(),true);eq(w.rows[3].cells[1].text,'Item 8')
  ns.Reports.Rows=original
 end)
 test('every tab window shares the strip position and replaces the others',function()
@@ -347,7 +352,7 @@ test('unknown chances have no expander and combined sources use summed trials',f
  w.combined=nil;w.filter=nil;w.page=1;w.expanded={[769]=true};ns.Reports.Update(w)
  eq(w.rows[2].cells[4].text,'100.0%');eq(w.rows[2].cells[5].text,'1 / 1')
  local unknown=w.rows[3];eq(unknown.data.itemID,770);eq(unknown.cells[3].text,'Unknown');assert(not unknown.expand:IsShown())
- w.scope.scripts.OnClick();eq(w.rows[2].cells[4].text,'66.7%');eq(w.rows[2].cells[5].text,'2 / 3')
+ pick(w.scope,'All characters');eq(w.rows[2].cells[4].text,'66.7%');eq(w.rows[2].cells[5].text,'2 / 3')
  eq(w.rows[1].cells[2].text,'2');eq(w.rows[3].cells[2].text,'2')
  ns.Reports.Show('chances');ns.Reports.Show('history');assert(w.expanded[769])
  ns.history,ns.production=previous,production;w.combined=nil;w.expanded={};ns.Reports.Update(w)

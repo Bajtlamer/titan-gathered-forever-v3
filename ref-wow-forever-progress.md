@@ -410,3 +410,7 @@ Owner screenshot of Warg Deepwater (Fishing 75/75, character level 14): the trai
 ### Combo boxes and classic tabs, 0.5.17-beta, 2026-11-12
 
 Owner request: use Blizzard style combo boxes instead of buttons with menus, and noted that classic tabs are possible. Navigation.lua gained Nav.Dropdown (WowStyle1DropdownTemplate with SetupMenu and radio choices, the same API another installed addon uses on this client; fallback button and context menu) and Nav.Tabs (PanelTabButtonTemplate with PanelTemplates_SetNumTabs and SetTab; fallback button row), both guarded by pcall. The profession filters of the recipes window and all statistics tabs use the drop down. Two state toggles (This character, All unlearned, All sources) stay buttons. New tests/navigation.lua covers the template and fallback paths. Live review pending: if the tabs or drop down look wrong or the fallback is used, the log of Lua errors (/console scriptErrors 1) shows why.
+
+### Combo boxes everywhere, 0.5.18-beta, 2026-11-12
+
+Owner request: replace choice buttons with combo boxes wherever possible. Nav.Dropdown now also serves the two state choices: scope in the statistics tabs and the export window, the recipes source filter, chances grouping and the export identity setting. Controls that perform an action stay buttons. Tests drive the choices through the same options and setters (recipe_browser captures them, reports and export_view pick from the fallback menu). Live review pending, together with the look of the drop downs from 0.5.17.
