@@ -1,6 +1,15 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.10-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.11-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## One window with tabs, scrolling lists, search and grouping, 0.5.11-beta
+
+- The minimap button now opens one window with seven tabs along the bottom: Unlearned recipes, Lifetime materials, Observed chances, Profession actions, Crafting and cooking, Reagent use and PvP Board. Left click opens the last used tab or closes the window; right click still opens the menu. The tabs are the same windows the menu and chat commands already opened, so every existing entry still works. All tabs share one size and one remembered position, and each keeps its own filters and scroll position.
+- Previous and Next paging is gone from the statistics windows and the recipe reagent planner. They scroll with the mouse wheel and a scroll bar, with a "Showing a-b of n" line. Rows keep their wrapped height, so a long row is never cut.
+- Search box (with Clear) in the recipes window and in every statistics tab; it matches item, recipe or statistic names.
+- Observed chances can be grouped by item (button "All sources" / "Grouped by item"): one row per item with its summed quantity, and a + button that expands the individual sources with their chances.
+- The export window still shows its JSON in numbered parts, because the client text box cannot hold a larger text.
+- New file Navigation.lua, so this update needs a full game restart, not only /reload.
 
 ## Red, temporary rings, 0.5.10-beta
 
