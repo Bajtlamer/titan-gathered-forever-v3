@@ -91,6 +91,16 @@ end
 -- The client fills trainer and merchant lists a moment after the SHOW event, so the same read runs again on
 -- the matching UPDATE event while the window stays open.
 function Obs:ReadTrainer(event)
+    -- Changing the trainer type filters makes the client send TRAINER_UPDATE from inside that call; such a nested
+    -- event is ignored, the read that caused it is still running.
+    if self.reading then return end
+    self.reading = true
+    local ok, err = pcall(self.ReadTrainerNow, self, event)
+    self.reading = false
+    if not ok then error(err, 0) end
+end
+
+function Obs:ReadTrainerNow(event)
     if not self.api.Enabled() then self:Log(event, 'disabled'); return end
     local npc = self.api.Npc()
     if not npc then self:Log(event, 'no-npc'); return end
@@ -309,10 +319,13 @@ function Obs.DefaultAPI()
         return #api.changedFilters > 0
     end
     api.RestoreFilters = function()
-        for _, name in ipairs(api.changedFilters or {}) do
+        -- The client answers a filter change with TRAINER_UPDATE inside the call itself, which reads the trainer
+        -- and ends up here again, so the list is taken and cleared before anything is changed.
+        local changed = api.changedFilters
+        api.changedFilters = nil
+        for _, name in ipairs(changed or {}) do
             pcall(SetTrainerServiceTypeFilter, name, false)
         end
-        api.changedFilters = nil
     end
     api.After = function(seconds, callback)
         if C_Timer and C_Timer.After then C_Timer.After(seconds, callback) else callback() end

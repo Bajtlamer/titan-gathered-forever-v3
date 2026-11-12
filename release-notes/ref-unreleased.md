@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.24-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.25-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Fix: C stack overflow when a trainer opens, 0.5.25-beta
+
+- Opening a Mining trainer raised "C stack overflow" in NpcObserver.lua. The client answers SetTrainerServiceTypeFilter with TRAINER_UPDATE from inside the call, so restoring the filters read the trainer again and restored the filters again, without end. A read that is running now ignores such nested events, and the list of changed filters is taken and cleared before the filters are put back. A test now simulates the immediate event. The error appeared from 0.5.24, which restored the filters right after the read.
 
 ## Trainer filters restored right after the read, 0.5.24-beta
 
