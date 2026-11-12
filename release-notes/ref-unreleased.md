@@ -1,6 +1,11 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.9-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.10-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Red, temporary rings, 0.5.10-beta
+
+- The mark on the NPCs of a clicked recipe is red instead of gold, and more compact: three tight concentric rings forming one thick band, about 1.7 times the pin size and at least 24 pixels (they were two thin rings of about 34 pixels).
+- The mark is no longer permanent. It belongs to the map opened from the unlearned recipes window, so closing the world map ends it and reopening the map shows plain pins. Clicking the same row again, choosing another recipe and the five minute limit still end it too. Because the rings are a single shared mark, they also leave the minimap when the world map is closed.
 
 ## Gold ring on the NPCs of a clicked recipe, 0.5.9-beta
 

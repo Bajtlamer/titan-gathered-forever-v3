@@ -46,7 +46,7 @@ assert(not flight.rim and not flight.shadows,'Flight artwork must not receive an
 assert(not flight.texture.mask,'Native flight artwork must retain its original shape')
 local allocated=#borderFrames;ns.PinStyle.Apply(flight,true)
 assert(#borderFrames==allocated and #borderFrames==0,'Borderless flight pin allocated a decoration frame')
--- Highlight: two concentric gold rings that pulse, and a raised frame level, removed again when switched off.
+-- Highlight: three concentric red rings that pulse, and a raised frame level, removed again when switched off.
 local function ringPin()
     local p=pin();p.scripts={};p.level=3
     function p:GetParent()return {GetFrameLevel=function()return 10 end}end
@@ -67,13 +67,14 @@ local clock=0;GetTime=function()return clock end
 local plain=ringPin();ns.PinStyle.Highlight(plain,false)
 assert(#plain.regions==0 and not plain.tgfRingOn,'Switching off an ordinary pin must not allocate anything')
 local h=ringPin();ns.PinStyle.Highlight(h,true)
-assert(h.tgfRingOn==true and #h.tgfRings==2,'A highlighted pin gets two rings')
+assert(h.tgfRingOn==true and #h.tgfRings==3,'A highlighted pin gets three rings')
 for _,ring in ipairs(h.tgfRings)do
     assert(ring.path:find('PinOutlineCircle',1,true),'Rings reuse the circle outline artwork')
-    assert(ring.color[1]==1 and ring.color[2]==0.82 and ring.color[3]==0,'Rings are gold')
-    assert(ring.shown==true and ring.width>=34,'Rings are visible and larger than an ordinary pin')
+    assert(ring.color[1]==1 and ring.color[2]==0.13 and ring.color[3]==0.13,'Rings are red')
+    assert(ring.shown==true and ring.width>=24 and ring.width<34,'Rings are compact but larger than an ordinary pin')
 end
-assert(h.tgfRings[2].width>h.tgfRings[1].width,'The second ring is the outer one')
+assert(h.tgfRings[2].width>h.tgfRings[1].width and h.tgfRings[3].width>h.tgfRings[2].width,'Rings grow outwards into one thick band')
+assert(h.tgfRings[3].width-h.tgfRings[1].width<=6,'The band stays tight around the pin')
 assert(h.level==60,'A highlighted pin is raised above its neighbours')
 clock=1.0;h.scripts.OnUpdate(h)
 for _,ring in ipairs(h.tgfRings)do assert(ring.alpha>=0.3 and ring.alpha<=1,'The pulse stays visible') end

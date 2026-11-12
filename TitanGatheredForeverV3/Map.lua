@@ -22,7 +22,11 @@ function Map.New(world, controller)
         if elapsed >= 0.2 then elapsed = 0; self:Refresh() end
     end)
     world:HookScript('OnShow', function() self:Refresh(true) end)
-    world:HookScript('OnHide', function() self:Hide() end)
+    -- The rings that mark a clicked recipe belong to the map the recipes window opened: closing the map ends them.
+    world:HookScript('OnHide', function()
+        self:Hide()
+        if ns.NpcSources and ns.NpcSources.HasHighlight and ns.NpcSources.HasHighlight() then ns.NpcSources.SetHighlight(nil) end
+    end)
     controller.changed = function() self.dirty = true; self:Refresh() end
     self:Refresh(true)
     return self

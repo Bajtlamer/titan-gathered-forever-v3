@@ -170,4 +170,16 @@ for _,pin in ipairs(map.pins)do
 end
 assert(ringed==1 and plainNpc==1,'expected one highlighted and one ordinary NPC pin')
 ns.PinStyle.Highlight=realHighlight;ns.NpcSources=nil;map:Refresh(true)
+-- Closing the world map ends the mark, so reopening the map shows no rings.
+local cleared={}
+ns.NpcSources={Enabled=function()return false end,IsHighlighted=function()return false end,
+    HasHighlight=function()return true end,SetHighlight=function(ids)cleared[#cleared+1]=ids==nil and 'nil' or 'set' end,
+    List=function()return {}end,FillTooltip=function()end}
+assert(world.hooks.OnHide,'the world map must watch for being closed')
+world.hooks.OnHide()
+assert(#cleared==1 and cleared[1]=='nil','Closing the map did not clear the marked NPCs')
+ns.NpcSources.HasHighlight=function()return false end
+world.hooks.OnHide()
+assert(#cleared==1,'Nothing is cleared when nothing is marked')
+ns.NpcSources=nil
 print('PASS 15 map rendering, scaling, projection, lifecycle, reuse, toggle and gathering-material checks')
