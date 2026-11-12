@@ -134,8 +134,9 @@ function PinStyle.Apply(pin, kind, override)
     PinStyle.Texture(pin, pin.texture, PinStyle.Get(kind, override))
 end
 
--- Marks a pin the player asked to find: two concentric gold rings that pulse, and a frame level above the
--- neighbouring pins. Switching it off restores the ordinary pin. The rings reuse the circle outline artwork.
+-- Marks a pin the player asked to find: three concentric red rings that pulse and form one thick band, and a
+-- frame level above the neighbouring pins. Switching it off restores the ordinary pin. The rings reuse the
+-- circle outline artwork.
 function PinStyle.Highlight(pin, on)
     if not on then
         if not pin.tgfRingOn then return end
@@ -148,17 +149,19 @@ function PinStyle.Highlight(pin, on)
     end
     if not pin.tgfRings then
         pin.tgfRings = {}
-        for index = 1, 2 do
+        for index = 1, 3 do
             local ring = pin:CreateTexture(nil, 'OVERLAY')
             ring:SetTexture('Interface\\AddOns\\TitanGatheredForeverV3\\Artwork\\PinOutlineCircle.tga')
-            ring:SetVertexColor(1, 0.82, 0, 1)
+            ring:SetVertexColor(1, 0.13, 0.13, 1)
             ring:SetPoint('CENTER', pin, 'CENTER')
             pin.tgfRings[index] = ring
         end
     end
-    local base = math.max(pin:GetWidth() * 2.2, 34)
-    pin.tgfRings[1]:SetSize(base, base)
-    pin.tgfRings[2]:SetSize(base + 4, base + 4)
+    local base = math.max(pin:GetWidth() * 1.7, 24)
+    for index, ring in ipairs(pin.tgfRings) do
+        local size = base + (index - 1) * 2.5
+        ring:SetSize(size, size)
+    end
     for _, ring in ipairs(pin.tgfRings) do ring:Show() end
     local parent = pin:GetParent()
     pin:SetFrameLevel((parent and parent:GetFrameLevel() or 0) + 50)
