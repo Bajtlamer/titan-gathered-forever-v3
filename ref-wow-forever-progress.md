@@ -434,3 +434,7 @@ Live log after 0.5.21: SetTrainerServiceTypeFilter(name, 1) fails with "Missing 
 ## 0.5.23-beta, trainer list no longer flashes
 
 Live report (screenshot, 0.5.21): the Bronk window showed several services and then emptied. This was the addon switching the type filters on for the read and back at once; it is not a client bug. 0.5.23 keeps the filters on until the trainer window closes. Pending live check that the filter is back off after closing.
+
+## 0.5.24-beta, filters restored right after the read
+
+Live report on 0.5.23: the filter returned to off after closing, but the window showed already known services meanwhile, which looked wrong. 0.5.24 restores the filters in the same handler as the successful read. Pending live check: how short the remaining flash is (the list is rebuilt after the filter change, so some flash may remain).
