@@ -292,9 +292,9 @@ function Reports.Update(window)
         end
         window.anchorItem=nil
     end
-    window.scope:SetText(window.combined and 'All characters' or 'This character')
+    window.scope.Sync()
     window.filterButton.Sync()
-    if window.group then window.group:SetText(window.grouped and'Grouped by item'or'All sources')end
+    if window.group then window.group.Sync()end
     window.empty:SetText(#rows==0 and (window.searchText and window.searchText~=''and'Nothing matches this search.'
         or window.mode=='reagentUsage'and'No supported reagent use is recorded in this coverage period.'
         or window.mode=='production'and'No recipe operations recorded for this view. Earlier inventory cannot reconstruct production.'
@@ -358,7 +358,9 @@ function Reports.Show(mode)
             or mode=='actions'and'Fishing completion means a catch window; other completion means spell success. Stopped means no confirmed result; gaps are not reconstructed.'
             or mode=='chances'and'Observed outcomes / complete looted sources, grouped by source and zone. Not a probability at a map coordinate. Click for sources.'
             or'Lifetime obtained combines acquired and crafted quantities. Use + to expand individual sources. Chances use complete samples; Unknown means insufficient evidence. Click an item for source actions.')
-        w.scope=button(w,'This character',15,-65,150,function()w.combined=not w.combined;w.offset=0;Reports.Update(w)end)
+        w.scope=ns.Nav.Dropdown(w,15,-65,150,function()
+            return{{value=false,label='This character'},{value=true,label='All characters'}}
+        end,function()return w.combined and true or false end,function(value)w.combined=value or nil;w.offset=0;Reports.Update(w)end)
         w.filterButton=ns.Nav.Dropdown(w,175,-65,190,function()
             local list={{value=false,label='All professions'}}
             if mode=='actions' then
@@ -373,7 +375,9 @@ function Reports.Show(mode)
         end,function()return w.filter or false end,function(value)w.filter=value or nil;w.offset=0;Reports.Update(w)end)
         if mode=='reagentUsage'or mode=='pvp'then w.filterButton:Hide()end
         if mode=='chances'then
-            w.group=button(w,'All sources',375,-65,140,function()w.grouped=not w.grouped;w.offset=0;w.expanded={};Reports.Update(w)end)
+            w.group=ns.Nav.Dropdown(w,375,-65,140,function()
+                return{{value=false,label='All sources'},{value=true,label='Grouped by item'}}
+            end,function()return w.grouped and true or false end,function(value)w.grouped=value or nil;w.offset=0;w.expanded={};Reports.Update(w)end)
         end
         local searchLabel=text(w,'GameFontNormalSmall',560,-70,60);searchLabel:SetText('Search')
         local search=CreateFrame('EditBox',nil,w,'InputBoxTemplate');w.search=search

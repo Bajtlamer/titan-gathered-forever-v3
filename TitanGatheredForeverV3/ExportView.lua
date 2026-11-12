@@ -16,8 +16,7 @@ function View.Display()
     w.editor:SetHeight(math.max(360,math.ceil(#content/60)*18))
     w.scroll:SetVerticalScroll(0)
     w.copyValid=content~=''and w.editor:GetText()==content
-    w.scope:SetText(w.scopeMode=='combined'and'All characters'or'This character')
-    w.identity:SetText('Include names/GUIDs: '..(w.includeIdentity and'On'or'Off'))
+    w.scope.Sync();w.identity.Sync()
     if content~=''and not w.copyValid then
         w.status:SetText('The client truncated this part. Copying is disabled; do not save incomplete JSON.')
     elseif content~=''then
@@ -53,12 +52,12 @@ function View.Show()
         w.TitleText:SetText('TGF v3 Export statistics')
         local note=text(w,'GameFontHighlightSmall',15,-35,785)
         note:SetText('JSON snapshot for manual copying. Names/GUIDs are off by default; item IDs, map IDs and gameplay timestamps remain.\nNothing is sent. Counts stay separate: acquisitions, complete-source samples, actions and crafting.')
-        w.scope=button(w,'This character',15,-90,145,function()
-            w.scopeMode=w.scopeMode=='character'and'combined'or'character';View.Generate()
-        end)
-        w.identity=button(w,'Include names/GUIDs: Off',170,-90,240,function()
-            w.includeIdentity=not w.includeIdentity;View.Generate()
-        end)
+        w.scope=ns.Nav.Dropdown(w,15,-90,145,function()
+            return{{value='character',label='This character'},{value='combined',label='All characters'}}
+        end,function()return w.scopeMode end,function(value)w.scopeMode=value;View.Generate()end)
+        w.identity=ns.Nav.Dropdown(w,170,-90,240,function()
+            return{{value=false,label='Include names/GUIDs: Off'},{value=true,label='Include names/GUIDs: On'}}
+        end,function()return w.includeIdentity and true or false end,function(value)w.includeIdentity=value;View.Generate()end)
         w.generate=button(w,'Generate',420,-90,100,View.Generate)
         w.copy=button(w,'Select text',530,-90,110,function()
             if w.copyValid then w.editor:SetFocus();w.editor:HighlightText()end

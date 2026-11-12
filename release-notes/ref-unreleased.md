@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.17-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.18-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Combo boxes for every choice, 0.5.18-beta
+
+- The remaining two state buttons are now combo boxes as well: the scope (This character, All characters) in every statistics tab and in the export window, the source filter (All unlearned, Vendor only) of the recipes window, the grouping (All sources, Grouped by item) of the observed chances and the export setting for names and GUIDs. Only action buttons remain buttons (Generate, Select text, Fewer, More, Refresh, Clear, the expand and part buttons).
 
 ## Combo boxes and classic tabs, 0.5.17-beta
 
