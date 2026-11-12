@@ -154,7 +154,7 @@ local function fixture(interface, saved, noBroker, noModules)
     local ns = {}
     for _, path in ipairs({ 'Localization/enUS.lua', 'Style.lua', 'Data/Metadata.lua', 'Data/NpcSeed.lua', 'Catalog.lua',
                             'Settings.lua', 'DebugLog.lua', 'Professions.lua', 'KnownRecipes.lua', 'Inventory.lua', 'Gathering.lua', 'History.lua', 'Actions.lua', 'PvP.lua', 'Production.lua', 'Crafting.lua', 'Export.lua', 'Observations.lua', 'Sources.lua', 'NpcSources.lua', 'NpcObserver.lua', 'PinStyle.lua', 'IconConfig.lua', 'FlightPaths.lua', 'Map.lua', 'Minimap.lua',
-                            'Tooltips.lua', 'Reports.lua', 'CraftingView.lua', 'RecipeBrowser.lua', 'Titan.lua', 'Core.lua' }) do
+                            'Tooltips.lua', 'Reports.lua', 'CraftingView.lua', 'RecipeBrowser.lua', 'MinimapButton.lua', 'Titan.lua', 'Core.lua' }) do
         assert(loadfile('TitanGatheredForeverV3/' .. path))('TitanGatheredForeverV3', ns)
     end
     -- Keep integration scenarios small; the generated data is validated separately.
@@ -353,6 +353,17 @@ test('trainer and recipe vendor menu toggles update their settings and redraw pi
     eq(alchemy.selected(), true); alchemy.callback(); eq(ns.settings.mapNpcProfessions.Alchemy, false)
     local record = s.menu.checkboxes['Record trainers and vendors when I open their window']
     eq(record.selected(), true); record.callback(); eq(ns.settings.recordNpcs, false)
+end)
+
+test('the minimap button can be hidden from the Display menu', function()
+    local s, ns = fixture(); s:Start()
+    s.broker.OnClick({}, 'RightButton')
+    local box = assert(s.menu.checkboxes['Show minimap button'], 'minimap button checkbox missing')
+    eq(box.selected(), true)
+    local updates = 0
+    ns.MinimapButton.Update = function() updates = updates + 1 end
+    box.callback(); eq(ns.settings.showMinimapButton, false); eq(updates, 1); eq(box.selected(), false)
+    box.callback(); eq(ns.settings.showMinimapButton, true); eq(updates, 2)
 end)
 
 test('menu offers every chat function that needs no parameter', function()

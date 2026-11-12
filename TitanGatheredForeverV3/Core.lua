@@ -282,6 +282,7 @@ local function start()
     ns.Tooltips.Initialize()
     ns.Crafting.Initialize()
     ns.Titan.Initialize()
+    ns.MinimapButton.Attach()
     for _, event in ipairs({ 'BAG_UPDATE_DELAYED', 'BANKFRAME_OPENED', 'BANKFRAME_CLOSED',
                             'BANK_TABS_CHANGED', 'PLAYERBANKSLOTS_CHANGED', 'PLAYER_ENTERING_WORLD',
                             'PLAYER_LEAVING_WORLD', 'ITEM_DATA_LOAD_RESULT', 'SKILL_LINES_CHANGED',

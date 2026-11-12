@@ -10,7 +10,9 @@ local ROW_WIDTH = 910
 function Browser.Cells(row)
     local first = row.sources[1]
     local where = ns.Style.Text(ns.Style.green, first.name) .. (#row.sources > 1 and (' (+' .. (#row.sources - 1) .. ')') or '')
-    return { row.name, ns.NpcSources.Label(row.kind), row.skill and tostring(row.skill) or 'Unknown',
+    -- A recipe the player lacks the skill for is red, so the ones that could be learned now stand out.
+    local function paint(value) return row.canLearn == false and ns.Style.Text(ns.Style.red, value) or value end
+    return { paint(row.name), ns.NpcSources.Label(row.kind), paint(row.skill and tostring(row.skill) or 'Unknown'),
         row.trainer and 'Trainer' or 'Vendor', where, row.price and ns.NpcSources.Coin(row.price) or 'Unknown' }
 end
 
@@ -39,6 +41,11 @@ local function button(parent, label, x, y, width, callback)
     b:SetText(label)
     b:SetScript('OnClick', callback)
     return b
+end
+
+-- Opens the window, or closes it when it is already open (used by the minimap button).
+function Browser.Toggle()
+    if Browser.window and Browser.window:IsShown() then Browser.window:Hide() else Browser.Show() end
 end
 
 function Browser.ScrollTo(offset)
@@ -111,7 +118,7 @@ function Browser.Show()
         w:SetScript('OnHide', function() GameTooltip:Hide() end)
         w.TitleText:SetText('TGF v3 Unlearned recipes')
         local note = text(w, 'GameFontHighlightSmall', 15, -33, 930)
-        note:SetText('Unlearned recipes with a known trainer or vendor source. Seed data is Classic and not confirmed in game until you visit the NPC. Scroll with the mouse wheel; hover an NPC name to see where to find them; click a row to open the map.')
+        note:SetText('Unlearned recipes with a known trainer or vendor source. Red recipes need more skill than you have yet. Seed data is Classic and not confirmed in game until you visit the NPC. Scroll with the mouse wheel; hover an NPC name to see where to find them; click a row to open the map.')
         w.filter = button(w, 'All unlearned', 15, -65, 150, function()
             Browser.vendorOnly = not Browser.vendorOnly; Browser.offset = 0; Browser.Refresh()
         end)
