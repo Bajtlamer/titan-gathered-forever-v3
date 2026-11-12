@@ -30,9 +30,9 @@ function Titan.Show(owner)
     tooltip:ClearLines()
     local skills = ns.Professions.Rows()
     if #skills > 0 then
-        tooltip:AddLine(ns.Style.Text(ns.Style.orange, 'Learned professions'))
+        tooltip:AddLine(ns.Style.Text(ns.Style.gold, 'Learned professions'))
         for _, skill in ipairs(skills) do
-            tooltip:AddDoubleLine(ns.Style.Text(ns.Style.gold, skill.name), ns.Style.Skill(skill.rank, skill.maxRank))
+            tooltip:AddDoubleLine(ns.Style.Text(ns.Style.SkillColor(skill.rank, skill.maxRank), skill.name), ns.Style.Skill(skill.rank, skill.maxRank))
         end
         ns.Style.Separator(tooltip)
     end
@@ -49,6 +49,7 @@ function Titan.Show(owner)
         tooltip:AddDoubleLine(ns.Style.ItemName(row.itemID), ns.Tooltips.CountValues(c), 1, 1, 1, 1, 1, 1)
     end
     if #rows == 0 then tooltip:AddLine(ns.L.noItems, 1, 1, 1, true) end
+    ns.Style.Separator(tooltip)
     local observation = ns.Tooltips.BankObservation(ns.inventory:Get(0))
     if observation then ns.Style.Note(tooltip, ns.Style.Text(ns.Style.gray, observation)) end
     if ns.inventory:Get(0).bagsState == 'cached' then
@@ -76,7 +77,7 @@ function Titan.ClearSpotsMenu(owner, world)
     if not ns.gathering then return end
     local mapID = world:GetMapID()
     MenuUtil.CreateContextMenu(owner, function(_, root)
-        root:CreateTitle(ns.Style.Text(ns.Style.orange, 'Clear saved TGF v3 spots'))
+        root:CreateTitle(ns.Style.Text(ns.Style.gold, 'Clear saved TGF v3 spots'))
         if not ns.IsPublic(mapID) or type(mapID) ~= 'number' or mapID <= 0 then
             root:CreateTitle('No map selected.'); return
         end
@@ -110,7 +111,7 @@ end
 function Titan.Menu(owner)
     Titan.Hide()
     MenuUtil.CreateContextMenu(owner, function(_, root)
-        root:CreateTitle(ns.Style.Text(ns.Style.orange, ns.L.title))
+        root:CreateTitle(ns.Style.Text(ns.Style.gold, ns.L.title))
         local display = root:CreateButton('Display')
         local function toggle(parent, label, key)
             parent:CreateCheckbox(label, function() return ns.settings[key] end, function()
@@ -128,9 +129,14 @@ function Titan.Menu(owner)
         end)
         local professions = root:CreateButton('Professions')
         professions:SetScrollMode(300)
+        local learned = {}
+        for _, skill in ipairs(ns.Professions.Rows()) do learned[skill.kind] = skill end
         local function moduleToggle(parent, module)
             local key = module.id
-            parent:CreateCheckbox(ns.Style.Text(ns.Style.gold, module.label), function() return ns.settings.categories[key] ~= false end, function()
+            local skill = learned[key]
+            local label = ns.Style.Text(ns.Style.gold, module.label)
+            if skill then label = label .. ' ' .. ns.Style.Skill(skill.rank, skill.maxRank) end
+            parent:CreateCheckbox(label, function() return ns.settings.categories[key] ~= false end, function()
                 ns.settings.categories[key] = ns.settings.categories[key] == false
                 ns.Catalog.Rebuild(ns.settings)
                 ns.UpdateGathering()

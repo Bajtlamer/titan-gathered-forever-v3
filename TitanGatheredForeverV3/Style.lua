@@ -1,6 +1,6 @@
 local _, ns = ...
-local Style = { gold = 'ffeda55f', orange = 'ffff8020', gray = 'ff9d9d9d',
-                white = 'ffffffff', cyan = 'ff53c9ff', green = 'ff20ff20', violet = 'ffb48cfa', note = 'ff8fbaaa' }
+local Style = { gold = 'ffffd100', red = 'ffff2020', orange = 'ffff8020', brown = 'ffb87333', gray = 'ff9d9d9d',
+                white = 'ffffffff', yellow = 'ffffff00', cyan = 'ff53c9ff', green = 'ff20ff20', violet = 'ffb48cfa', note = 'ff8fbaaa' }
 ns.Style = Style
 
 function Style.Text(color, text)
@@ -78,13 +78,18 @@ end
 
 function Style.Section(tooltip, title)
     Style.Separator(tooltip)
-    tooltip:AddLine(Style.Text(Style.orange, title))
+    tooltip:AddLine(Style.Text(Style.gold, title))
+end
+
+function Style.SkillColor(rank, maximum)
+    local ratio = maximum > 0 and rank / maximum or 0
+    local color = ratio >= 0.75 and Style.green
+        or (ratio >= 0.5 and Style.yellow or (ratio >= 0.25 and Style.brown or Style.red))
+    return color
 end
 
 function Style.Skill(rank, maximum)
-    local ratio = maximum > 0 and rank / maximum or 0
-    local color = ratio >= 0.95 and Style.green or (ratio >= 0.5 and Style.gold or Style.orange)
-    return Style.Text(color, rank .. '/' .. maximum)
+    return Style.Text(Style.SkillColor(rank, maximum), rank .. '/' .. maximum)
 end
 
 function Style.Count(value, field)

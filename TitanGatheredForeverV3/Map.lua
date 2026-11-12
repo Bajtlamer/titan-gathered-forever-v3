@@ -93,7 +93,10 @@ function Map:CreatePin()
             GameTooltip:AddLine(ns.PinStyle.Label(node.kind))
             GameTooltip:AddLine(string.format('Observed %d times near %.1f, %.1f', node.count,
                 (node.sourceX or node.x) * 100, (node.sourceY or node.y) * 100))
-            for _, line in ipairs(ns.PinStyle.HistoryLines(node)) do GameTooltip:AddLine(line) end
+            local history, note = ns.PinStyle.HistoryLines(node)
+            for _, line in ipairs(history) do GameTooltip:AddLine(line) end
+            ns.Style.Separator(GameTooltip)
+            if note then GameTooltip:AddLine(note) end
             GameTooltip:AddLine('Recorded near your gathering position.')
         end
         GameTooltip:Show()

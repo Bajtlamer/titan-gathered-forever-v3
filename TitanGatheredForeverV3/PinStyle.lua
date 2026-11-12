@@ -2,6 +2,7 @@ local _, ns = ...
 local PinStyle = {}
 ns.PinStyle = PinStyle
 local labels = { Mining = 'TGF v3 Mining spot', Herbs = 'TGF v3 Herbalism spot', Skinning = 'TGF v3 Skinning area', Fishing = 'TGF v3 Fishing spot', Rare = 'TGF v3 Rare loot', PvP = 'TGF v3 PvP kill spot' }
+local historyNote = 'Source/zone observations, not a chance at this coordinate.'
 local icons = { Mining = 'Interface\\Icons\\Trade_Mining', Herbs = 'Interface\\Icons\\Trade_Herbalism',
                 Skinning = 'Interface\\Icons\\INV_Misc_Pelt_Wolf_01', PvP = 'Interface\\Icons\\INV_Sword_04' }
 
@@ -17,6 +18,31 @@ end
 function PinStyle.HistoryLines(node)
     local lines={}
     if node.kind == 'PvP' or not node.itemID then return lines end
+    if node.kind == 'Mining' then
+        local rates = ns.history and ns.history:Rates((ns.characterID or UnitGUID('player'))) or {}
+        local sources, order = {}, {}
+        for _, row in ipairs(rates) do
+            if row.itemID == node.itemID and row.kind == 'Mining' and row.mapID == node.mapID
+                and (row.instanceType or 'none') == 'none' then
+                local key = tostring(row.source)
+                if not sources[key] then sources[key] = row; order[#order + 1] = key end
+            end
+        end
+        for _, key in ipairs(order) do
+            local source = sources[key]
+            lines[#lines + 1] = ns.Reports.Source(source)
+            lines[#lines + 1] = string.format('Complete mining loot samples: %d', source.trials)
+            for _, row in ipairs(rates) do
+                if row.kind == 'Mining' and row.mapID == node.mapID and tostring(row.source) == key
+                    and (row.instanceType or 'none') == 'none' then
+                    lines[#lines + 1] = string.format('%s: %.1f%% (%d / %d samples); %d items',
+                        ns.Style.ItemName(row.itemID), row.percent, row.hits, row.trials, row.quantity)
+                end
+            end
+        end
+        if #order == 0 then lines[#lines + 1] = 'Drop chances: Unknown; no complete mining loot samples recorded.' end
+        return lines, #order > 0 and historyNote or nil
+    end
     if not ns.history or not ns.Reports then return lines end
     for _,row in ipairs(ns.history:Rates((ns.characterID or UnitGUID('player')),node.itemID))do
         if row.mapID==node.mapID and (row.kind==node.kind or row.kind=='Loot') then
@@ -24,8 +50,7 @@ function PinStyle.HistoryLines(node)
             if #lines==2 then break end
         end
     end
-    if #lines>0 then lines[#lines+1]='Source/zone observations, not a chance at this coordinate.'end
-    return lines
+    return lines, #lines > 0 and historyNote or nil
 end
 
 local defaults = {

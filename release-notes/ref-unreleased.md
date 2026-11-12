@@ -1,6 +1,48 @@
 # Unreleased development updates
 
-Updated 2026-11-09. These changes describe the 0.4.2-alpha source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-10. These changes describe the 0.4.11-alpha source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Learned profession colors, 0.4.10-alpha
+
+- Names under Learned professions match their skill rank color. Section headings use bright gold.
+
+## Bright gold labels, 0.4.9-alpha
+
+- The shared label color is now bright gold (#FFD100), including profession section headings in the Titan hover tooltip.
+
+## Titan label colors, 0.4.8-alpha
+
+- Gold marks Titan headings, section labels and profession names. Skill ranks use their progress colors, and material names use their item rarity colors.
+
+## Titan Panel footer divider, 0.4.7-alpha
+
+- Added a horizontal divider between the material list and the bank, page and controls notes in the Titan Panel hover tooltip.
+
+## Gathering tooltip dividers, 0.4.6-alpha
+
+- A divider separates observed gathering data from the explanatory footer on world veins, world-map pins and minimap pins.
+
+## Skill percentage bands and world-vein tooltips, 0.4.5-alpha
+
+- Supersedes the earlier three-color progress thresholds: below 50% orange, 50% to below 75% yellow, 75% to below 100% green, and capped gray. All colors use current rank / current maximum and refresh with rank/cap changes. Mining 68/75 remains green.
+- Added the missing native Object tooltip post-call. Actual world ore veins now show observed complete mining loot samples and each sampled output's quantity, hit/sample percentage and counts for the current character, source, zone and instance context. Map pin enrichment remains available separately.
+- Recognizes source IDs only from saved mining observations, including partial history and other characters for identity only. No guessed ore-to-object mapping, external drop table or invented depleted-vein count. Unrecognized objects are unchanged. Identified sources without matching current-character samples display Unknown. History in item tooltips controls this enrichment.
+- Registration guards missing Object enums; forbidden/restricted tooltips and mismatched GUID/object IDs are ignored. Regression tests cover registration, source isolation, partial exclusion, clearing/reuse, duplicate suppression, restricted identity, absent enums and skill color boundaries.
+- API evidence: [pinned Forever tooltip rules](https://github.com/Gethe/wow-ui-source/blob/9dc84f0d3bbae1768ac3405b3716000bd93eda06/Interface/AddOns/Blizzard_SharedXMLGame/Tooltip/TooltipDataRules.lua) registers an Object post-call; the sibling generated TooltipInfoSharedDocumentation declares Object type 4. Live world-object identity availability and appearance remain to be verified in the client.
+- Full checks pass. Installed with backup `Interface/.tgf-v3-backups/candidate-b5wi9ft_`; all 57 installed runtime files match source with no extras.
+
+## Near-cap profession colors, 0.4.4-alpha
+
+- Corrected the skill-progress green threshold from 95% to 90% of the current skill cap. Mining 68/75 now displays green for both the name and rank in the Titan tooltip and Professions submenu.
+- Added integration coverage for the reported 68/75 case, including both tooltip and menu output. These remain rank/cap progress colors, not per-recipe difficulty.
+- Full checks pass. Installed with backup `Interface/.tgf-v3-backups/candidate-yx5g4e3i`; all 57 installed files match source with no extras. Live appearance needs verification after `/reload`.
+
+## Profession colors and mining pin statistics, 0.4.3-alpha
+
+- Learned profession names share the existing rank/max progress colors; the Professions submenu now includes colored live ranks. These colors describe profession progress, not recipe skill-up difficulty.
+- Mining pin hovers list all observed outputs for the matching ore sources and outdoor zone, including stones and gems, with hit/sample percentages and obtained quantities from complete loot samples. Partial loot does not enter the rate denominator; other characters, zones and instance contexts are excluded. Missing evidence remains Unknown.
+- Minimap pins now show their saved observation count, matching world-map visibility. Counts describe recorded observations, not unique depleted veins or completed mining casts.
+- Regression tests reproduce the missing colors, omitted minimap counts and missing byproduct rates. Full checks pass. Installed with backup `Interface/.tgf-v3-backups/candidate-5ab9ipau`; all 57 installed runtime files match source, without extra files. Live tooltip appearance still requires in-game validation after `/reload`.
 
 ## Expandable lifetime sources, 0.4.2-alpha
 
