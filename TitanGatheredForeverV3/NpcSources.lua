@@ -389,8 +389,8 @@ function Npc.ItemRecipeName(itemID)
     ns.ItemName(itemID) -- requests the item data; the window refreshes on ITEM_DATA_LOAD_RESULT
 end
 
-Npc.RecipeKinds = { 'Alchemy', 'Blacksmithing', 'Cooking', 'Enchanting', 'Engineering', 'FirstAid',
-    'Leatherworking', 'Mining', 'Tailoring' }
+Npc.RecipeKinds = { 'Alchemy', 'Blacksmithing', 'Cooking', 'Enchanting', 'Engineering', 'FirstAid', 'Fishing',
+    'Herbs', 'Leatherworking', 'Mining', 'Skinning', 'Tailoring' }
 local recipeKinds = {}
 for _, kind in ipairs(Npc.RecipeKinds) do recipeKinds[kind] = true end
 
@@ -403,11 +403,14 @@ function Npc.Unlearned(character, vendorOnly, kindFilter)
     for id in pairs(seedNpcs()) do ids[#ids + 1] = id; seen[id] = true end
     for id in pairs(observed()) do if not seen[id] then ids[#ids + 1] = id end end
     table.sort(ids)
-    local function add(npcID, npcName, kind, display, skill, price, role)
+    local skills = Npc.Skills()
+    local function add(npcID, npcName, kind, display, skill, price, role, rank)
         if not recipeKinds[kind] or (kindFilter and kind ~= kindFilter) then return end
-        local known = K and K.IsKnown(character, kind, display)
-        if known == nil then unreadSet[kind] = true; return end
-        if known == true then return end
+        if not rank then
+            local known = K and K.IsKnown(character, kind, display)
+            if known == nil then unreadSet[kind] = true; return end
+            if known == true then return end
+        end
         local key = kind .. '|' .. K.Normalize(display)
         local row = byKey[key]
         if not row then
@@ -419,11 +422,20 @@ function Npc.Unlearned(character, vendorOnly, kindFilter)
         if price and (not row.price or price < row.price) then row.price = price end
         row.sources[#row.sources + 1] = { npcID = npcID, name = npcName, role = role, price = price }
     end
+    -- Profession ranks ("Journeyman Fishing") are listed only as the next step: the lowest tier the player
+    -- has not reached yet, once the skill requirement is met, and only for professions the player has.
+    local ranks = {}
     for _, id in ipairs(ids) do
         local record = Npc.Record(id)
         for _, row in ipairs(record.trainer or {}) do
             if not isRankSpell(row.name) then
                 add(id, record.name, record.profession, row.name, row.skill, row.cost, 'Trainer')
+            elseif skills and skills[record.profession] and type(row.skill) == 'number' and row.skill <= skills[record.profession]
+                and Npc.RankSpellKnown(record.profession, row.name) == false then
+                local cap = rankCaps[row.name:match('^(%a+) ')]
+                local best = ranks[record.profession]
+                if not best or cap < best.cap then best = { cap = cap, entries = {} }; ranks[record.profession] = best end
+                if cap == best.cap then best.entries[#best.entries + 1] = { id, record.name, row.name, row.skill, row.cost } end
             end
         end
         for _, row in ipairs(record.vendor or {}) do
@@ -432,12 +444,14 @@ function Npc.Unlearned(character, vendorOnly, kindFilter)
             else pending = pending + 1 end
         end
     end
+    for kind, best in pairs(ranks) do
+        for _, e in ipairs(best.entries) do add(e[1], e[2], kind, e[3], e[4], e[5], 'Trainer', true) end
+    end
     if vendorOnly then
         local filtered = {}
         for _, row in ipairs(rows) do if not row.trainer then filtered[#filtered + 1] = row end end
         rows = filtered
     end
-    local skills = Npc.Skills()
     for _, row in ipairs(rows) do row.canLearn = Npc.CanLearn(skills, row.kind, row.skill) end
     table.sort(rows, function(a, b)
         if a.kind ~= b.kind then return a.kind < b.kind end

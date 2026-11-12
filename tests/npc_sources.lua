@@ -203,6 +203,31 @@ test('rank spells are known by the skill cap and never ask for a profession wind
     eq(t.doubles[1][1], '<white>Apprentice Fishing</> <red>(1)</>')
 end)
 
+test('the window lists the next profession rank where it can be learned', function()
+    local ns = fresh()
+    ns.NpcSeed.npcs[9] = { n = 'Angler', m = 0, x = 1, y = 1, p = 'Fishing',
+        t = { { 7733, 'Apprentice Fishing', 100, 1, 0 }, { 7734, 'Journeyman Fishing', 500, 50, 0 }, { 7620, 'Expert Fishing', 5000, 125, 0 } } }
+    ns.NpcSeed.npcs[10] = { n = 'Other Angler', m = 0, x = 1, y = 1, p = 'Fishing',
+        t = { { 7734, 'Journeyman Fishing', 400, 50, 0 } } }
+    ns.KnownRecipes = { IsKnown = function() return false end, Normalize = function(n) return n:lower() end,
+        Strip = function(n) return n end }
+    local function rankRows(maxRank, rank)
+        ns.Professions = { Rows = function() return { { kind = 'Fishing', rank = rank, maxRank = maxRank } } end }
+        local rows = ns.NpcSources.Unlearned('C1', false, 'Fishing')
+        return rows
+    end
+    local rows = rankRows(75, 75)               -- maximum reached: next is Journeyman, two trainers teach it
+    eq(#rows, 1); eq(rows[1].name, 'Journeyman Fishing'); eq(rows[1].kind, 'Fishing'); eq(rows[1].trainer, true)
+    eq(#rows[1].sources, 2); eq(rows[1].price, 400); eq(rows[1].skill, 50); eq(rows[1].canLearn, true)
+    eq(#rankRows(150, 80), 0)                    -- Journeyman known, Expert needs 125, the player has 80
+    eq(#rankRows(150, 130), 1); eq(rankRows(150, 130)[1].name, 'Expert Fishing')
+    eq(#rankRows(75, 30), 0)                     -- Journeyman needs 50 and the player has 30
+    ns.Professions = { Rows = function() return {} end }
+    eq(#ns.NpcSources.Unlearned('C1', false, 'Fishing'), 0)   -- the player has no Fishing at all
+    ns.Professions = { Rows = function() return { { kind = 'Fishing', rank = 75, maxRank = 75 } } end }
+    eq(#ns.NpcSources.Unlearned('C1', true, 'Fishing'), 0)    -- trainer only rows are hidden by the vendor filter
+end)
+
 test('a required skill above the player rank is red and unknown requirements stay neutral', function()
     local ns = fresh()
     ns.Professions = { Rows = function() return { { kind = 'Alchemy', rank = 60 } } end }

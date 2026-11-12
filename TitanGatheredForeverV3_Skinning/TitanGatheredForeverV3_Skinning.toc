@@ -1,7 +1,7 @@
 ## Interface: 16001
 ## Title: Titan Gathered Forever v3: Skinning
 ## Notes: Optional Skinning material catalogue for Titan Gathered Forever v3.
-## Version: 0.5.13-beta
+## Version: 0.5.14-beta
 ## Dependencies: Titan, TitanGatheredForeverV3
 
 Data.lua

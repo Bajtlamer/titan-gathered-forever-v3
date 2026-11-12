@@ -393,3 +393,8 @@ Owner feedback: trainer and vendor tooltips did not make clear whether the recip
 ### Rank spells in tooltips, 0.5.13-beta, 2026-11-12
 
 Owner report: the Fishing trainer tooltip kept saying the learned status is unknown although the profession window was opened many times. The saved log showed recipe reads for FirstAid, Cooking, Mining and Engineering but never Fishing, and the Fishing trainer record holds one service, "Journeyman Fishing" (trainer 1683, services=1). Fishing has no trade skill recipe list, so KnownRecipes never records it, and rank spells are in no recipe list anywhere. NpcSources.RankSpellKnown now decides rank spells from Professions maxRank against the tier cap, and the unread note ignores them. Automated checks pass (npc_sources, 25 checks). Live review pending.
+
+
+### Next profession rank in the window, 0.5.14-beta, 2026-11-12
+
+Owner request: show the trainers where the next skill level can be learned once the maximum is reached or learning is possible. NpcSources.Unlearned now adds rank spells as trainer rows: per profession the player has, the lowest tier whose cap (75, 150, 225, 300, 375) exceeds the current skill cap, provided the trainer requirement is not above the current skill. Beyond that only Fishing, Herbs and Skinning joined RecipeKinds. Automated checks pass (npc_sources, recipe_browser updated). The data depends on the seed trainer rows for those professions; live review pending, especially whether Expert and Artisan trainers exist in the seed.
