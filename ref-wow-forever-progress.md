@@ -338,3 +338,12 @@ Live test on Forever: map pins appeared and /tgf npc named the nearest trainer, 
 ### Trainer list timing fix, 0.5.2-beta, 2026-11-12
 
 The 0.5.1 recording log from the live client showed TRAINER_SHOW delivering the NPC correctly (GUID, name, map 1426, not in an instance) while GetNumTrainerServices returned 0 at that moment; the C_TrainerUI table does not exist, so the classic trainer API is the one in use. The client fills the list shortly afterwards. 0.5.2-beta reads trainer and merchant data again on TRAINER_UPDATE and MERCHANT_UPDATE while the window is open and stops on the CLOSED events. All automated checks pass; installed with tools/install.py, all 64 files match and all 14 manifests read 0.5.2-beta. /reload is enough. Live re-test pending: the pin tooltip should read Confirmed in game after the trainer window is opened; whether GetTrainerServiceSkillReq returns a skill name is still unverified and the log will say so.
+
+### Live validation results, trainers, 2026-11-12
+
+Evidence from the 0.5.2-beta recording log and saved npcs table on WoW Forever 1.60.1 (character on a PvE realm, Ironforge, map 1426):
+- Confirmed: the pin tooltip changes to Confirmed in game after a trainer window is opened.
+- Confirmed: TRAINER_SHOW delivers the NPC (GUID, name, map, not in an instance) but GetNumTrainerServices returns 0 at that moment; TRAINER_UPDATE then returns the full list (10 services for Dank Drizzlecut, 7 for Cook Ghilm). Reading again on update fixed recording in 0.5.2-beta.
+- Confirmed: GetTrainerServiceSkillReq returns the profession name and required rank (for example Mining, 125), so the profession is identified. GetTrainerServiceCost returns the copper cost. C_TrainerUI does not exist, so the classic trainer API is the one in use.
+- Observed: Forever has recipes absent from the Classic 1.12.1 seed (for example Azerothium Bar at skill 275), which supports letting observed data replace seed data.
+- Still open: recipe vendor recording (price and required skill parsed from the merchant tooltip), known recipe reading from profession windows with the Unlearned recipes window, continent UiMapIDs 1414 and 1415 for the row click, and the 15-line tooltip cap on a large vendor.
