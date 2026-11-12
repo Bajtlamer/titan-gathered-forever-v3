@@ -152,9 +152,9 @@ local function fixture(interface, saved, noBroker, noModules)
         state.message = message; state.messages[#state.messages + 1] = message
     end }
     local ns = {}
-    for _, path in ipairs({ 'Localization/enUS.lua', 'Style.lua', 'Data/Metadata.lua', 'Catalog.lua',
-                            'Settings.lua', 'Professions.lua', 'Inventory.lua', 'Gathering.lua', 'History.lua', 'Actions.lua', 'PvP.lua', 'Production.lua', 'Crafting.lua', 'Export.lua', 'Observations.lua', 'Sources.lua', 'PinStyle.lua', 'IconConfig.lua', 'FlightPaths.lua', 'Map.lua', 'Minimap.lua',
-                            'Tooltips.lua', 'Reports.lua', 'CraftingView.lua', 'Titan.lua', 'Core.lua' }) do
+    for _, path in ipairs({ 'Localization/enUS.lua', 'Style.lua', 'Data/Metadata.lua', 'Data/NpcSeed.lua', 'Catalog.lua',
+                            'Settings.lua', 'Professions.lua', 'KnownRecipes.lua', 'Inventory.lua', 'Gathering.lua', 'History.lua', 'Actions.lua', 'PvP.lua', 'Production.lua', 'Crafting.lua', 'Export.lua', 'Observations.lua', 'Sources.lua', 'NpcSources.lua', 'NpcObserver.lua', 'PinStyle.lua', 'IconConfig.lua', 'FlightPaths.lua', 'Map.lua', 'Minimap.lua',
+                            'Tooltips.lua', 'Reports.lua', 'CraftingView.lua', 'RecipeBrowser.lua', 'Titan.lua', 'Core.lua' }) do
         assert(loadfile('TitanGatheredForeverV3/' .. path))('TitanGatheredForeverV3', ns)
     end
     -- Keep integration scenarios small; the generated data is validated separately.
@@ -338,6 +338,21 @@ test('right-click menu toggles actual settings', function()
     assert(ns.Catalog.Get(2589))
     eq(s.menu.checkboxes.Other, nil)
     assert(s.menu.checkboxes['Auction items'])
+end)
+
+test('trainer and recipe vendor menu toggles update their settings and redraw pins', function()
+    local s, ns = fixture(); s:Start()
+    s.broker.OnClick({}, 'RightButton')
+    local trainers, vendors = s.menu.checkboxes['Show profession trainers'], s.menu.checkboxes['Show recipe vendors']
+    eq(trainers.selected(), true); eq(vendors.selected(), true)
+    trainers.callback(); eq(ns.settings.mapTrainers, false); eq(trainers.selected(), false)
+    vendors.callback(); eq(ns.settings.mapRecipeVendors, false)
+    trainers.callback(); vendors.callback()
+    eq(ns.settings.mapTrainers, true); eq(ns.settings.mapRecipeVendors, true)
+    local alchemy = s.menu.checkboxes['Alchemy pins']
+    eq(alchemy.selected(), true); alchemy.callback(); eq(ns.settings.mapNpcProfessions.Alchemy, false)
+    local record = s.menu.checkboxes['Record trainers and vendors when I open their window']
+    eq(record.selected(), true); record.callback(); eq(ns.settings.recordNpcs, false)
 end)
 
 test('private Titan summary omits confusing count labels and does not repeat shared reagents', function()

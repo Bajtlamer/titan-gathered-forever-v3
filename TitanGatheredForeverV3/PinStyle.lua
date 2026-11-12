@@ -1,10 +1,12 @@
 local _, ns = ...
 local PinStyle = {}
 ns.PinStyle = PinStyle
-local labels = { Mining = 'TGF v3 Mining spot', Herbs = 'TGF v3 Herbalism spot', Skinning = 'TGF v3 Skinning area', Fishing = 'TGF v3 Fishing spot', Rare = 'TGF v3 Rare loot', PvP = 'TGF v3 PvP kill spot' }
+local labels = { Mining = 'TGF v3 Mining spot', Herbs = 'TGF v3 Herbalism spot', Skinning = 'TGF v3 Skinning area', Fishing = 'TGF v3 Fishing spot', Rare = 'TGF v3 Rare loot', PvP = 'TGF v3 PvP kill spot',
+                Trainer = 'TGF v3 Profession trainer', RecipeVendor = 'TGF v3 Recipe vendor' }
 local historyNote = 'Source/zone observations, not a chance at this coordinate.'
 local icons = { Mining = 'Interface\\Icons\\Trade_Mining', Herbs = 'Interface\\Icons\\Trade_Herbalism',
-                Skinning = 'Interface\\Icons\\INV_Misc_Pelt_Wolf_01', PvP = 'Interface\\Icons\\INV_Sword_04' }
+                Skinning = 'Interface\\Icons\\INV_Misc_Pelt_Wolf_01', PvP = 'Interface\\Icons\\INV_Sword_04',
+                Trainer = 'Interface\\Icons\\INV_Misc_Book_11', RecipeVendor = 'Interface\\Icons\\INV_Scroll_03' }
 
 function PinStyle.Label(kind) return labels[kind] or ('TGF v3 ' .. kind .. ' material source') end
 function PinStyle.Icon(itemID, kind)
