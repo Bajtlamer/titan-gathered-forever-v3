@@ -187,6 +187,7 @@ function Npc.FillTooltip(tooltip, node)
     local record = Npc.Record(node.npcID)
     if not record then return end
     local Style = ns.Style
+    local function small(target) if Style.Small then Style.Small(target) end end
     tooltip:AddLine(Style.Text(Style.gold, record.name))
     local rows, role
     if node.kind == 'Trainer' then
@@ -195,12 +196,14 @@ function Npc.FillTooltip(tooltip, node)
         role, rows = 'Recipe vendor', record.vendor or {}
     end
     tooltip:AddLine(Style.Text(Style.gray, role))
+    small(tooltip)
     if record.confirmed then
         local when = record.lastSeen and date and (' ' .. date('%Y-%m-%d', record.lastSeen)) or ''
         tooltip:AddLine(Style.Text(Style.green, 'Confirmed in game' .. when))
     else
         tooltip:AddLine(Style.Text(Style.gray, 'Not yet confirmed in game'))
     end
+    small(tooltip)
     if Style.Separator then Style.Separator(tooltip) else tooltip:AddLine(' ') end
     local ordered = {}
     for _, row in ipairs(rows) do ordered[#ordered + 1] = row end
@@ -224,9 +227,16 @@ function Npc.FillTooltip(tooltip, node)
         else right = Style.Text(Style.gray, row.itemID and 'price unknown' or 'cost unknown') end
         if row.extendedCost then right = right .. ' ' .. Style.Text(Style.gray, '+ extra cost') end
         tooltip:AddDoubleLine(left, right)
+        small(tooltip)
     end
-    if #ordered > shown then tooltip:AddLine(Style.Text(Style.gray, string.format('and %d more', #ordered - shown))) end
-    if #ordered == 0 then tooltip:AddLine(Style.Text(Style.gray, 'No recipes recorded yet.')) end
+    if #ordered > shown then
+        tooltip:AddLine(Style.Text(Style.gray, string.format('and %d more', #ordered - shown)))
+        small(tooltip)
+    end
+    if #ordered == 0 then
+        tooltip:AddLine(Style.Text(Style.gray, 'No recipes recorded yet.'))
+        small(tooltip)
+    end
 end
 
 -- Item recipe name for matching, or nil while the client is still loading the item.

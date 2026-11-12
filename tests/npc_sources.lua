@@ -20,7 +20,8 @@ local function fresh()
         settings = { mapNpcProfessions = {} }, db = { npcs = {} },
         Style = { gold = 'gold', gray = 'gray', white = 'white', green = 'green',
             Text = function(color, text) return '<' .. color .. '>' .. text .. '</>' end,
-            Separator = function(tooltip) tooltip:AddLine('---') end },
+            Separator = function(tooltip) tooltip:AddLine('---') end,
+            Small = function(tooltip) tooltip.smallLines = (tooltip.smallLines or 0) + 1 end },
         ItemName = function(id) return 'Recipe: Item' .. id end }
     ns.NpcSeed = { npcs = {
         [1] = { n = 'Alchemy Trainer', m = 0, x = 10, y = 20, p = 'Alchemy',
@@ -143,6 +144,7 @@ test('vendor tooltip lists recipes with skill and price and marks unconfirmed da
     eq(t.doubles[2][1], '<white>Recipe: Item101</> <gray>(?)</>')
     eq(t.doubles[2][2], '<gray>price unknown</>')
     eq(#t.lines, 4)
+    eq(t.smallLines, 4)   -- role, status and the two list rows are small; the NPC name and the rule are not
 end)
 
 test('trainer tooltip shows profession, skill and cost', function()
