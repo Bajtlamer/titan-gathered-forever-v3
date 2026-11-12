@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.21-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.22-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Trainers with all services known are recorded, 0.5.22-beta
+
+- Confirmed live: Bronk Guzzlegear is now recorded (11 Engineering services). The client rejects the numbers 1 and 0 in SetTrainerServiceTypeFilter ("Missing on/off parameter") and accepts true and false, so the filters are switched on with true for one delayed read and put back with false. The report field in the NPC recording log is kept.
 
 ## Trainer filter diagnostics, 0.5.21-beta
 

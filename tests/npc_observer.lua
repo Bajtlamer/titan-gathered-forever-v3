@@ -201,7 +201,10 @@ test('a fully known trainer is read again with the filters on and the filters ar
     GetTrainerServiceCost = function() return 100 end
     GetTrainerServiceSkillReq = function() return 'Engineering', 50 end
     GetTrainerServiceTypeFilter = function(name) return filters[name] == 1 end
-    SetTrainerServiceTypeFilter = function(name, value) filters[name] = value; sets[#sets + 1] = name .. '=' .. value end
+    SetTrainerServiceTypeFilter = function(name, value)
+        assert(type(value) == 'boolean', 'Missing on/off parameter')
+        filters[name] = value and 1 or 0; sets[#sets + 1] = name .. '=' .. tostring(value)
+    end
     C_Timer = { After = function(_, callback) later = callback end }
     local ns = fresh()
     local api = ns.NpcObserver.DefaultAPI()
@@ -211,7 +214,7 @@ test('a fully known trainer is read again with the filters on and the filters ar
     local observer = ns.NpcObserver.New(api)
     observer:TrainerShown()
     eq(ns.db.npcs[1702], nil)            -- nothing yet: the list is rebuilt after the filters change
-    eq(filters.used, 1); eq(table.concat(sets, ','), 'used=1')
+    eq(filters.used, 1); eq(table.concat(sets, ','), 'used=true')
     later()                               -- the delayed read
     eq(#ns.db.npcs[1702].trainer, 2)
     eq(filters.used, 0)                   -- the player's filter is back
