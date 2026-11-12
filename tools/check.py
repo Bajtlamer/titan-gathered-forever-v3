@@ -41,6 +41,7 @@ commands = [
     [runtime, 'tests/known_recipes.lua'],
     [runtime, 'tests/npc_observer.lua'],
     [runtime, 'tests/recipe_browser.lua'],
+    [runtime, 'tests/navigation.lua'],
 ]
 for command in commands:
     subprocess.run(command, cwd=root, check=True, stdin=subprocess.DEVNULL)
