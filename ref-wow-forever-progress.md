@@ -414,3 +414,7 @@ Owner request: use Blizzard style combo boxes instead of buttons with menus, and
 ### Combo boxes everywhere, 0.5.18-beta, 2026-11-12
 
 Owner request: replace choice buttons with combo boxes wherever possible. Nav.Dropdown now also serves the two state choices: scope in the statistics tabs and the export window, the recipes source filter, chances grouping and the export identity setting. Controls that perform an action stay buttons. Tests drive the choices through the same options and setters (recipe_browser captures them, reports and export_view pick from the fallback menu). Live review pending, together with the look of the drop downs from 0.5.17.
+
+## 0.5.19-beta, trainers whose services are all known
+
+Live finding: Bronk Guzzlegear (npc 1702) stayed "Not yet confirmed in game". The NPC recording log showed GetNumTrainerServices=0 on both TRAINER_SHOW and TRAINER_UPDATE, while another trainer in the same session returned 10. Probable cause: the default trainer window filter hides already known services, so a trainer with nothing left to teach reads as empty. Fix: with an empty list the observer switches the available, unavailable and used filters on for one read per opened window and restores them. Pending live check: that the client rebuilds the list synchronously after SetTrainerServiceTypeFilter, and that Bronk is then recorded (confirmed). If the log still shows services=0, the probe line "type filters" shows the filter states.

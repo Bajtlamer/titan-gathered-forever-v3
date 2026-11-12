@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.18-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.19-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Trainers with nothing left to learn, 0.5.19-beta
+
+- A trainer whose services are all already known (for example Bronk Guzzlegear for an engineer) stayed "Not yet confirmed in game", because the trainer window hides known services by default and the addon saw an empty list. When the list is empty the addon now switches the three type filters on for the read, records the trainer and puts the filters back. This happens once per opened window. The Diagnostics NPC recording log also shows the filter states. Whether the client applies the filter change immediately awaits live review.
 
 ## Combo boxes for every choice, 0.5.18-beta
 

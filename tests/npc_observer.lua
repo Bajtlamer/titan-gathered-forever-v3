@@ -189,6 +189,33 @@ test('modern merchant item info table yields price and extended cost', function(
     eq(ns.NpcObserver.MerchantInfo({ price = 'x' }), nil)
 end)
 
+test('a fully known trainer is read with every filter on and the filters are put back', function()
+    local filters = { available = 1, unavailable = 1, used = 0 }
+    local sets, shown = {}, 0
+    local saved = { GetNumTrainerServices = GetNumTrainerServices, GetTrainerServiceInfo = GetTrainerServiceInfo,
+        GetTrainerServiceCost = GetTrainerServiceCost, GetTrainerServiceSkillReq = GetTrainerServiceSkillReq,
+        GetTrainerServiceTypeFilter = GetTrainerServiceTypeFilter, SetTrainerServiceTypeFilter = SetTrainerServiceTypeFilter }
+    GetNumTrainerServices = function() return filters.used == 1 and 2 or 0 end
+    GetTrainerServiceInfo = function(index) return 'Recipe ' .. index, 'used', 'used', 0 end
+    GetTrainerServiceCost = function() return 100 end
+    GetTrainerServiceSkillReq = function() return 'Engineering', 50 end
+    GetTrainerServiceTypeFilter = function(name) return filters[name] end
+    SetTrainerServiceTypeFilter = function(name, value) filters[name] = value; sets[#sets + 1] = name .. '=' .. value end
+    local ns = fresh()
+    local api = ns.NpcObserver.DefaultAPI()
+    api.ResetTrainer()
+    local got = #api.TrainerServices()
+    eq(got, 2)
+    eq(filters.used, 0)
+    eq(table.concat(sets, ','), 'used=1,used=0')
+    eq(#api.TrainerServices(), 0) -- the refresh after restoring does not toggle again
+    eq(#sets, 2)
+    api.ResetTrainer()
+    eq(#api.TrainerServices(), 2) -- a newly opened window tries again
+    eq(#sets, 4)
+    for name, value in pairs(saved) do _G[name] = value end
+end)
+
 for _, entry in ipairs(tests) do
     local ok, err = pcall(entry[2])
     if not ok then io.stderr:write('FAIL ' .. entry[1] .. ': ' .. tostring(err) .. '\n'); os.exit(1) end

@@ -1,7 +1,7 @@
 ## Interface: 16001
 ## Title: Titan Gathered Forever v3: Fishing
 ## Notes: Optional Fishing material catalogue for Titan Gathered Forever v3.
-## Version: 0.5.18-beta
+## Version: 0.5.19-beta
 ## Dependencies: Titan, TitanGatheredForeverV3
 
 Data.lua
