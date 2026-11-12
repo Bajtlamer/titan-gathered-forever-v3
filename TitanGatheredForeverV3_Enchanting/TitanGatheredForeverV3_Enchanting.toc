@@ -1,7 +1,7 @@
 ## Interface: 16001
 ## Title: Titan Gathered Forever v3: Enchanting
 ## Notes: Optional Enchanting material catalogue for Titan Gathered Forever v3.
-## Version: 0.4.1-alpha
+## Version: 0.4.11-alpha
 ## Dependencies: Titan, TitanGatheredForeverV3
 
 Data.lua

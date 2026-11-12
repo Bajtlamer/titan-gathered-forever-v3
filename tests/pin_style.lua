@@ -50,3 +50,31 @@ assert(ns.PinStyle.Label('Skinning')=='TGF v3 Skinning area')
 assert(ns.PinStyle.Label('PvP')=='TGF v3 PvP kill spot')
 assert(ns.PinStyle.Icon(nil,'PvP')=='Interface\\Icons\\INV_Sword_04')
 print('PASS 9 image alpha, transparent border and pooled pin checks')
+
+-- Ore pins must expose byproducts from the same source, without mixing veins,
+-- characters, zones or instance contexts, or counting partial loot as trials.
+ns.characterID='miner'
+ns.Style={ItemName=function(id)return 'Item '..id end}
+ns.Reports={Source=function(row)return 'Vein '..row.source end}
+assert(loadfile('TitanGatheredForeverV3/History.lua'))('TitanGatheredForeverV3',ns)
+ns.history=ns.History.New({})
+local function observe(id,items,source,map,complete,character,context)
+    ns.history:Observe(character or 'miner','Miner',{id=id,kind='Mining',source=source or 'copper',
+        mapID=map or 1,instanceType=context or 'none',items=items,complete=complete~=false,at=100})
+end
+observe('one',{[2770]=2,[2835]=1,[774]=1})
+observe('two',{[2770]=3,[2835]=2})
+observe('partial',{[2770]=1,[774]=10},nil,nil,false)
+observe('tin',{[2771]=1,[1206]=1},'tin')
+observe('elsewhere',{[2770]=1,[818]=1},nil,2)
+observe('alt',{[2770]=1,[818]=1},nil,nil,true,'alt')
+observe('instance',{[2770]=1,[818]=1},nil,nil,true,nil,'party')
+local lines=table.concat(ns.PinStyle.HistoryLines({kind='Mining',itemID=2770,mapID=1,count=3}),'\n')
+assert(lines:find('Complete mining loot samples: 2',1,true),'Missing complete mining sample count')
+assert(lines:find('Item 774: 50.0% (1 / 2 samples); 1 items',1,true),'Gem drops or partial-loot exclusion missing')
+assert(lines:find('Item 2835: 100.0% (2 / 2 samples); 3 items',1,true),'Stone drops missing')
+assert(lines:find('Item 2770: 100.0% (2 / 2 samples); 5 items',1,true),'Ore quantities missing')
+assert(not lines:find('1206',1,true) and not lines:find('818',1,true),'Unrelated source evidence leaked into ore pin')
+local unknown=table.concat(ns.PinStyle.HistoryLines({kind='Mining',itemID=999,mapID=1,count=1}),'\n')
+assert(unknown:find('Unknown',1,true),'Unobserved drop rates need explicit unknown evidence')
+print('PASS mining pin drop lists, complete counts, partial exclusion and source isolation')

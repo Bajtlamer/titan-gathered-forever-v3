@@ -38,7 +38,7 @@ C_Item = { GetItemIconByID = function(id) return id + 1000 end }
 GameTooltip = { SetOwner = function() end, AddLine = function() end, Show = function() end, Hide = function() end }
 local ns = { settings = { gatheringMap = true, mapMinimap = true }, IsPublic = function() return true end,
     Catalog = { modules = { Herbs = {} } },
-    Style = { ItemName = function(id) return 'Item ' .. id end } }
+    Style = { Separator = function(tooltip) tooltip:AddLine(' ') end, ItemName = function(id) return 'Item ' .. id end } }
 local nodes = { { mapID = 1412, itemID = 765, kind = 'Herbs', x = 0.55, y = 0.5, count = 1 } }
 ns.gathering = { List = function(_, mapID) return mapID == 1412 and nodes or {} end }
 assert(loadfile('TitanGatheredForeverV3/PinStyle.lua'))('TitanGatheredForeverV3', ns)
@@ -98,6 +98,9 @@ test('hovering a mapped material shows observed history without losing native to
     local pin=ns.Minimap.instance.pins[1];pin.scripts.OnEnter(pin)
     local found=false;for _,line in ipairs(lines)do if line:find('50.0%',1,true)then found=true end end
     assert(found)
+    local countFound=false
+    for _,line in ipairs(lines)do if line:find('Observed '..pin.node.count..' times',1,true)then countFound=true end end
+    assert(countFound,'Minimap hover omitted the saved gathering count')
 end)
 test('minimap appearance applies independently and large icons remain within its edge',function()
     ns.settings.iconAppearance={minimap={size=30,shape='square',border=false}}

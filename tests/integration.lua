@@ -63,7 +63,7 @@ local function fixture(interface, saved, noBroker, noModules)
     _G.COMBATLOG_HONORGAIN = '%s dies, honorable kill Rank: %s (Estimated Honor Points: %d)'
     _G.date = function(_, timestamp) return 'observed-' .. timestamp end
     _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS = 5
-    _G.Enum = { BankType = { Character = 0 }, TooltipDataType = { Item = 0 }, BagIndex = { Characterbanktab = -2 } }
+    _G.Enum = { BankType = { Character = 0 }, TooltipDataType = { Item = 0, Object = 4 }, BagIndex = { Characterbanktab = -2 } }
     _G.issecretvalue = function(value) return value == state.secret and state.secret ~= nil end
     _G.C_Timer = { After = function(_, fn) state.timers[#state.timers + 1] = fn end }
     _G.C_Container = {
@@ -114,7 +114,9 @@ local function fixture(interface, saved, noBroker, noModules)
     _G.Professions=nil
     _G.EventRegistry={RegisterCallback=function(_,event,callback,owner)state.callbacks[event]={fn=callback,owner=owner}end}
     _G.C_AddOns = { GetAddOnMetadata = function(_, key) return key == 'Version' and '0.1.0-alpha' or nil end }
-    _G.TooltipDataProcessor = { AddTooltipPostCall = function(kind, fn) eq(kind, 0); state.post = fn end }
+    _G.TooltipDataProcessor = { AddTooltipPostCall = function(kind, fn)
+        if kind==0 then state.post=fn elseif kind==4 then state.objectPost=fn else error('Unexpected tooltip kind')end
+    end }
     _G.MenuUtil = { CreateContextMenu = function(_, fn)
         local root = { checkboxes = {}, radios = {}, titles = {}, buttons = {}, submenus = {}, paths = {}, path = {} }
         function root:CreateTitle(title) self.titles[#self.titles + 1] = title end
@@ -129,7 +131,7 @@ local function fixture(interface, saved, noBroker, noModules)
             return setmetatable({ path = path }, { __index = root })
         end
         function root:CreateCheckbox(label, selected, callback)
-            root.checkboxes[plain(label)] = { selected = selected, callback = callback }
+            root.checkboxes[plain(label)] = { selected = selected, callback = callback, label = label }
             root.paths[plain(label)] = table.concat(self.path, '/')
             root.checkboxesByPath = root.checkboxesByPath or {}
             root.checkboxesByPath[table.concat(self.path, '/') .. '/' .. plain(label)] = root.checkboxes[plain(label)]
@@ -487,7 +489,7 @@ test('item tooltip distinguishes labels, professions, recipe names and explanato
     assert(not contains(tip.lines, ns.L.title), 'Redundant addon header remains')
     assert(contains(tip.lines, 'Reagent for First Aid'))
     local text = table.concat(tip.lines, '\n')
-    assert(text:find('|cffeda55fReagent for |r', 1, true), 'Label color missing')
+    assert(text:find('|cffffd100Reagent for |r', 1, true), 'Label color missing')
     assert(text:find('|cff53c9ffFirst Aid|r', 1, true), 'Profession color missing')
     assert(text:find('|cffb48cfaRecipe 1|r', 1, true), 'Recipe name color missing')
     tip:ClearLines(); s.post(tip, { id = 264019 })
@@ -719,6 +721,60 @@ test('configuration checkboxes are grouped in submenus', function()
     eq(s.menu.paths['Mining spots'], 'Gathering map/Professions')
     eq(s.menu.paths[plain(ns.Style.ItemName(2770))], 'Gathering map/Map materials/Mining')
     eq(s.menu.paths['Debug mode'], 'Diagnostics')
+end)
+
+test('world ore vein tooltip shows source-specific observed drops and clears recycled state',function()
+    local s,ns=fixture();s:Start()
+    s.itemNames[2770]='Copper Ore';s.itemNames[774]='Malachite';s.itemNames[818]='Tigerseye';s.itemNames[2771]='Tin Ore'
+    assert(s.objectPost,'World-object tooltip callback was not registered')
+    local function sample(id,items,complete,source,map,character)
+        ns.history:Observe(character or UnitGUID('player'),'Miner',{id=id,kind='Mining',source=source or '1731',
+            mapID=map or 1,instanceType='none',items=items,complete=complete~=false,at=100})
+    end
+    sample('one',{[2770]=2,[774]=1})
+    sample('two',{[2770]=3})
+    sample('partial',{[774]=20},false)
+    sample('other vein',{[2771]=1,[818]=1},true,'1732')
+    sample('other zone',{[2770]=1,[818]=1},true,'1731',2)
+    sample('alt',{[2770]=1,[818]=1},true,'1731',1,'alt')
+    local tip=CreateFrame('GameTooltip');tip:AddLine('Copper Vein')
+    local data={id=1731,guid='GameObject-0-1-2-3-1731-9'}
+    s.objectPost(tip,data)
+    assert(contains(tip.lines,'Complete mining loot samples: 2'))
+    assert(contains(tip.lines,'Copper Ore: 100.0% (2 / 2 samples); 5 items'))
+    assert(contains(tip.lines,'Malachite: 50.0% (1 / 2 samples); 1 items'))
+    assert(not contains(tip.lines,'Tigerseye:') and not contains(tip.lines,'Tin Ore:'),'Unrelated vein drops leaked')
+    local count=#tip.lines;s.objectPost(tip,data);eq(#tip.lines,count)
+    tip:ClearLines();tip:AddLine('Copper Vein');s.objectPost(tip,data);eq(#tip.lines,count)
+    tip:ClearLines();tip:AddLine('Unrelated chest');s.objectPost(tip,{id=9999});eq(#tip.lines,1)
+    tip:ClearLines();s.objectPost(tip,{id=1732,guid=data.guid});eq(#tip.lines,0)
+    s.secret=data.guid;s.objectPost(tip,data);eq(#tip.lines,0);s.secret=nil
+    s.objectPost(tip,{guid=data.guid});assert(contains(tip.lines,'Complete mining loot samples: 2'))
+    tip:ClearLines();s.objectPost(tip,{id=1731});assert(contains(tip.lines,'Complete mining loot samples: 2'))
+    ns.settings.historyTooltips=false;tip:ClearLines();s.objectPost(tip,data);eq(#tip.lines,0)
+    ns.settings.historyTooltips=true;s.secret=data.id;s.objectPost(tip,data);eq(#tip.lines,0);s.secret=nil
+    tip:ClearLines();ns.history.saved.characters[UnitGUID('player')].groups={}
+    s.objectPost(tip,data);assert(contains(tip.lines,'Unknown'),'An identified vein without current-character samples needs Unknown')
+end)
+
+test('missing optional world-object tooltip enum preserves item tooltip registration',function()
+    local s=fixture();Enum.TooltipDataType.Object=nil;s:Start()
+    assert(s.post and not s.objectPost)
+end)
+
+test('learned profession names and ranks match while menu labels use gold', function()
+    local s, ns = fixture()
+    s.skills[197] = { name = 'Tailoring', rank = 68, maxRank = 75 }
+    s:Start()
+    s.broker.OnEnter({})
+    local label = '|cffffd100Tailoring|r'
+    local greenRank = '|cff20ff2068/75|r'
+    assert(table.concat(ns.Titan.tooltip.lines, '\n'):find('|cff20ff20Tailoring|r ' .. greenRank, 1, true))
+    s.broker.OnClick({}, 'RightButton')
+    eq(s.menu.checkboxes['Tailoring 68/75'].label, label .. ' ' .. greenRank)
+    s.skills[197].rank = 75
+    s.broker.OnEnter({})
+    assert(table.concat(ns.Titan.tooltip.lines, '\n'):find('|cff20ff20Tailoring|r |cff20ff2075/75|r', 1, true))
 end)
 
 test('map clear menu requires confirmation and captures the displayed map', function()

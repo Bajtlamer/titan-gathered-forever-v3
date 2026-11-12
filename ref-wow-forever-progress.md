@@ -1,10 +1,10 @@
 # WoW Forever Development Progress
 
-Updated 2026-11-09. Current roadmap: [plan-next-development.md](plan-next-development.md). Change summary: [unreleased development updates](release-notes/ref-unreleased.md). Detailed entries below are historical snapshots, including superseded designs and earlier test counts.
+Updated 2026-11-10. Current roadmap: [plan-next-development.md](plan-next-development.md). Change summary: [unreleased development updates](release-notes/ref-unreleased.md). Detailed entries below are historical snapshots, including superseded designs and earlier test counts.
 
 ## Current state
 
-The installed development candidate retains manifest version 0.4.1-alpha and the short panel caption TG3 Forever - v0.4.1. It contains the shared core, twelve profession addons and Auction Items, with 57 allowlisted runtime files. All 57 installed files match the source package byte-for-byte. Previous installation: `Interface/.tgf-v3-backups/candidate-eqi9ea04`. The current candidate passes 405 automated checks (76 Python, 329 Lua) and compiles every shipped Lua file with Lua 5.1 semantics. User reviews and live acceptance are deferred at the user's explicit request. The follow-up user request authorizes committing and pushing the verified source update to main. No tag, release assets or hosting changes are requested.
+The installed development candidate uses manifest version 0.4.10-alpha and the short panel caption TG3 Forever - v0.4.10. All 57 allowlisted runtime files across the shared core, twelve profession addons and Auction Items match the source package byte-for-byte, with no extra installed files. Previous folders are backed up at `Interface/.tgf-v3-backups/candidate-8yyuttu1`. `python3 tools/check.py` passes all Python and Lua suites, catalogue validation and Lua 5.1 compilation. Titan headings and profession menu labels use bright gold (#FFD100). Learned profession names and ranks use four percentage bands against the current maximum. Actual world-vein tooltips now have a guarded native Object callback for readable object IDs identified in mining history, with zone and character scoped complete sample counts, observed percentages and quantities. The screenshot verifies the previous version's running panel; live acceptance of the new native tooltip remains open. Run `/reload` for the Lua change; if the version caption is stale, restart the client to reread manifest metadata. No source push, release publication or hosting changes were performed. The 0.4.6-alpha update adds a divider above explanatory text on world vein, world-map pin and minimap pin tooltips. The 0.4.7-alpha update adds a divider above the Titan Panel hover footer.
 
 Implemented features include profession action counters, crafting/cooking production, fixed-reagent recipe planning, manual JSON export/reconstruction, faction-aware flight points, the small icon appearance window and the PvP Board with outdoor kill spots. Each is integrated with independent settings and preserves earlier acquired history. The PvP client totals, rank functions, honor events and death-recap attribution still require live Forever-client acceptance. The user should run `/reload` to load this Lua-only update. See the focused plans for API evidence, review findings and regression fixes.
 
@@ -24,9 +24,16 @@ Catalogue evidence remains partial: 532 supported items, 1,973 combined recipe r
 
 Automatically install each completed, verified runtime update into /Applications/World of Warcraft/_forever_/Interface/AddOns using tools/install.py, retaining backups and checking installed bytes. This is recorded in AGENTS.md and .cursor/rules/automatic-live-install.mdc. Preserve SavedVariables, other addons and the user's control of the running game. Use /reload for Lua-only updates and a full restart when new files/assets require it. An identical verified installation does not need another backup/replacement.
 
-The latest installed candidate is retained in the client; the immediately preceding folders are backed up under Interface/.tgf-v3-backups/candidate-eqi9ea04. No account data was committed or edited directly, and no hosting change or new release tag was created.
+The latest 0.4.2-alpha candidate is retained in the client; the immediately preceding folders are backed up under Interface/.tgf-v3-backups/candidate-yndg5ybt. No account data was committed or edited directly, and no hosting change or new release tag was created.
 
 ## Implementation and installation history
+
+### Expandable lifetime sources, 0.4.2-alpha
+
+Replaced joined lifetime chance summaries with a compact parent material row and dedicated plus/minus expansion. Every source has a separate label, percentage and hits/samples. All source groups are retained, including more than three; continuation pages repeat the parent material, and the clicked material stays anchored to visible evidence. Collapsing clamps page bounds. Unknown evidence has no expander. Combined percentages continue to use summed complete trials, while item quantities and stored acquired/produced evidence stay unchanged.
+
+The full checker passes 408 checks and all Lua 5.1 compilation. Independent review found no critical/important issue. Very long labels are height-bounded; full source actions/labels remain available through the item menu. Automated tests do not certify client font rendering. Safe installer preview/apply completed; all 57 installed runtime files across fourteen addons match the 0.4.2-alpha package byte-for-byte. Backup: Interface/.tgf-v3-backups/candidate-yndg5ybt. Run /reload for live acceptance.
+
 
 ### Interface refinements installed, 2026-11-09
 

@@ -32,7 +32,7 @@ _G.TestTipTextLeft = {}
 local addLine = tip.AddLine
 function tip:AddLine(text) addLine(self, text); _G['TestTipTextLeft' .. #lines] = _G.TestTipTextLeft[#lines] end
 ns.Style.Section(tip, 'Mining')
-assert(lines[2]:find('|cffff8020', 1, true))
+assert(lines[2]:find('|cffffd100', 1, true))
 assert(#tip.textures == 1 and tip.textures[1].width == 220, 'Rule must fill the inner tooltip width')
 tip.width = 420; tip.hooks.OnSizeChanged(tip)
 assert(tip.textures[1].width == 400, 'Rule did not resize with the tooltip')
@@ -67,4 +67,14 @@ ns.Style.Note(tip,'Small explanatory note')
 assert(region.font=='GameFontHighlightSmall')
 tip.hooks.OnTooltipCleared(tip)
 assert(region.font=='OriginalFont','Tooltip recycling leaked a small font into native item content')
+-- Current skill percentage progresses through red, brown, gold and green.
+for _,case in ipairs({
+    {1,75,'|cffff20201/75|r'}, {18,75,'|cffff202018/75|r'},
+    {19,75,'|cffb8733319/75|r'}, {30,75,'|cffb8733330/75|r'},
+    {37,75,'|cffb8733337/75|r'}, {38,75,'|cffffff0038/75|r'},
+    {56,75,'|cffffff0056/75|r'}, {57,75,'|cff20ff2057/75|r'},
+    {68,75,'|cff20ff2068/75|r'}, {75,75,'|cff20ff2075/75|r'},
+})do
+    assert(ns.Style.Skill(case[1],case[2])==case[3], 'Wrong skill color for '..case[1]..'/'..case[2])
+end
 print('PASS 10 rarity, separator and learned-profession checks')

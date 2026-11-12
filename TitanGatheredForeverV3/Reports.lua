@@ -55,9 +55,9 @@ function Reports.Rows(mode,character,filter)
         for _,rate in ipairs(ns.history:Rates(character))do
             rates[rate.itemID]=rates[rate.itemID]or{}
             local item=rates[rate.itemID]
-            if #item<3 then item[#item+1]=string.format('%s: %.1f%% (%d/%d)',Reports.Source(rate),rate.percent,rate.hits,rate.trials)end
+            item[#item+1]=rate
         end
-        for _,row in ipairs(rows)do row.chances=rates[row.itemID]and table.concat(rates[row.itemID],'; ')or'Unknown'end
+        for _,row in ipairs(rows)do row.sources=rates[row.itemID]or{}end
     end
     local obtained=filter and ns.history:ItemsFor(filter,character)or{}
     for _,row in ipairs(rows)do if Reports.Matches(row.itemID,filter,row.kind)or obtained[row.itemID]or craftedKinds[row.itemID]then result[#result+1]=row end end
@@ -73,7 +73,8 @@ local function button(frame,label,x,y,width,callback)
 end
 local layouts={
     pvp={{'Statistic',0,330},{'Value',345,565}},
-    history={{'Material',0,225},{'Lifetime obtained',235,115},{'Observed drop chance',360,570}},
+    history={{'Material',0,225},{'Lifetime obtained',235,115},{'Observed source',390,355},
+        {'Chance',755,70},{'Hits / samples',840,90}},
     chances={{'Material',0,195},{'Observed',205,70},{'Hits / samples',285,105},{'Items',400,75},{'Source and zone',485,445}},
     actions={{'Profession',0,140},{'Attempts',150,65},{'Completed',225,75},{'Failed',310,55},
         {'Interrupted',375,85},{'Stopped',470,70},{'Unresolved',550,85},{'Recording began',645,285}},
@@ -105,7 +106,13 @@ local function values(mode,row)
     elseif mode=='reagentUsage'then
         return {ns.Style.ItemName(row.itemID),row.quantity,ns.Production.labels[row.leading],string.format('%.1f%%',row.share)}
     end
-    return {ns.Style.ItemName(row.itemID),row.quantity+(row.crafted or 0),row.chances or'Unknown'}
+    if row.sourceRate then
+        local rate=row.sourceRate
+        return {'','',Reports.Source(rate),string.format('%.1f%%',rate.percent),string.format('%d / %d',rate.hits,rate.trials)}
+    end
+    local count=#(row.sources or{})
+    return {ns.Style.ItemName(row.itemID),row.quantity+(row.crafted or 0),
+        count>0 and(count..(count==1 and' source'or' sources'))or'Unknown','',''}
 end
 function Reports.ReagentDetails(owner,row)
     MenuUtil.CreateContextMenu(owner,function(_,root)
@@ -127,22 +134,49 @@ function Reports.ReagentDetails(owner,row)
     end)
 end
 local function pagesFor(window,rows)
-    local pages={{}}
-    local page,used=pages[1],0
+    local entries={}
     for _,row in ipairs(rows)do
+        entries[#entries+1]=row
+        if window.mode=='history' and window.expanded and window.expanded[row.itemID] then
+            for _,rate in ipairs(row.sources or{})do
+                entries[#entries+1]={itemID=row.itemID,sourceRate=rate,parent=row}
+            end
+        end
+    end
+    local pages={{}}
+    local page,used,parent=pages[1],0,nil
+    local capacity=contentBottom-contentTop
+    for _,row in ipairs(entries)do
         local columns=values(window.mode,row)
         local height=16
         for i,value in ipairs(columns)do
             local measure=window.measure.cells[i];measure:SetText(value)
             height=math.max(height,measure:GetStringHeight())
         end
-        height=math.min(contentBottom-contentTop,height+6)
-        if #page>0 and (#page==#window.rows or used+height>contentBottom-contentTop)then
+        height=math.min(capacity,height+6)
+        if window.mode=='history' and not row.sourceRate then height=math.min(height,82)end
+        if row.sourceRate and parent then height=math.min(height,capacity-parent.height)end
+        if #page>0 and (#page==#window.rows or used+height>capacity)then
             page={};pages[#pages+1]=page;used=0
+            if row.sourceRate and parent then
+                local repeated=values(window.mode,parent.data)
+                repeated[3]=repeated[3]..' (continued)'
+                page[#page+1]={data=parent.data,values=repeated,height=parent.height}
+                used=parent.height
+            end
         end
-        page[#page+1]={data=row,values=columns,height=height};used=used+height
+        local entry={data=row,values=columns,height=height}
+        page[#page+1]=entry;used=used+height
+        if not row.sourceRate then parent=entry end
     end
     return pages
+end
+function Reports.ToggleSources(window,itemID)
+    if window.mode~='history' then return end
+    window.expanded=window.expanded or{}
+    window.expanded[itemID]=not window.expanded[itemID]
+    window.anchorItem=itemID
+    Reports.Update(window)
 end
 function Reports.ItemSources(owner,itemID,character)
     local rates=ns.history:Rates(character,itemID)
@@ -226,11 +260,25 @@ function Reports.Update(window)
     end
     local pages=pagesFor(window,rows)
     window.page=math.min(#pages,math.max(1,window.page))
+    if window.anchorItem then
+        for index,page in ipairs(pages)do
+            local found=false
+            for position,entry in ipairs(page)do
+                if entry.data.itemID==window.anchorItem and not entry.data.sourceRate then
+                    local following=page[position+1]
+                    if not window.expanded[window.anchorItem] or(following and following.data.sourceRate
+                        and following.data.itemID==window.anchorItem)then found=true;break end
+                end
+            end
+            if found then window.page=index;break end
+        end
+        window.anchorItem=nil
+    end
     window.scope:SetText(window.combined and 'All characters' or 'This character')
     local module=window.filter and ns.Catalog.modules[window.filter]
     window.filterButton:SetText(module and module.label or (window.mode=='actions' and labels[window.filter])
         or (window.mode=='production'and ns.Production.labels[window.filter]) or 'All professions')
-    window.pageText:SetText(string.format('Page %d / %d - %d entries',window.page,#pages,#rows))
+    window.pageText:SetText(string.format('Page %d / %d - %d %s',window.page,#pages,#rows,window.mode=='history'and'materials'or'entries'))
     local y=contentTop
     for i,view in ipairs(window.rows)do
         local entry=pages[window.page][i];view.data=entry and entry.data;view.character=character
@@ -239,8 +287,13 @@ function Reports.Update(window)
             for column,value in ipairs(entry.values)do
                 view.cells[column]:SetHeight(entry.height-6);view.cells[column]:SetText(value)
             end
+            if view.expand then
+                if not entry.data.sourceRate and #(entry.data.sources or{})>0 then
+                    view.expand:SetText(window.expanded[entry.data.itemID]and'-'or'+');view.expand:Show()
+                else view.expand:Hide()end
+            end
             view:Show();y=y+entry.height
-        else view:Hide()end
+        else if view.expand then view.expand:Hide()end;view:Hide()end
     end
     window.empty:SetText(#rows==0 and (window.mode=='production'and'No recipe operations recorded for this view. Earlier inventory cannot reconstruct production.'
         or window.mode=='actions' and 'No actions recorded for this view. Earlier loot history cannot reconstruct actions.'
@@ -254,7 +307,7 @@ function Reports.Show(mode)
             or mode=='reagentUsage'and'ReagentUsage'or'History')..'Window'
         w=CreateFrame('Frame',name,UIParent,'BasicFrameTemplateWithInset');Reports.windows[mode]=w
         if UISpecialFrames then table.insert(UISpecialFrames,name)end
-        w.mode,w.page,w.rows=mode,1,{}
+        w.mode,w.page,w.rows,w.expanded=mode,1,{},{}
         w:SetSize(960,560);w:SetPoint('CENTER',UIParent,'CENTER',0,0)
         w:SetClampedToScreen(true);w:SetMovable(true);w:EnableMouse(true);w:RegisterForDrag('LeftButton')
         w:SetScript('OnDragStart',function(self)self:StartMoving()end)
@@ -271,7 +324,7 @@ function Reports.Show(mode)
             or mode=='production'and'Completed % = completed casts / observed attempts, including unresolved attempts. Bonus/multicraft use readable-field counts. Click for output details.'
             or mode=='actions'and'Fishing completion means a catch window; other completion means spell success. Stopped means no confirmed result; gaps are not reconstructed.'
             or mode=='chances'and'Observed outcomes / complete looted sources, grouped by source and zone. Not a probability at a map coordinate. Click for sources.'
-            or'Lifetime obtained combines acquired and crafted quantities. Chances use complete source samples; Unknown means insufficient evidence. Click for all sources.')
+            or'Lifetime obtained combines acquired and crafted quantities. Use + to expand individual sources. Chances use complete samples; Unknown means insufficient evidence. Click an item for source actions.')
         w.scope=button(w,'This character',15,-65,150,function()w.combined=not w.combined;w.page=1;Reports.Update(w)end)
         w.filterButton=button(w,'All professions',175,-65,190,function(owner)
             MenuUtil.CreateContextMenu(owner,function(_,root)
@@ -304,6 +357,12 @@ function Reports.Show(mode)
             local row=CreateFrame('Button',nil,w);row:SetSize(930,22)
             row.cells=cells(row,mode,'GameFontHighlightSmall',0)
             row.name=row.cells[1];row.detail=mode=='production'and row.cells[2]or nil
+            if mode=='history' then
+                row.expand=button(row,'+',360,0,20,function()
+                    if row.data and not row.data.sourceRate then Reports.ToggleSources(w,row.data.itemID)end
+                end)
+                row.expand:SetSize(20,18);row.expand:Hide()
+            end
             row:SetScript('OnClick',function(self)
                 if mode=='reagentUsage'and self.data then Reports.ReagentDetails(self,self.data)
                 elseif mode=='production'and self.data then Reports.ProductionDetails(self,self.data)

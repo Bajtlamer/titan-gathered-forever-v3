@@ -42,8 +42,12 @@ function Mini:CreatePin()
         else
             GameTooltip:AddLine(ns.Style.ItemName(button.node.itemID))
             GameTooltip:AddLine(ns.PinStyle.Label(button.node.kind))
+            GameTooltip:AddLine(string.format('Observed %d times', button.node.count or 0))
+            local history, note = ns.PinStyle.HistoryLines(button.node)
+            for _, line in ipairs(history) do GameTooltip:AddLine(line) end
+            ns.Style.Separator(GameTooltip)
+            if note then GameTooltip:AddLine(note) end
             GameTooltip:AddLine('Previously gathered here; the resource may not have respawned.')
-            for _, line in ipairs(ns.PinStyle.HistoryLines(button.node)) do GameTooltip:AddLine(line) end
         end
         GameTooltip:Show()
     end)

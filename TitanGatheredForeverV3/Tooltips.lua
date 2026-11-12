@@ -144,6 +144,66 @@ function Tooltips.Append(tooltip, data)
     end
 end
 
+-- Object IDs are matched only to mining sources observed in saved history.
+-- Tooltip names and ore item IDs are not reliable game-object identities.
+function Tooltips.AppendObject(tooltip, data)
+    if not ns.settings or not ns.settings.historyTooltips or not ns.history or type(data) ~= 'table'
+        or (tooltip.IsForbidden and tooltip:IsForbidden()) then return end
+    if not ns.IsPublic(data.id) or not ns.IsPublic(data.guid) then return end
+    local id = data.id
+    if type(data.guid) == 'string' then
+        local entry = data.guid:match('^GameObject%-%d+%-%d+%-%d+%-%d+%-(%d+)%-')
+        if not entry then return end
+        entry = tonumber(entry)
+        if id ~= nil and id ~= entry then return end
+        id = entry
+    end
+    if type(id) ~= 'number' or id <= 0 or id ~= math.floor(id) or id == math.huge then return end
+    local source, known = tostring(id), false
+    for _, character in pairs(ns.history.saved.characters) do
+        for _, group in pairs(character.groups) do
+            if group.kind == 'Mining' and tostring(group.source) == source then known = true; break end
+        end
+        if known then break end
+    end
+    if not known then return end
+    local mapID = C_Map and C_Map.GetBestMapForUnit and C_Map.GetBestMapForUnit('player')
+    local _, context = IsInInstance()
+    if not ns.IsPublic(mapID) or type(mapID) ~= 'number' or not ns.IsPublic(context)
+        or type(context) ~= 'string' then return end
+    local key = source .. ':' .. mapID .. ':' .. context
+    if tooltip.tgfMiningSource == key then return end
+    if not tooltip.tgfMiningHooked then
+        tooltip:HookScript('OnTooltipCleared', function(self) self.tgfMiningSource = nil end)
+        tooltip.tgfMiningHooked = true
+    end
+    tooltip.tgfMiningSource = key
+    ns.Style.Separator(tooltip)
+    tooltip:AddLine(ns.Style.Text(ns.Style.gold, 'TGF observed mining drops'))
+    local rows, trials = {}, 0
+    for _, row in ipairs(ns.history:Rates(ns.characterID or UnitGUID('player'))) do
+        if row.kind == 'Mining' and tostring(row.source) == source and row.mapID == mapID
+            and (row.instanceType or 'none') == context then
+            rows[#rows + 1] = row
+            trials = math.max(trials, row.trials)
+        end
+    end
+    if #rows == 0 then
+        ns.Style.Note(tooltip, 'Drop chances: Unknown; no complete mining loot samples for this character and zone.')
+        return
+    end
+    tooltip:AddLine(string.format('Complete mining loot samples: %d', trials))
+    for _, row in ipairs(rows) do
+        tooltip:AddLine(string.format('%s: %.1f%% (%d / %d samples); %d items',
+            ns.Style.ItemName(row.itemID), row.percent, row.hits, row.trials, row.quantity), 1, 1, 1, true)
+    end
+    ns.Style.Separator(tooltip)
+    ns.Style.Note(tooltip, 'Observed for this source and zone; samples are loot operations, not depleted veins.')
+end
+
 function Tooltips.Initialize()
     TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, Tooltips.Append)
+    if Enum.TooltipDataType.Object then
+        TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Object, Tooltips.AppendObject)
+    end
 end
