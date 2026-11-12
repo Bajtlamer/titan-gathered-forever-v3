@@ -9,6 +9,11 @@ function ns.Settings.Initialize(saved)
     if type(settings.showBank) ~= 'boolean' then settings.showBank = true end
     if type(settings.debugMode) ~= 'boolean' then settings.debugMode = false end
     if type(settings.debugChat) ~= 'boolean' then settings.debugChat = false end
+    if type(settings.showMinimapButton) ~= 'boolean' then settings.showMinimapButton = true end
+    if type(settings.minimapButtonAngle) ~= 'number' or settings.minimapButtonAngle ~= settings.minimapButtonAngle
+        or settings.minimapButtonAngle == math.huge or settings.minimapButtonAngle == -math.huge then
+        settings.minimapButtonAngle = 205
+    end
     if type(settings.flightPoints) ~= 'boolean' then settings.flightPoints = true end
     settings.showTotal = nil
     if type(settings.itemTooltips) ~= 'boolean' then settings.itemTooltips = true end

@@ -19,7 +19,7 @@ C_Map = {
 local function fresh()
     local ns = { IsPublic = function() return true end, characterID = 'C1',
         settings = { mapNpcProfessions = {} }, db = { npcs = {} },
-        Style = { gold = 'gold', gray = 'gray', white = 'white', green = 'green',
+        Style = { gold = 'gold', gray = 'gray', white = 'white', green = 'green', red = 'red',
             Text = function(color, text) return '<' .. color .. '>' .. text .. '</>' end,
             Separator = function(tooltip) tooltip:AddLine('---') end,
             Small = function(tooltip) tooltip.smallLines = (tooltip.smallLines or 0) + 1 end },
@@ -167,6 +167,37 @@ test('tooltip is capped at fifteen recipes and marks known ones', function()
     eq(#t.doubles, 15); eq(t.doubles[1][1], '<white>Recipe: Item201</> <gray>(1)</> <green>(known)</>')
     eq(t.doubles[2][1], '<white>Recipe: Item202</> <gray>(2)</>')
     eq(t.lines[#t.lines], '<gray>and 5 more</>')
+end)
+
+test('a required skill above the player rank is red and unknown requirements stay neutral', function()
+    local ns = fresh()
+    ns.Professions = { Rows = function() return { { kind = 'Alchemy', rank = 60 } } end }
+    local t = tip()
+    ns.NpcSources.FillTooltip(t, { kind = 'RecipeVendor', npcID = 2 })
+    eq(t.doubles[1][1], '<white>Recipe: Item100</> <red>(225)</>')   -- needs 225, the player has 60
+    eq(t.doubles[2][1], '<white>Recipe: Item101</> <gray>(?)</>')
+    t = tip()
+    ns.NpcSources.FillTooltip(t, { kind = 'Trainer', npcID = 1 })
+    eq(t.doubles[1][1], '<white>Elixir of Minor Defense</> <gray>(1)</>')
+    eq(t.doubles[2][1], '<white>Lesser Healing Potion</> <gray>(50)</>')   -- 60 is enough for 50
+    ns.Professions = { Rows = function() return {} end }                   -- the player has no profession at all
+    t = tip()
+    ns.NpcSources.FillTooltip(t, { kind = 'Trainer', npcID = 1 })
+    eq(t.doubles[1][1], '<white>Elixir of Minor Defense</> <red>(1)</>')
+end)
+
+test('skills come from the player professions and unknown evidence stays unknown', function()
+    local ns = fresh()
+    eq(ns.NpcSources.Skills(), nil)                                         -- no way to read professions
+    eq(ns.NpcSources.CanLearn(nil, 'Alchemy', 50), nil)
+    ns.Professions = { Rows = function() return { { kind = 'Alchemy', rank = 60 }, { kind = 'Cooking', rank = 5 } } end }
+    local skills = ns.NpcSources.Skills()
+    eq(skills.Alchemy, 60); eq(skills.Cooking, 5)
+    eq(ns.NpcSources.CanLearn(skills, 'Alchemy', 60), true); eq(ns.NpcSources.CanLearn(skills, 'Alchemy', 61), false)
+    eq(ns.NpcSources.CanLearn(skills, 'Tailoring', 1), false)                -- profession not learned
+    eq(ns.NpcSources.CanLearn(skills, 'Alchemy', nil), nil)                  -- requirement unknown
+    ns.Professions = { Rows = function() error('client unavailable') end }
+    eq(ns.NpcSources.Skills(), nil)
 end)
 
 test('confirmed data is green, extra costs are noted and an empty list says so', function()

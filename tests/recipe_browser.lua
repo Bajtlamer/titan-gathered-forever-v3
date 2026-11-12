@@ -8,7 +8,7 @@ C_Item = { GetItemInfo = function(id) return itemNames[id] end }
 local function newNs(seed)
     local ns = { IsPublic = function() return true end, characterID = 'C1', settings = {},
         db = { npcs = {}, knownRecipes = {} },
-        Style = { gold = 'gold', gray = 'gray', green = 'green', white = 'white',
+        Style = { gold = 'gold', gray = 'gray', green = 'green', white = 'white', red = 'red',
             Text = function(color, text) return '<' .. color .. '>' .. text .. '</>' end },
         ItemName = function(id) return itemNames[id] or ('Loading ' .. id) end }
     ns.NpcSeed = { npcs = seed }
@@ -102,6 +102,53 @@ test('a profession filter limits recipes and the professions reported as unread'
     eq(#rows, 0); eq(#unread, 1); eq(unread[1], 'Cooking')
     local all = ns.NpcSources.RecipeKinds
     eq(#all, 9); eq(all[1], 'Alchemy'); eq(all[#all], 'Tailoring')
+end)
+
+test('rows know whether the player has the skill to learn them', function()
+    local ns = big()
+    ns.KnownRecipes.Record('C1', 'Alchemy', {}, 10)
+    local rows = ns.NpcSources.Unlearned('C1', false)
+    eq(rows[1].canLearn, nil)                                  -- professions cannot be read: unknown
+    ns.Professions = { Rows = function() return { { kind = 'Alchemy', rank = 25 } } end }
+    rows = ns.NpcSources.Unlearned('C1', false)
+    eq(rows[25].name, 'Spell 25'); eq(rows[25].canLearn, true)
+    eq(rows[26].name, 'Spell 26'); eq(rows[26].canLearn, false)
+    ns.Professions = { Rows = function() return {} end }
+    eq(ns.NpcSources.Unlearned('C1', false)[1].canLearn, false)
+end)
+
+test('recipes the player cannot learn yet are red in the list', function()
+    local ns = fresh()
+    installFrames()
+    assert(loadfile('TitanGatheredForeverV3/RecipeBrowser.lua'))('TitanGatheredForeverV3', ns)
+    local row = { name = 'Lesser Healing Potion', kind = 'Alchemy', skill = 50, trainer = true, price = 500,
+        sources = { { npcID = 1, name = 'Alchemy Trainer', role = 'Trainer', price = 500 } } }
+    local cells = ns.RecipeBrowser.Cells(row)
+    eq(cells[1], 'Lesser Healing Potion'); eq(cells[3], '50')
+    row.canLearn = true
+    cells = ns.RecipeBrowser.Cells(row); eq(cells[1], 'Lesser Healing Potion'); eq(cells[3], '50')
+    row.canLearn = false
+    cells = ns.RecipeBrowser.Cells(row)
+    eq(cells[1], '<red>Lesser Healing Potion</>'); eq(cells[3], '<red>50</>')
+    eq(cells[5], '<green>Alchemy Trainer</>')               -- the NPC name keeps its own color
+    row.skill = nil; row.canLearn = nil
+    cells = ns.RecipeBrowser.Cells(row); eq(cells[3], 'Unknown')
+end)
+
+test('the toolbar button toggles the window', function()
+    local ns = fresh()
+    installFrames()
+    assert(loadfile('TitanGatheredForeverV3/RecipeBrowser.lua'))('TitanGatheredForeverV3', ns)
+    local B = ns.RecipeBrowser
+    B.Toggle()                                   -- not created yet: opens
+    local w = B.window
+    assert(w, 'window was not created')
+    local visible, hidden, shown = true, 0, 0
+    w.IsShown = function() return visible end
+    w.Hide = function() hidden = hidden + 1; visible = false end
+    w.Show = function() shown = shown + 1; visible = true end
+    B.Toggle(); eq(hidden, 1)
+    B.Toggle(); eq(shown, 1)
 end)
 
 test('browser cells, hover tooltip and profession filter', function()

@@ -1,6 +1,11 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.7-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.8-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Skill colors and a minimap button, 0.5.8-beta
+
+- The unlearned recipes window colors a recipe red (name and skill) when the character's rank in that profession is below the required skill, or when the character does not have the profession. Recipes the character could learn now keep the normal color, and an unknown requirement stays neutral because unknown evidence is never guessed. The skill in brackets in trainer and vendor pin tooltips is red under the same rule.
+- A round TG3 button on the minimap edge, styled like the ApproxDPS button: left click opens or closes the unlearned recipes window, right click opens the addon menu, dragging moves it around the minimap, and the angle is saved. Display > Show minimap button hides it. It is a new file, so a full client restart is needed.
 
 ## Debug log file and scrolling recipe list, 0.5.7-beta
 

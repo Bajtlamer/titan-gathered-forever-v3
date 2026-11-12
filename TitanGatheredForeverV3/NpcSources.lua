@@ -185,6 +185,25 @@ function Npc.Nearest()
     return best, bestDistance, mapID
 end
 
+-- The player's rank per profession kind, or nil when the professions cannot be read. A profession the
+-- player does not have is simply absent, so every recipe of it needs more skill than the player has.
+function Npc.Skills()
+    if not ns.Professions or not ns.Professions.Rows then return nil end
+    local ok, rows = pcall(ns.Professions.Rows)
+    if not ok or type(rows) ~= 'table' then return nil end
+    local skills = {}
+    for _, row in ipairs(rows) do
+        if row.kind and type(row.rank) == 'number' then skills[row.kind] = row.rank end
+    end
+    return skills
+end
+
+-- true: the player has the skill, false: not enough skill, nil: unknown requirement or unreadable skills.
+function Npc.CanLearn(skills, kind, required)
+    if not skills or type(required) ~= 'number' then return nil end
+    return (skills[kind] or 0) >= required
+end
+
 -- Tooltip colours: gold is the NPC name, white the list entries, gray (and green when confirmed) the
 -- additional information. The header is separated from the list by a rule.
 function Npc.FillTooltip(tooltip, node)
@@ -192,6 +211,7 @@ function Npc.FillTooltip(tooltip, node)
     if not record then return end
     local Style = ns.Style
     local function small(target) if Style.Small then Style.Small(target) end end
+    local skills = Npc.Skills()
     tooltip:AddLine(Style.Text(Style.gold, record.name))
     local rows, role
     if node.kind == 'Trainer' then
@@ -223,7 +243,9 @@ function Npc.FillTooltip(tooltip, node)
         local row = ordered[index]
         local name = row.itemID and ns.ItemName(row.itemID) or row.name or 'Unknown recipe'
         local known = ns.KnownRecipes and ns.KnownRecipes.IsKnown(ns.characterID, row.kind or record.profession, name)
-        local left = Style.Text(Style.white, name) .. ' ' .. Style.Text(Style.gray, '(' .. (row.skill or '?') .. ')')
+        local can = Npc.CanLearn(skills, row.kind or record.profession, row.skill)
+        local skillColor = can == false and Style.red or Style.gray
+        local left = Style.Text(Style.white, name) .. ' ' .. Style.Text(skillColor, '(' .. (row.skill or '?') .. ')')
         if known == true then left = left .. ' ' .. Style.Text(Style.green, '(known)') end
         local amount = row.itemID and row.price or row.cost
         local right
@@ -353,6 +375,8 @@ function Npc.Unlearned(character, vendorOnly, kindFilter)
         for _, row in ipairs(rows) do if not row.trainer then filtered[#filtered + 1] = row end end
         rows = filtered
     end
+    local skills = Npc.Skills()
+    for _, row in ipairs(rows) do row.canLearn = Npc.CanLearn(skills, row.kind, row.skill) end
     table.sort(rows, function(a, b)
         if a.kind ~= b.kind then return a.kind < b.kind end
         local left, right = a.skill or math.huge, b.skill or math.huge
