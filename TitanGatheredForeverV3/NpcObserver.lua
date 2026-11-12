@@ -36,23 +36,60 @@ function Obs:Save(npc, fields)
     if self.api.Changed then self.api.Changed() end
 end
 
+-- Bounded diagnostic log of recording attempts (Diagnostics > Show NPC recording log). It records why an
+-- attempt did or did not store anything, plus raw client API answers, so live behaviour can be checked.
+function Obs:Log(event, result, details)
+    local log = ns.db and ns.db.npcLog
+    if type(log) ~= 'table' then return end
+    local entry = { at = self.api.Now(), event = event, result = result }
+    for key, value in pairs(details or {}) do entry[key] = value end
+    if self.api.Probe and result ~= 'disabled' then
+        local ok, probe = pcall(self.api.Probe, event == 'TRAINER_SHOW' and 'trainer' or 'merchant')
+        if ok and type(probe) == 'table' then entry.probe = probe end
+    end
+    log[#log + 1] = entry
+    while #log > 12 do table.remove(log, 1) end
+end
+
+function Obs.PrintLog()
+    local log = ns.db and ns.db.npcLog
+    if type(log) ~= 'table' or #log == 0 then
+        ns.Print('No NPC recording attempts yet. Open a trainer or merchant window first.')
+        return
+    end
+    for _, entry in ipairs(log) do
+        local stamp = date and entry.at and date('%H:%M:%S', entry.at) or tostring(entry.at)
+        local parts = { stamp, entry.event, entry.result }
+        for _, key in ipairs({ 'npc', 'services', 'first', 'profession', 'recipes' }) do
+            if entry[key] ~= nil then parts[#parts + 1] = key .. '=' .. tostring(entry[key]) end
+        end
+        ns.Print(table.concat(parts, ' '))
+        for _, line in ipairs(entry.probe or {}) do ns.Print('  ' .. line) end
+    end
+end
+
 function Obs:TrainerShown()
-    if not self.api.Enabled() then return end
+    local event = 'TRAINER_SHOW'
+    if not self.api.Enabled() then self:Log(event, 'disabled'); return end
     local npc = self.api.Npc()
-    if not npc then return end
+    if not npc then self:Log(event, 'no-npc'); return end
     local counts, services = {}, {}
     for _, service in ipairs(self.api.TrainerServices()) do
         local kind = kindBySkillName[service.skillName or '']
         if kind then counts[kind] = (counts[kind] or 0) + 1 end
         services[#services + 1] = { name = service.name, cost = service.cost, skill = service.skillRank, kind = kind }
     end
+    if #services == 0 then self:Log(event, 'no-services', { npc = npc.id, services = 0 }); return end
     local profession
     for kind, count in pairs(counts) do
         if not profession or count > counts[profession] or (count == counts[profession] and kind < profession) then
             profession = kind
         end
     end
-    if not profession then return end -- class or non-profession trainer
+    if not profession then -- class or non-profession trainer, or the client gave no skill requirement
+        self:Log(event, 'no-profession', { npc = npc.id, services = #services, first = services[1].name })
+        return
+    end
     local rows = {}
     for _, service in ipairs(services) do
         if service.kind == profession then
@@ -60,15 +97,18 @@ function Obs:TrainerShown()
         end
     end
     self:Save(npc, { profession = profession, trainer = rows })
+    self:Log(event, 'saved', { npc = npc.id, profession = profession, services = #rows })
 end
 
 function Obs:MerchantShown()
-    if not self.api.Enabled() then return end
+    local event = 'MERCHANT_SHOW'
+    if not self.api.Enabled() then self:Log(event, 'disabled'); return end
     local npc = self.api.Npc()
-    if not npc then return end
+    if not npc then self:Log(event, 'no-npc'); return end
     local rows = self.api.MerchantRecipes()
-    if #rows == 0 then return end
+    if #rows == 0 then self:Log(event, 'no-recipes', { npc = npc.id, recipes = 0 }); return end
     self:Save(npc, { vendor = rows })
+    self:Log(event, 'saved', { npc = npc.id, recipes = #rows })
 end
 
 -- Client adapter. The exact Forever 1.60.1 behaviour of these calls is a live validation gate.
@@ -98,6 +138,45 @@ function Obs.DefaultAPI()
         local x, y = position:GetXY()
         if not public(x, 'number') or not public(y, 'number') then return end
         return { id = id, name = name, mapID = mapID, x = x, y = y }
+    end
+    api.Probe = function(which)
+        local out = {}
+        local function describe(fn, ...)
+            if type(fn) ~= 'function' then return 'missing' end
+            local function pack(ok, ...)
+                if not ok then return 'error' end
+                local parts = {}
+                for i = 1, select('#', ...) do
+                    local value = (select(i, ...))
+                    parts[i] = ns.IsPublic(value) and tostring(value) or '<secret>'
+                end
+                return '(' .. table.concat(parts, ', ') .. ')'
+            end
+            return pack(pcall(fn, ...))
+        end
+        out[#out + 1] = 'IsInInstance=' .. describe(IsInInstance)
+        out[#out + 1] = 'UnitGUID(npc)=' .. describe(UnitGUID, 'npc') .. ' UnitName(npc)=' .. describe(UnitName, 'npc')
+        out[#out + 1] = 'map=' .. describe(C_Map and C_Map.GetBestMapForUnit, 'player')
+        if which == 'trainer' then
+            out[#out + 1] = 'GetNumTrainerServices=' .. describe(GetNumTrainerServices)
+                .. ' C_TrainerUI=' .. type(C_TrainerUI)
+            local count = call(GetNumTrainerServices)
+            for index = 1, math.min(public(count, 'number') and count or 0, 3) do
+                out[#out + 1] = 'service' .. index .. ' info=' .. describe(GetTrainerServiceInfo, index)
+                    .. ' skillReq=' .. describe(GetTrainerServiceSkillReq, index)
+                    .. ' cost=' .. describe(GetTrainerServiceCost, index)
+            end
+        else
+            local count = call(GetMerchantNumItems)
+            out[#out + 1] = 'GetMerchantNumItems=' .. describe(GetMerchantNumItems)
+                .. ' C_TooltipInfo=' .. type(C_TooltipInfo)
+            for index = 1, math.min(public(count, 'number') and count or 0, 3) do
+                local link = call(GetMerchantItemLink, index)
+                out[#out + 1] = 'item' .. index .. ' link=' .. describe(GetMerchantItemLink, index)
+                    .. ' info=' .. describe(GetMerchantItemInfo, index)
+            end
+        end
+        return out
     end
     api.TrainerServices = function()
         local result = {}
