@@ -105,6 +105,16 @@ function Obs:ReadTrainer(event)
             if self.emptyTrainerLogged then return end
             self.emptyTrainerLogged = true
         end
+        if self.api.EnableFilters and self.api.EnableFilters() then
+            -- Probably a trainer with nothing left to teach: the window hides known services. Read again once the
+            -- client has rebuilt the list, then put the filters back.
+            self:Log(event, 'filters-on', { npc = npc.id, services = 0 })
+            self.api.After(0.3, function()
+                if self.trainerOpen then self:ReadTrainer('TRAINER_FILTER') end
+                if self.api.RestoreFilters then self.api.RestoreFilters() end
+            end)
+            return
+        end
         self:Log(event, 'no-services', { npc = npc.id, services = 0 })
         return
     end
@@ -134,7 +144,10 @@ function Obs:TrainerShown()
     self:ReadTrainer('TRAINER_SHOW')
 end
 function Obs:TrainerUpdated() if self.trainerOpen then self:ReadTrainer('TRAINER_UPDATE') end end
-function Obs:TrainerClosed() self.trainerOpen = false end
+function Obs:TrainerClosed()
+    self.trainerOpen = false
+    if self.api.RestoreFilters then self.api.RestoreFilters() end
+end
 
 function Obs:ReadMerchant(event)
     if not self.api.Enabled() then self:Log(event, 'disabled'); return end
@@ -269,35 +282,34 @@ function Obs.DefaultAPI()
         return out
     end
     -- The trainer window hides services by type (available, unavailable, already known). A trainer whose
-    -- services are all known reads as empty, so with an empty list the filters are switched on for the read and
-    -- put back afterwards.
+    -- services are all known reads as empty. EnableFilters switches the types on (true when something changed),
+    -- the list is read again a moment later, and RestoreFilters puts the player's choice back.
     local filterNames = { 'available', 'unavailable', 'used' }
-    local function withAllFilters(read)
-        local changed = {}
+    api.EnableFilters = function()
+        if api.filtersTried then return false end
+        api.filtersTried = true
+        api.changedFilters = {}
         if type(GetTrainerServiceTypeFilter) == 'function' and type(SetTrainerServiceTypeFilter) == 'function' then
             for _, name in ipairs(filterNames) do
                 local on = call(GetTrainerServiceTypeFilter, name)
                 if not on or on == 0 then
-                    changed[#changed + 1] = name
+                    api.changedFilters[#api.changedFilters + 1] = name
                     call(SetTrainerServiceTypeFilter, name, 1)
                 end
             end
         end
-        local result = read()
-        for _, name in ipairs(changed) do call(SetTrainerServiceTypeFilter, name, 0) end
-        return result
+        return #api.changedFilters > 0
     end
-    api.TrainerServices = function()
-        local count = call(GetNumTrainerServices)
-        -- Once per opened window: putting the filters back refreshes the list and would otherwise repeat this.
-        if public(count, 'number') and count == 0 and not api.filtersTried then
-            api.filtersTried = true
-            return withAllFilters(api.ReadTrainerServices)
-        end
-        return api.ReadTrainerServices()
+    api.RestoreFilters = function()
+        for _, name in ipairs(api.changedFilters or {}) do call(SetTrainerServiceTypeFilter, name, 0) end
+        api.changedFilters = nil
     end
+    api.After = function(seconds, callback)
+        if C_Timer and C_Timer.After then C_Timer.After(seconds, callback) else callback() end
+    end
+    -- A new window may try the filters again.
     api.ResetTrainer = function() api.filtersTried = false end
-    api.ReadTrainerServices = function()
+    api.TrainerServices = function()
         local result = {}
         local count = call(GetNumTrainerServices)
         if not public(count, 'number') or count < 1 or count > 400 then return result end

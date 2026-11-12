@@ -418,3 +418,7 @@ Owner request: replace choice buttons with combo boxes wherever possible. Nav.Dr
 ## 0.5.19-beta, trainers whose services are all known
 
 Live finding: Bronk Guzzlegear (npc 1702) stayed "Not yet confirmed in game". The NPC recording log showed GetNumTrainerServices=0 on both TRAINER_SHOW and TRAINER_UPDATE, while another trainer in the same session returned 10. Probable cause: the default trainer window filter hides already known services, so a trainer with nothing left to teach reads as empty. Fix: with an empty list the observer switches the available, unavailable and used filters on for one read per opened window and restores them. Pending live check: that the client rebuilds the list synchronously after SetTrainerServiceTypeFilter, and that Bronk is then recorded (confirmed). If the log still shows services=0, the probe line "type filters" shows the filter states.
+
+## 0.5.20-beta, delayed read after the trainer filters change
+
+Live log after 0.5.19: Bronk (npc 1702) still returned GetNumTrainerServices=0, with the type filters available/unavailable/used = true/true/false when probed (after the toggle and restore). The list is therefore not rebuilt synchronously. The observer now logs filters-on, reads again after 0.3 s (event TRAINER_FILTER) and restores the filters afterwards or on close. Pending live check: Bronk recorded as saved, and the player's trainer filter back to its previous state.

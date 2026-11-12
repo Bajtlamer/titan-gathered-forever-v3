@@ -189,30 +189,39 @@ test('modern merchant item info table yields price and extended cost', function(
     eq(ns.NpcObserver.MerchantInfo({ price = 'x' }), nil)
 end)
 
-test('a fully known trainer is read with every filter on and the filters are put back', function()
+test('a fully known trainer is read again with the filters on and the filters are put back', function()
     local filters = { available = 1, unavailable = 1, used = 0 }
-    local sets, shown = {}, 0
+    local sets, later = {}, nil
     local saved = { GetNumTrainerServices = GetNumTrainerServices, GetTrainerServiceInfo = GetTrainerServiceInfo,
         GetTrainerServiceCost = GetTrainerServiceCost, GetTrainerServiceSkillReq = GetTrainerServiceSkillReq,
-        GetTrainerServiceTypeFilter = GetTrainerServiceTypeFilter, SetTrainerServiceTypeFilter = SetTrainerServiceTypeFilter }
+        GetTrainerServiceTypeFilter = GetTrainerServiceTypeFilter, SetTrainerServiceTypeFilter = SetTrainerServiceTypeFilter,
+        C_Timer = C_Timer }
     GetNumTrainerServices = function() return filters.used == 1 and 2 or 0 end
     GetTrainerServiceInfo = function(index) return 'Recipe ' .. index, 'used', 'used', 0 end
     GetTrainerServiceCost = function() return 100 end
     GetTrainerServiceSkillReq = function() return 'Engineering', 50 end
-    GetTrainerServiceTypeFilter = function(name) return filters[name] end
+    GetTrainerServiceTypeFilter = function(name) return filters[name] == 1 end
     SetTrainerServiceTypeFilter = function(name, value) filters[name] = value; sets[#sets + 1] = name .. '=' .. value end
+    C_Timer = { After = function(_, callback) later = callback end }
     local ns = fresh()
     local api = ns.NpcObserver.DefaultAPI()
-    api.ResetTrainer()
-    local got = #api.TrainerServices()
-    eq(got, 2)
-    eq(filters.used, 0)
-    eq(table.concat(sets, ','), 'used=1,used=0')
-    eq(#api.TrainerServices(), 0) -- the refresh after restoring does not toggle again
+    api.Enabled = function() return true end
+    api.Npc = function() return { id = 1702, name = 'Bronk', mapID = 1455, x = 0.5, y = 0.5 } end
+    api.Probe = nil; api.Now = function() return 1 end
+    local observer = ns.NpcObserver.New(api)
+    observer:TrainerShown()
+    eq(ns.db.npcs[1702], nil)            -- nothing yet: the list is rebuilt after the filters change
+    eq(filters.used, 1); eq(table.concat(sets, ','), 'used=1')
+    later()                               -- the delayed read
+    eq(#ns.db.npcs[1702].trainer, 2)
+    eq(filters.used, 0)                   -- the player's filter is back
+    observer:TrainerUpdated()             -- refresh caused by the restore does not toggle again
     eq(#sets, 2)
-    api.ResetTrainer()
-    eq(#api.TrainerServices(), 2) -- a newly opened window tries again
-    eq(#sets, 4)
+    observer:TrainerClosed()
+    observer:TrainerShown()               -- a new window tries again
+    eq(#sets, 3)
+    observer:TrainerClosed()              -- closing restores the filters
+    eq(filters.used, 0)
     for name, value in pairs(saved) do _G[name] = value end
 end)
 
