@@ -164,9 +164,26 @@ test('tooltip is capped at fifteen recipes and marks known ones', function()
     ns.KnownRecipes = { IsKnown = function(_, _, name) return name == 'Recipe: Item201' end }
     local t = tip()
     ns.NpcSources.FillTooltip(t, { kind = 'RecipeVendor', npcID = 5 })
-    eq(#t.doubles, 15); eq(t.doubles[1][1], '<white>Recipe: Item201</> <gray>(1)</> <green>(known)</>')
+    eq(#t.doubles, 15); eq(t.doubles[1][1], '<gray>Recipe: Item201</> <gray>(1)</> <green>learned</>')
     eq(t.doubles[2][1], '<white>Recipe: Item202</> <gray>(2)</>')
     eq(t.lines[#t.lines], '<gray>and 5 more</>')
+end)
+
+test('recipes of a profession that was never read say the learned status is unknown', function()
+    local ns = fresh()
+    ns.KnownRecipes = { IsKnown = function(_, kind, name)
+        if kind == 'Alchemy' then return name == 'Recipe: Item100' end
+        return nil
+    end }
+    local t = tip()
+    ns.NpcSources.FillTooltip(t, { kind = 'RecipeVendor', npcID = 2 })
+    eq(t.doubles[1][1], '<gray>Recipe: Item100</> <gray>(225)</> <green>learned</>')
+    eq(t.doubles[2][1], '<white>Recipe: Item101</> <gray>(?)</>')
+    assert(t.lines[#t.lines]:find('(Cooking)', 1, true) and not t.lines[#t.lines]:find('Alchemy', 1, true))   -- only Cooking was never read
+    ns.KnownRecipes = { IsKnown = function() return nil end }
+    t = tip()
+    ns.NpcSources.FillTooltip(t, { kind = 'RecipeVendor', npcID = 2 })
+    assert(t.lines[#t.lines]:find('Learned status unknown', 1, true) and t.lines[#t.lines]:find('Alchemy', 1, true))
 end)
 
 test('a required skill above the player rank is red and unknown requirements stay neutral', function()

@@ -270,14 +270,22 @@ function Npc.FillTooltip(tooltip, node)
         return tostring(a.name or '') < tostring(b.name or '')
     end)
     local shown = math.min(#ordered, SHOWN)
+    local unread, unreadKinds = {}, {}
     for index = 1, shown do
         local row = ordered[index]
         local name = row.itemID and ns.ItemName(row.itemID) or row.name or 'Unknown recipe'
-        local known = ns.KnownRecipes and ns.KnownRecipes.IsKnown(ns.characterID, row.kind or record.profession, name)
+        local kind = row.kind or record.profession
+        local known = ns.KnownRecipes and ns.KnownRecipes.IsKnown(ns.characterID, kind, name)
+        -- nil: the profession was never read for this character, so nothing can be said about the recipe.
+        if ns.KnownRecipes and known == nil and kind and not unread[kind] then
+            unread[kind] = true; unreadKinds[#unreadKinds + 1] = Npc.Label(kind)
+        end
         local can = Npc.CanLearn(skills, row.kind or record.profession, row.skill)
         local skillColor = can == false and Style.red or Style.gray
-        local left = Style.Text(Style.white, name) .. ' ' .. Style.Text(skillColor, '(' .. (row.skill or '?') .. ')')
-        if known == true then left = left .. ' ' .. Style.Text(Style.green, '(known)') end
+        -- A recipe the player already knows is dimmed and tagged, so the rest are the ones still worth learning.
+        local left = Style.Text(known == true and Style.gray or Style.white, name) .. ' '
+            .. Style.Text(skillColor, '(' .. (row.skill or '?') .. ')')
+        if known == true then left = left .. ' ' .. Style.Text(Style.green, 'learned') end
         local amount = row.itemID and row.price or row.cost
         local right
         if amount then right = Npc.CoinIcons(amount)
@@ -292,6 +300,12 @@ function Npc.FillTooltip(tooltip, node)
     end
     if #ordered == 0 then
         tooltip:AddLine(Style.Text(Style.gray, 'No recipes recorded yet.'))
+        small(tooltip)
+    end
+    if #unreadKinds > 0 then
+        table.sort(unreadKinds)
+        tooltip:AddLine(Style.Text(Style.gray, 'Learned status unknown: open the profession window once ('
+            .. table.concat(unreadKinds, ', ') .. ').'))
         small(tooltip)
     end
 end
