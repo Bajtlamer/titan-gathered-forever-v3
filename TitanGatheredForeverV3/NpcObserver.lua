@@ -294,15 +294,10 @@ function Obs.DefaultAPI()
                 local on = call(GetTrainerServiceTypeFilter, name)
                 if not on or on == 0 then
                     api.changedFilters[#api.changedFilters + 1] = name
-                    -- The accepted value type is not documented for this client: try 1, then true.
-                    local ok1, err1 = pcall(SetTrainerServiceTypeFilter, name, 1)
-                    local now = call(GetTrainerServiceTypeFilter, name)
-                    local note = name .. ' set1 ' .. (ok1 and 'ok' or tostring(err1)) .. ' now ' .. tostring(now)
-                    if not now or now == 0 then
-                        local ok2, err2 = pcall(SetTrainerServiceTypeFilter, name, true)
-                        note = note .. '; settrue ' .. (ok2 and 'ok' or tostring(err2)) .. ' now '
-                            .. tostring(call(GetTrainerServiceTypeFilter, name))
-                    end
+                    -- Live: this client wants a boolean ("Missing on/off parameter" for 1 or 0).
+                    local ok, err = pcall(SetTrainerServiceTypeFilter, name, true)
+                    local note = name .. ' set ' .. (ok and 'ok' or tostring(err)) .. ' now '
+                        .. tostring(call(GetTrainerServiceTypeFilter, name))
                     api.filterReport[#api.filterReport + 1] = note
                 end
             end
@@ -314,8 +309,7 @@ function Obs.DefaultAPI()
     end
     api.RestoreFilters = function()
         for _, name in ipairs(api.changedFilters or {}) do
-            pcall(SetTrainerServiceTypeFilter, name, 0)
-            if call(GetTrainerServiceTypeFilter, name) then pcall(SetTrainerServiceTypeFilter, name, false) end
+            pcall(SetTrainerServiceTypeFilter, name, false)
         end
         api.changedFilters = nil
     end

@@ -426,3 +426,7 @@ Live log after 0.5.19: Bronk (npc 1702) still returned GetNumTrainerServices=0, 
 ## 0.5.21-beta, trainer filter diagnostics
 
 Live log after 0.5.20: filters-on was logged for Bronk (npc 1702), but the probe still showed used=false and the delayed TRAINER_FILTER read still returned 0 services. Either SetTrainerServiceTypeFilter(name, 1) is not accepted by this client or the empty list has another cause. 0.5.21 tries 1 then true and writes the client answers into the filters-on log entry (field first). Pending live check of that report.
+
+## 0.5.22-beta, Bronk recorded
+
+Live log after 0.5.21: SetTrainerServiceTypeFilter(name, 1) fails with "Missing on/off parameter", SetTrainerServiceTypeFilter(name, true) works. After the delayed read Bronk (npc 1702) was saved with 11 Engineering services. 0.5.22 uses true and false only. Pending live check: the player's "Already known" filter is back to off after the window closes.
