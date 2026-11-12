@@ -98,7 +98,7 @@ function Obs:ReadTrainer(event)
     for _, service in ipairs(self.api.TrainerServices()) do
         local kind = kindBySkillName[service.skillName or '']
         if kind then counts[kind] = (counts[kind] or 0) + 1 end
-        services[#services + 1] = { name = service.name, cost = service.cost, skill = service.skillRank, kind = kind }
+        services[#services + 1] = { name = service.name, cost = service.cost, skill = service.skillRank, level = service.level, kind = kind }
     end
     if #services == 0 then
         if event == 'TRAINER_UPDATE' then
@@ -121,7 +121,7 @@ function Obs:ReadTrainer(event)
     local rows = {}
     for _, service in ipairs(services) do
         if service.kind == profession then
-            rows[#rows + 1] = { name = service.name, skill = service.skill, cost = service.cost }
+            rows[#rows + 1] = { name = service.name, skill = service.skill, cost = service.cost, level = service.level }
         end
     end
     self:Save(npc, { profession = profession, trainer = rows })
@@ -270,13 +270,15 @@ function Obs.DefaultAPI()
         local count = call(GetNumTrainerServices)
         if not public(count, 'number') or count < 1 or count > 400 then return result end
         for index = 1, count do
-            local name, _, category = call(GetTrainerServiceInfo, index)
+            -- Returns: name, state, icon, required character level (as seen in the recorded probe).
+            local name, _, category, level = call(GetTrainerServiceInfo, index)
             if public(name, 'string') and category ~= 'header' then
                 local cost = call(GetTrainerServiceCost, index)
                 local skillName, skillRank = call(GetTrainerServiceSkillReq, index)
                 result[#result + 1] = { name = name, cost = public(cost, 'number') and cost or nil,
                     skillName = public(skillName, 'string') and skillName or nil,
-                    skillRank = public(skillRank, 'number') and skillRank or nil }
+                    skillRank = public(skillRank, 'number') and skillRank or nil,
+                    level = public(level, 'number') and level > 0 and level or nil }
             end
         end
         return result
