@@ -19,9 +19,39 @@ local function observed() return (ns.db and ns.db.npcs) or {} end
 function Npc.Label(kind) return labels[kind] or kind end
 function Npc.Invalidate() cache = {} end
 
+-- NPCs the player asked to find (from the unlearned recipes window). They are shown whatever the map
+-- filters say, and the mark ends after a while or when another recipe is chosen.
+local HIGHLIGHT_SECONDS = 300
+local highlight
+local function now() return GetTime and GetTime() or 0 end
+
+function Npc.HasHighlight()
+    if highlight and now() >= highlight.expires then highlight = nil end
+    return highlight ~= nil
+end
+
+function Npc.IsHighlighted(npcID)
+    return Npc.HasHighlight() and highlight.ids[npcID] == true
+end
+
+function Npc.SetHighlight(npcIDs)
+    highlight = nil
+    if type(npcIDs) ~= 'table' or #npcIDs == 0 then return end
+    local ids = {}
+    for _, id in ipairs(npcIDs) do ids[id] = true end
+    highlight = { ids = ids, expires = now() + HIGHLIGHT_SECONDS }
+    -- Pins are redrawn once more when the mark expires so the rings do not linger.
+    if C_Timer and C_Timer.After then
+        C_Timer.After(HIGHLIGHT_SECONDS + 1, function()
+            if ns.Map and ns.Map.Update then ns.Map.Update() end
+            if ns.Minimap and ns.Minimap.Update then ns.Minimap.Update() end
+        end)
+    end
+end
+
 function Npc.Enabled()
     local settings = ns.settings or {}
-    return settings.mapTrainers ~= false or settings.mapRecipeVendors ~= false
+    return settings.mapTrainers ~= false or settings.mapRecipeVendors ~= false or Npc.HasHighlight()
 end
 
 function Npc.Coin(copper)
@@ -150,6 +180,7 @@ function Npc.Nodes(mapID)
 end
 
 function Npc.Visible(node)
+    if node.npcID and Npc.IsHighlighted(node.npcID) then return true end
     local settings = ns.settings or {}
     local filter = settings.mapNpcProfessions or {}
     if node.kind == 'Trainer' then
@@ -311,7 +342,7 @@ function Npc.FillSourcesTooltip(tooltip, row)
         tooltip:AddLine(Style.Text(Style.gray, string.format('and %d more sources', #row.sources - shown)))
         small()
     end
-    tooltip:AddLine(Style.Text(Style.gray, 'Click the row to open the map.'))
+    tooltip:AddLine(Style.Text(Style.gray, 'Click the row to open the map and mark the NPCs; click again to clear the mark.'))
     small()
 end
 

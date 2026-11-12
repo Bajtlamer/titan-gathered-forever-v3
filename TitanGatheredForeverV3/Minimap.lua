@@ -105,6 +105,7 @@ function Mini:Refresh()
             local pin = self.pins[visible] or self:CreatePin()
             pin:SetSize(style.size, style.size)
             ns.PinStyle.Apply(pin, 'minimap')
+            ns.PinStyle.Highlight(pin, node.npcID ~= nil and ns.NpcSources ~= nil and ns.NpcSources.IsHighlighted(node.npcID))
             pin.node = node
             pin:ClearAllPoints()
             pin:SetPoint('CENTER', self.overlay, 'CENTER', px, py)

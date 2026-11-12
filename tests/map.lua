@@ -138,7 +138,7 @@ local found=false;for _,line in ipairs(lines)do if line:find('3 honorable kills'
 assert(found,'PvP marker tooltip omitted its count')
 -- Trainer and recipe vendor pins share the overlay, use their own icons and the NPC tooltip.
 local npcFilled
-ns.NpcSources={Enabled=function()return true end,
+ns.NpcSources={Enabled=function()return true end,IsHighlighted=function()return false end,
     List=function(mapID)return {{kind='Trainer',npcID=7,mapID=mapID,x=.55,y=.5,profession='Alchemy'}}end,
     FillTooltip=function(_,node)npcFilled=node.npcID end}
 map:Refresh(true)
@@ -153,4 +153,21 @@ npcPin=nil
 for _,pin in ipairs(map.pins)do if pin.shown and pin.icon=='Interface\\Icons\\INV_Misc_Book_11'then npcPin=pin end end
 assert(npcPin,'NPC pins must not depend on the gathering map switch')
 ns.settings.gatheringMap=true;ns.NpcSources=nil;map:Refresh(true)
+-- Highlighted NPC pins get the gold ring; ordinary and gathering pins do not.
+local lit={}
+local realHighlight=ns.PinStyle.Highlight
+ns.PinStyle.Highlight=function(pin,on)lit[pin]=on end
+ns.NpcSources={Enabled=function()return true end,IsHighlighted=function(id)return id==7 end,
+    List=function(mapID)return {{kind='Trainer',npcID=7,mapID=mapID,x=.55,y=.5,profession='Alchemy'},
+        {kind='RecipeVendor',npcID=8,mapID=mapID,x=.6,y=.5,professions={Alchemy=true}}}end,
+    FillTooltip=function()end}
+lit={};map:Refresh(true)
+local ringed,plainNpc=0,0
+for _,pin in ipairs(map.pins)do
+    if pin.shown and pin.node and pin.node.npcID==7 then assert(lit[pin]==true,'target pin was not highlighted');ringed=ringed+1 end
+    if pin.shown and pin.node and pin.node.npcID==8 then assert(lit[pin]==false,'other NPC pin was highlighted');plainNpc=plainNpc+1 end
+    if pin.shown and pin.node and not pin.node.npcID then assert(lit[pin]==false,'gathering pin was highlighted') end
+end
+assert(ringed==1 and plainNpc==1,'expected one highlighted and one ordinary NPC pin')
+ns.PinStyle.Highlight=realHighlight;ns.NpcSources=nil;map:Refresh(true)
 print('PASS 15 map rendering, scaling, projection, lifecycle, reuse, toggle and gathering-material checks')

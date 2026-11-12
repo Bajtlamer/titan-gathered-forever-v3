@@ -148,6 +148,7 @@ function Map:Refresh(force)
         pin.node = node
         pin:SetSize(iconSize, iconSize)
         ns.PinStyle.Apply(pin, 'world')
+        ns.PinStyle.Highlight(pin, node.npcID ~= nil and ns.NpcSources ~= nil and ns.NpcSources.IsHighlighted(node.npcID))
         pin:ClearAllPoints()
         pin:SetPoint('CENTER', self.overlay, 'TOPLEFT', node.x * width, -node.y * height)
         pin.texture:SetTexture(ns.PinStyle.Icon(node.itemID, node.kind))

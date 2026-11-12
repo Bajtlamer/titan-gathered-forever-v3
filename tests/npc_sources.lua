@@ -238,8 +238,58 @@ test('sources tooltip lists every source with colored names, location and price'
     eq(t.doubles[1][1], '<green>Alchemy Trainer</> <gray>(Trainer)</>'); eq(t.doubles[1][2], '5' .. SILVER)
     eq(t.lines[2], '<gray>Zone 1429 10.0, 20.0, not yet confirmed in game</>')
     eq(t.doubles[2][1], '<green>Recipe Vendor</> <gray>(Vendor)</>'); eq(t.doubles[2][2], '<gray>price unknown</>')
-    eq(t.lines[#t.lines], '<gray>Click the row to open the map.</>')
+    eq(t.lines[#t.lines], '<gray>Click the row to open the map and mark the NPCs; click again to clear the mark.</>')
     eq(t.smallLines, 5)
+end)
+
+local clock = 100
+GetTime = function() return clock end
+
+test('a highlighted npc is remembered for a while and overrides the visibility filters', function()
+    local ns = fresh()
+    clock = 100
+    eq(ns.NpcSources.IsHighlighted(1), false); eq(ns.NpcSources.HasHighlight(), false)
+    ns.settings.mapTrainers = false; ns.settings.mapRecipeVendors = false
+    eq(ns.NpcSources.Enabled(), false); eq(#ns.NpcSources.List(1429), 0)
+    ns.NpcSources.SetHighlight({ 1 })
+    eq(ns.NpcSources.IsHighlighted(1), true); eq(ns.NpcSources.IsHighlighted(2), false)
+    eq(ns.NpcSources.Enabled(), true)                      -- the pin must be drawn although the toggles are off
+    local list = ns.NpcSources.List(1429)
+    eq(#list, 1); eq(list[1].npcID, 1)
+    ns.settings.mapNpcProfessions.Alchemy = false          -- a hidden profession cannot hide it either
+    eq(#ns.NpcSources.List(1429), 1)
+    clock = 100 + 299; eq(ns.NpcSources.IsHighlighted(1), true)
+    clock = 100 + 301; eq(ns.NpcSources.IsHighlighted(1), false); eq(ns.NpcSources.HasHighlight(), false)
+    eq(#ns.NpcSources.List(1429), 0)
+    clock = 100
+end)
+
+test('setting a new highlight replaces the old one and an empty list clears it', function()
+    local ns = fresh()
+    clock = 100
+    ns.NpcSources.SetHighlight({ 1, 2 })
+    eq(ns.NpcSources.IsHighlighted(1), true); eq(ns.NpcSources.IsHighlighted(2), true)
+    ns.NpcSources.SetHighlight({ 2 })
+    eq(ns.NpcSources.IsHighlighted(1), false); eq(ns.NpcSources.IsHighlighted(2), true)
+    ns.NpcSources.SetHighlight(nil)
+    eq(ns.NpcSources.HasHighlight(), false)
+    ns.NpcSources.SetHighlight({ 1 }); ns.NpcSources.SetHighlight({})
+    eq(ns.NpcSources.HasHighlight(), false)
+end)
+
+test('a highlight expiry redraws the pins once', function()
+    local ns = fresh()
+    clock = 100
+    local timers, redraws = {}, 0
+    C_Timer = { After = function(delay, fn) timers[#timers + 1] = { delay, fn } end }
+    ns.Map = { Update = function() redraws = redraws + 1 end }
+    ns.Minimap = { Update = function() redraws = redraws + 1 end }
+    ns.NpcSources.SetHighlight({ 1 })
+    eq(#timers, 1); eq(timers[1][1], 301)
+    clock = 100 + 301
+    timers[1][2](); eq(redraws, 2)
+    C_Timer = nil
+    clock = 100
 end)
 
 test('nearest reports the closest visible pin to the player', function()

@@ -60,10 +60,34 @@ function Browser.SetKind(kind)
     Browser.Refresh()
 end
 
+-- Opens the world map at the zone of the first source and marks every source with a gold ring, because the
+-- map is crowded. Clicking the same recipe again clears the mark; choosing another recipe replaces it.
+local function sourceIDs(row)
+    local ids = {}
+    for _, source in ipairs(row.sources) do ids[#ids + 1] = source.npcID end
+    return ids
+end
+
 local function openMap(line)
-    local source = line.row and line.row.sources[1]
-    local mapID = source and ns.NpcSources.ContinentMap(source.npcID)
-    if mapID and OpenWorldMap then OpenWorldMap(mapID) end
+    local row = line.row
+    local source = row and row.sources[1]
+    if not source then return end
+    local key = row.kind .. '|' .. row.name
+    if Browser.marked == key and ns.NpcSources.HasHighlight() then
+        Browser.marked = nil
+        ns.NpcSources.SetHighlight(nil)
+    else
+        Browser.marked = key
+        ns.NpcSources.SetHighlight(sourceIDs(row))
+    end
+    local place = ns.NpcSources.Location(source.npcID)
+    local mapID = place and place.mapID or ns.NpcSources.ContinentMap(source.npcID)
+    if mapID then
+        if OpenWorldMap then OpenWorldMap(mapID)
+        elseif WorldMapFrame and WorldMapFrame.SetMapID then WorldMapFrame:Show(); WorldMapFrame:SetMapID(mapID) end
+    end
+    if ns.Map and ns.Map.Update then ns.Map.Update() end
+    if ns.Minimap and ns.Minimap.Update then ns.Minimap.Update() end
 end
 
 function Browser.Refresh()
