@@ -101,7 +101,7 @@ test('a profession filter limits recipes and the professions reported as unread'
     rows, unread = ns.NpcSources.Unlearned('C1', false, 'Cooking')
     eq(#rows, 0); eq(#unread, 1); eq(unread[1], 'Cooking')
     local all = ns.NpcSources.RecipeKinds
-    eq(#all, 9); eq(all[1], 'Alchemy'); eq(all[#all], 'Tailoring')
+    eq(#all, 12); eq(all[1], 'Alchemy'); eq(all[#all], 'Tailoring')
 end)
 
 test('rows know whether the player has the skill to learn them', function()

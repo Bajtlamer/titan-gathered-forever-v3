@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.13-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.14-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Next profession rank in the unlearned window, 0.5.14-beta
+
+- The unlearned recipes window now lists the next profession rank (for example Journeyman Fishing) with the trainers who teach it, their price and the required skill. For every profession the character has, only the lowest rank not yet reached is listed, and only once the skill requirement is met, which covers both "the maximum is reached" and "it can be learned now". Clicking the row opens the map and marks those trainers like any other recipe. Fishing, Herbalism and Skinning were added to the profession filter for this. The vendor only filter hides these rows because they are trainer rows.
 
 ## Rank spells in trainer tooltips, 0.5.13-beta
 
