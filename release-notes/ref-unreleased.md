@@ -1,6 +1,11 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.2-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.3-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Merchant price and recipe diagnostics, 0.5.3-beta
+
+- Fix from live evidence: this client has no GetMerchantItemInfo (the recording log probe printed info=missing), so merchant recipe prices could never be read. Prices and extended cost now come from C_MerchantFrame.GetItemInfo with the old function as a fallback.
+- The merchant probe in the NPC recording log now counts all items by item class and shows the first four recipe items with their raw info and tooltip lines, so the log shows whether a vendor sells recipes and how the required skill reads. Recording rules are otherwise unchanged.
 
 ## Trainer and merchant lists read on update, 0.5.2-beta
 

@@ -178,6 +178,16 @@ test('merchant stock that arrives after the window opens is recorded on update',
     eq(#ns.db.npcs[3167].vendor, 1)
 end)
 
+test('modern merchant item info table yields price and extended cost', function()
+    local ns = fresh()
+    local price, extended = ns.NpcObserver.MerchantInfo({ price = 12000, hasExtendedCost = false })
+    eq(price, 12000); eq(extended, nil)
+    price, extended = ns.NpcObserver.MerchantInfo({ price = 0, hasExtendedCost = true })
+    eq(price, 0); eq(extended, true)
+    eq(ns.NpcObserver.MerchantInfo(nil), nil)
+    eq(ns.NpcObserver.MerchantInfo({ price = 'x' }), nil)
+end)
+
 for _, entry in ipairs(tests) do
     local ok, err = pcall(entry[2])
     if not ok then io.stderr:write('FAIL ' .. entry[1] .. ': ' .. tostring(err) .. '\n'); os.exit(1) end

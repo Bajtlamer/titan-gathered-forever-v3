@@ -23,6 +23,13 @@ function Obs.ParseRequirement(text)
     return kindBySkillName[name], tonumber(rank)
 end
 
+-- Modern clients answer C_MerchantFrame.GetItemInfo(index) with a table; GetMerchantItemInfo is gone.
+function Obs.MerchantInfo(info)
+    if type(info) ~= 'table' or not ns.IsPublic(info) then return nil end
+    local price = ns.IsPublic(info.price) and type(info.price) == 'number' and info.price or nil
+    return price, info.hasExtendedCost == true or nil
+end
+
 function Obs.New(api) return setmetatable({ api = api }, Obs) end
 
 function Obs:Save(npc, fields)
@@ -182,7 +189,18 @@ function Obs.DefaultAPI()
                 local parts = {}
                 for i = 1, select('#', ...) do
                     local value = (select(i, ...))
-                    parts[i] = ns.IsPublic(value) and tostring(value) or '<secret>'
+                    if type(value) == 'table' and ns.IsPublic(value) then
+                        local fields = {}
+                        for key, inner in pairs(value) do
+                            if type(inner) ~= 'table' and type(inner) ~= 'function' then
+                                fields[#fields + 1] = tostring(key) .. '=' .. (ns.IsPublic(inner) and tostring(inner) or '<secret>')
+                            end
+                        end
+                        table.sort(fields)
+                        parts[i] = '{' .. table.concat(fields, ',') .. '}'
+                    else
+                        parts[i] = ns.IsPublic(value) and tostring(value) or '<secret>'
+                    end
                 end
                 return '(' .. table.concat(parts, ', ') .. ')'
             end
@@ -203,11 +221,39 @@ function Obs.DefaultAPI()
         else
             local count = call(GetMerchantNumItems)
             out[#out + 1] = 'GetMerchantNumItems=' .. describe(GetMerchantNumItems)
-                .. ' C_TooltipInfo=' .. type(C_TooltipInfo)
-            for index = 1, math.min(public(count, 'number') and count or 0, 3) do
+                .. ' C_TooltipInfo=' .. type(C_TooltipInfo) .. ' C_MerchantFrame.GetItemInfo='
+                .. type(C_MerchantFrame and C_MerchantFrame.GetItemInfo) .. ' GetMerchantItemInfo=' .. type(GetMerchantItemInfo)
+            local limit = public(count, 'number') and math.min(count, 400) or 0
+            local classes, recipes = {}, {}
+            for index = 1, limit do
                 local link = call(GetMerchantItemLink, index)
-                out[#out + 1] = 'item' .. index .. ' link=' .. describe(GetMerchantItemLink, index)
-                    .. ' info=' .. describe(GetMerchantItemInfo, index)
+                local itemID = public(link, 'string') and tonumber(link:match('item:(%d+)')) or nil
+                local class, subclass
+                if itemID then
+                    local _, _, _, _, _, c, sc = call(C_Item.GetItemInfoInstant, itemID)
+                    class, subclass = c, sc
+                end
+                classes[tostring(class)] = (classes[tostring(class)] or 0) + 1
+                if class == 9 and #recipes < 4 then recipes[#recipes + 1] = { index = index, link = link, itemID = itemID, subclass = subclass } end
+            end
+            local parts = {}
+            for class, n in pairs(classes) do parts[#parts + 1] = class .. ':' .. n end
+            table.sort(parts)
+            out[#out + 1] = 'item classes (class:count)=' .. table.concat(parts, ' ')
+            if limit > 0 then
+                out[#out + 1] = 'item1 C_MerchantFrame info=' .. describe(C_MerchantFrame and C_MerchantFrame.GetItemInfo, 1)
+            end
+            for _, recipe in ipairs(recipes) do
+                local lines = {}
+                local data = C_TooltipInfo and call(C_TooltipInfo.GetMerchantItem, recipe.index)
+                if public(data, 'table') and public(data.lines, 'table') then
+                    for _, line in ipairs(data.lines) do
+                        if public(line.leftText, 'string') and #lines < 8 then lines[#lines + 1] = line.leftText end
+                    end
+                end
+                out[#out + 1] = 'recipe item' .. recipe.index .. ' id=' .. tostring(recipe.itemID) .. ' subclass='
+                    .. tostring(recipe.subclass) .. ' info=' .. describe(C_MerchantFrame and C_MerchantFrame.GetItemInfo, recipe.index)
+                out[#out + 1] = '  tooltip: ' .. table.concat(lines, ' | ')
             end
         end
         return out
@@ -241,7 +287,14 @@ function Obs.DefaultAPI()
                 classID, subclassID = class, subclass
             end
             if itemID and classID == 9 and kindBySubclass[subclassID] then
-                local _, _, price, _, _, _, _, extended = call(GetMerchantItemInfo, index)
+                local modern = C_MerchantFrame and C_MerchantFrame.GetItemInfo
+                    and call(C_MerchantFrame.GetItemInfo, index)
+                local price, extended = Obs.MerchantInfo(modern)
+                if price == nil then
+                    local _, _, legacyPrice, _, _, _, _, legacyExtended = call(GetMerchantItemInfo, index)
+                    price = public(legacyPrice, 'number') and legacyPrice or nil
+                    extended = extended or legacyExtended == true or nil
+                end
                 local skill
                 local data = C_TooltipInfo and call(C_TooltipInfo.GetMerchantItem, index)
                 if public(data, 'table') and public(data.lines, 'table') then
@@ -251,8 +304,7 @@ function Obs.DefaultAPI()
                     end
                 end
                 result[#result + 1] = { itemID = itemID, kind = kindBySubclass[subclassID],
-                    price = public(price, 'number') and price or nil, skill = skill,
-                    extendedCost = extended == true or nil }
+                    price = price, skill = skill, extendedCost = extended }
             end
         end
         return result
