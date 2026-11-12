@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.4-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.5-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Smaller tooltip text, 0.5.5-beta
+
+- The role and confirmation lines, the recipe rows (both columns) and the closing lines of trainer and vendor pin tooltips use the small tooltip font. The NPC name keeps the normal size. A new Style.Small helper shrinks the last tooltip line in both columns and restores the original fonts when the tooltip is recycled, like Style.Note.
 
 ## Trainer and vendor tooltip layout, 0.5.4-beta
 

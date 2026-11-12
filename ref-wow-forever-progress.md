@@ -355,3 +355,7 @@ Live merchant log (Kazan Mogosh, NPC 1237, 18 items): MERCHANT_SHOW delivered th
 ### Trainer and vendor tooltip layout, 0.5.4-beta, 2026-11-12
 
 Pin tooltip reformatted at the owner's request: required skill in brackets right after the recipe name, only the price on the right in the classic gold, silver and copper icon format, a separator between the NPC header and the list, and colors that distinguish the NPC name (gold), the list (white) and additional information (gray, green for confirmed). Automated checks pass, including tests for the exact left and right text, the colors, the separator, extra cost and empty list; installed with tools/install.py, all 64 files match and all 14 manifests read 0.5.4-beta. /reload is enough. Live visual review pending: icon sizes in the right column, separator rendering and the color choices.
+
+### Smaller tooltip text, 0.5.5-beta, 2026-11-12
+
+After live review of the 0.5.4 layout ("tooltip is OK, maybe a smaller font") the pin tooltip lines other than the NPC name use the small tooltip font, through a new Style.Small helper that restores the original fonts when the tooltip is recycled. Automated checks pass, including a presentation test for both columns and the restore, and a test that exactly the role, status and list rows are shrunk; installed with tools/install.py, all 64 files match and all 14 manifests read 0.5.5-beta. /reload is enough. Live visual review of the size is pending.

@@ -67,6 +67,20 @@ ns.Style.Note(tip,'Small explanatory note')
 assert(region.font=='GameFontHighlightSmall')
 tip.hooks.OnTooltipCleared(tip)
 assert(region.font=='OriginalFont','Tooltip recycling leaked a small font into native item content')
+-- A two-column line is shrunk on both sides and restored with the same recycling hook.
+local leftRegion,rightRegion={font='OriginalLeft'},{font='OriginalRight'}
+for _,r in ipairs({leftRegion,rightRegion})do
+    function r:GetFontObject()return self.font end
+    function r:SetFontObject(font)self.font=font end
+end
+function tip:AddDoubleLine(left,right)
+    originalAddLine(self,left);_G['TestTipTextLeft'..#lines]=leftRegion;_G['TestTipTextRight'..#lines]=rightRegion
+end
+tip:AddDoubleLine('Recipe (50)','1g')
+ns.Style.Small(tip)
+assert(leftRegion.font=='GameFontHighlightSmall' and rightRegion.font=='GameFontHighlightSmall','Small() must shrink both columns')
+tip.hooks.OnTooltipCleared(tip)
+assert(leftRegion.font=='OriginalLeft' and rightRegion.font=='OriginalRight','Small() leaked a small font after recycling')
 -- Current skill percentage progresses through red, brown, gold and green.
 for _,case in ipairs({
     {1,75,'|cffff20201/75|r'}, {18,75,'|cffff202018/75|r'},
