@@ -54,6 +54,20 @@ class PackageTests(unittest.TestCase):
                 self.assertTrue(all(name.startswith('TitanGatheredForeverV3/') for name in archive.namelist()))
                 self.assertNotIn('TitanGatheredForeverV3/Data/Items.lua', archive.namelist())
 
+    def test_core_package_carries_license_and_notice_but_professions_do_not(self):
+        with tempfile.TemporaryDirectory() as directory:
+            core = packager.package(ROOT, Path(directory) / 'core.zip', addons=['TitanGatheredForeverV3'])
+            with zipfile.ZipFile(core) as archive:
+                names = archive.namelist()
+                self.assertIn('TitanGatheredForeverV3/LICENSE', names)
+                self.assertIn('TitanGatheredForeverV3/NOTICE', names)
+                self.assertIn('TitanGatheredForeverV3/Data/NpcSeed.lua', names)
+                self.assertEqual(archive.read('TitanGatheredForeverV3/LICENSE'), (ROOT / 'LICENSE').read_bytes())
+                self.assertEqual(archive.read('TitanGatheredForeverV3/NOTICE'), (ROOT / 'NOTICE').read_bytes())
+            mining = packager.package(ROOT, Path(directory) / 'mining.zip', addons=['TitanGatheredForeverV3_Mining'])
+            with zipfile.ZipFile(mining) as archive:
+                self.assertFalse([name for name in archive.namelist() if name.endswith(('LICENSE', 'NOTICE'))])
+
     def test_single_profession_download_contains_only_that_optional_addon(self):
         with tempfile.TemporaryDirectory() as directory:
             target = Path(directory) / 'herbs.zip'
