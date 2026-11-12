@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.8-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.9-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Gold ring on the NPCs of a clicked recipe, 0.5.9-beta
+
+- Clicking a row in the unlearned recipes window now opens the world map at the zone of the recipe's first source (the continent only as a fallback) and marks every trainer and vendor that provides the recipe with two pulsing gold rings, raised above neighboring pins, on the world map and the minimap. The target is shown even when the trainer or vendor toggles or the profession filter would hide it. Clicking the same row again clears the mark, choosing another recipe replaces it, and it ends by itself after five minutes. It is not saved across a reload.
 
 ## Skill colors and a minimap button, 0.5.8-beta
 

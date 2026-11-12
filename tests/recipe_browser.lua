@@ -135,6 +135,42 @@ test('recipes the player cannot learn yet are red in the list', function()
     cells = ns.RecipeBrowser.Cells(row); eq(cells[3], 'Unknown')
 end)
 
+test('clicking a row opens the map at the first source and marks every source', function()
+    local ns = fresh()
+    ns.KnownRecipes.Record('C1', 'Alchemy', { 'Elixir of Minor Defense' }, 10)
+    GetTime = function() return 100 end
+    CreateVector2D = function(x, y) return { x = x, y = y, GetXY = function() return x, y end } end
+    C_Map = { GetMapPosFromWorldPos = function(_, v) return 1437, CreateVector2D(v.x / 100, v.y / 100) end,
+        GetMapInfo = function(id) return { name = 'Zone ' .. id } end }
+    local opened, updates = {}, 0
+    OpenWorldMap = function(id) opened[#opened + 1] = id end
+    ns.Map = { Update = function() updates = updates + 1 end }
+    ns.Minimap = { Update = function() updates = updates + 1 end }
+    installFrames()
+    assert(loadfile('TitanGatheredForeverV3/RecipeBrowser.lua'))('TitanGatheredForeverV3', ns)
+    local B = ns.RecipeBrowser
+    B.Show()
+    local line = B.window.lines[1]                      -- Lesser Healing Potion: trainer 1 and vendor 2
+    eq(line.row.name, 'Lesser Healing Potion')
+    scriptsOf(line).OnClick(line)
+    eq(opened[1], 1437)                                 -- the zone of the first source, not the whole continent
+    eq(ns.NpcSources.IsHighlighted(1), true); eq(ns.NpcSources.IsHighlighted(2), true)
+    eq(updates, 2)                                      -- world map and minimap redraw
+    scriptsOf(line).OnClick(line)                       -- the same row again clears the mark but still opens the map
+    eq(ns.NpcSources.HasHighlight(), false); eq(#opened, 2); eq(updates, 4)
+    local second = B.window.lines[2]
+    scriptsOf(line).OnClick(line)                       -- another row replaces the mark
+    scriptsOf(second).OnClick(second)
+    eq(ns.NpcSources.IsHighlighted(1), false); eq(ns.NpcSources.IsHighlighted(2), true)
+    C_Map = nil                                         -- without a zone the continent map is the fallback
+    scriptsOf(line).OnClick(line)
+    eq(opened[#opened], 1415)
+    OpenWorldMap = nil                                  -- no map opener: nothing breaks
+    scriptsOf(line).OnClick(line)
+    ns.Map, ns.Minimap = nil, nil                       -- redraw hooks missing: nothing breaks either
+    scriptsOf(line).OnClick(line)
+end)
+
 test('the toolbar button toggles the window', function()
     local ns = fresh()
     installFrames()

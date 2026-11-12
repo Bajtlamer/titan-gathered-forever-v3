@@ -138,7 +138,7 @@ end)
 test('trainer and recipe vendor pins use their own icons and tooltip',function()
     local filled
     ns.NpcSources={
-        Enabled=function()return true end,
+        Enabled=function()return true end,IsHighlighted=function()return false end,
         List=function(mapID)
             return {{kind='Trainer',npcID=7,mapID=mapID,x=.55,y=.5,profession='Alchemy'},
                 {kind='RecipeVendor',npcID=8,mapID=mapID,x=.55,y=.5,professions={Alchemy=true}}}
@@ -160,5 +160,24 @@ test('trainer and recipe vendor pins use their own icons and tooltip',function()
     ns.settings.gatheringMap=true
     ns.NpcSources=nil
     ns.Minimap.instance:Refresh()
+end)
+test('the highlighted npc pin on the minimap gets the gold ring',function()
+    local lit,real={},ns.PinStyle.Highlight
+    ns.PinStyle.Highlight=function(pin,on)lit[pin]=on end
+    ns.NpcSources={Enabled=function()return true end,IsHighlighted=function(id)return id==7 end,
+        List=function(mapID)
+            return {{kind='Trainer',npcID=7,mapID=mapID,x=.55,y=.5,profession='Alchemy'},
+                {kind='RecipeVendor',npcID=8,mapID=mapID,x=.55,y=.5,professions={Alchemy=true}}}
+        end,FillTooltip=function()end}
+    state.x,state.y,state.radius,state.rotate=.5,.5,100,false
+    nodes={}
+    ns.Minimap.instance:Refresh()
+    local ringed,plain=0,0
+    for _,pin in ipairs(ns.Minimap.instance.pins)do
+        if pin.shown and pin.node and pin.node.npcID==7 then assert(lit[pin]==true);ringed=ringed+1 end
+        if pin.shown and pin.node and pin.node.npcID==8 then assert(lit[pin]==false);plain=plain+1 end
+    end
+    assert(ringed==1 and plain==1)
+    ns.PinStyle.Highlight=real;ns.NpcSources=nil;ns.Minimap.instance:Refresh()
 end)
 print('PASS ' .. passed .. ' minimap icon projection, rotation, zoom, reuse and toggle checks')
