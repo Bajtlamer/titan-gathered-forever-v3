@@ -303,3 +303,22 @@ The renamed saved table is TitanGatheredForeverV3DB. A non-destructive one-time 
 The project now develops outside the game installation. All fourteen addon folders contain only game-required manifest files and artwork. Tools, tests, catalogue JSON, release notes, contributor guidance and prefixed documents moved to the collection root. Private archives and old repository metadata remain preserved in root .work; generated packages moved to root dist. The redundant core README/ignore files were archived privately.
 
 Root commands and GitHub workflow paths were updated. A strict manifest-based regression verifies every addon folder's contents. The addon version remains 0.4.1-alpha because runtime behavior and packaged files are unchanged. All 177 checks and shipped Lua compilation pass; runtime/package hash verification accompanies this structural change. AGENTS.md was moved without changing its contents.
+
+### Trainer and recipe vendor design, 2026-11-12
+
+Design recorded in plan-npc-sources.md. The classic-db 1.12.1 dump was downloaded to a scratch directory, pinned by commit and SHA-256, and a throwaway parse found 284 profession trainers and 230 recipe vendors with spawns. GPL-3.0 `LICENSE` and `NOTICE` were added. No runtime code, manifest or version changed, so nothing was installed.
+
+### Trainer and recipe vendor feature, 0.4.12-alpha, 2026-11-12
+
+Implemented per plan-npc-sources-implementation.md: pinned seed generator and generated Data/NpcSeed.lua (190 KB, 458 NPCs: 247 trainers and 211 recipe vendors on continents only), NpcSources, NpcObserver, KnownRecipes and RecipeBrowser modules, world map and minimap pins, menu toggles with a profession filter, /tgf npc, /tgf recipes, and LICENSE/NOTICE packaging. All 86 Python tests and every Lua suite pass, including 14 NpcSources, 8 NpcObserver, 4 KnownRecipes and 4 RecipeBrowser checks, and all shipped Lua files compile with Lua 5.1 semantics. tools/check.py now closes stdin for its subprocesses after a LuaJIT compile step hung on an open pipe.
+
+The candidate was installed with tools/install.py. All 64 installed files match the source candidate and all 14 manifests read 0.4.12-alpha. Previous folders: Interface/.tgf-v3-backups/candidate-zhwty_pc. New files and manifest entries require a full client restart.
+
+Live validation (open, separate from automated checks):
+- [ ] Pins appear on the world map and minimap at plausible positions; /tgf npc names a nearby trainer; /tgf npc swap fixes mirrored placement if needed.
+- [ ] Continent UiMapIDs 1414 (Kalimdor) and 1415 (Eastern Kingdoms) are correct for Forever.
+- [ ] Opening a profession trainer stores profession, services, skill and cost (trainer API behaviour).
+- [ ] Opening a recipe vendor stores recipe items with price and the required skill parsed from the tooltip.
+- [ ] Opening each profession window marks recipes as known; the Unlearned recipes window reflects it.
+- [ ] Tooltip text, the 15-line cap and the menu toggles behave as designed; no Lua errors with /console scriptErrors 1.
+
