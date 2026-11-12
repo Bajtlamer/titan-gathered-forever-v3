@@ -43,8 +43,14 @@ function Obs:Log(event, result, details)
     if type(log) ~= 'table' then return end
     local entry = { at = self.api.Now(), event = event, result = result }
     for key, value in pairs(details or {}) do entry[key] = value end
+    local previous = log[#log]
+    if previous and previous.event == event and previous.result == result and previous.npc == entry.npc
+        and previous.services == entry.services and previous.recipes == entry.recipes
+        and (event == 'TRAINER_UPDATE' or event == 'MERCHANT_UPDATE') then
+        return
+    end
     if self.api.Probe and result ~= 'disabled' then
-        local ok, probe = pcall(self.api.Probe, event == 'TRAINER_SHOW' and 'trainer' or 'merchant')
+        local ok, probe = pcall(self.api.Probe, event:find('^TRAINER') and 'trainer' or 'merchant')
         if ok and type(probe) == 'table' then entry.probe = probe end
     end
     log[#log + 1] = entry
@@ -68,8 +74,9 @@ function Obs.PrintLog()
     end
 end
 
-function Obs:TrainerShown()
-    local event = 'TRAINER_SHOW'
+-- The client fills trainer and merchant lists a moment after the SHOW event, so the same read runs again on
+-- the matching UPDATE event while the window stays open.
+function Obs:ReadTrainer(event)
     if not self.api.Enabled() then self:Log(event, 'disabled'); return end
     local npc = self.api.Npc()
     if not npc then self:Log(event, 'no-npc'); return end
@@ -79,7 +86,14 @@ function Obs:TrainerShown()
         if kind then counts[kind] = (counts[kind] or 0) + 1 end
         services[#services + 1] = { name = service.name, cost = service.cost, skill = service.skillRank, kind = kind }
     end
-    if #services == 0 then self:Log(event, 'no-services', { npc = npc.id, services = 0 }); return end
+    if #services == 0 then
+        if event == 'TRAINER_UPDATE' then
+            if self.emptyTrainerLogged then return end
+            self.emptyTrainerLogged = true
+        end
+        self:Log(event, 'no-services', { npc = npc.id, services = 0 })
+        return
+    end
     local profession
     for kind, count in pairs(counts) do
         if not profession or count > counts[profession] or (count == counts[profession] and kind < profession) then
@@ -100,16 +114,36 @@ function Obs:TrainerShown()
     self:Log(event, 'saved', { npc = npc.id, profession = profession, services = #rows })
 end
 
-function Obs:MerchantShown()
-    local event = 'MERCHANT_SHOW'
+function Obs:TrainerShown()
+    self.trainerOpen, self.emptyTrainerLogged = true, false
+    self:ReadTrainer('TRAINER_SHOW')
+end
+function Obs:TrainerUpdated() if self.trainerOpen then self:ReadTrainer('TRAINER_UPDATE') end end
+function Obs:TrainerClosed() self.trainerOpen = false end
+
+function Obs:ReadMerchant(event)
     if not self.api.Enabled() then self:Log(event, 'disabled'); return end
     local npc = self.api.Npc()
     if not npc then self:Log(event, 'no-npc'); return end
     local rows = self.api.MerchantRecipes()
-    if #rows == 0 then self:Log(event, 'no-recipes', { npc = npc.id, recipes = 0 }); return end
+    if #rows == 0 then
+        if event == 'MERCHANT_UPDATE' then
+            if self.emptyMerchantLogged then return end
+            self.emptyMerchantLogged = true
+        end
+        self:Log(event, 'no-recipes', { npc = npc.id, recipes = 0 })
+        return
+    end
     self:Save(npc, { vendor = rows })
     self:Log(event, 'saved', { npc = npc.id, recipes = #rows })
 end
+
+function Obs:MerchantShown()
+    self.merchantOpen, self.emptyMerchantLogged = true, false
+    self:ReadMerchant('MERCHANT_SHOW')
+end
+function Obs:MerchantUpdated() if self.merchantOpen then self:ReadMerchant('MERCHANT_UPDATE') end end
+function Obs:MerchantClosed() self.merchantOpen = false end
 
 -- Client adapter. The exact Forever 1.60.1 behaviour of these calls is a live validation gate.
 local function call(fn, ...)

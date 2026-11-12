@@ -135,6 +135,49 @@ test('printing the log summarises every entry or says there is none', function()
     assert(ns.printed[2]:find('GetNumTrainerServices=function', 1, true))
 end)
 
+test('trainer services that arrive after the window opens are recorded on update', function()
+    local services = {}
+    local ns, observer = fresh({ TrainerServices = function() return services end })
+    observer:TrainerShown()
+    eq(next(ns.db.npcs), nil)
+    services = { { name = 'Apprentice Cooking', cost = 10, skillName = 'Cooking', skillRank = 1 },
+        { name = 'Spice Bread', cost = 100, skillName = 'Cooking', skillRank = 1 } }
+    observer:TrainerUpdated()
+    eq(ns.db.npcs[3167].profession, 'Cooking'); eq(#ns.db.npcs[3167].trainer, 2)
+    local last = ns.db.npcLog[#ns.db.npcLog]
+    eq(last.event, 'TRAINER_UPDATE'); eq(last.result, 'saved')
+end)
+
+test('updates are ignored when no trainer window is open and empty updates are logged once', function()
+    local ns, observer = fresh({ TrainerServices = function() return {} end })
+    observer:TrainerUpdated(); eq(#ns.db.npcLog, 0)
+    observer:TrainerShown(); observer:TrainerUpdated(); observer:TrainerUpdated(); observer:TrainerUpdated()
+    eq(#ns.db.npcLog, 2) -- the show plus a single empty update
+    observer:TrainerClosed(); observer:TrainerUpdated()
+    eq(#ns.db.npcLog, 2)
+end)
+
+test('repeated identical saves from updates are not logged again', function()
+    local services = { { name = 'A', cost = 1, skillName = 'Cooking', skillRank = 1 } }
+    local ns, observer = fresh({ TrainerServices = function() return services end })
+    observer:TrainerShown(); observer:TrainerUpdated(); observer:TrainerUpdated()
+    eq(#ns.db.npcLog, 2)
+    services = { { name = 'A', cost = 1, skillName = 'Cooking', skillRank = 1 }, { name = 'B', cost = 2, skillName = 'Cooking', skillRank = 5 } }
+    observer:TrainerUpdated()
+    eq(#ns.db.npcLog, 3); eq(#ns.db.npcs[3167].trainer, 2)
+end)
+
+test('merchant stock that arrives after the window opens is recorded on update', function()
+    local rows = {}
+    local ns, observer = fresh({ MerchantRecipes = function() return rows end })
+    observer:MerchantShown(); eq(next(ns.db.npcs), nil)
+    rows = { { itemID = 100, kind = 'Alchemy', price = 5 } }
+    observer:MerchantUpdated()
+    eq(#ns.db.npcs[3167].vendor, 1)
+    observer:MerchantClosed(); rows = {}; observer:MerchantUpdated()
+    eq(#ns.db.npcs[3167].vendor, 1)
+end)
+
 for _, entry in ipairs(tests) do
     local ok, err = pcall(entry[2])
     if not ok then io.stderr:write('FAIL ' .. entry[1] .. ': ' .. tostring(err) .. '\n'); os.exit(1) end
