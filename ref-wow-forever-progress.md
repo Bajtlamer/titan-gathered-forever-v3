@@ -438,3 +438,7 @@ Live report (screenshot, 0.5.21): the Bronk window showed several services and t
 ## 0.5.24-beta, filters restored right after the read
 
 Live report on 0.5.23: the filter returned to off after closing, but the window showed already known services meanwhile, which looked wrong. 0.5.24 restores the filters in the same handler as the successful read. Pending live check: how short the remaining flash is (the list is rebuilt after the filter change, so some flash may remain).
+
+## 0.5.25-beta, C stack overflow fixed
+
+Live error on 0.5.24 when a Mining trainer was opened: C stack overflow in NpcObserver.lua (Log, ReadTrainer, TrainerUpdated, RestoreFilters in a loop). The client delivers TRAINER_UPDATE inside SetTrainerServiceTypeFilter. 0.5.25 ignores nested reads and clears the changed filter list before restoring. Pending live check: Mining trainer opens without an error and is recorded.

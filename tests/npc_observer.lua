@@ -191,7 +191,7 @@ end)
 
 test('a fully known trainer is read again with the filters on and the filters are put back', function()
     local filters = { available = 1, unavailable = 1, used = 0 }
-    local sets, later = {}, nil
+    local sets, later, calls, observer = {}, nil, 0, nil
     local saved = { GetNumTrainerServices = GetNumTrainerServices, GetTrainerServiceInfo = GetTrainerServiceInfo,
         GetTrainerServiceCost = GetTrainerServiceCost, GetTrainerServiceSkillReq = GetTrainerServiceSkillReq,
         GetTrainerServiceTypeFilter = GetTrainerServiceTypeFilter, SetTrainerServiceTypeFilter = SetTrainerServiceTypeFilter,
@@ -204,6 +204,9 @@ test('a fully known trainer is read again with the filters on and the filters ar
     SetTrainerServiceTypeFilter = function(name, value)
         assert(type(value) == 'boolean', 'Missing on/off parameter')
         filters[name] = value and 1 or 0; sets[#sets + 1] = name .. '=' .. tostring(value)
+        calls = calls + 1
+        assert(calls < 50, 'runaway recursion')
+        if observer then observer:TrainerUpdated() end -- the client answers a change with an update at once
     end
     C_Timer = { After = function(_, callback) later = callback end }
     local ns = fresh()
@@ -211,7 +214,7 @@ test('a fully known trainer is read again with the filters on and the filters ar
     api.Enabled = function() return true end
     api.Npc = function() return { id = 1702, name = 'Bronk', mapID = 1455, x = 0.5, y = 0.5 } end
     api.Probe = nil; api.Now = function() return 1 end
-    local observer = ns.NpcObserver.New(api)
+    observer = ns.NpcObserver.New(api)
     observer:TrainerShown()
     eq(ns.db.npcs[1702], nil)            -- nothing yet: the list is rebuilt after the filters change
     eq(filters.used, 1); eq(table.concat(sets, ','), 'used=true')
