@@ -108,7 +108,7 @@ function Obs:ReadTrainer(event)
         if self.api.EnableFilters and self.api.EnableFilters() then
             -- Probably a trainer with nothing left to teach: the window hides known services. Read again once the
             -- client has rebuilt the list, then put the filters back.
-            self:Log(event, 'filters-on', { npc = npc.id, services = 0 })
+            self:Log(event, 'filters-on', { npc = npc.id, services = 0, first = table.concat(self.api.filterReport or {}, ' | ') })
             self.api.After(0.3, function()
                 if self.trainerOpen then self:ReadTrainer('TRAINER_FILTER') end
                 if self.api.RestoreFilters then self.api.RestoreFilters() end
@@ -288,20 +288,35 @@ function Obs.DefaultAPI()
     api.EnableFilters = function()
         if api.filtersTried then return false end
         api.filtersTried = true
-        api.changedFilters = {}
+        api.changedFilters, api.filterReport = {}, {}
         if type(GetTrainerServiceTypeFilter) == 'function' and type(SetTrainerServiceTypeFilter) == 'function' then
             for _, name in ipairs(filterNames) do
                 local on = call(GetTrainerServiceTypeFilter, name)
                 if not on or on == 0 then
                     api.changedFilters[#api.changedFilters + 1] = name
-                    call(SetTrainerServiceTypeFilter, name, 1)
+                    -- The accepted value type is not documented for this client: try 1, then true.
+                    local ok1, err1 = pcall(SetTrainerServiceTypeFilter, name, 1)
+                    local now = call(GetTrainerServiceTypeFilter, name)
+                    local note = name .. ' set1 ' .. (ok1 and 'ok' or tostring(err1)) .. ' now ' .. tostring(now)
+                    if not now or now == 0 then
+                        local ok2, err2 = pcall(SetTrainerServiceTypeFilter, name, true)
+                        note = note .. '; settrue ' .. (ok2 and 'ok' or tostring(err2)) .. ' now '
+                            .. tostring(call(GetTrainerServiceTypeFilter, name))
+                    end
+                    api.filterReport[#api.filterReport + 1] = note
                 end
             end
+        else
+            api.filterReport[1] = 'filter functions missing: ' .. type(GetTrainerServiceTypeFilter) .. '/'
+                .. type(SetTrainerServiceTypeFilter)
         end
         return #api.changedFilters > 0
     end
     api.RestoreFilters = function()
-        for _, name in ipairs(api.changedFilters or {}) do call(SetTrainerServiceTypeFilter, name, 0) end
+        for _, name in ipairs(api.changedFilters or {}) do
+            pcall(SetTrainerServiceTypeFilter, name, 0)
+            if call(GetTrainerServiceTypeFilter, name) then pcall(SetTrainerServiceTypeFilter, name, false) end
+        end
         api.changedFilters = nil
     end
     api.After = function(seconds, callback)
