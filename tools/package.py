@@ -23,7 +23,7 @@ def default_target(root, version, addon=None):
 
 def package(root, target, addons=None):
     allowed = addon_names(root)
-    paths = []
+    paths = []  # (source path, archive name)
     for name in (allowed if addons is None else addons):
         if name not in allowed:
             raise ValueError(f'Unknown addon: {name}')
@@ -38,11 +38,17 @@ def package(root, target, addons=None):
             path = addon / entry
             if not path.resolve().is_relative_to(addon.resolve()) or not path.is_file():
                 raise ValueError(f'Invalid addon file: {entry}')
-            paths.append(path)
+            paths.append((path, path.relative_to(root).as_posix()))
+        if name == 'TitanGatheredForeverV3':
+            for notice in ('LICENSE', 'NOTICE'):
+                source = root / notice
+                if not source.is_file():
+                    raise ValueError(f'Missing {notice} at the repository root')
+                paths.append((source, f'TitanGatheredForeverV3/{notice}'))
     target.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(target, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
-        for path in sorted(set(paths)):
-            info = zipfile.ZipInfo(path.relative_to(root).as_posix(), (2026, 11, 6, 0, 0, 0))
+        for path, arcname in sorted(set(paths), key=lambda pair: pair[1]):
+            info = zipfile.ZipInfo(arcname, (2026, 11, 6, 0, 0, 0))
             info.external_attr = 0o100644 << 16
             info.compress_type = zipfile.ZIP_DEFLATED
             archive.writestr(info, path.read_bytes())
