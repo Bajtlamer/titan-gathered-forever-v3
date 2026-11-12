@@ -359,3 +359,7 @@ Pin tooltip reformatted at the owner's request: required skill in brackets right
 ### Smaller tooltip text, 0.5.5-beta, 2026-11-12
 
 After live review of the 0.5.4 layout ("tooltip is OK, maybe a smaller font") the pin tooltip lines other than the NPC name use the small tooltip font, through a new Style.Small helper that restores the original fonts when the tooltip is recycled. Automated checks pass, including a presentation test for both columns and the restore, and a test that exactly the role, status and list rows are shrunk; installed with tools/install.py, all 64 files match and all 14 manifests read 0.5.5-beta. /reload is enough. Live visual review of the size is pending.
+
+### Unlearned recipes window: filter, green NPC names and location tooltip, 0.5.6-beta, 2026-11-12
+
+Added at the owner's request after reviewing the window: a profession filter, green NPC names, and a hover tooltip over the NPC column that lists every source of the recipe with role, price in coin icons, zone and coordinates (observed position, or the seed's Classic world position converted with C_Map.GetMapPosFromWorldPos without an override map and marked not yet confirmed). Automated checks pass, including model tests for the filter and Location, a tooltip test, and a window test that fires the hover scripts; installed with tools/install.py, all 64 files match and all 14 manifests read 0.5.6-beta. /reload is enough. Live review pending: the zone and coordinates of seed NPCs depend on the unverified world-to-map conversion and axis order.

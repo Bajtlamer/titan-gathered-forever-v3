@@ -1,6 +1,11 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.5-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.6-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Unlearned recipes window: profession filter and NPC tooltip, 0.5.6-beta
+
+- A profession filter button (All professions, then each recipe profession) limits the list. Unread-profession notes follow the filter, and paging restarts when it changes.
+- NPC names in the list are green. Hovering the NPC column shows a tooltip for the row: the recipe, then every trainer or vendor that provides it with a green name, its role, the price in coin icons, and the zone with coordinates. Coordinates of NPCs seen in game are exact for where you stood; seed NPCs are converted from the Classic world position and marked not yet confirmed in game. Clicking the column still opens the map.
 
 ## Smaller tooltip text, 0.5.5-beta
 

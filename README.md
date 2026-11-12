@@ -8,7 +8,7 @@ Website: [titan-gathered.com](https://www.titan-gathered.com/).
 
 ## Current beta
 
-The current development candidate is version `0.5.5-beta` and targets **WoW Forever 1.60.1, interface 16001**, with Titan Panel installed separately. It is installed in the local test client. The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); they do not represent a new tagged release. Other WoW editions are outside this project's scope.
+The current development candidate is version `0.5.6-beta` and targets **WoW Forever 1.60.1, interface 16001**, with Titan Panel installed separately. It is installed in the local test client. The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); they do not represent a new tagged release. Other WoW editions are outside this project's scope.
 
 Validation: all Python and Lua suites pass, plus Lua 5.1 compilation of every shipped Lua file. The user confirms the icon configurator works; the full [live acceptance checklist](book-wow-forever-validation.md) remains open.
 
@@ -129,7 +129,7 @@ Record production and Production recording by profession control crafting/cookin
 
 ## Trainers and recipe vendors
 
-Trainers and Recipe vendors are separate map switches in the menu, with a per-profession filter, and they work on the world map and minimap without the gathering map. Pins start from a bundled Classic seed and show as not yet confirmed in game until you open that NPC's window, which records its recipes, required skill and price. Observed data replaces seed data, and unknown values stay unknown. Vendor and trainer tooltips show the NPC name in gold, role and confirmation state in gray (green when confirmed in game), a rule, then one white line per recipe with the required skill in brackets after the name and only the price on the right in the classic gold, silver and copper icon format. Recipes you know are marked once that profession window has been opened. The Unlearned recipes window lists recipes you have not learned and shows whether a trainer or only a vendor provides them. Pins never appear in instances.
+Trainers and Recipe vendors are separate map switches in the menu, with a per-profession filter, and they work on the world map and minimap without the gathering map. Pins start from a bundled Classic seed and show as not yet confirmed in game until you open that NPC's window, which records its recipes, required skill and price. Observed data replaces seed data, and unknown values stay unknown. Vendor and trainer tooltips show the NPC name in gold, role and confirmation state in gray (green when confirmed in game), a rule, then one white line per recipe with the required skill in brackets after the name and only the price on the right in the classic gold, silver and copper icon format. Recipes you know are marked once that profession window has been opened. The Unlearned recipes window lists recipes you have not learned and shows whether a trainer or only a vendor provides them. It has a profession filter, NPC names in green, and hovering an NPC name shows every source of that recipe with its zone, coordinates and price; clicking a row opens the map. Pins never appear in instances.
 
 ## Plan recipe materials
 

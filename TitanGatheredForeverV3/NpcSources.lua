@@ -82,10 +82,14 @@ function Npc.Record(npcID)
     return record
 end
 
+local function axes(a, b)
+    if ns.settings and ns.settings.npcAxisSwap == true then return b, a end
+    return a, b
+end
+
 function Npc.WorldToMap(continent, a, b, mapID)
     if not supported[continent] or not C_Map or not C_Map.GetMapPosFromWorldPos or not CreateVector2D then return end
-    local first, second = a, b
-    if ns.settings and ns.settings.npcAxisSwap == true then first, second = b, a end
+    local first, second = axes(a, b)
     local ok, _, position = pcall(C_Map.GetMapPosFromWorldPos, continent, CreateVector2D(first, second), mapID)
     if not ok or type(position) ~= 'table' or not position.GetXY then return end
     local x, y = position:GetXY()
@@ -239,6 +243,56 @@ function Npc.FillTooltip(tooltip, node)
     end
 end
 
+-- Where to find an NPC: zone name and coordinates in percent. Observed position first; a seed NPC is
+-- converted from world coordinates to the best map the client knows for that point.
+function Npc.Location(npcID)
+    local saw, seed = observed()[npcID], seedNpcs()[npcID]
+    local mapID, x, y
+    if saw and saw.mapID then
+        mapID, x, y = saw.mapID, saw.x, saw.y
+    elseif seed and supported[seed.m] and C_Map and C_Map.GetMapPosFromWorldPos and CreateVector2D then
+        local first, second = axes(seed.x, seed.y)
+        local ok, resolved, position = pcall(C_Map.GetMapPosFromWorldPos, seed.m, CreateVector2D(first, second))
+        if ok and finite(resolved) and type(position) == 'table' and position.GetXY then
+            local px, py = position:GetXY()
+            if finite(px) and finite(py) then mapID, x, y = resolved, px, py end
+        end
+    end
+    if not mapID or not finite(x) or not finite(y) then return nil end
+    local info = C_Map and C_Map.GetMapInfo and C_Map.GetMapInfo(mapID)
+    local zone = type(info) == 'table' and type(info.name) == 'string' and info.name or ('Map ' .. mapID)
+    return { mapID = mapID, zone = zone, x = x * 100, y = y * 100, confirmed = saw ~= nil }
+end
+
+-- Tooltip for a row of the unlearned recipes window: every source with a green name, price and location.
+function Npc.FillSourcesTooltip(tooltip, row)
+    local Style = ns.Style
+    local function small() if Style.Small then Style.Small(tooltip) end end
+    tooltip:AddLine(Style.Text(Style.white, row.name))
+    local shown = math.min(#row.sources, 6)
+    for index = 1, shown do
+        local source = row.sources[index]
+        local right = source.price and Npc.CoinIcons(source.price) or Style.Text(Style.gray, 'price unknown')
+        tooltip:AddDoubleLine(Style.Text(Style.green, source.name) .. ' ' .. Style.Text(Style.gray, '(' .. source.role .. ')'), right)
+        small()
+        local place = Npc.Location(source.npcID)
+        if place then
+            local text = string.format('%s %.1f, %.1f', place.zone, place.x, place.y)
+            if not place.confirmed then text = text .. ', not yet confirmed in game' end
+            tooltip:AddLine(Style.Text(Style.gray, text))
+        else
+            tooltip:AddLine(Style.Text(Style.gray, 'Location unknown'))
+        end
+        small()
+    end
+    if #row.sources > shown then
+        tooltip:AddLine(Style.Text(Style.gray, string.format('and %d more sources', #row.sources - shown)))
+        small()
+    end
+    tooltip:AddLine(Style.Text(Style.gray, 'Click the row to open the map.'))
+    small()
+end
+
 -- Item recipe name for matching, or nil while the client is still loading the item.
 function Npc.ItemRecipeName(itemID)
     local name = C_Item and C_Item.GetItemInfo and C_Item.GetItemInfo(itemID)
@@ -251,12 +305,14 @@ local function isRankSpell(name)
     local prefix = type(name) == 'string' and name:match('^(%a+) ')
     return prefix ~= nil and rankPrefixes[prefix] == true
 end
-local recipeKinds = { Alchemy = true, Blacksmithing = true, Cooking = true, Enchanting = true,
-    Engineering = true, FirstAid = true, Leatherworking = true, Mining = true, Tailoring = true }
+Npc.RecipeKinds = { 'Alchemy', 'Blacksmithing', 'Cooking', 'Enchanting', 'Engineering', 'FirstAid',
+    'Leatherworking', 'Mining', 'Tailoring' }
+local recipeKinds = {}
+for _, kind in ipairs(Npc.RecipeKinds) do recipeKinds[kind] = true end
 
 -- Rows: unlearned recipes with a known source. Second result: professions never read for this
 -- character (their recipes are not listed). Third: vendor recipes whose item names are still loading.
-function Npc.Unlearned(character, vendorOnly)
+function Npc.Unlearned(character, vendorOnly, kindFilter)
     local K = ns.KnownRecipes
     local byKey, rows, unreadSet, pending = {}, {}, {}, 0
     local ids, seen = {}, {}
@@ -264,7 +320,7 @@ function Npc.Unlearned(character, vendorOnly)
     for id in pairs(observed()) do if not seen[id] then ids[#ids + 1] = id end end
     table.sort(ids)
     local function add(npcID, npcName, kind, display, skill, price, role)
-        if not recipeKinds[kind] then return end
+        if not recipeKinds[kind] or (kindFilter and kind ~= kindFilter) then return end
         local known = K and K.IsKnown(character, kind, display)
         if known == nil then unreadSet[kind] = true; return end
         if known == true then return end
