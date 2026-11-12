@@ -22,7 +22,7 @@ Implemented:
 - Per-character lifetime obtained-item totals, with an optional combined-character view. Reports open one at a time and retain their own scope, filter and page. Lifetime materials, observed chances and profession actions use compact columns with wrapped rows and pagination. Lifetime materials show combined acquired/crafted quantities with a compact source count. Use + or - to expand/collapse individual source rows, each with its own source/zone, chance and hit/sample denominator. All sources remain accessible across pages, with material context repeated on continuation pages. Click a material for source actions. Acquisition occurrences remain stored/exported separately; older incomplete occurrence totals remain lower bounds or unknown.
 - Observed acquisition rates for readable loot sources, including mining and herbalism byproducts, skinning, fishing and supported ordinary material drops.
 - Outdoor world-map and minimap source icons, controlled by profession and material. Material visibility is shared across profession menus: toggling Linen Cloth under either First Aid or Tailoring affects all eligible cloth spots on both maps. Show all / Hide all applies to the selected submenu’s materials across professions; profession-wide switches remain independent. Clearing map spots preserves lifetime statistics. Material icons use the original WoW artwork, default to no border, and remain centered at recorded/projected coordinates, including when markers overlap. Appearance is configurable.
-- PvP Board (`/tgf pvp` or Titan > History and sources) shows client lifetime honorable kills and rank, plus separate addon-observed honorable kills and per-kill honor estimates by outdoor, Battleground and arena context. Other honor awards are excluded from these estimates. PvP map/minimap spots require an outdoor honorable-kill message and honor assist credit; Battleground and arena events never create map spots. PvP deaths require a hostile player or player-controlled source in the death recap and are tracked after this feature is enabled. The client lifetime kill total is not added to addon counters. History and sources > Record PvP lifetime history independently controls addon kill/death recording and new PvP spots, preserving earlier observations and native totals.
+- PvP Board (Titan > History and sources) shows client lifetime honorable kills and rank, plus separate addon-observed honorable kills and per-kill honor estimates by outdoor, Battleground and arena context. Other honor awards are excluded from these estimates. PvP map/minimap spots require an outdoor honorable-kill message and honor assist credit; Battleground and arena events never create map spots. PvP deaths require a hostile player or player-controlled source in the death recap and are tracked after this feature is enabled. The client lifetime kill total is not added to addon counters. History and sources > Record PvP lifetime history independently controls addon kill/death recording and new PvP spots, preserving earlier observations and native totals.
 - Mining map markers prioritize primary ore rather than stones/gems. All outputs remain in statistics; old overlapping byproduct pins are hidden only where ore is recorded.
 - Disenchanting outcomes grouped by input item when its identity is readable. Enchanting creates no map spots.
 - Separate per-character action counters for Mining, Herbalism, Skinning, Fishing and Disenchanting, with combined reports and independent recording controls. Real-client event order remains under validation.
@@ -30,7 +30,7 @@ Implemented:
 - live recipe reagent plans with required/available/missing quantities, material-limited operation estimates, cached-inventory labels and personal source evidence. Native reagent tooltips show a compact selected-recipe summary.
 - schema-versioned JSON statistics export with current/combined selection, identity opt-in and a manual copy window. Large snapshots use numbered parts and a local reconstruction tool.
 - faction-aware world-map flight points, including undiscovered routes. Markers retain native artwork and use green for confirmed flight-master visits, amber for client-reported undiscovered nodes and gray for unconfirmed discovery. Only opening the taxi map at the current master confirms that node for the current character; previously visited nodes require a new observed visit. Map-wide false discovery flags do not confirm discovery. The Flight points menu contains its visibility switch.
-- Small icon appearance window: `/tgf icons` or Titan menu > Icon appearance. Configure world-map materials, minimap materials and flight points independently: 12–40 px, circular crop or full image, and an optional thin gold outline. Preview before Apply; Cancel discards edits.
+- Small icon appearance window: Titan menu > Icon appearance. Configure world-map materials, minimap materials and flight points independently: 12–40 px, circular crop or full image, and an optional thin gold outline. Preview before Apply; Cancel discards edits.
 - Independent profession addons, optional Auction Items and a shared core.
 
 Open issues and next work:
@@ -58,11 +58,11 @@ Lifetime history begins with acquisitions recorded in `0.4.0`. Earlier versions 
 
 Profession actions use separate schema-1 storage. An attempt requires a readable cast identity and a recognized start, channel start, success, failure or interruption event. Duplicate events share one attempt. A mining, herbalism, skinning or disenchanting completion means spell success, regardless of loot quantity. Fishing spell success only launches the line; its completion requires a confirmed fishing-loot window, even if you leave the loot behind. Stops without a confirmed result, explicit failures, interruptions and unresolved observations are reported separately. A stop does not prove manual cancellation or failure.
 
-`/tgf actions` shows the first recorded action time for each profession, current-character or combined counts, and profession filters. Combined coverage begins at the earliest included character observation; it does not mean all characters recorded continuously since then. Recording gaps are not reconstructed. Reloads, world transitions and action-recording changes seal pending observations without inventing outcomes. Recent cast receipts are bounded to 1024 per character; lifetime aggregates remain. These counters do not change source-rate percentages or reconstruct actions from earlier history.
+Profession actions (Titan > History and sources) shows the first recorded action time for each profession, current-character or combined counts, and profession filters. Combined coverage begins at the earliest included character observation; it does not mean all characters recorded continuously since then. Recording gaps are not reconstructed. Reloads, world transitions and action-recording changes seal pending observations without inventing outcomes. Recent cast receipts are bounded to 1024 per character; lifetime aggregates remain. These counters do not change source-rate percentages or reconstruct actions from earlier history.
 
 Crafting/cooking production also uses separate schema-1 storage. It requires a readable player cast start while recording is enabled and live recipe metadata from the corresponding profession. Supported item recipes include Cooking, Alchemy, Blacksmithing, Engineering, First Aid, Leatherworking, Tailoring, smelting under Mining and item-producing Enchanting recipes that the client identifies as ordinary item recipes. Recraft, dummy, gathering, enchanting-application and salvage recipe flags are excluded. Unknown metadata or protected fields do not produce guessed records.
 
-`/tgf production` separates completed casts from operations with matched dedicated crafted-item results. Item totals use actual reported quantities, not requested queue lengths, bag changes, loot chat or recipe defaults. Click a recipe for observed output-quantity distributions, failed/interrupted/unresolved attempts and matched-operation counts. Bonus and multicraft counts use only readable explicit fields as denominators; quantity variation alone is not labeled a proc. These observations do not establish server probabilities or complete production coverage.
+Crafting and cooking (Titan > History and sources) separates completed casts from operations with matched dedicated crafted-item results. Item totals use actual reported quantities, not requested queue lengths, bag changes, loot chat or recipe defaults. Click a recipe for observed output-quantity distributions, failed/interrupted/unresolved attempts and matched-operation counts. Bonus and multicraft counts use only readable explicit fields as denominators; quantity variation alone is not labeled a proc. These observations do not establish server probabilities or complete production coverage.
 
 Production result events have no recipe ID. Matching therefore requires an unambiguous recent output/recipe context and a positive operation identity, within 60 seconds of the cast start. Secondary outputs arriving before a primary binding, first-craft rewards, unpaired results and ambiguous recipes are skipped. After a recording gap, recent sealed casts can suppress new output attribution for the remainder of that window while completed casts remain counted. Reloads preserve aggregates and seal pending contexts. Ordinary recipe identities used for recrafts and the actual Forever event sequence still require live validation. Lifetime material rows and item tooltips show crafted quantities separately from acquired loot; crafting creates no map spots or loot-rate samples.
 
@@ -107,19 +107,19 @@ The tool changes the old `TitanGathered2ForeverDB` assignment to `TitanGatheredF
 
 Right-click the Titan entry for Display, Professions, Additional items, Icon appearance, Flight points, Trainers and recipe vendors, Gathering map, History and sources, and Diagnostics settings. History recording and map visibility have separate controls.
 
-- `/tgf icons`: small icon appearance window with separate World map, Minimap and Flights settings.
-- `/tgf history`: lifetime materials window.
-- `/tgf chances`: observed acquisition rates and source samples.
-- `/tgf actions`: observed profession attempts and results.
-- `/tgf production`: crafting/cooking recipe operations and observed outputs.
-- `/tgf recipes`: window of unlearned recipes with a trainer or vendor source.
-- `/tgf npc` and `/tgf npc swap`: name the nearest trainer or vendor pin; flip the world axes if pins look mirrored.
-- `/tgf recipe <recipeID> [operations]`: reagent plan for a recipe; omit the ID after selecting a native profession recipe.
-- `/tgf export`: versioned statistics snapshot for manual copying.
-- `/tgf settings`: configuration menu.
-- `/tgf refresh`: refresh accessible inventory.
-- `/tgf status`: explicit diagnostic report.
-- `/tgf next` and `/tgf prev`: page the Titan summary.
+Everything that needs no parameter is in the right-click menu of the Titan entry:
+
+- Display: Next summary page and Previous summary page.
+- Icon appearance: the small icon appearance window.
+- Trainers and recipe vendors: map toggles, profession filter, Unlearned recipes, and Pin placement (find the nearest pin, swap map axes if pins look mirrored).
+- History and sources: Lifetime materials, Observed chances, Profession actions, Crafting and cooking, PvP Board, Export statistics and recording switches.
+- Diagnostics: Debug mode, Refresh inventory and Show status report.
+
+A command is only needed when it takes a parameter:
+
+- `/tgf recipe <recipeID> [operations]`: reagent plan for a recipe; omit the ID after selecting a native profession recipe. Plan selected recipe reagents in the menu does the same for the selected recipe.
+
+The earlier parameterless commands (`/tgf settings`, `icons`, `history`, `chances`, `actions`, `production`, `pvp`, `recipes`, `export`, `refresh`, `status`, `next`, `prev`, `npc`, `npc swap`) still work as shortcuts but are no longer documented, because the menu covers them.
 
 Click a material in a report for its recorded sources. Use **TGF v3 spots** on the world map to clear a category from the displayed map after confirmation. Debug mode prints local diagnostics and is normally off.
 
@@ -145,7 +145,7 @@ Each reagent links to personal acquisition evidence and recorded map positions. 
 
 ## Export statistics
 
-Use `/tgf export` or Export statistics under History and sources. The default is This character with names and GUIDs excluded. All characters retains per-character policy/coverage records plus a weighted combined summary. Include names/GUIDs is an explicit opt-in that resets on closing. Numeric game IDs, map IDs and gameplay timestamps remain in identity-excluded exports.
+Use Export statistics under History and sources. The default is This character with names and GUIDs excluded. All characters retains per-character policy/coverage records plus a weighted combined summary. Include names/GUIDs is an explicit opt-in that resets on closing. Numeric game IDs, map IDs and gameplay timestamps remain in identity-excluded exports.
 
 Select text, copy with Ctrl+C or Cmd+C and save UTF-8 JSON outside addon folders. The addon sends nothing. Its snapshot stays fixed while copying; Generate captures a new one. Small exports are complete schema-1 JSON. Large exports are numbered JSON parts: save every part from the same snapshot and reconstruct with `tools/read_export.py`. The reader rejects missing, duplicate, mixed or corrupt parts and refuses to overwrite files.
 

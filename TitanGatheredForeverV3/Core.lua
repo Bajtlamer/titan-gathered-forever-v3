@@ -285,40 +285,28 @@ local function start()
                             'TRADE_SKILL_DATA_SOURCE_CHANGING', 'TRADE_SKILL_DATA_SOURCE_CHANGED',
                             'TRADE_SKILL_DETAILS_UPDATE', 'TRADE_SKILL_CLOSE',
                             'TRAINER_SHOW', 'MERCHANT_SHOW' }) do frame:RegisterEvent(event) end
-    SlashCmdList.TITANGATHEREDFOREVERV3 = function(command)
-        if command=='icons' then ns.IconConfig.Show(); return end
-        if command=='export'then ns.ExportView.Show();return end
-        if command=='recipe'or command:match('^recipe%s')then
-            local id,target=command:match('^recipe%s+(%d+)%s*(%d*)%s*$')
-            if command=='recipe'then id=ns.Crafting.selectedID;target=1 end
-            if not id then ns.Print('Usage: /tgf recipe <recipeID> [operations], or select a recipe and use /tgf recipe.');return end
-            ns.CraftingView.Show(tonumber(id),tonumber(target)or 1);return
-        end
-        if command == 'npc' or command == 'npc swap' then
-            if command == 'npc swap' then
-                ns.settings.npcAxisSwap = not ns.settings.npcAxisSwap
-                ns.NpcSources.Invalidate(); ns.Map.Update(); ns.Minimap.Update()
-                ns.Print('NPC world axes swapped: ' .. tostring(ns.settings.npcAxisSwap))
-            end
-            local node, distance, mapID = ns.NpcSources.Nearest()
-            if node then
-                local record = ns.NpcSources.Record(node.npcID)
-                ns.Print(string.format('Nearest NPC pin on map %s: %s (%s), %.1f%% of the map away; axis swap %s.',
-                    tostring(mapID), record.name, node.kind, distance * 100, tostring(ns.settings.npcAxisSwap)))
-            else ns.Print('No visible NPC pin on this map.') end
-            return
-        end
-        if command == 'recipes' then ns.RecipeBrowser.Show(); return end
-        if command == 'refresh' then ns.ScheduleRefresh(); return end
-        if command == 'next' or command == 'prev' then
-            ns.Titan.page = math.max(1, ns.Titan.page + (command == 'next' and 1 or -1))
-            ns.Titan.Refresh(); return
-        end
-        if command == 'history' or command == 'chances' or command == 'actions' or command == 'production' or command == 'pvp' then ns.Reports.Show(command); return end
-        if command == 'settings' then ns.Titan.Menu(UIParent); return end
-        local help = 'Commands: /tgf settings, /tgf icons, /tgf refresh, /tgf next, /tgf prev, /tgf history, /tgf chances, /tgf actions, /tgf production, /tgf recipe <recipeID> [operations], /tgf export, /tgf npc, /tgf npc swap, /tgf recipes, /tgf status.'
-        if command ~= 'status' and not ns.settings.debugMode then ns.Print(help); return end
-        local report = command == 'status' and ns.Print or ns.Debug
+    -- Shared by the right-click menu and the slash commands so each function has one implementation.
+    function ns.ChangeSummaryPage(delta)
+        ns.Titan.page = math.max(1, ns.Titan.page + delta)
+        ns.Titan.Refresh()
+    end
+    function ns.NpcNearest()
+        local node, distance, mapID = ns.NpcSources.Nearest()
+        if node then
+            local record = ns.NpcSources.Record(node.npcID)
+            ns.Print(string.format('Nearest NPC pin on map %s: %s (%s), %.1f%% of the map away; axis swap %s.',
+                tostring(mapID), record.name, node.kind, distance * 100, tostring(ns.settings.npcAxisSwap)))
+        else ns.Print('No visible NPC pin on this map.') end
+    end
+    function ns.NpcToggleAxes()
+        ns.settings.npcAxisSwap = not ns.settings.npcAxisSwap
+        ns.NpcSources.Invalidate(); ns.Map.Update(); ns.Minimap.Update()
+        ns.Print('NPC world axes swapped: ' .. tostring(ns.settings.npcAxisSwap))
+        ns.NpcNearest()
+    end
+    local help = 'Most functions are in the right-click menu of the Titan entry. Command with a parameter: /tgf recipe <recipeID> [operations].'
+    function ns.ShowStatus(toChat)
+        local report = toChat and ns.Print or ns.Debug
         local count = ns.inventory:Get(0)
         report(string.format('Titan Gathered Forever v3 %s; client %s.%s; bank %s; catalogue %d materials / %d recipes.',
             C_AddOns.GetAddOnMetadata(addonName, 'Version') or 'unknown', version, build,
@@ -338,6 +326,25 @@ local function start()
             .. '; world map ' .. (world and tostring(world.mapID or 'not opened') or 'not attached')
             .. ' / icons ' .. (world and world.visibleCount or 0)
             .. '; minimap icons ' .. (mini and mini.visibleCount or 0))
+    end
+    SlashCmdList.TITANGATHEREDFOREVERV3 = function(command)
+        if command=='icons' then ns.IconConfig.Show(); return end
+        if command=='export'then ns.ExportView.Show();return end
+        if command=='recipe'or command:match('^recipe%s')then
+            local id,target=command:match('^recipe%s+(%d+)%s*(%d*)%s*$')
+            if command=='recipe'then id=ns.Crafting.selectedID;target=1 end
+            if not id then ns.Print('Usage: /tgf recipe <recipeID> [operations], or select a recipe and use /tgf recipe.');return end
+            ns.CraftingView.Show(tonumber(id),tonumber(target)or 1);return
+        end
+        if command == 'npc' then ns.NpcNearest(); return end
+        if command == 'npc swap' then ns.NpcToggleAxes(); return end
+        if command == 'recipes' then ns.RecipeBrowser.Show(); return end
+        if command == 'refresh' then ns.ScheduleRefresh(); return end
+        if command == 'next' or command == 'prev' then ns.ChangeSummaryPage(command == 'next' and 1 or -1); return end
+        if command == 'history' or command == 'chances' or command == 'actions' or command == 'production' or command == 'pvp' then ns.Reports.Show(command); return end
+        if command == 'settings' then ns.Titan.Menu(UIParent); return end
+        if command ~= 'status' and not ns.settings.debugMode then ns.Print(help); return end
+        ns.ShowStatus(command == 'status')
     end
     SLASH_TITANGATHEREDFOREVERV31 = '/tgf'
     ns.ScheduleRefresh()

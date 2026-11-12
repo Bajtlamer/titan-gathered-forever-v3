@@ -355,6 +355,34 @@ test('trainer and recipe vendor menu toggles update their settings and redraw pi
     eq(record.selected(), true); record.callback(); eq(ns.settings.recordNpcs, false)
 end)
 
+test('menu offers every chat function that needs no parameter', function()
+    local s, ns = fixture(); s:Start()
+    s.broker.OnClick({}, 'RightButton')
+    local buttons = s.menu.buttons
+    for _, label in ipairs({ 'Refresh inventory', 'Show status report', 'Next summary page', 'Previous summary page',
+        'Find nearest trainer or vendor pin', 'Unlearned recipes...' }) do
+        assert(type(buttons[label]) == 'function', 'menu lacks ' .. label)
+    end
+    local axes = s.menu.checkboxes['Swap map axes (use if pins look mirrored)']
+    assert(axes, 'menu lacks the axis swap checkbox')
+    local before = #s.messages
+    buttons['Show status report']()
+    assert(#s.messages > before and contains(s.messages, 'Titan Gathered Forever v3'), 'status report not printed')
+    ns.Titan.page = 1
+    buttons['Next summary page'](); eq(ns.Titan.page, 2)
+    buttons['Previous summary page'](); eq(ns.Titan.page, 1)
+    buttons['Previous summary page'](); eq(ns.Titan.page, 1)
+    eq(axes.selected(), false); axes.callback(); eq(ns.settings.npcAxisSwap, true); eq(axes.selected(), true)
+    axes.callback(); eq(ns.settings.npcAxisSwap, false)
+    before = #s.messages
+    buttons['Find nearest trainer or vendor pin']()
+    assert(#s.messages > before, 'nearest pin gave no feedback')
+    local scheduled, original = 0, ns.ScheduleRefresh
+    ns.ScheduleRefresh = function() scheduled = scheduled + 1 end
+    buttons['Refresh inventory'](); eq(scheduled, 1)
+    ns.ScheduleRefresh = original
+end)
+
 test('private Titan summary omits confusing count labels and does not repeat shared reagents', function()
     local s, ns = fixture(); s:Start()
     s:Event('BANKFRAME_OPENED'); s:Flush()
@@ -711,7 +739,9 @@ test('explicit status works with debug disabled while normal commands stay quiet
     local s, ns = fixture(); s:Start()
     SlashCmdList.TITANGATHEREDFOREVERV3('refresh'); s:Flush(); eq(#s.messages, 0)
     SlashCmdList.TITANGATHEREDFOREVERV3('')
-    eq(#s.messages, 1); assert(s.message:find('/tgf status', 1, true))
+    eq(#s.messages, 1); assert(s.message:find('/tgf recipe <recipeID> [operations]', 1, true))
+    assert(s.message:find('right-click menu', 1, true), 'help must point to the menu')
+    assert(not s.message:find('/tgf refresh', 1, true), 'help must not list commands that need no parameter')
     local before = #s.messages
     SlashCmdList.TITANGATHEREDFOREVERV3('status')
     eq(#s.messages, before + 4); assert(s.message:find('Gathering map:', 1, true))

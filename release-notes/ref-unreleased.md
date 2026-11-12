@@ -1,6 +1,11 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.4.12-alpha source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.4.13-alpha source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Menu covers every parameterless command, 0.4.13-alpha
+
+- The right-click menu now offers the functions that were only reachable through chat commands: Refresh inventory and Show status report (Diagnostics), Next and Previous summary page (Display), and Find nearest trainer or vendor pin plus a Swap map axes checkbox (Trainers and recipe vendors, Pin placement).
+- Chat commands and the menu share one implementation. /tgf recipe <recipeID> [operations] stays as the documented command because it needs a parameter. The other commands still work as undocumented shortcuts, and the in-game help now points to the menu.
 
 ## Trainers and recipe vendors, 0.4.12-alpha
 
