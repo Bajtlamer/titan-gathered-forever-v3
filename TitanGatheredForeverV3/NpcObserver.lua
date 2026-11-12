@@ -107,11 +107,11 @@ function Obs:ReadTrainer(event)
         end
         if self.api.EnableFilters and self.api.EnableFilters() then
             -- Probably a trainer with nothing left to teach: the window hides known services. Read again once the
-            -- client has rebuilt the list, then put the filters back.
+            -- client has rebuilt the list. The filters stay on while the window is open (putting them back at once
+            -- made the list flash and empty) and are restored when it closes.
             self:Log(event, 'filters-on', { npc = npc.id, services = 0, first = table.concat(self.api.filterReport or {}, ' | ') })
             self.api.After(0.3, function()
                 if self.trainerOpen then self:ReadTrainer('TRAINER_FILTER') end
-                if self.api.RestoreFilters then self.api.RestoreFilters() end
             end)
             return
         end

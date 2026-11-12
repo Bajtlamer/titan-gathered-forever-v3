@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.22-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.23-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## No flashing trainer list, 0.5.23-beta
+
+- For a trainer with nothing left to teach, the trainer window showed the known services for a moment and then emptied, because the filters were put back right after the read. The filters now stay on while that window is open and are restored when it closes.
 
 ## Trainers with all services known are recorded, 0.5.22-beta
 
