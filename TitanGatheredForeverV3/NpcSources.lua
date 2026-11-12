@@ -235,6 +235,25 @@ function Npc.CanLearn(skills, kind, required)
     return (skills[kind] or 0) >= required
 end
 
+-- Profession rank spells ("Journeyman Fishing") are not recipes: no recipe list contains them. They are known
+-- when the profession's skill cap has reached the tier.
+local rankCaps = { Apprentice = 75, Journeyman = 150, Expert = 225, Artisan = 300, Master = 375 }
+local function isRankSpell(name)
+    local prefix = type(name) == 'string' and name:match('^(%a+) ')
+    return prefix ~= nil and rankCaps[prefix] ~= nil
+end
+-- true/false from the skill cap, nil when the professions cannot be read.
+function Npc.RankSpellKnown(kind, name)
+    local cap = isRankSpell(name) and rankCaps[name:match('^(%a+) ')]
+    if not cap or not ns.Professions or not ns.Professions.Rows then return nil end
+    local ok, rows = pcall(ns.Professions.Rows)
+    if not ok or type(rows) ~= 'table' then return nil end
+    for _, row in ipairs(rows) do
+        if row.kind == kind then return type(row.maxRank) == 'number' and row.maxRank >= cap end
+    end
+    return false
+end
+
 -- Tooltip colours: gold is the NPC name, white the list entries, gray (and green when confirmed) the
 -- additional information. The header is separated from the list by a rule.
 function Npc.FillTooltip(tooltip, node)
@@ -275,9 +294,12 @@ function Npc.FillTooltip(tooltip, node)
         local row = ordered[index]
         local name = row.itemID and ns.ItemName(row.itemID) or row.name or 'Unknown recipe'
         local kind = row.kind or record.profession
-        local known = ns.KnownRecipes and ns.KnownRecipes.IsKnown(ns.characterID, kind, name)
+        local known
+        local rank = isRankSpell(name)
+        if rank then known = Npc.RankSpellKnown(kind, name)
+        else known = ns.KnownRecipes and ns.KnownRecipes.IsKnown(ns.characterID, kind, name) end
         -- nil: the profession was never read for this character, so nothing can be said about the recipe.
-        if ns.KnownRecipes and known == nil and kind and not unread[kind] then
+        if not rank and ns.KnownRecipes and known == nil and kind and not unread[kind] then
             unread[kind] = true; unreadKinds[#unreadKinds + 1] = Npc.Label(kind)
         end
         local can = Npc.CanLearn(skills, row.kind or record.profession, row.skill)
@@ -367,11 +389,6 @@ function Npc.ItemRecipeName(itemID)
     ns.ItemName(itemID) -- requests the item data; the window refreshes on ITEM_DATA_LOAD_RESULT
 end
 
-local rankPrefixes = { Apprentice = true, Journeyman = true, Expert = true, Artisan = true, Master = true }
-local function isRankSpell(name)
-    local prefix = type(name) == 'string' and name:match('^(%a+) ')
-    return prefix ~= nil and rankPrefixes[prefix] == true
-end
 Npc.RecipeKinds = { 'Alchemy', 'Blacksmithing', 'Cooking', 'Enchanting', 'Engineering', 'FirstAid',
     'Leatherworking', 'Mining', 'Tailoring' }
 local recipeKinds = {}

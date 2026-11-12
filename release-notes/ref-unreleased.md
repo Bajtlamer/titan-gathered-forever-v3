@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.12-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.13-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Rank spells in trainer tooltips, 0.5.13-beta
+
+- Fix: the Fishing trainer tooltip said "Learned status unknown: open the profession window once (Fishing)" even after the Fishing window was opened. Fishing has no recipe list, so it can never be read that way, and the trainer only teaches rank spells ("Journeyman Fishing"). Rank spells (Apprentice, Journeyman, Expert, Artisan, Master) are now judged by the profession skill cap (75, 150, 225, 300, 375) and are shown as learned or not without that note. The same applies to the rank rows of every other profession trainer, which were previously shown as not learned.
 
 ## Learned status in trainer and vendor tooltips, 0.5.12-beta
 

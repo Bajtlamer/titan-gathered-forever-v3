@@ -11,7 +11,7 @@ from urllib.parse import urlsplit
 PROFESSIONS = {'Alchemy', 'Blacksmithing', 'Cooking', 'Enchanting', 'Engineering',
                'First Aid', 'Fishing', 'Herbalism', 'Leatherworking', 'Mining', 'Skinning', 'Tailoring'}
 MODULE_IDS = {'First Aid': 'FirstAid', 'Herbalism': 'Herbs'}
-VERSION = '0.5.12-beta'
+VERSION = '0.5.13-beta'
 MINING_ORES = {2770, 2771, 2772, 2775, 2776, 3858, 7911, 10620, 11370, 18562}
 SCARCE_MINERALS = {249391, 249425, 249426}
 SCARCE_HERBS = {249274, 249399, 249424}

@@ -389,3 +389,7 @@ Owner request: open the statistics windows from the minimap button, scroll inste
 ### Learned status in tooltips, 0.5.12-beta, 2026-11-12
 
 Owner feedback: trainer and vendor tooltips did not make clear whether the recipe is already learned. The tooltip had only a small green "(known)" tag and said nothing when a profession was never read. Known recipes are now dimmed with a green "learned" tag, and a gray footer lists the professions whose learned status is unknown (open that profession window once). Automated checks pass (npc_sources, 24 checks). Live review pending.
+
+### Rank spells in tooltips, 0.5.13-beta, 2026-11-12
+
+Owner report: the Fishing trainer tooltip kept saying the learned status is unknown although the profession window was opened many times. The saved log showed recipe reads for FirstAid, Cooking, Mining and Engineering but never Fishing, and the Fishing trainer record holds one service, "Journeyman Fishing" (trainer 1683, services=1). Fishing has no trade skill recipe list, so KnownRecipes never records it, and rank spells are in no recipe list anywhere. NpcSources.RankSpellKnown now decides rank spells from Professions maxRank against the tier cap, and the unread note ignores them. Automated checks pass (npc_sources, 25 checks). Live review pending.
