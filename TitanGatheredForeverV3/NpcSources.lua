@@ -86,7 +86,7 @@ function Npc.Record(npcID)
         local rows = {}
         if saw and saw.trainer then
             for _, row in ipairs(saw.trainer) do
-                rows[#rows + 1] = { name = row.name, skill = row.skill, cost = row.cost, observed = true }
+                rows[#rows + 1] = { name = row.name, skill = row.skill, cost = row.cost, level = row.level, observed = true }
             end
         elseif seed and seed.t then
             for _, row in ipairs(seed.t) do
@@ -243,6 +243,11 @@ local function isRankSpell(name)
     return prefix ~= nil and rankCaps[prefix] ~= nil
 end
 -- true/false from the skill cap, nil when the professions cannot be read.
+-- Character level needed for a rank spell when the trainer window never reported it (classic values).
+local rankLevels = { Journeyman = 10, Expert = 20, Artisan = 35, Master = 50 }
+function Npc.RankLevel(row)
+    return row.level or rankLevels[row.name:match('^(%a+) ') or '']
+end
 function Npc.RankSpellKnown(kind, name)
     local cap = isRankSpell(name) and rankCaps[name:match('^(%a+) ')]
     if not cap or not ns.Professions or not ns.Professions.Rows then return nil end
@@ -405,6 +410,8 @@ function Npc.Unlearned(character, vendorOnly, kindFilter)
     for id in pairs(observed()) do if not seen[id] then ids[#ids + 1] = id end end
     table.sort(ids)
     local skills = Npc.Skills()
+    local playerLevel = UnitLevel and UnitLevel('player')
+    if type(playerLevel) ~= 'number' then playerLevel = nil end
     local function add(npcID, npcName, kind, display, skill, price, role, rank)
         if not recipeKinds[kind] or (kindFilter and kind ~= kindFilter) then return end
         if not rank then
@@ -432,7 +439,8 @@ function Npc.Unlearned(character, vendorOnly, kindFilter)
             if not isRankSpell(row.name) then
                 add(id, record.name, record.profession, row.name, row.skill, row.cost, 'Trainer')
             elseif skills and skills[record.profession] and type(row.skill) == 'number' and row.skill <= skills[record.profession]
-                and Npc.RankSpellKnown(record.profession, row.name) == false then
+                and Npc.RankSpellKnown(record.profession, row.name) == false
+                and not (playerLevel and (Npc.RankLevel(row) or 0) > playerLevel) then
                 local cap = rankCaps[row.name:match('^(%a+) ')]
                 local best = ranks[record.profession]
                 if not best or cap < best.cap then best = { cap = cap, entries = {} }; ranks[record.profession] = best end

@@ -402,3 +402,7 @@ Owner request: show the trainers where the next skill level can be learned once 
 ### Skill reading on rank rows, 0.5.15-beta, 2026-11-12
 
 Owner report: with Fishing 75/75 the Warg Deepwater trainer is circled although the owner believes he teaches only up to 75. The saved record of trainer 1683 (observed, 21:56:31, mapID 1432) lists one service, Journeyman Fishing, state available, skill requirement 50 met, cost 500, so the recorded data says he teaches Journeyman. The rank logic already uses rank and maxRank from Professions.Rows (Fishing 75/75 selects Journeyman). To make the input visible, rank rows now show "Your <profession> skill is a / b." at the top of the hover tooltip. Open: what the Warg trainer window really lists for the owner, and which skill reading the tooltip prints.
+
+### Character level for rank rows, 0.5.16-beta, 2026-11-12
+
+Owner screenshot of Warg Deepwater (Fishing 75/75, character level 14): the trainer window lists Journeyman Fishing, Requires: Level 10, Fishing (50), 5 silver, so the recorded and seed data match the game and Warg correctly appears as the source of the next rank. The screenshot exposed an unchecked requirement, the character level. NpcObserver now records the level per trainer service and NpcSources hides rank rows above the player level, with classic tier levels as the fallback. The seed carries no level (its fifth field is 0), so regenerating it would need the pinned dump. Automated checks pass.

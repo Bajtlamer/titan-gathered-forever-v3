@@ -36,13 +36,14 @@ end)
 test('trainer window stores the dominant profession and its services', function()
     local ns, observer = fresh({ TrainerServices = function() return {
         { name = 'Elixir of Minor Defense', cost = 100, skillName = 'Alchemy', skillRank = 1 },
-        { name = 'Lesser Healing Potion', cost = 500, skillName = 'Alchemy', skillRank = 50 },
+        { name = 'Lesser Healing Potion', cost = 500, skillName = 'Alchemy', skillRank = 50, level = 10 },
         { name = 'Heal', cost = 10, skillName = nil } } end })
     observer:TrainerShown()
     local saved = ns.db.npcs[3167]
     eq(saved.name, 'Trainer Bob'); eq(saved.profession, 'Alchemy'); eq(saved.lastSeen, 1234)
     eq(saved.mapID, 1429); eq(saved.x, 0.4); eq(#saved.trainer, 2)
     eq(saved.trainer[2].name, 'Lesser Healing Potion'); eq(saved.trainer[2].skill, 50); eq(saved.trainer[2].cost, 500)
+    eq(saved.trainer[2].level, 10); eq(saved.trainer[1].level, nil)
     eq(ns.invalidated, 1)
 end)
 

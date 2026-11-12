@@ -223,6 +223,18 @@ test('the window lists the next profession rank where it can be learned', functi
     eq(#rankRows(150, 80), 0)                    -- Journeyman known, Expert needs 125, the player has 80
     eq(#rankRows(150, 130), 1); eq(rankRows(150, 130)[1].name, 'Expert Fishing')
     eq(#rankRows(75, 30), 0)                     -- Journeyman needs 50 and the player has 30
+    ns.Professions = { Rows = function() return { { kind = 'Fishing', rank = 75, maxRank = 75 } } end }
+    UnitLevel = function() return 9 end
+    eq(#rankRows(75, 75), 0)                     -- Journeyman needs character level 10
+    UnitLevel = function() return 10 end
+    eq(#rankRows(75, 75), 1)
+    ns.db.npcs[9] = { name = 'Angler', profession = 'Fishing', mapID = 1, x = 0.1, y = 0.1, lastSeen = 1,
+        trainer = { { name = 'Journeyman Fishing', skill = 50, cost = 500, level = 15 } } }
+    ns.NpcSources.Invalidate()
+    eq(#rankRows(75, 75), 1)                     -- the other trainer still reports level 10
+    UnitLevel = function() return 14 end
+    eq(#rankRows(75, 75), 1)
+    UnitLevel = nil
     ns.Professions = { Rows = function() return {} end }
     eq(#ns.NpcSources.Unlearned('C1', false, 'Fishing'), 0)   -- the player has no Fishing at all
     ns.Professions = { Rows = function() return { { kind = 'Fishing', rank = 75, maxRank = 75 } } end }

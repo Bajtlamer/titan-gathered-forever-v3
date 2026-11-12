@@ -1,6 +1,11 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.15-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.16-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Character level for profession ranks, 0.5.16-beta
+
+- Profession rank rows in the unlearned recipes window are hidden until the character reaches the level the trainer requires (Journeyman 10, Expert 20, Artisan 35, Master 50 when the trainer window never reported it).
+- The trainer window recording now stores the required character level of each service (the fourth value of GetTrainerServiceInfo in the recorded probe), so visited trainers use the real value. Trainers visited before this version fall back to the classic values above until they are opened again.
 
 ## Skill reading shown for rank rows, 0.5.15-beta
 
