@@ -130,6 +130,7 @@ end
 
 function Obs:TrainerShown()
     self.trainerOpen, self.emptyTrainerLogged = true, false
+    if self.api.ResetTrainer then self.api.ResetTrainer() end
     self:ReadTrainer('TRAINER_SHOW')
 end
 function Obs:TrainerUpdated() if self.trainerOpen then self:ReadTrainer('TRAINER_UPDATE') end end
@@ -219,6 +220,8 @@ function Obs.DefaultAPI()
         if which == 'trainer' then
             out[#out + 1] = 'GetNumTrainerServices=' .. describe(GetNumTrainerServices)
                 .. ' C_TrainerUI=' .. type(C_TrainerUI)
+            out[#out + 1] = 'type filters available/unavailable/used=' .. describe(GetTrainerServiceTypeFilter, 'available')
+                .. '/' .. describe(GetTrainerServiceTypeFilter, 'unavailable') .. '/' .. describe(GetTrainerServiceTypeFilter, 'used')
             local count = call(GetNumTrainerServices)
             for index = 1, math.min(public(count, 'number') and count or 0, 3) do
                 out[#out + 1] = 'service' .. index .. ' info=' .. describe(GetTrainerServiceInfo, index)
@@ -265,7 +268,36 @@ function Obs.DefaultAPI()
         end
         return out
     end
+    -- The trainer window hides services by type (available, unavailable, already known). A trainer whose
+    -- services are all known reads as empty, so with an empty list the filters are switched on for the read and
+    -- put back afterwards.
+    local filterNames = { 'available', 'unavailable', 'used' }
+    local function withAllFilters(read)
+        local changed = {}
+        if type(GetTrainerServiceTypeFilter) == 'function' and type(SetTrainerServiceTypeFilter) == 'function' then
+            for _, name in ipairs(filterNames) do
+                local on = call(GetTrainerServiceTypeFilter, name)
+                if not on or on == 0 then
+                    changed[#changed + 1] = name
+                    call(SetTrainerServiceTypeFilter, name, 1)
+                end
+            end
+        end
+        local result = read()
+        for _, name in ipairs(changed) do call(SetTrainerServiceTypeFilter, name, 0) end
+        return result
+    end
     api.TrainerServices = function()
+        local count = call(GetNumTrainerServices)
+        -- Once per opened window: putting the filters back refreshes the list and would otherwise repeat this.
+        if public(count, 'number') and count == 0 and not api.filtersTried then
+            api.filtersTried = true
+            return withAllFilters(api.ReadTrainerServices)
+        end
+        return api.ReadTrainerServices()
+    end
+    api.ResetTrainer = function() api.filtersTried = false end
+    api.ReadTrainerServices = function()
         local result = {}
         local count = call(GetNumTrainerServices)
         if not public(count, 'number') or count < 1 or count > 400 then return result end
