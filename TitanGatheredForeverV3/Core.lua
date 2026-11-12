@@ -6,8 +6,11 @@ function ns.Print(message)
     DEFAULT_CHAT_FRAME:AddMessage(message)
 end
 
+-- Debug messages go to the saved debug log (the physical SavedVariables file); the chat only repeats them when
+-- Diagnostics > Also show debug messages in chat is on.
 function ns.Debug(message)
-    if ns.settings and ns.settings.debugMode then ns.Print(message) end
+    if ns.DebugLog then ns.DebugLog.Add('debug', message) end
+    if ns.settings and ns.settings.debugMode and ns.settings.debugChat then ns.Print(message) end
 end
 
 function ns.IsPublic(value)
@@ -359,6 +362,7 @@ frame:SetScript('OnEvent', function(_, event, ...)
     end
     if event == 'PLAYER_LOGIN' then start(); return end
     if not ns.inventory then return end
+    ns.DebugLog.Event(event, ...)
     if event=='TRADE_SKILL_DATA_SOURCE_CHANGING'or event=='TRADE_SKILL_CLOSE'or event=='PLAYER_LEAVING_WORLD'then ns.Crafting.Select(nil)end
     if event=='CHAT_MSG_COMBAT_HONOR_GAIN'then
         if ns.settings.recordPvP == false then return end
