@@ -70,8 +70,8 @@ test('tabs use the classic panel tab template and select the active tab', functi
     ns.RecipeBrowser, ns.Reports = nil, nil
     local window = frame()
     ns.Nav.Tabs(window, 'chances')
-    eq(numTabs, #ns.Nav.tabs); eq(selected, 3); eq(window.tabButtons.pvp.template, 'PanelTabButtonTemplate')
-    eq(#window.Tabs, 7); eq(window.Tabs[2].calls.SetID[1], 2)
+    eq(numTabs, #ns.Nav.tabs); eq(selected, 4); eq(window.tabButtons.pvp.template, 'PanelTabButtonTemplate')
+    eq(#window.Tabs, 8); eq(window.Tabs[2].calls.SetID[1], 2)
 end)
 
 test('tabs fall back to buttons when the panel tab template is missing', function()

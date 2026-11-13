@@ -446,3 +446,7 @@ Live error on 0.5.24 when a Mining trainer was opened: C stack overflow in NpcOb
 ## 0.5.26-beta, filters touched only for an empty update
 
 Live log on 0.5.25: the Mining trainer (npc 5392) was recorded without an error, but the filters were also switched for it (filters-on on SHOW, 15 services saved, then 10 on the restore). TRAINER_SHOW is always empty. 0.5.26 switches the filters only when TRAINER_UPDATE is still empty. Pending live check: Mining trainer saved with the player's filters (no filters-on entry), Bronk still recorded.
+
+## 0.5.27-beta, Trainers tab
+
+New tab Trainers (TrainerBrowser.lua, NpcSources.Trainers): all profession trainers with zone, coordinates and status, default list of trainers not visited yet, status and profession combo boxes, search over name, profession and zone, hover tooltip of what the trainer teaches and a map click that rings the trainer. Visited means a recorded trainer window, not only a merchant visit. Pending live check: the look of the eight tabs along the bottom (they may be wider than the window), the converted coordinates of unvisited trainers and the map click.

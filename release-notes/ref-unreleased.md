@@ -1,6 +1,11 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.26-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.27-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Trainers tab, 0.5.27-beta
+
+- New tab Trainers in the window (also Titan menu > Trainers and recipe vendors > Trainers...): every profession trainer with zone, coordinates in percent and status. By default only trainers not visited yet are listed; a combo box switches to Visited (with the date) or All trainers, another one filters by profession. The search box matches trainer name, profession and zone. Hovering a row shows what the trainer teaches; clicking opens the world map at the trainer and marks it with the red ring (click again to clear). A trainer counts as visited once its window was opened and recorded, so a visit to the same NPC only as a merchant does not count. Trainers without a known position are counted in the footer.
+- New file TrainerBrowser.lua, so a full game restart is needed. The tab strip now has eight tabs; the button fallback shares the width evenly.
 
 ## Trainer filters touched only when needed, 0.5.26-beta
 

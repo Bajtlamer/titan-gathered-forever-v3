@@ -201,7 +201,10 @@ function Obs.DefaultAPI()
     local api = {}
     api.Enabled = function() return ns.settings and ns.settings.recordNpcs ~= false end
     api.Now = function() return time() end
-    api.Changed = function() if ns.RecipeBrowser and ns.RecipeBrowser.Refresh then ns.RecipeBrowser.Refresh() end end
+    api.Changed = function()
+        if ns.RecipeBrowser and ns.RecipeBrowser.Refresh then ns.RecipeBrowser.Refresh() end
+        if ns.TrainerBrowser and ns.TrainerBrowser.Refresh then ns.TrainerBrowser.Refresh() end
+    end
     api.Npc = function()
         local inside, kind = IsInInstance()
         if not (ns.IsPublic(inside) and inside == false and ns.IsPublic(kind) and kind == 'none') then return end

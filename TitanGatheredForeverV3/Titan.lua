@@ -188,6 +188,7 @@ function Titan.Menu(owner)
             end)
         end
         npcs:CreateButton('Unlearned recipes...', function() ns.RecipeBrowser.Show() end)
+        npcs:CreateButton('Trainers...', function() ns.TrainerBrowser.Show() end)
         local placement = npcs:CreateButton('Pin placement')
         placement:CreateButton('Find nearest trainer or vendor pin', function() ns.NpcNearest() end)
         placement:CreateCheckbox('Swap map axes (use if pins look mirrored)', function() return ns.settings.npcAxisSwap == true end, function()
