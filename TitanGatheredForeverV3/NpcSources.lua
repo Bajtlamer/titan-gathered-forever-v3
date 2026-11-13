@@ -358,6 +358,36 @@ function Npc.Location(npcID)
     return { mapID = mapID, zone = zone, x = x * 100, y = y * 100, confirmed = saw ~= nil }
 end
 
+-- Profession trainers for the trainers list. status is 'unvisited' (default), 'visited' or 'all'; a trainer is
+-- visited once its window was opened and recorded. kind limits the list to one profession. Rows carry the
+-- place the map would use (zone and coordinates in percent), or nil when the position is unknown.
+function Npc.Trainers(status, kind)
+    local ids, seen = {}, {}
+    for id in pairs(seedNpcs()) do ids[#ids + 1] = id; seen[id] = true end
+    for id in pairs(observed()) do if not seen[id] then ids[#ids + 1] = id end end
+    local rows = {}
+    for _, id in ipairs(ids) do
+        local record = Npc.Record(id)
+        local saw = observed()[id]
+        if record and record.profession and (not kind or record.profession == kind) then
+            local visited = saw ~= nil and saw.trainer ~= nil
+            if status == 'all' or (status == 'visited') == visited then
+                local where = Npc.Location(id)
+                rows[#rows + 1] = { npcID = id, name = record.name, kind = record.profession, visited = visited,
+                    lastSeen = visited and saw.lastSeen or nil, mapID = where and where.mapID, zone = where and where.zone,
+                    x = where and where.x, y = where and where.y }
+            end
+        end
+    end
+    table.sort(rows, function(a, b)
+        if a.kind ~= b.kind then return Npc.Label(a.kind) < Npc.Label(b.kind) end
+        if (a.zone or '') ~= (b.zone or '') then return (a.zone or '') < (b.zone or '') end
+        if a.name ~= b.name then return a.name < b.name end
+        return a.npcID < b.npcID
+    end)
+    return rows
+end
+
 -- Tooltip for a row of the unlearned recipes window: every source with a green name, price and location.
 function Npc.FillSourcesTooltip(tooltip, row)
     local Style = ns.Style

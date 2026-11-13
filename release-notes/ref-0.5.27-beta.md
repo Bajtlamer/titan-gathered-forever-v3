@@ -1,11 +1,11 @@
-# Titan Gathered Forever v3 0.5.26-beta
+# Titan Gathered Forever v3 0.5.27-beta
 
 First beta. It contains everything since the last built download set, 0.4.2-alpha. Per-step history is in ref-unreleased.md. This text is the changelog for the website; the release itself is not published yet.
 
 ## Highlights
 
 - Trainer and recipe vendor pins on the world map and minimap, with tooltips that show which recipes you already know.
-- One window with tabs for the unlearned recipes and every statistics view, opened from a minimap button.
+- One window with tabs for the unlearned recipes, the trainers and every statistics view, opened from a minimap button.
 - A list of unlearned recipes with their trainers and vendors, including the next rank of each profession you have.
 - Scrolling lists with search, grouping and Blizzard style combo boxes everywhere.
 
@@ -25,10 +25,14 @@ First beta. It contains everything since the last built download set, 0.4.2-alph
 - Hovering the NPC column shows every source with its role, price, zone and coordinates. Clicking a row opens the world map at that zone and marks every trainer and vendor of the recipe with red rings. The marks end when the map closes, when you click the row again, when you choose another recipe, or after five minutes.
 - Filters for profession and source (all or vendors only), and a search box.
 
+### Trainers list
+
+- A Trainers tab lists every profession trainer with zone, coordinates and status. It starts with the trainers you have not visited yet and can show the visited ones (with the date) or all of them. Filter by profession, search by name, profession or zone, hover a row to see what the trainer teaches, and click a row to open the map and mark the trainer with a red ring.
+
 ### One window and the minimap button
 
 - A round TG3 button on the minimap edge. Left click opens or closes the window, right click opens the addon menu, dragging moves it around the minimap. Display > Show minimap button hides it.
-- The window has classic tabs along the bottom: Unlearned recipes, Lifetime materials, Observed chances, Profession actions, Crafting and cooking, Reagent use and PvP Board. All tabs share one size and one remembered position and keep their own filters and scroll position.
+- The window has classic tabs along the bottom: Unlearned recipes, Trainers, Lifetime materials, Observed chances, Profession actions, Crafting and cooking, Reagent use and PvP Board. All tabs share one size and one remembered position and keep their own filters and scroll position.
 - Every list scrolls with the mouse wheel and a scroll bar instead of Previous and Next buttons (only the export parts keep them). Lists have a search box. Observed chances can be grouped by item, with a button to expand the sources of each item.
 - Every choice (profession, scope, source, grouping, export identity) is a Blizzard style combo box. If a client lacks the template, a button with a menu takes its place.
 

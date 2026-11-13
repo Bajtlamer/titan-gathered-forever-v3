@@ -371,7 +371,7 @@ test('menu offers every chat function that needs no parameter', function()
     s.broker.OnClick({}, 'RightButton')
     local buttons = s.menu.buttons
     for _, label in ipairs({ 'Refresh inventory', 'Show status report', 'Show NPC recording log', 'Next summary page', 'Previous summary page',
-        'Find nearest trainer or vendor pin', 'Unlearned recipes...' }) do
+        'Find nearest trainer or vendor pin', 'Unlearned recipes...', 'Trainers...' }) do
         assert(type(buttons[label]) == 'function', 'menu lacks ' .. label)
     end
     local axes = s.menu.checkboxes['Swap map axes (use if pins look mirrored)']

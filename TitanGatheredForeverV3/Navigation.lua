@@ -9,6 +9,7 @@ Nav.WIDTH, Nav.HEIGHT = 985, 592
 Nav.TAB_Y = -558
 Nav.tabs = {
     { id = 'recipes', label = 'Unlearned recipes' },
+    { id = 'trainers', label = 'Trainers' },
     { id = 'history', label = 'Lifetime materials' },
     { id = 'chances', label = 'Observed chances' },
     { id = 'actions', label = 'Profession actions' },
@@ -19,11 +20,14 @@ Nav.tabs = {
 
 local function windowOf(id)
     if id == 'recipes' then return ns.RecipeBrowser and ns.RecipeBrowser.window end
+    if id == 'trainers' then return ns.TrainerBrowser and ns.TrainerBrowser.window end
     return ns.Reports and ns.Reports.windows[id]
 end
 
 function Nav.Open(id)
-    if id == 'recipes' then ns.RecipeBrowser.Show() else ns.Reports.Show(id) end
+    if id == 'recipes' then ns.RecipeBrowser.Show()
+    elseif id == 'trainers' then ns.TrainerBrowser.Show()
+    else ns.Reports.Show(id) end
 end
 
 -- The id of the tab window that is on screen, if any.
@@ -90,17 +94,18 @@ local function panelTabs(window, id)
 end
 
 local function buttonTabs(window, id)
+    local step = math.floor((Nav.WIDTH - 30) / #Nav.tabs)
     local x = 15
     for _, tab in ipairs(Nav.tabs) do
         local b = CreateFrame('Button', nil, window, 'UIPanelButtonTemplate')
-        b:SetSize(130, 22)
+        b:SetSize(step - 6, 22)
         b:SetPoint('TOPLEFT', window, 'TOPLEFT', x, Nav.TAB_Y)
         b:SetText(tab.label)
         local target = tab.id
         b:SetScript('OnClick', function() if target ~= id then Nav.Open(target) end end)
         if target == id and b.LockHighlight then b:LockHighlight() end
         window.tabButtons[target] = b
-        x = x + 136
+        x = x + step
     end
 end
 
