@@ -526,3 +526,7 @@ Live report with screenshot: the reagent window opened over the profit tab showe
 ## 0.5.46-beta, header button and movable client windows
 
 Live report with screenshot: no Reagents button in the header of the profession window (the window has no visible maximize button). Cause: the button was a child of ProfessionsFrame.MaximizeMinimize, which this client keeps hidden. Now a child of CraftingPage, anchored by Button.Place left of the maximize button when shown, otherwise left of CloseButton; professionLog records what was found. New Movable.lua makes ProfessionsFrame and AuctionHouseFrame draggable (setting moveBlizzard), keeps the position in windowPositions and re-applies it on show and after UpdateUIPanelPositions. Pending live checks: the header button, dragging and the kept position of both windows (and that the client does not undo the position), whether the window of the client reacts to drag on empty places only.
+
+## 0.5.47-beta, Reagents button as a child of the screen
+
+Live professionLog on 0.5.46: stage attached with page = true, close = true, maximize = false, maximizeShown = false, and still no button on screen. 0.5.47 makes the button a child of UIParent (strata HIGH, level of the window + 50) anchored to the close button, with visibility synchronised with the window and the recipes page, and logs a "placed" line one second later (visible, left, top, width, close position, frame and page shown, strata, level, scale). Pending live check: the button on screen; if it is still missing, read the placed line.

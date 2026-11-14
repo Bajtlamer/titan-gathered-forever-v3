@@ -11,8 +11,16 @@ local function frame()
     function f:ClearAllPoints() self.calls.cleared = (self.calls.cleared or 0) + 1 end
     function f:IsShown() return self.shownState end
     function f:HookScript(name, fn) self.hooked = self.hooked or {}; self.hooked[name] = fn end
-    function f:GetFrameLevel() return 5 end
+    function f:GetFrameLevel() return self.level or 5 end
     function f:SetFrameLevel(level) self.level = level end
+    function f:SetFrameStrata(strata) self.strata = strata end
+    function f:GetFrameStrata() return self.strata or 'MEDIUM' end
+    function f:SetShown(value) self.shownState = value end
+    function f:IsVisible() return self.shownState == true end
+    function f:GetLeft() return 100.123 end
+    function f:GetTop() return 50 end
+    function f:GetWidth() return 80 end
+    function f:GetEffectiveScale() return 1 end
     function f:RegisterEvent(e) self.events[#self.events + 1] = e end
     return f
 end
@@ -22,40 +30,46 @@ local function fresh()
     ns.Crafting = { Resolve = function(info) return info.recipeID end }
     ns.CraftingView = { Show = function(id, operations) ns.shown[#ns.shown + 1] = { id, operations } end }
     CreateFrame = function(_, _, parent) local f = frame(); f.parent = parent; return f end
-    C_Timer = { After = function(_, fn) fn() end }
+    C_Timer = { After = function() end }
     GameTooltip = { SetOwner = function() end, AddLine = function() end, Show = function() end, Hide = function() end }
     Menu = nil
     assert(loadfile('TitanGatheredForeverV3/ProfessionButton.lua'))('TitanGatheredForeverV3', ns)
     return ns
 end
 local function professionFrame(crafts, maximize, withPage)
-    local page = withPage ~= false and { CreateMultipleInputBox = { GetNumber = function() return crafts end }, shown = true } or nil
-    if page then page.HookScript = function(self, name, fn) self.hooked = self.hooked or {}; self.hooked[name] = fn end
-        page.GetFrameLevel = function() return 3 end end
-    local frame_ = { CraftingPage = page, CloseButton = frame() }
-    if page then page.CreateMultipleInputBox = page.CreateMultipleInputBox end
+    local page = withPage ~= false and { CreateMultipleInputBox = { GetNumber = function() return crafts end }, shownState = true } or nil
+    if page then
+        page.HookScript = function(self, name, fn) self.hooked = self.hooked or {}; self.hooked[name] = fn end
+        page.IsShown = function(self) return self.shownState end
+    end
+    local frame_ = { CraftingPage = page, CloseButton = frame(), shownState = true, level = 3 }
+    frame_.HookScript = function(self, name, fn) self.hooked = self.hooked or {}; self.hooked[name] = fn end
+    frame_.IsShown = function(self) return self.shownState end
+    frame_.GetFrameLevel = function(self) return self.level end
     if maximize then frame_.MaximizeMinimize = frame(); frame_.MaximizeMinimize.shownState = maximize == 'shown' end
     _G.ProfessionsFrame = frame_
     return frame_
 end
 
-test('the button is a child of the recipes page and goes left of the close button when the maximize button is hidden', function()
+test('the button belongs to the screen, sits left of the close button when the maximize button is hidden, and is raised', function()
     local ns = fresh()
     ns.db = { professionLog = {} }
+    UIParent = {}
     _G.ProfessionsFrame = nil
     eq(ns.ProfessionButton.Attach(), false)                 -- the profession addon is not loaded yet
     local window = professionFrame(1, 'hidden')
     eq(ns.ProfessionButton.Attach(), true)
     local button = ns.ProfessionButton.button
     eq(button.text, 'Reagents'); eq(button.calls.point[1], 'RIGHT'); eq(button.calls.point[2], window.CloseButton)
-    eq(button.calls.point[3], 'LEFT'); eq(button.parent, window.CraftingPage)           -- not a child of a hidden button
-    eq(button.level, 23)                                                                -- above the art of the page
+    eq(button.calls.point[3], 'LEFT'); eq(button.parent, UIParent)                       -- nothing in the window can clip or cover it
+    eq(button.strata, 'HIGH'); eq(button.level, 53)                                      -- above the window
+    eq(button.shownState, true)
     eq(ns.ProfessionButton.Attach(), true); eq(ns.ProfessionButton.button, button)
-    eq(ns.db.professionLog[#ns.db.professionLog].stage, 'attached')
-    eq(ns.db.professionLog[#ns.db.professionLog].maximizeShown, false)
+    local entry = ns.db.professionLog[#ns.db.professionLog]
+    eq(entry.stage, 'attached'); eq(entry.maximizeShown, false); eq(entry.parent, 'screen')
 end)
 
-test('a shown maximize button is the neighbour, and the place is chosen again whenever the page is shown', function()
+test('the button follows the window and its recipes page and is placed again whenever one is shown', function()
     local ns = fresh()
     local window = professionFrame(1, 'shown')
     ns.ProfessionButton.Attach()
@@ -63,14 +77,31 @@ test('a shown maximize button is the neighbour, and the place is chosen again wh
     eq(button.calls.point[2], window.MaximizeMinimize)
     window.MaximizeMinimize.shownState = false               -- the other tab hides it
     window.CraftingPage.hooked.OnShow()
-    eq(button.calls.point[2], window.CloseButton); assert((button.calls.cleared or 0) >= 2)
+    eq(button.calls.point[2], window.CloseButton); eq(button.shownState, true)
+    window.CraftingPage.shownState = false; window.CraftingPage.hooked.OnHide()
+    eq(button.shownState, false)                             -- another page of the window: no button
+    window.CraftingPage.shownState = true; window.CraftingPage.hooked.OnShow(); eq(button.shownState, true)
+    window.shownState = false; window.hooked.OnHide(); eq(button.shownState, false)   -- the window is closed
 end)
 
-test('without a recipes page the button hangs on the window itself; without any neighbour nothing is made and it is logged', function()
+test('a second look is logged with where the button is and whether it is visible', function()
+    local ns = fresh()
+    ns.db = { professionLog = {} }
+    local timers = {}
+    C_Timer = { After = function(_, fn) timers[#timers + 1] = fn end }
+    local window = professionFrame(1, 'hidden')
+    ns.ProfessionButton.Attach()
+    eq(#timers, 1); timers[1]()
+    local entry = ns.db.professionLog[#ns.db.professionLog]
+    eq(entry.stage, 'placed'); eq(entry.visible, true); eq(entry.left, 100.1); eq(entry.strata, 'HIGH')
+    eq(entry.frameShown, true); eq(entry.pageShown, true); eq(entry.closeLeft, 100.1)
+end)
+
+test('without a recipes page only the window decides; without any neighbour nothing is made and it is logged once', function()
     local ns = fresh()
     ns.db = { professionLog = {} }
     local window = professionFrame(1, nil, false)
-    eq(ns.ProfessionButton.Attach(), true); eq(ns.ProfessionButton.button.parent, window)
+    eq(ns.ProfessionButton.Attach(), true); eq(ns.ProfessionButton.button.shownState, true)
     ns = fresh(); ns.db = { professionLog = {} }
     _G.ProfessionsFrame = { }
     eq(ns.ProfessionButton.Attach(), false); eq(ns.ProfessionButton.button, nil)
@@ -94,6 +125,7 @@ end)
 
 test('initializing tries again on the events around opening the profession window until the button exists', function()
     local ns = fresh()
+    C_Timer = { After = function(_, fn) fn() end }
     _G.ProfessionsFrame = nil
     ns.ProfessionButton.Initialize()
     local events = ns.ProfessionButton.frame.events

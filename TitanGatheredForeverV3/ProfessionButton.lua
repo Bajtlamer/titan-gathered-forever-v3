@@ -64,7 +64,6 @@ local function log(stage, details)
 end
 
 -- The header button goes left of the maximize button when that one is on screen, otherwise left of the close button.
--- It is a child of the recipes page, so it is shown exactly on that page and never hidden by a button it is not part of.
 function Button.Place()
     local frame, button = _G.ProfessionsFrame, Button.button
     if not frame or not button then return end
@@ -75,7 +74,19 @@ function Button.Place()
     button:SetPoint('RIGHT', neighbour, 'LEFT', -6, 0)
 end
 
--- Adds the header button once the profession window exists. Returns whether the button is there.
+-- The button is shown with the window, on the recipes page only.
+function Button.Sync()
+    local frame, button = _G.ProfessionsFrame, Button.button
+    if not frame or not button then return end
+    local page = frame.CraftingPage
+    local visible = frame:IsShown() and (not page or page:IsShown())
+    button:SetShown(visible)
+    if visible then Button.Place() end
+end
+
+-- Adds the header button once the profession window exists. Returns whether the button is there. The button is a
+-- child of the screen, not of the window: a button that was a child of the window or of its page never showed, and
+-- nothing in the window can clip or cover it this way. It is raised above the window and follows its visibility.
 function Button.Attach()
     if Button.button then return true end
     local frame = _G.ProfessionsFrame
@@ -87,11 +98,12 @@ function Button.Attach()
         end
         return false
     end
-    local button = CreateFrame('Button', nil, page or frame, 'UIPanelButtonTemplate')
+    local button = CreateFrame('Button', nil, UIParent, 'UIPanelButtonTemplate')
     Button.button = button
     button:SetSize(80, 20)
     button:SetText('Reagents')
-    if button.SetFrameLevel and (page or frame).GetFrameLevel then button:SetFrameLevel(((page or frame):GetFrameLevel() or 0) + 20) end
+    if button.SetFrameStrata then button:SetFrameStrata('HIGH') end
+    if button.SetFrameLevel and frame.GetFrameLevel then button:SetFrameLevel((frame:GetFrameLevel() or 0) + 50) end
     button:SetScript('OnClick', function() Button.Open(frame.CraftingPage) end)
     button:SetScript('OnEnter', function(self)
         GameTooltip:SetOwner(self, 'ANCHOR_BOTTOM')
@@ -100,12 +112,28 @@ function Button.Attach()
         GameTooltip:Show()
     end)
     button:SetScript('OnLeave', function() GameTooltip:Hide() end)
-    Button.Place()
-    local host = page or frame
-    if host.HookScript then host:HookScript('OnShow', Button.Place) end
+    for _, host in ipairs({ frame, page }) do
+        if host and host.HookScript then
+            host:HookScript('OnShow', Button.Sync)
+            host:HookScript('OnHide', Button.Sync)
+        end
+    end
+    Button.Sync()
     log('attached', { page = page ~= nil, maximize = frame.MaximizeMinimize ~= nil,
         maximizeShown = frame.MaximizeMinimize and frame.MaximizeMinimize.IsShown and frame.MaximizeMinimize:IsShown() or false,
-        close = frame.CloseButton ~= nil })
+        close = frame.CloseButton ~= nil, parent = 'screen' })
+    -- A second look a moment later: where the button really is and whether it is visible.
+    if C_Timer and C_Timer.After then
+        C_Timer.After(1, function()
+            local function number(value) return type(value) == 'number' and math.floor(value * 10 + 0.5) / 10 or false end
+            local close = frame.CloseButton
+            log('placed', { visible = button:IsVisible() == true, shown = button:IsShown() == true,
+                left = number(button:GetLeft()), top = number(button:GetTop()), width = number(button:GetWidth()),
+                closeLeft = close and number(close:GetLeft()) or false, closeTop = close and number(close:GetTop()) or false,
+                frameShown = frame:IsShown() == true, pageShown = page and page:IsShown() == true or false,
+                strata = button:GetFrameStrata(), level = button:GetFrameLevel(), scale = number(button:GetEffectiveScale()) })
+        end)
+    end
     return true
 end
 

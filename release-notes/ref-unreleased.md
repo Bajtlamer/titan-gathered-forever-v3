@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.46-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.47-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Reagents button as a child of the screen, 0.5.47-beta
+
+- The professionLog of 0.5.46 showed that the button was created (the recipes page and the close button exist, the maximize button does not) and still never showed, so the cause is the drawing, not the search for the window. The button is now a child of the screen instead of the window or its page, in the HIGH strata and 50 levels above the window, anchored left of the close button (or of the maximize button when that is on screen), and it is shown and hidden with the window and with its recipes page. One second after it is created, the professionLog gets a "placed" line with where the button is (left, top, width), whether it is visible, the state of the window and page, the strata, level and scale, so that the next step does not need a guess.
 
 ## Reagents button visible, movable client windows, 0.5.46-beta
 
