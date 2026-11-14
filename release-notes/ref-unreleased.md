@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.41-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.42-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Auction price in item tooltips, 0.5.42-beta
+
+- The tooltip of a profession item (the same items the tooltip already knows) shows the price of the last auction scan: "Auction: 12s 50c each" and, when you hold some, "Worth: ... for 3 at this price" (bags, plus the bank when bank counts are shown). A small gray line gives the number of auctions and items behind the lowest buyout and the age of the scan. Nothing is shown for items without a price, for another realm, or before a scan. It follows the existing item tooltip switch.
 
 ## Faster auction scan reading, 0.5.41-beta
 

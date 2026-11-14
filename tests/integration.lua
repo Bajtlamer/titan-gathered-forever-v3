@@ -250,6 +250,19 @@ test('inventory events coalesce and bank closure preserves snapshots', function(
     eq(ns.inventory:Get(2589).bank, 7)
 end)
 
+test('the scanned auction price, what the held items are worth and the age of the scan are in the item tooltip', function()
+    local s, ns = fixture(); s:Start()
+    local tip = CreateFrame('GameTooltip')
+    s.post(tip, { id = 2589 }); assert(not contains(tip.lines, 'Auction:'))    -- nothing scanned yet
+    ns.db.auction = { at = time() - 7200, entries = 100, items = { [2589] = { min = 1250, qty = 40, n = 5 } } }
+    tip:ClearLines(); s.post(tip, { id = 2589 })
+    assert(contains(tip.lines, 'Auction: '), 'price line'); assert(contains(tip.lines, ' each'))
+    assert(contains(tip.lines, 'Worth: '), 'value of the three in the bags'); assert(contains(tip.lines, 'for 3 at this price'))
+    assert(contains(tip.lines, 'Lowest buyout of 5 auctions (40 items), scanned 2 h ago'))
+    ns.db.auction.items[2589] = nil
+    tip:ClearLines(); s.post(tip, { id = 2589 }); assert(not contains(tip.lines, 'Auction:'))   -- no price for this item
+end)
+
 test('unvisited bank omits redundant total and zero bank count', function()
     local s, ns = fixture(); s:Start()
     local tip = CreateFrame('GameTooltip')

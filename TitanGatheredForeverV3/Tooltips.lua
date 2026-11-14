@@ -80,6 +80,24 @@ function Tooltips.Lines(itemID)
     end
     local observation = Tooltips.BankObservation(observed)
     if observation then note(ns.Style.Text(ns.Style.gray, observation)) end
+    -- The lowest buyout of the last auction scan, per unit, and what the items held here would be worth at it.
+    local price, scannedAt
+    if ns.AuctionScan then price, scannedAt = ns.AuctionScan.Price(itemID) end
+    if price then
+        local function coin(copper)
+            return ns.NpcSources and ns.NpcSources.CoinIcons(copper) or (tostring(copper) .. 'c')
+        end
+        lines[#lines + 1] = false
+        lines[#lines + 1] = ns.Style.Text(ns.Style.gold, 'Auction: ') .. coin(price.min) .. ns.Style.Text(ns.Style.gray, ' each')
+        local held = counts.bags + (ns.settings.showBank and counts.bank or 0)
+        if held > 0 then
+            lines[#lines + 1] = ns.Style.Text(ns.Style.gold, 'Worth: ') .. coin(price.min * held)
+                .. ns.Style.Text(ns.Style.gray, string.format(' for %d at this price', held))
+        end
+        local age = scannedAt and time and ns.AuctionScan.Age(math.max(0, time() - scannedAt)) or 'earlier'
+        note(ns.Style.Text(ns.Style.gray, string.format('Lowest buyout of %d auctions (%d items), scanned %s. Scan prices at the auction house.',
+            price.n, price.qty, age)))
+    end
     if reagent then
         lines[#lines+1]=false
         lines[#lines+1]=ns.Style.Text(ns.Style.violet,string.format('For %s: %d per operation; missing %d (%s)',
