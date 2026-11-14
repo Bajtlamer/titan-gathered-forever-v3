@@ -136,4 +136,50 @@ local lines={};GameTooltip.AddLine=function(_,line)lines[#lines+1]=line end
 map.pins[2].scripts.OnEnter(map.pins[2])
 local found=false;for _,line in ipairs(lines)do if line:find('3 honorable kills',1,true)then found=true end end
 assert(found,'PvP marker tooltip omitted its count')
+-- Trainer and recipe vendor pins share the overlay, use their own icons and the NPC tooltip.
+local npcFilled
+ns.NpcSources={Enabled=function()return true end,IsHighlighted=function()return false end,
+    List=function(mapID)return {{kind='Trainer',npcID=7,mapID=mapID,x=.55,y=.5,profession='Alchemy'}}end,
+    FillTooltip=function(_,node)npcFilled=node.npcID end}
+map:Refresh(true)
+local npcPin
+for _,pin in ipairs(map.pins)do if pin.shown and pin.icon=='Interface\\Icons\\INV_Misc_Book_11'then npcPin=pin end end
+assert(npcPin,'trainer pin was not rendered on the world map')
+assert(npcPin.x==.55*canvas.width,'trainer pin was not projected onto the canvas')
+npcPin.scripts.OnEnter(npcPin)
+assert(npcFilled==7,'trainer pin did not use the NPC tooltip')
+ns.settings.gatheringMap=false;map:Refresh(true)
+npcPin=nil
+for _,pin in ipairs(map.pins)do if pin.shown and pin.icon=='Interface\\Icons\\INV_Misc_Book_11'then npcPin=pin end end
+assert(npcPin,'NPC pins must not depend on the gathering map switch')
+ns.settings.gatheringMap=true;ns.NpcSources=nil;map:Refresh(true)
+-- Highlighted NPC pins get the gold ring; ordinary and gathering pins do not.
+local lit={}
+local realHighlight=ns.PinStyle.Highlight
+ns.PinStyle.Highlight=function(pin,on)lit[pin]=on end
+ns.NpcSources={Enabled=function()return true end,IsHighlighted=function(id)return id==7 end,
+    List=function(mapID)return {{kind='Trainer',npcID=7,mapID=mapID,x=.55,y=.5,profession='Alchemy'},
+        {kind='RecipeVendor',npcID=8,mapID=mapID,x=.6,y=.5,professions={Alchemy=true}}}end,
+    FillTooltip=function()end}
+lit={};map:Refresh(true)
+local ringed,plainNpc=0,0
+for _,pin in ipairs(map.pins)do
+    if pin.shown and pin.node and pin.node.npcID==7 then assert(lit[pin]==true,'target pin was not highlighted');ringed=ringed+1 end
+    if pin.shown and pin.node and pin.node.npcID==8 then assert(lit[pin]==false,'other NPC pin was highlighted');plainNpc=plainNpc+1 end
+    if pin.shown and pin.node and not pin.node.npcID then assert(lit[pin]==false,'gathering pin was highlighted') end
+end
+assert(ringed==1 and plainNpc==1,'expected one highlighted and one ordinary NPC pin')
+ns.PinStyle.Highlight=realHighlight;ns.NpcSources=nil;map:Refresh(true)
+-- Closing the world map ends the mark, so reopening the map shows no rings.
+local cleared={}
+ns.NpcSources={Enabled=function()return false end,IsHighlighted=function()return false end,
+    HasHighlight=function()return true end,SetHighlight=function(ids)cleared[#cleared+1]=ids==nil and 'nil' or 'set' end,
+    List=function()return {}end,FillTooltip=function()end}
+assert(world.hooks.OnHide,'the world map must watch for being closed')
+world.hooks.OnHide()
+assert(#cleared==1 and cleared[1]=='nil','Closing the map did not clear the marked NPCs')
+ns.NpcSources.HasHighlight=function()return false end
+world.hooks.OnHide()
+assert(#cleared==1,'Nothing is cleared when nothing is marked')
+ns.NpcSources=nil
 print('PASS 15 map rendering, scaling, projection, lifecycle, reuse, toggle and gathering-material checks')

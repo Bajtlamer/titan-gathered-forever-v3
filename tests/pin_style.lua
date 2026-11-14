@@ -46,6 +46,43 @@ assert(not flight.rim and not flight.shadows,'Flight artwork must not receive an
 assert(not flight.texture.mask,'Native flight artwork must retain its original shape')
 local allocated=#borderFrames;ns.PinStyle.Apply(flight,true)
 assert(#borderFrames==allocated and #borderFrames==0,'Borderless flight pin allocated a decoration frame')
+-- Highlight: three concentric red rings that pulse, and a raised frame level, removed again when switched off.
+local function ringPin()
+    local p=pin();p.scripts={};p.level=3
+    function p:GetParent()return {GetFrameLevel=function()return 10 end}end
+    function p:SetFrameLevel(level)self.level=level end
+    function p:SetScript(event,fn)self.scripts[event]=fn end
+    local create=p.CreateTexture
+    function p:CreateTexture(...)
+        local r=create(self,...)
+        function r:SetVertexColor(...)self.color={...}end
+        function r:SetAlpha(alpha)self.alpha=alpha end
+        function r:Show()self.shown=true end
+        function r:Hide()self.shown=false end
+        return r
+    end
+    return p
+end
+local clock=0;GetTime=function()return clock end
+local plain=ringPin();ns.PinStyle.Highlight(plain,false)
+assert(#plain.regions==0 and not plain.tgfRingOn,'Switching off an ordinary pin must not allocate anything')
+local h=ringPin();ns.PinStyle.Highlight(h,true)
+assert(h.tgfRingOn==true and #h.tgfRings==3,'A highlighted pin gets three rings')
+for _,ring in ipairs(h.tgfRings)do
+    assert(ring.path:find('PinOutlineCircle',1,true),'Rings reuse the circle outline artwork')
+    assert(ring.color[1]==1 and ring.color[2]==0.13 and ring.color[3]==0.13,'Rings are red')
+    assert(ring.shown==true and ring.width>=24 and ring.width<34,'Rings are compact but larger than an ordinary pin')
+end
+assert(h.tgfRings[2].width>h.tgfRings[1].width and h.tgfRings[3].width>h.tgfRings[2].width,'Rings grow outwards into one thick band')
+assert(h.tgfRings[3].width-h.tgfRings[1].width<=6,'The band stays tight around the pin')
+assert(h.level==60,'A highlighted pin is raised above its neighbours')
+clock=1.0;h.scripts.OnUpdate(h)
+for _,ring in ipairs(h.tgfRings)do assert(ring.alpha>=0.3 and ring.alpha<=1,'The pulse stays visible') end
+local regions=#h.regions;ns.PinStyle.Highlight(h,true)
+assert(#h.regions==regions,'Highlighting again must reuse the rings')
+ns.PinStyle.Highlight(h,false)
+for _,ring in ipairs(h.tgfRings)do assert(ring.shown==false,'Rings are hidden when the highlight ends') end
+assert(h.level==11 and h.scripts.OnUpdate==nil and not h.tgfRingOn,'The pin returns to its normal level without a pulse')
 assert(ns.PinStyle.Label('Skinning')=='TGF v3 Skinning area')
 assert(ns.PinStyle.Label('PvP')=='TGF v3 PvP kill spot')
 assert(ns.PinStyle.Icon(nil,'PvP')=='Interface\\Icons\\INV_Sword_04')

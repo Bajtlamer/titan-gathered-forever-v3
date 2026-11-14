@@ -152,9 +152,9 @@ local function fixture(interface, saved, noBroker, noModules)
         state.message = message; state.messages[#state.messages + 1] = message
     end }
     local ns = {}
-    for _, path in ipairs({ 'Localization/enUS.lua', 'Style.lua', 'Data/Metadata.lua', 'Catalog.lua',
-                            'Settings.lua', 'Professions.lua', 'Inventory.lua', 'Gathering.lua', 'History.lua', 'Actions.lua', 'PvP.lua', 'Production.lua', 'Crafting.lua', 'Export.lua', 'Observations.lua', 'Sources.lua', 'PinStyle.lua', 'IconConfig.lua', 'FlightPaths.lua', 'Map.lua', 'Minimap.lua',
-                            'Tooltips.lua', 'Reports.lua', 'CraftingView.lua', 'Titan.lua', 'Core.lua' }) do
+    for _, path in ipairs({ 'Localization/enUS.lua', 'Style.lua', 'Data/Metadata.lua', 'Data/NpcSeed.lua', 'Catalog.lua',
+                            'Settings.lua', 'DebugLog.lua', 'Professions.lua', 'KnownRecipes.lua', 'Inventory.lua', 'Gathering.lua', 'History.lua', 'Actions.lua', 'PvP.lua', 'Production.lua', 'Crafting.lua', 'Export.lua', 'Observations.lua', 'Sources.lua', 'NpcSources.lua', 'NpcObserver.lua', 'PinStyle.lua', 'IconConfig.lua', 'FlightPaths.lua', 'Map.lua', 'Minimap.lua',
+                            'Tooltips.lua', 'Reports.lua', 'CraftingView.lua', 'ProfessionButton.lua', 'AuctionScan.lua', 'RecipeBrowser.lua', 'MinimapButton.lua', 'Titan.lua', 'Core.lua' }) do
         assert(loadfile('TitanGatheredForeverV3/' .. path))('TitanGatheredForeverV3', ns)
     end
     -- Keep integration scenarios small; the generated data is validated separately.
@@ -327,6 +327,17 @@ test('metadata requests are deduplicated and successful item loading refreshes n
     eq(ns.ItemName(249391), 'Localized Pyrite')
 end)
 
+test('a burst of item answers redraws the recipe list once', function()
+    local s, ns = fixture(); s:Start()
+    local redraws = 0
+    ns.RecipeBrowser.Refresh = function() redraws = redraws + 1 end
+    for id = 1, 50 do s:Event('ITEM_DATA_LOAD_RESULT', id, true) end
+    s:Flush()
+    eq(redraws, 1)
+    s:Event('ITEM_DATA_LOAD_RESULT', 51, true); s:Flush()
+    eq(redraws, 2)
+end)
+
 test('right-click menu toggles actual settings', function()
     local s, ns = fixture(); s:Start()
     s.broker.OnClick({}, 'RightButton')
@@ -338,6 +349,63 @@ test('right-click menu toggles actual settings', function()
     assert(ns.Catalog.Get(2589))
     eq(s.menu.checkboxes.Other, nil)
     assert(s.menu.checkboxes['Auction items'])
+end)
+
+test('trainer and recipe vendor menu toggles update their settings and redraw pins', function()
+    local s, ns = fixture(); s:Start()
+    s.broker.OnClick({}, 'RightButton')
+    local trainers, vendors = s.menu.checkboxes['Show profession trainers'], s.menu.checkboxes['Show recipe vendors']
+    eq(trainers.selected(), true); eq(vendors.selected(), true)
+    trainers.callback(); eq(ns.settings.mapTrainers, false); eq(trainers.selected(), false)
+    vendors.callback(); eq(ns.settings.mapRecipeVendors, false)
+    trainers.callback(); vendors.callback()
+    eq(ns.settings.mapTrainers, true); eq(ns.settings.mapRecipeVendors, true)
+    local alchemy = s.menu.checkboxes['Alchemy pins']
+    eq(alchemy.selected(), true); alchemy.callback(); eq(ns.settings.mapNpcProfessions.Alchemy, false)
+    local record = s.menu.checkboxes['Record trainers and vendors when I open their window']
+    eq(record.selected(), true); record.callback(); eq(ns.settings.recordNpcs, false)
+end)
+
+test('the minimap button can be hidden from the Display menu', function()
+    local s, ns = fixture(); s:Start()
+    s.broker.OnClick({}, 'RightButton')
+    local box = assert(s.menu.checkboxes['Show minimap button'], 'minimap button checkbox missing')
+    eq(box.selected(), true)
+    local updates = 0
+    ns.MinimapButton.Update = function() updates = updates + 1 end
+    box.callback(); eq(ns.settings.showMinimapButton, false); eq(updates, 1); eq(box.selected(), false)
+    box.callback(); eq(ns.settings.showMinimapButton, true); eq(updates, 2)
+end)
+
+test('menu offers every chat function that needs no parameter', function()
+    local s, ns = fixture(); s:Start()
+    s.broker.OnClick({}, 'RightButton')
+    local buttons = s.menu.buttons
+    for _, label in ipairs({ 'Refresh inventory', 'Show status report', 'Show NPC recording log', 'Next summary page', 'Previous summary page',
+        'Find nearest trainer or vendor pin', 'Unlearned recipes...', 'Trainers...' }) do
+        assert(type(buttons[label]) == 'function', 'menu lacks ' .. label)
+    end
+    local axes = s.menu.checkboxes['Swap map axes (use if pins look mirrored)']
+    assert(axes, 'menu lacks the axis swap checkbox')
+    local before = #s.messages
+    buttons['Show status report']()
+    assert(#s.messages > before and contains(s.messages, 'Titan Gathered Forever v3'), 'status report not printed')
+    ns.Titan.page = 1
+    buttons['Next summary page'](); eq(ns.Titan.page, 2)
+    buttons['Previous summary page'](); eq(ns.Titan.page, 1)
+    buttons['Previous summary page'](); eq(ns.Titan.page, 1)
+    eq(axes.selected(), false); axes.callback(); eq(ns.settings.npcAxisSwap, true); eq(axes.selected(), true)
+    axes.callback(); eq(ns.settings.npcAxisSwap, false)
+    before = #s.messages
+    buttons['Find nearest trainer or vendor pin']()
+    assert(#s.messages > before, 'nearest pin gave no feedback')
+    before = #s.messages
+    buttons['Show NPC recording log']()
+    assert(#s.messages == before + 1 and s.message:find('No NPC recording attempts yet', 1, true), 'empty log not explained')
+    local scheduled, original = 0, ns.ScheduleRefresh
+    ns.ScheduleRefresh = function() scheduled = scheduled + 1 end
+    buttons['Refresh inventory'](); eq(scheduled, 1)
+    ns.ScheduleRefresh = original
 end)
 
 test('private Titan summary omits confusing count labels and does not repeat shared reagents', function()
@@ -675,34 +743,63 @@ test('runtime rejects dungeon and raid observations and clears pending gathers o
     eq(#ns.gathering:List(1), 0)
 end)
 
-test('debug mode defaults off, gates messages immediately and persists through reload', function()
+test('debug mode defaults off, writes to the saved log instead of chat and persists through reload', function()
     local s, ns = fixture(); s:Start()
-    eq(ns.settings.debugMode, false)
+    eq(ns.settings.debugMode, false); eq(ns.settings.debugChat, false)
     eq(#s.messages, 0)
-    ns.Debug('hidden debug message'); eq(#s.messages, 0)
+    ns.Debug('hidden debug message'); eq(#s.messages, 0); eq(#ns.db.debugLog, 0)
     s.broker.OnClick({}, 'RightButton')
     local toggle = assert(s.menu.checkboxes['Debug mode'], 'Debug checkbox missing')
     eq(toggle.selected(), false); toggle.callback(); eq(ns.settings.debugMode, true)
-    ns.Debug('visible debug message'); eq(s.message, 'visible debug message')
+    ns.Debug('logged debug message')
+    eq(#s.messages, 0)   -- the physical log only, not the chat
+    eq(#ns.db.debugLog, 1); assert(ns.db.debugLog[1]:find(' debug logged debug message', 1, true))
+    local chat = assert(s.menu.checkboxes['Also show debug messages in chat'], 'chat repeat checkbox missing')
+    eq(chat.selected(), false); chat.callback(); eq(ns.settings.debugChat, true)
+    ns.Debug('visible debug message'); eq(s.message, 'visible debug message'); eq(#ns.db.debugLog, 2)
+    chat.callback(); eq(ns.settings.debugChat, false)
     local saved = TitanGatheredForeverV3DB
-    s, ns = fixture(nil, saved); s:Start(); eq(ns.settings.debugMode, true)
+    s, ns = fixture(nil, saved); s:Start(); eq(ns.settings.debugMode, true); eq(#ns.db.debugLog, 2)
     s.broker.OnClick({}, 'RightButton'); s.menu.checkboxes['Debug mode'].callback()
-    local before = #s.messages
-    ns.Debug('hidden again'); eq(#s.messages, before)
+    local before, logged = #s.messages, #ns.db.debugLog
+    ns.Debug('hidden again'); eq(#s.messages, before); eq(#ns.db.debugLog, logged)
     s, ns = fixture(nil, TitanGatheredForeverV3DB); s:Start(); eq(ns.settings.debugMode, false)
+end)
+
+test('debug mode logs important events and the log can be cleared from the menu', function()
+    local s, ns = fixture(); s:Start()
+    s:Event('BANKFRAME_OPENED'); s:Flush()
+    eq(#ns.db.debugLog, 0)   -- nothing is written while debug mode is off
+    ns.settings.debugMode = true
+    s:Event('BANKFRAME_CLOSED'); s:Event('BAG_UPDATE_DELAYED'); s:Flush()
+    local found = false
+    for _, line in ipairs(ns.db.debugLog) do
+        if line:find(' event BANKFRAME_CLOSED', 1, true) then found = true end
+        assert(not line:find('BAG_UPDATE_DELAYED', 1, true), 'noisy event was logged')
+    end
+    assert(found, 'bank event was not logged')
+    s.broker.OnClick({}, 'RightButton')
+    local clear = assert(s.menu.buttons['Clear debug log'], 'clear button missing')
+    s.messages = {}
+    clear(); eq(#ns.db.debugLog, 0); assert(s.message:find('Debug log cleared', 1, true))
 end)
 
 test('explicit status works with debug disabled while normal commands stay quiet', function()
     local s, ns = fixture(); s:Start()
     SlashCmdList.TITANGATHEREDFOREVERV3('refresh'); s:Flush(); eq(#s.messages, 0)
     SlashCmdList.TITANGATHEREDFOREVERV3('')
-    eq(#s.messages, 1); assert(s.message:find('/tgf status', 1, true))
+    eq(#s.messages, 1); assert(s.message:find('/tgf recipe <recipeID> [operations]', 1, true))
+    assert(s.message:find('right-click menu', 1, true), 'help must point to the menu')
+    assert(not s.message:find('/tgf refresh', 1, true), 'help must not list commands that need no parameter')
     local before = #s.messages
     SlashCmdList.TITANGATHEREDFOREVERV3('status')
     eq(#s.messages, before + 4); assert(s.message:find('Gathering map:', 1, true))
     ns.settings.debugMode = true
-    before = #s.messages; SlashCmdList.TITANGATHEREDFOREVERV3('')
-    eq(#s.messages, before + 4)
+    before = #s.messages
+    local logged = #ns.db.debugLog
+    SlashCmdList.TITANGATHEREDFOREVERV3('')
+    eq(#s.messages, before)               -- the debug status goes to the log, not the chat
+    eq(#ns.db.debugLog, logged + 4)
 end)
 
 test('configuration checkboxes are grouped in submenus', function()

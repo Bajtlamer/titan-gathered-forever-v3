@@ -5,7 +5,7 @@ Updated 2026-11-09. This is the current continuation roadmap. Focused plans pres
 ## Current baseline
 
 - Repository: https://github.com/Bajtlamer/titan-gathered-forever-v3, branch main. Interface refinements are installed locally. The follow-up user request authorizes committing and pushing these changes to main; no release tag is requested.
-- Development candidate: 0.4.2-alpha, WoW Forever 1.60.1, interface 16001. Latest captured installation build: 70862. The live API/build compatibility gate remains explicit.
+- Development candidate: 0.5.0-beta (beta since 2026-11-12; earlier 0.4.x versions were alpha), WoW Forever 1.60.1, interface 16001. Latest captured installation build: 70862. The live API/build compatibility gate remains explicit.
 - Fourteen runtime addon folders: shared core, twelve professions and Auction Items. The current runtime package has 57 files. Development tools, tests, catalogue evidence and documentation stay outside these folders.
 - The current interface candidate passes 408 automated checks and Lua 5.1 compilation. Its candidate is installed and all 57 runtime files were byte-verified; broader live acceptance remains pending.
 - Changelog: [unreleased development updates](release-notes/ref-unreleased.md). Current implementation and installation history: [progress](ref-wow-forever-progress.md).
@@ -60,6 +60,10 @@ The small icon window provides independent world/minimap/flight size, shape and 
 ## Interface refinements requested 2026-11-09
 
 User design reviews and live acceptance are deferred, as explicitly requested. The current interface refinement work is tracked in [plan-interface-refinements.md](plan-interface-refinements.md): lifetime source chances, compact crafting percentages, concise count/caption/source presentation, small explanatory text, independent PvP recording and interaction-confirmed flight visits. These replace earlier layout/discovery presentation requirements without changing historical records or manifest versions. All 405 checks pass, the safe installer completed and all 57 installed files match source. Previous candidate backup: Interface/.tgf-v3-backups/candidate-eqi9ea04. Older checklist entries below retain their original execution evidence; deferred live gates remain open and do not block this authorized implementation.
+
+### Profession trainers and recipe vendors: implemented and installed, live acceptance pending
+
+Implemented in 0.4.12-alpha and installed. Map pins for profession trainers and recipe vendors with menu toggles and a per-profession filter, vendor tooltips listing recipes with required skill and price, and a window of unlearned recipes with a trainer or vendor source. The seed comes from a pinned CMaNGOS classic-db dump merged with live observation, with `LICENSE` and `NOTICE` added. Live gates: world-to-map coordinate conversion, trainer and merchant API behaviour on Forever 1.60.1. See [plan-npc-sources.md](plan-npc-sources.md).
 
 ## Expandable lifetime source evidence, 0.4.2-alpha
 

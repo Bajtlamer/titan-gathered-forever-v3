@@ -1,10 +1,12 @@
 local _, ns = ...
 local PinStyle = {}
 ns.PinStyle = PinStyle
-local labels = { Mining = 'TGF v3 Mining spot', Herbs = 'TGF v3 Herbalism spot', Skinning = 'TGF v3 Skinning area', Fishing = 'TGF v3 Fishing spot', Rare = 'TGF v3 Rare loot', PvP = 'TGF v3 PvP kill spot' }
+local labels = { Mining = 'TGF v3 Mining spot', Herbs = 'TGF v3 Herbalism spot', Skinning = 'TGF v3 Skinning area', Fishing = 'TGF v3 Fishing spot', Rare = 'TGF v3 Rare loot', PvP = 'TGF v3 PvP kill spot',
+                Trainer = 'TGF v3 Profession trainer', RecipeVendor = 'TGF v3 Recipe vendor' }
 local historyNote = 'Source/zone observations, not a chance at this coordinate.'
 local icons = { Mining = 'Interface\\Icons\\Trade_Mining', Herbs = 'Interface\\Icons\\Trade_Herbalism',
-                Skinning = 'Interface\\Icons\\INV_Misc_Pelt_Wolf_01', PvP = 'Interface\\Icons\\INV_Sword_04' }
+                Skinning = 'Interface\\Icons\\INV_Misc_Pelt_Wolf_01', PvP = 'Interface\\Icons\\INV_Sword_04',
+                Trainer = 'Interface\\Icons\\INV_Misc_Book_11', RecipeVendor = 'Interface\\Icons\\INV_Scroll_03' }
 
 function PinStyle.Label(kind) return labels[kind] or ('TGF v3 ' .. kind .. ' material source') end
 function PinStyle.Icon(itemID, kind)
@@ -130,6 +132,44 @@ function PinStyle.Apply(pin, kind, override)
         pin.texture:SetAllPoints(pin)
     end
     PinStyle.Texture(pin, pin.texture, PinStyle.Get(kind, override))
+end
+
+-- Marks a pin the player asked to find: three concentric red rings that pulse and form one thick band, and a
+-- frame level above the neighbouring pins. Switching it off restores the ordinary pin. The rings reuse the
+-- circle outline artwork.
+function PinStyle.Highlight(pin, on)
+    if not on then
+        if not pin.tgfRingOn then return end
+        pin.tgfRingOn = false
+        for _, ring in ipairs(pin.tgfRings) do ring:Hide() end
+        local parent = pin:GetParent()
+        pin:SetFrameLevel((parent and parent:GetFrameLevel() or 0) + 1)
+        pin:SetScript('OnUpdate', nil)
+        return
+    end
+    if not pin.tgfRings then
+        pin.tgfRings = {}
+        for index = 1, 3 do
+            local ring = pin:CreateTexture(nil, 'OVERLAY')
+            ring:SetTexture('Interface\\AddOns\\TitanGatheredForeverV3\\Artwork\\PinOutlineCircle.tga')
+            ring:SetVertexColor(1, 0.13, 0.13, 1)
+            ring:SetPoint('CENTER', pin, 'CENTER')
+            pin.tgfRings[index] = ring
+        end
+    end
+    local base = math.max(pin:GetWidth() * 1.7, 24)
+    for index, ring in ipairs(pin.tgfRings) do
+        local size = base + (index - 1) * 2.5
+        ring:SetSize(size, size)
+    end
+    for _, ring in ipairs(pin.tgfRings) do ring:Show() end
+    local parent = pin:GetParent()
+    pin:SetFrameLevel((parent and parent:GetFrameLevel() or 0) + 50)
+    pin:SetScript('OnUpdate', function()
+        local alpha = 0.65 + 0.35 * math.sin(GetTime() * 4)
+        for _, ring in ipairs(pin.tgfRings) do ring:SetAlpha(alpha) end
+    end)
+    pin.tgfRingOn = true
 end
 
 function PinStyle.RestoreNative(pin)

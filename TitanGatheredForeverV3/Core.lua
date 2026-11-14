@@ -1,13 +1,17 @@
 local addonName, ns = ...
 TitanGatheredForeverV3 = ns
 local pendingItems, scheduled, bankAttempts, bankVisit = {}, false, 0, 0
+local itemRefreshQueued = false
 
 function ns.Print(message)
     DEFAULT_CHAT_FRAME:AddMessage(message)
 end
 
+-- Debug messages go to the saved debug log (the physical SavedVariables file); the chat only repeats them when
+-- Diagnostics > Also show debug messages in chat is on.
 function ns.Debug(message)
-    if ns.settings and ns.settings.debugMode then ns.Print(message) end
+    if ns.DebugLog then ns.DebugLog.Add('debug', message) end
+    if ns.settings and ns.settings.debugMode and ns.settings.debugChat then ns.Print(message) end
 end
 
 function ns.IsPublic(value)
@@ -273,35 +277,44 @@ local function start()
         return inputs
     end
     ns.observations = ns.Observations.New(observationAPI)
+    ns.npcObserver = ns.NpcObserver.New(ns.NpcObserver.DefaultAPI())
     ns.UpdateGathering()
     ns.FlightPaths.Attach()
     ns.Tooltips.Initialize()
     ns.Crafting.Initialize()
+    ns.ProfessionButton.Initialize()
+    ns.AuctionScan.Initialize()
     ns.Titan.Initialize()
+    ns.MinimapButton.Attach()
     for _, event in ipairs({ 'BAG_UPDATE_DELAYED', 'BANKFRAME_OPENED', 'BANKFRAME_CLOSED',
                             'BANK_TABS_CHANGED', 'PLAYERBANKSLOTS_CHANGED', 'PLAYER_ENTERING_WORLD',
                             'PLAYER_LEAVING_WORLD', 'ITEM_DATA_LOAD_RESULT', 'SKILL_LINES_CHANGED',
                             'TRADE_SKILL_DATA_SOURCE_CHANGING', 'TRADE_SKILL_DATA_SOURCE_CHANGED',
-                            'TRADE_SKILL_DETAILS_UPDATE', 'TRADE_SKILL_CLOSE' }) do frame:RegisterEvent(event) end
-    SlashCmdList.TITANGATHEREDFOREVERV3 = function(command)
-        if command=='icons' then ns.IconConfig.Show(); return end
-        if command=='export'then ns.ExportView.Show();return end
-        if command=='recipe'or command:match('^recipe%s')then
-            local id,target=command:match('^recipe%s+(%d+)%s*(%d*)%s*$')
-            if command=='recipe'then id=ns.Crafting.selectedID;target=1 end
-            if not id then ns.Print('Usage: /tgf recipe <recipeID> [operations], or select a recipe and use /tgf recipe.');return end
-            ns.CraftingView.Show(tonumber(id),tonumber(target)or 1);return
-        end
-        if command == 'refresh' then ns.ScheduleRefresh(); return end
-        if command == 'next' or command == 'prev' then
-            ns.Titan.page = math.max(1, ns.Titan.page + (command == 'next' and 1 or -1))
-            ns.Titan.Refresh(); return
-        end
-        if command == 'history' or command == 'chances' or command == 'actions' or command == 'production' or command == 'pvp' then ns.Reports.Show(command); return end
-        if command == 'settings' then ns.Titan.Menu(UIParent); return end
-        local help = 'Commands: /tgf settings, /tgf icons, /tgf refresh, /tgf next, /tgf prev, /tgf history, /tgf chances, /tgf actions, /tgf production, /tgf recipe <recipeID> [operations], /tgf export, /tgf status.'
-        if command ~= 'status' and not ns.settings.debugMode then ns.Print(help); return end
-        local report = command == 'status' and ns.Print or ns.Debug
+                            'TRADE_SKILL_DETAILS_UPDATE', 'TRADE_SKILL_CLOSE',
+                            'TRAINER_SHOW', 'TRAINER_UPDATE', 'TRAINER_CLOSED',
+                            'MERCHANT_SHOW', 'MERCHANT_UPDATE', 'MERCHANT_CLOSED' }) do frame:RegisterEvent(event) end
+    -- Shared by the right-click menu and the slash commands so each function has one implementation.
+    function ns.ChangeSummaryPage(delta)
+        ns.Titan.page = math.max(1, ns.Titan.page + delta)
+        ns.Titan.Refresh()
+    end
+    function ns.NpcNearest()
+        local node, distance, mapID = ns.NpcSources.Nearest()
+        if node then
+            local record = ns.NpcSources.Record(node.npcID)
+            ns.Print(string.format('Nearest NPC pin on map %s: %s (%s), %.1f%% of the map away; axis swap %s.',
+                tostring(mapID), record.name, node.kind, distance * 100, tostring(ns.settings.npcAxisSwap)))
+        else ns.Print('No visible NPC pin on this map.') end
+    end
+    function ns.NpcToggleAxes()
+        ns.settings.npcAxisSwap = not ns.settings.npcAxisSwap
+        ns.NpcSources.Invalidate(); ns.Map.Update(); ns.Minimap.Update()
+        ns.Print('NPC world axes swapped: ' .. tostring(ns.settings.npcAxisSwap))
+        ns.NpcNearest()
+    end
+    local help = 'Most functions are in the right-click menu of the Titan entry. Command with a parameter: /tgf recipe <recipeID> [operations].'
+    function ns.ShowStatus(toChat)
+        local report = toChat and ns.Print or ns.Debug
         local count = ns.inventory:Get(0)
         report(string.format('Titan Gathered Forever v3 %s; client %s.%s; bank %s; catalogue %d materials / %d recipes.',
             C_AddOns.GetAddOnMetadata(addonName, 'Version') or 'unknown', version, build,
@@ -322,6 +335,25 @@ local function start()
             .. ' / icons ' .. (world and world.visibleCount or 0)
             .. '; minimap icons ' .. (mini and mini.visibleCount or 0))
     end
+    SlashCmdList.TITANGATHEREDFOREVERV3 = function(command)
+        if command=='icons' then ns.IconConfig.Show(); return end
+        if command=='export'then ns.ExportView.Show();return end
+        if command=='recipe'or command:match('^recipe%s')then
+            local id,target=command:match('^recipe%s+(%d+)%s*(%d*)%s*$')
+            if command=='recipe'then id=ns.Crafting.selectedID;target=1 end
+            if not id then ns.Print('Usage: /tgf recipe <recipeID> [operations], or select a recipe and use /tgf recipe.');return end
+            ns.CraftingView.Show(tonumber(id),tonumber(target)or 1);return
+        end
+        if command == 'npc' then ns.NpcNearest(); return end
+        if command == 'npc swap' then ns.NpcToggleAxes(); return end
+        if command == 'recipes' then ns.RecipeBrowser.Show(); return end
+        if command == 'refresh' then ns.ScheduleRefresh(); return end
+        if command == 'next' or command == 'prev' then ns.ChangeSummaryPage(command == 'next' and 1 or -1); return end
+        if command == 'history' or command == 'chances' or command == 'actions' or command == 'production' or command == 'pvp' then ns.Reports.Show(command); return end
+        if command == 'settings' then ns.Titan.Menu(UIParent); return end
+        if command ~= 'status' and not ns.settings.debugMode then ns.Print(help); return end
+        ns.ShowStatus(command == 'status')
+    end
     SLASH_TITANGATHEREDFOREVERV31 = '/tgf'
     ns.ScheduleRefresh()
 end
@@ -334,6 +366,7 @@ frame:SetScript('OnEvent', function(_, event, ...)
     end
     if event == 'PLAYER_LOGIN' then start(); return end
     if not ns.inventory then return end
+    ns.DebugLog.Event(event, ...)
     if event=='TRADE_SKILL_DATA_SOURCE_CHANGING'or event=='TRADE_SKILL_CLOSE'or event=='PLAYER_LEAVING_WORLD'then ns.Crafting.Select(nil)end
     if event=='CHAT_MSG_COMBAT_HONOR_GAIN'then
         if ns.settings.recordPvP == false then return end
@@ -366,6 +399,13 @@ frame:SetScript('OnEvent', function(_, event, ...)
     elseif event=='PLAYER_PVP_KILLS_CHANGED'or event=='PLAYER_PVP_RANK_CHANGED'then
         ns.Reports.Refresh();return
     end
+    if event == 'TRAINER_SHOW' then ns.npcObserver:TrainerShown(); return end
+    if event == 'MERCHANT_SHOW' then ns.npcObserver:MerchantShown(); return end
+    if event == 'TRAINER_UPDATE' then ns.npcObserver:TrainerUpdated(); return end
+    if event == 'TRAINER_CLOSED' then ns.npcObserver:TrainerClosed(); return end
+    if event == 'MERCHANT_UPDATE' then ns.npcObserver:MerchantUpdated(); return end
+    if event == 'MERCHANT_CLOSED' then ns.npcObserver:MerchantClosed(); return end
+    if event == 'TRADE_SKILL_DATA_SOURCE_CHANGED' then ns.KnownRecipes.Schedule() end
     if event:match('^UNIT_SPELLCAST_') then
         local unit, castGUID, spellID = ...
         if ns.IsPublic(unit) and ns.IsPublic(castGUID) and ns.IsPublic(spellID) then
@@ -401,7 +441,16 @@ frame:SetScript('OnEvent', function(_, event, ...)
         local itemID, success = ...
         if not ns.IsPublic(itemID) or type(itemID) ~= 'number' then return end
         if success then pendingItems[itemID] = nil else pendingItems[itemID] = false end
-        ns.Reports.Refresh()
+        -- Opening the recipes window asks for hundreds of items at once and every answer arrives as its own
+        -- event. One redraw after the burst replaces a full recomputation per item.
+        if not itemRefreshQueued then
+            itemRefreshQueued = true
+            C_Timer.After(0.3, function()
+                itemRefreshQueued = false
+                ns.Reports.Refresh()
+                ns.RecipeBrowser.Refresh()
+            end)
+        end
     end
     ns.ScheduleRefresh()
 end)

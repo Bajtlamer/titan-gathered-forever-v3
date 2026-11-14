@@ -7,24 +7,36 @@ function Style.Text(color, text)
     return '|c' .. color .. tostring(text) .. '|r'
 end
 
--- Resize only addon-owned supporting text, preserving native tooltip fonts.
+-- Resize only addon-owned supporting text, preserving native tooltip fonts. The original font is restored
+-- when the tooltip is recycled.
+local function shrink(tooltip, line)
+    if not line or not line.SetFontObject then return end
+    if not tooltip.tgfNoteFonts then
+        tooltip.tgfNoteFonts = {}
+        tooltip:HookScript('OnTooltipCleared', function(self)
+            for region, font in pairs(self.tgfNoteFonts) do region:SetFontObject(font) end
+            self.tgfNoteFonts = {}
+        end)
+    end
+    if not tooltip.tgfNoteFonts[line] then
+        tooltip.tgfNoteFonts[line] = line.GetFontObject and line:GetFontObject() or 'GameTooltipText'
+    end
+    line:SetFontObject('GameFontHighlightSmall')
+end
+
 function Style.Note(tooltip, value)
     tooltip:AddLine(value, 1, 1, 1, true)
     local name = tooltip.GetName and tooltip:GetName()
-    local line = name and _G[name .. 'TextLeft' .. tooltip:NumLines()]
-    if line and line.SetFontObject then
-        if not tooltip.tgfNoteFonts then
-            tooltip.tgfNoteFonts = {}
-            tooltip:HookScript('OnTooltipCleared', function(self)
-                for region, font in pairs(self.tgfNoteFonts) do region:SetFontObject(font) end
-                self.tgfNoteFonts = {}
-            end)
-        end
-        if not tooltip.tgfNoteFonts[line] then
-            tooltip.tgfNoteFonts[line] = line.GetFontObject and line:GetFontObject() or 'GameTooltipText'
-        end
-        line:SetFontObject('GameFontHighlightSmall')
-    end
+    shrink(tooltip, name and _G[name .. 'TextLeft' .. tooltip:NumLines()])
+end
+
+-- Shrink the line that was just added, in both columns of a two-column line.
+function Style.Small(tooltip)
+    local name = tooltip.GetName and tooltip:GetName()
+    if not name then return end
+    local index = tooltip:NumLines()
+    shrink(tooltip, _G[name .. 'TextLeft' .. index])
+    shrink(tooltip, _G[name .. 'TextRight' .. index])
 end
 
 function Style.MenuNote(parent, value)

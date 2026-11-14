@@ -22,7 +22,11 @@ function Map.New(world, controller)
         if elapsed >= 0.2 then elapsed = 0; self:Refresh() end
     end)
     world:HookScript('OnShow', function() self:Refresh(true) end)
-    world:HookScript('OnHide', function() self:Hide() end)
+    -- The rings that mark a clicked recipe belong to the map the recipes window opened: closing the map ends them.
+    world:HookScript('OnHide', function()
+        self:Hide()
+        if ns.NpcSources and ns.NpcSources.HasHighlight and ns.NpcSources.HasHighlight() then ns.NpcSources.SetHighlight(nil) end
+    end)
     controller.changed = function() self.dirty = true; self:Refresh() end
     self:Refresh(true)
     return self
@@ -41,7 +45,7 @@ function Map:Hide()
     self.visibleCount = 0
 end
 
-function Map:Nodes(mapID)
+function Map:GatheringNodes(mapID)
     local result = {}
     for _, node in ipairs(self.controller:List(mapID)) do result[#result + 1] = node end
     if #result >= 500 then return result end
@@ -68,6 +72,15 @@ function Map:Nodes(mapID)
     return result
 end
 
+function Map:Nodes(mapID)
+    local result = {}
+    if ns.settings.gatheringMap then result = self:GatheringNodes(mapID) end
+    if ns.NpcSources and ns.NpcSources.Enabled() then
+        for _, node in ipairs(ns.NpcSources.List(mapID)) do result[#result + 1] = node end
+    end
+    return result
+end
+
 function Map:CreatePin()
     local pin = CreateFrame('Button', nil, self.overlay)
     -- The native scroll-frame drawing pass covers MEDIUM addon children even
@@ -78,6 +91,11 @@ function Map:CreatePin()
     pin:SetScript('OnEnter', function(button)
         local node = button.node
         GameTooltip:SetOwner(button, 'ANCHOR_RIGHT')
+        if node.npcID and ns.NpcSources then
+            ns.NpcSources.FillTooltip(GameTooltip, node)
+            GameTooltip:Show()
+            return
+        end
         if node.kind == 'PvP' then
             GameTooltip:AddLine(ns.PinStyle.Label(node.kind))
             GameTooltip:AddLine('Open-world PvP honorable kills')
@@ -107,7 +125,8 @@ function Map:CreatePin()
 end
 
 function Map:Refresh(force)
-    if not ns.settings.gatheringMap or ns.settings.mapWorld == false or not self.world:IsShown() then self:Hide(); return end
+    local npcs = ns.NpcSources and ns.NpcSources.Enabled()
+    if not (ns.settings.gatheringMap or npcs) or ns.settings.mapWorld == false or not self.world:IsShown() then self:Hide(); return end
     local mapID, canvas = self.world:GetMapID(), self.world:GetCanvas()
     if not mapID or not canvas then self:Hide(); return end
     local width, height = canvas:GetWidth(), canvas:GetHeight()
@@ -133,6 +152,7 @@ function Map:Refresh(force)
         pin.node = node
         pin:SetSize(iconSize, iconSize)
         ns.PinStyle.Apply(pin, 'world')
+        ns.PinStyle.Highlight(pin, node.npcID ~= nil and ns.NpcSources ~= nil and ns.NpcSources.IsHighlighted(node.npcID))
         pin:ClearAllPoints()
         pin:SetPoint('CENTER', self.overlay, 'TOPLEFT', node.x * width, -node.y * height)
         pin.texture:SetTexture(ns.PinStyle.Icon(node.itemID, node.kind))

@@ -13,6 +13,7 @@ if not runtime:
 commands = [
     [sys.executable, '-m', 'unittest', 'discover', '-s', 'tests', '-p', 'test_*.py'],
     [sys.executable, 'tools/generate_catalog.py', '--check'],
+    [sys.executable, 'tools/generate_npc_seed.py', '--check'],
     [runtime, 'tests/run.lua'],
     [runtime, 'tests/integration.lua'],
     [runtime, 'tests/addon_loading.lua'],
@@ -34,14 +35,25 @@ commands = [
     [runtime, 'tests/icon_appearance.lua'],
     [runtime, 'tests/icon_config.lua'],
     [runtime, 'tests/minimap.lua'],
+    [runtime, 'tests/npc_sources.lua'],
+    [runtime, 'tests/debug_log.lua'],
+    [runtime, 'tests/minimap_button.lua'],
+    [runtime, 'tests/known_recipes.lua'],
+    [runtime, 'tests/npc_observer.lua'],
+    [runtime, 'tests/recipe_browser.lua'],
+    [runtime, 'tests/navigation.lua'],
+    [runtime, 'tests/profession_button.lua'],
+    [runtime, 'tests/auction_scan.lua'],
+    [runtime, 'tests/trainer_browser.lua'],
 ]
 for command in commands:
-    subprocess.run(command, cwd=root, check=True)
+    subprocess.run(command, cwd=root, check=True, stdin=subprocess.DEVNULL)
 addons = ['TitanGatheredForeverV3'] + [row['folder'] for row in json.loads((root / 'catalogue/modules.json').read_text())]
 for addon in addons:
     toc = root / addon / (addon + '.toc')
     for line in toc.read_text().splitlines():
         if line.endswith('.lua'):
             path = addon + '/' + line
-            subprocess.run([runtime, '-e', 'assert(loadfile(arg[1])); os.exit(0)', path], cwd=root, check=True)
+            subprocess.run([runtime, '-e', 'assert(loadfile(arg[1])); os.exit(0)', path], cwd=root, check=True,
+                           stdin=subprocess.DEVNULL)
 print('PASS all shipped Lua files compile with Lua 5.1 semantics')

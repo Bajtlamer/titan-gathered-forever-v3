@@ -303,3 +303,202 @@ The renamed saved table is TitanGatheredForeverV3DB. A non-destructive one-time 
 The project now develops outside the game installation. All fourteen addon folders contain only game-required manifest files and artwork. Tools, tests, catalogue JSON, release notes, contributor guidance and prefixed documents moved to the collection root. Private archives and old repository metadata remain preserved in root .work; generated packages moved to root dist. The redundant core README/ignore files were archived privately.
 
 Root commands and GitHub workflow paths were updated. A strict manifest-based regression verifies every addon folder's contents. The addon version remains 0.4.1-alpha because runtime behavior and packaged files are unchanged. All 177 checks and shipped Lua compilation pass; runtime/package hash verification accompanies this structural change. AGENTS.md was moved without changing its contents.
+
+### Trainer and recipe vendor design, 2026-11-12
+
+Design recorded in plan-npc-sources.md. The classic-db 1.12.1 dump was downloaded to a scratch directory, pinned by commit and SHA-256, and a throwaway parse found 284 profession trainers and 230 recipe vendors with spawns. GPL-3.0 `LICENSE` and `NOTICE` were added. No runtime code, manifest or version changed, so nothing was installed.
+
+### Trainer and recipe vendor feature, 0.4.12-alpha, 2026-11-12
+
+Implemented per plan-npc-sources-implementation.md: pinned seed generator and generated Data/NpcSeed.lua (190 KB, 458 NPCs: 247 trainers and 211 recipe vendors on continents only), NpcSources, NpcObserver, KnownRecipes and RecipeBrowser modules, world map and minimap pins, menu toggles with a profession filter, /tgf npc, /tgf recipes, and LICENSE/NOTICE packaging. All 86 Python tests and every Lua suite pass, including 14 NpcSources, 8 NpcObserver, 4 KnownRecipes and 4 RecipeBrowser checks, and all shipped Lua files compile with Lua 5.1 semantics. tools/check.py now closes stdin for its subprocesses after a LuaJIT compile step hung on an open pipe.
+
+The candidate was installed with tools/install.py. All 64 installed files match the source candidate and all 14 manifests read 0.4.12-alpha. Previous folders: Interface/.tgf-v3-backups/candidate-zhwty_pc. New files and manifest entries require a full client restart.
+
+Live validation (open, separate from automated checks):
+- [ ] Pins appear on the world map and minimap at plausible positions; /tgf npc names a nearby trainer; /tgf npc swap fixes mirrored placement if needed.
+- [ ] Continent UiMapIDs 1414 (Kalimdor) and 1415 (Eastern Kingdoms) are correct for Forever.
+- [ ] Opening a profession trainer stores profession, services, skill and cost (trainer API behaviour).
+- [ ] Opening a recipe vendor stores recipe items with price and the required skill parsed from the tooltip.
+- [ ] Opening each profession window marks recipes as known; the Unlearned recipes window reflects it.
+- [ ] Tooltip text, the 15-line cap and the menu toggles behave as designed; no Lua errors with /console scriptErrors 1.
+
+### Menu covers every parameterless command, 0.4.13-alpha, 2026-11-12
+
+The right-click menu gained Refresh inventory and Show status report (Diagnostics), Next and Previous summary page (Display), and Find nearest trainer or vendor pin plus a Swap map axes checkbox (Trainers and recipe vendors, Pin placement). Slash commands and menu share one implementation (ns.ShowStatus, ns.ChangeSummaryPage, ns.NpcNearest, ns.NpcToggleAxes). Only /tgf recipe <recipeID> [operations] stays documented, because it needs a parameter; other commands still work as undocumented shortcuts. tools/check.py and the pin outline check pass, including a new integration test for the menu entries. Installed with tools/install.py, all 64 installed files match the source and all 14 manifests read 0.4.13-alpha. Previous folders: Interface/.tgf-v3-backups/candidate-kwogl7e0. Lua-only changes to existing files plus no new files, so /reload is enough.
+
+
+### Beta stage, 0.5.0-beta, 2026-11-12
+
+The project left alpha at the owner's request. Version 0.5.0-beta was applied to the core manifest, generator VERSION and all generated profession manifests, with README, AGENTS.md versioning rule, roadmap baseline and unreleased notes updated. Earlier versioned notes and downloads keep their alpha names. Version-only change: runtime behavior equals 0.4.13-alpha. tools/check.py and the catalogue check pass. Installed with tools/install.py, all 64 installed files match the source and all 14 manifests read 0.5.0-beta. Previous folders: Interface/.tgf-v3-backups/candidate-kulx7m8v. Live validation checklists above remain open, so beta means feature complete with unverified client behavior. /reload is enough (no new files).
+
+### First live finding and NPC recording log, 0.5.1-beta, 2026-11-12
+
+Live test on Forever: map pins appeared and /tgf npc named the nearest trainer, but after opening a trainer window its pin tooltip still read Not yet confirmed in game, so no observation was stored. The cause is not yet known (event not delivered, NPC identity, empty or different trainer API answers, or no skill requirement from the client). 0.5.1-beta adds a bounded log of the last 12 trainer and merchant recording attempts (npcLog in SavedVariables) with the outcome and raw API answers, and Diagnostics > Show NPC recording log. Recording behavior is unchanged. All automated checks pass; installed with tools/install.py, all 64 files match and all 14 manifests read 0.5.1-beta. Previous folders: Interface/.tgf-v3-backups/candidate-liouj14j. /reload is enough. Next: read the log from the live client and fix the recording path.
+
+### Trainer list timing fix, 0.5.2-beta, 2026-11-12
+
+The 0.5.1 recording log from the live client showed TRAINER_SHOW delivering the NPC correctly (GUID, name, map 1426, not in an instance) while GetNumTrainerServices returned 0 at that moment; the C_TrainerUI table does not exist, so the classic trainer API is the one in use. The client fills the list shortly afterwards. 0.5.2-beta reads trainer and merchant data again on TRAINER_UPDATE and MERCHANT_UPDATE while the window is open and stops on the CLOSED events. All automated checks pass; installed with tools/install.py, all 64 files match and all 14 manifests read 0.5.2-beta. /reload is enough. Live re-test pending: the pin tooltip should read Confirmed in game after the trainer window is opened; whether GetTrainerServiceSkillReq returns a skill name is still unverified and the log will say so.
+
+### Live validation results, trainers, 2026-11-12
+
+Evidence from the 0.5.2-beta recording log and saved npcs table on WoW Forever 1.60.1 (character on a PvE realm, Ironforge, map 1426):
+- Confirmed: the pin tooltip changes to Confirmed in game after a trainer window is opened.
+- Confirmed: TRAINER_SHOW delivers the NPC (GUID, name, map, not in an instance) but GetNumTrainerServices returns 0 at that moment; TRAINER_UPDATE then returns the full list (10 services for Dank Drizzlecut, 7 for Cook Ghilm). Reading again on update fixed recording in 0.5.2-beta.
+- Confirmed: GetTrainerServiceSkillReq returns the profession name and required rank (for example Mining, 125), so the profession is identified. GetTrainerServiceCost returns the copper cost. C_TrainerUI does not exist, so the classic trainer API is the one in use.
+- Observed: Forever has recipes absent from the Classic 1.12.1 seed (for example Azerothium Bar at skill 275), which supports letting observed data replace seed data.
+- Still open: recipe vendor recording (price and required skill parsed from the merchant tooltip), known recipe reading from profession windows with the Unlearned recipes window, continent UiMapIDs 1414 and 1415 for the row click, and the 15-line tooltip cap on a large vendor.
+
+### Merchant API finding, 0.5.3-beta, 2026-11-12
+
+Live merchant log (Kazan Mogosh, NPC 1237, 18 items): MERCHANT_SHOW delivered the NPC, GetMerchantNumItems returned 18 and item links work, but GetMerchantItemInfo does not exist in this client (probe: info=missing), so prices could not be read, and recording ended with no-recipes. It is not yet known whether this vendor sells recipe items or whether recipes were missed. 0.5.3-beta reads price and extended cost from C_MerchantFrame.GetItemInfo (fallback to the old function) and extends the merchant probe: item class counts over all items, and for the first four recipe items the raw info and tooltip lines. All automated checks pass; installed with tools/install.py, all 64 files match and all 14 manifests read 0.5.3-beta. /reload is enough. Live re-test pending with the same vendor and with a vendor known to sell recipes.
+
+### Trainer and vendor tooltip layout, 0.5.4-beta, 2026-11-12
+
+Pin tooltip reformatted at the owner's request: required skill in brackets right after the recipe name, only the price on the right in the classic gold, silver and copper icon format, a separator between the NPC header and the list, and colors that distinguish the NPC name (gold), the list (white) and additional information (gray, green for confirmed). Automated checks pass, including tests for the exact left and right text, the colors, the separator, extra cost and empty list; installed with tools/install.py, all 64 files match and all 14 manifests read 0.5.4-beta. /reload is enough. Live visual review pending: icon sizes in the right column, separator rendering and the color choices.
+
+### Smaller tooltip text, 0.5.5-beta, 2026-11-12
+
+After live review of the 0.5.4 layout ("tooltip is OK, maybe a smaller font") the pin tooltip lines other than the NPC name use the small tooltip font, through a new Style.Small helper that restores the original fonts when the tooltip is recycled. Automated checks pass, including a presentation test for both columns and the restore, and a test that exactly the role, status and list rows are shrunk; installed with tools/install.py, all 64 files match and all 14 manifests read 0.5.5-beta. /reload is enough. Live visual review of the size is pending.
+
+### Unlearned recipes window: filter, green NPC names and location tooltip, 0.5.6-beta, 2026-11-12
+
+Added at the owner's request after reviewing the window: a profession filter, green NPC names, and a hover tooltip over the NPC column that lists every source of the recipe with role, price in coin icons, zone and coordinates (observed position, or the seed's Classic world position converted with C_Map.GetMapPosFromWorldPos without an override map and marked not yet confirmed). Automated checks pass, including model tests for the filter and Location, a tooltip test, and a window test that fires the hover scripts; installed with tools/install.py, all 64 files match and all 14 manifests read 0.5.6-beta. /reload is enough. Live review pending: the zone and coordinates of seed NPCs depend on the unverified world-to-map conversion and axis order.
+
+### Debug log file and scrolling recipe list, 0.5.7-beta, 2026-11-12
+
+Two requests after reviewing the unlearned recipes window. First, Debug mode is now the switch for a debug log of important events: DebugLog.lua keeps the latest 1,000 lines in the saved variables file (the only file an addon can influence; it is written on /reload and logout) and ns.Debug writes there instead of the chat, which can still repeat messages through Also show debug messages in chat. Events traced: player spell casts, loot, trainer and merchant windows, profession windows, bank and world changes, honor events and player death; NPC recording outcomes and profession recipe reads are added. Second, the unlearned recipes window scrolls with the mouse wheel and a native slider scroll bar instead of Previous and Next buttons. New core file DebugLog.lua, so a full client restart is needed once. Automated checks pass (new debug log suite, rewritten recipe browser suite with 7 checks, integration tests for the menu entries and event logging); installed with tools/install.py, all 65 files match and all 14 manifests read 0.5.7-beta. Live review pending: the scroll bar look and wheel behaviour, and the log contents after a /reload.
+
+The local build in dist/releases/0.5.6-beta is stale and must be rebuilt for the version that is finally published; release-notes/ref-0.5.6-beta.md describes the first beta and is to be revised for that version.
+
+### Skill colors and a minimap button, 0.5.8-beta, 2026-11-12
+
+Two requests after reviewing the unlearned recipes window. First, recipes the character lacks the skill for are shown in red (name and skill in the window, the skill in brackets in pin tooltips) so those that could be learned now stand out; the rank per profession comes from ns.Professions.Rows through new NpcSources.Skills and CanLearn, a profession the character does not have counts as insufficient skill, and an unknown requirement or unreadable professions stay neutral. Second, MinimapButton.lua adds a round TG3 button modelled on the TitanApproxDPS one (32 px, MEDIUM strata, minimap width/2 + 22 from the center, saved angle, drag, left click toggles the recipes window, right click opens the menu), with Display > Show minimap button. New core file, so a full client restart is needed once. Automated checks pass (new minimap button suite with 8 checks, 20 NpcSources checks, 10 recipe browser checks and a menu integration test); installed with tools/install.py, all 66 files match and all 14 manifests read 0.5.8-beta. Live review pending: the button look and position next to other minimap buttons, and the red coloring against real skill levels.
+
+### Gold ring on the NPCs of a clicked recipe, 0.5.9-beta, 2026-11-12
+
+After clicking a recipe in the unlearned recipes window the world map showed many vendor pins and the wanted one was hard to find. Clicking a row now opens the map at the zone of the first source (NpcSources.Location, continent fallback) and marks every source with a gold highlight: PinStyle.Highlight draws two concentric rings from the circle outline artwork in gold, pulsing by alpha, and raises the pin frame level; NpcSources keeps the marked NPC IDs for five minutes (SetHighlight, IsHighlighted, HasHighlight), shows them whatever the map toggles and profession filter say, and schedules one redraw at expiry. The same row clears the mark, another recipe replaces it, it is not saved across a reload. Automated checks pass (new tests in pin_style, npc_sources, map, minimap and recipe_browser); installed with tools/install.py, all 66 files match and all 14 manifests read 0.5.9-beta. No new file, so /reload is enough. Live review pending: whether two thin rings are visible enough on the world map and on the minimap at the chosen sizes, and how the pulse looks.
+
+### Red, temporary rings, 0.5.10-beta, 2026-11-12
+
+Live review of 0.5.9: the ring stayed after the world map was closed and reopened, which would soon fill the map with rings, and the owner wanted it red and a different size (chosen: smaller and thicker). PinStyle.Highlight now draws three tight red rings (base max(1.7 x pin width, 24) px, 2.5 px apart) instead of two gold ones, and Map.lua ends the mark through NpcSources.SetHighlight(nil) when the world map is hidden, so a normally reopened map shows plain pins. Because the mark is one shared state, it also leaves the minimap then. Automated checks pass (updated pin_style test and a new map test for the clear on close); installed with tools/install.py, all 66 files match and all 14 manifests read 0.5.10-beta. No new file, so /reload is enough. Live review pending: size and visibility of the band, and whether the rings should stay on the minimap while walking to the NPC.
+
+### One tabbed window, scrolling lists, search and grouping, 0.5.11-beta, 2026-11-12
+
+Owner request: open the statistics windows from the minimap button, scroll instead of paging everywhere, and add filtering or grouping by item. Decision: instead of a menu of windows, the minimap button opens one tabbed window (seven bottom tabs, shared size 985x592 and remembered position) built from the existing frames through the new Navigation.lua (tab strip, Activate/Toggle, Scrollbar helper). Reports now flatten rows into measured entries and draw from a scroll offset (variable row heights kept; the last offset is the first one whose remaining rows still fill the window); the crafting planner scrolls by reagent row. Search by name in all tabs and the recipes window, and a group by item mode with expandable sources for observed chances. The export window keeps numbered parts (client text box limit). Automated checks pass (reports 22, crafting view, recipe browser and minimap button tests updated). Live review pending: tab look and spacing, scroll feel, search box look, grouped chances. New file: restart the client once.
+
+### Learned status in tooltips, 0.5.12-beta, 2026-11-12
+
+Owner feedback: trainer and vendor tooltips did not make clear whether the recipe is already learned. The tooltip had only a small green "(known)" tag and said nothing when a profession was never read. Known recipes are now dimmed with a green "learned" tag, and a gray footer lists the professions whose learned status is unknown (open that profession window once). Automated checks pass (npc_sources, 24 checks). Live review pending.
+
+### Rank spells in tooltips, 0.5.13-beta, 2026-11-12
+
+Owner report: the Fishing trainer tooltip kept saying the learned status is unknown although the profession window was opened many times. The saved log showed recipe reads for FirstAid, Cooking, Mining and Engineering but never Fishing, and the Fishing trainer record holds one service, "Journeyman Fishing" (trainer 1683, services=1). Fishing has no trade skill recipe list, so KnownRecipes never records it, and rank spells are in no recipe list anywhere. NpcSources.RankSpellKnown now decides rank spells from Professions maxRank against the tier cap, and the unread note ignores them. Automated checks pass (npc_sources, 25 checks). Live review pending.
+
+
+### Next profession rank in the window, 0.5.14-beta, 2026-11-12
+
+Owner request: show the trainers where the next skill level can be learned once the maximum is reached or learning is possible. NpcSources.Unlearned now adds rank spells as trainer rows: per profession the player has, the lowest tier whose cap (75, 150, 225, 300, 375) exceeds the current skill cap, provided the trainer requirement is not above the current skill. Beyond that only Fishing, Herbs and Skinning joined RecipeKinds. Automated checks pass (npc_sources, recipe_browser updated). The data depends on the seed trainer rows for those professions; live review pending, especially whether Expert and Artisan trainers exist in the seed.
+
+### Skill reading on rank rows, 0.5.15-beta, 2026-11-12
+
+Owner report: with Fishing 75/75 the Warg Deepwater trainer is circled although the owner believes he teaches only up to 75. The saved record of trainer 1683 (observed, 21:56:31, mapID 1432) lists one service, Journeyman Fishing, state available, skill requirement 50 met, cost 500, so the recorded data says he teaches Journeyman. The rank logic already uses rank and maxRank from Professions.Rows (Fishing 75/75 selects Journeyman). To make the input visible, rank rows now show "Your <profession> skill is a / b." at the top of the hover tooltip. Open: what the Warg trainer window really lists for the owner, and which skill reading the tooltip prints.
+
+### Character level for rank rows, 0.5.16-beta, 2026-11-12
+
+Owner screenshot of Warg Deepwater (Fishing 75/75, character level 14): the trainer window lists Journeyman Fishing, Requires: Level 10, Fishing (50), 5 silver, so the recorded and seed data match the game and Warg correctly appears as the source of the next rank. The screenshot exposed an unchecked requirement, the character level. NpcObserver now records the level per trainer service and NpcSources hides rank rows above the player level, with classic tier levels as the fallback. The seed carries no level (its fifth field is 0), so regenerating it would need the pinned dump. Automated checks pass.
+
+### Combo boxes and classic tabs, 0.5.17-beta, 2026-11-12
+
+Owner request: use Blizzard style combo boxes instead of buttons with menus, and noted that classic tabs are possible. Navigation.lua gained Nav.Dropdown (WowStyle1DropdownTemplate with SetupMenu and radio choices, the same API another installed addon uses on this client; fallback button and context menu) and Nav.Tabs (PanelTabButtonTemplate with PanelTemplates_SetNumTabs and SetTab; fallback button row), both guarded by pcall. The profession filters of the recipes window and all statistics tabs use the drop down. Two state toggles (This character, All unlearned, All sources) stay buttons. New tests/navigation.lua covers the template and fallback paths. Live review pending: if the tabs or drop down look wrong or the fallback is used, the log of Lua errors (/console scriptErrors 1) shows why.
+
+### Combo boxes everywhere, 0.5.18-beta, 2026-11-12
+
+Owner request: replace choice buttons with combo boxes wherever possible. Nav.Dropdown now also serves the two state choices: scope in the statistics tabs and the export window, the recipes source filter, chances grouping and the export identity setting. Controls that perform an action stay buttons. Tests drive the choices through the same options and setters (recipe_browser captures them, reports and export_view pick from the fallback menu). Live review pending, together with the look of the drop downs from 0.5.17.
+
+## 0.5.19-beta, trainers whose services are all known
+
+Live finding: Bronk Guzzlegear (npc 1702) stayed "Not yet confirmed in game". The NPC recording log showed GetNumTrainerServices=0 on both TRAINER_SHOW and TRAINER_UPDATE, while another trainer in the same session returned 10. Probable cause: the default trainer window filter hides already known services, so a trainer with nothing left to teach reads as empty. Fix: with an empty list the observer switches the available, unavailable and used filters on for one read per opened window and restores them. Pending live check: that the client rebuilds the list synchronously after SetTrainerServiceTypeFilter, and that Bronk is then recorded (confirmed). If the log still shows services=0, the probe line "type filters" shows the filter states.
+
+## 0.5.20-beta, delayed read after the trainer filters change
+
+Live log after 0.5.19: Bronk (npc 1702) still returned GetNumTrainerServices=0, with the type filters available/unavailable/used = true/true/false when probed (after the toggle and restore). The list is therefore not rebuilt synchronously. The observer now logs filters-on, reads again after 0.3 s (event TRAINER_FILTER) and restores the filters afterwards or on close. Pending live check: Bronk recorded as saved, and the player's trainer filter back to its previous state.
+
+## 0.5.21-beta, trainer filter diagnostics
+
+Live log after 0.5.20: filters-on was logged for Bronk (npc 1702), but the probe still showed used=false and the delayed TRAINER_FILTER read still returned 0 services. Either SetTrainerServiceTypeFilter(name, 1) is not accepted by this client or the empty list has another cause. 0.5.21 tries 1 then true and writes the client answers into the filters-on log entry (field first). Pending live check of that report.
+
+## 0.5.22-beta, Bronk recorded
+
+Live log after 0.5.21: SetTrainerServiceTypeFilter(name, 1) fails with "Missing on/off parameter", SetTrainerServiceTypeFilter(name, true) works. After the delayed read Bronk (npc 1702) was saved with 11 Engineering services. 0.5.22 uses true and false only. Pending live check: the player's "Already known" filter is back to off after the window closes.
+
+## 0.5.23-beta, trainer list no longer flashes
+
+Live report (screenshot, 0.5.21): the Bronk window showed several services and then emptied. This was the addon switching the type filters on for the read and back at once; it is not a client bug. 0.5.23 keeps the filters on until the trainer window closes. Pending live check that the filter is back off after closing.
+
+## 0.5.24-beta, filters restored right after the read
+
+Live report on 0.5.23: the filter returned to off after closing, but the window showed already known services meanwhile, which looked wrong. 0.5.24 restores the filters in the same handler as the successful read. Pending live check: how short the remaining flash is (the list is rebuilt after the filter change, so some flash may remain).
+
+## 0.5.25-beta, C stack overflow fixed
+
+Live error on 0.5.24 when a Mining trainer was opened: C stack overflow in NpcObserver.lua (Log, ReadTrainer, TrainerUpdated, RestoreFilters in a loop). The client delivers TRAINER_UPDATE inside SetTrainerServiceTypeFilter. 0.5.25 ignores nested reads and clears the changed filter list before restoring. Pending live check: Mining trainer opens without an error and is recorded.
+
+## 0.5.26-beta, filters touched only for an empty update
+
+Live log on 0.5.25: the Mining trainer (npc 5392) was recorded without an error, but the filters were also switched for it (filters-on on SHOW, 15 services saved, then 10 on the restore). TRAINER_SHOW is always empty. 0.5.26 switches the filters only when TRAINER_UPDATE is still empty. Pending live check: Mining trainer saved with the player's filters (no filters-on entry), Bronk still recorded.
+
+## 0.5.27-beta, Trainers tab
+
+New tab Trainers (TrainerBrowser.lua, NpcSources.Trainers): all profession trainers with zone, coordinates and status, default list of trainers not visited yet, status and profession combo boxes, search over name, profession and zone, hover tooltip of what the trainer teaches and a map click that rings the trainer. Visited means a recorded trainer window, not only a merchant visit. Pending live check: the look of the eight tabs along the bottom (they may be wider than the window), the converted coordinates of unvisited trainers and the map click.
+
+## 0.5.28-beta, first opening of the recipes window
+
+Live report: the first opening after the game starts lags. Cause found by measurement: Unlearned() requests the names of about 550 vendor recipe items; each ITEM_DATA_LOAD_RESULT redrew the list (one computation takes about 6 ms in LuaJIT on a desktop, so hundreds of them add up). 0.5.28 coalesces the redraw (0.3 s after the first answer) and requests item names only for the professions in view. Pending live check of the first opening. The window construction itself and the item requests (about 550 at once on an All professions list) were not measured in game.
+
+## 0.5.29-beta, tab widths on the first window
+
+Live report with screenshot: the first window after starting the game shows narrow, cut tabs ("Unlearn...", "Lifetime..."); later windows are right. Probable cause: the tab texts are measured before the fonts are ready. 0.5.29 calls PanelTemplates_TabResize again on show and 0.1 s later. The cause is inferred, not proven. Pending live check on the first open after a game start.
+
+## 0.5.30-beta, tab widths with the string width
+
+Live: 0.5.29 left the first window unchanged; clicking another tab and back repaired it, so a later show measures correctly. Inferred cause: the template reads GetWidth of the tab text before the first layout pass. 0.5.30 passes GetStringWidth to PanelTemplates_TabResize (sixth argument, absolute text size) and repeats the resize at 0.1, 0.5 and 1.5 seconds. Whether this client version honors the sixth argument is unverified; if the first window is still cut, set the tab widths directly.
+
+## 0.5.31-beta, tab width measurement log
+
+Live: 0.5.30 still shows cut tabs on the first window after a game start; hiding and showing the window (click another tab and back) repairs them with no extra code. 0.5.31 sets a width directly when a tab is narrower than its text and logs measured widths to SavedVariables key navProbe (button/text/string width at show and +0.1, +0.5, +1.5 s). To read it: start the game, open the window once without touching the tabs, switch to another tab and back, /reload. Then read navProbe. Remove the probe when the cause is fixed.
+
+## 0.5.32-beta, tab widths: first Show does not fire OnShow
+
+navProbe on 0.5.31 held a single show with correct widths (button = text + 20): the one logged show was the re-show after clicking another tab, which matches the report that the tabs are only repaired then. A frame is shown when created, so the first Show() fires no OnShow. 0.5.32 measures the tabs when they are created too. Pending live check on the first open after a game start; navProbe stays one more version and should then show a show-before line at creation time.
+
+## 0.5.33-beta, tab widths: unconstrained measurement
+
+navProbe on 0.5.32 at creation: every tab button 72 wide, text 52, string widths 49 to 53 (the cut text), unchanged by the resize at 0.1, 0.5 and 1.5 s. After hide and show: button 114, text 94, string 94. Cause: the tab text has a fixed width of 52 until the template resizes it, so GetStringWidth reports the cut text. 0.5.33 sets the text width to 0 before measuring. Pending live check on the first open after a game start.
+
+## 0.5.34-beta, tab width log removed
+
+Live: after 0.5.33 the tabs of the first window are correct after a game restart. The navProbe diagnostic is removed. The tab width problem chain: the first Show of a new frame fires no OnShow (0.5.32), and the fixed 52 pixel text width made GetStringWidth report the cut text (0.5.33).
+
+## 0.5.35-beta, recipe reagent window redesigned
+
+CraftingView.lua rewritten: one line per reagent with columns Need, Bags, Bank, Missing and Where to get it, green, yellow, red states (ready, in the bank, missing), gray for unknown counts, missing first, - and + with a number box, 18 rows. Crafting.Compute rows gained bags, bank, state and fromBank, and the plan gained counts. Pending live check: the look of the colors and columns, the plus and minus buttons and the number box with real inventory and bank data.
+
+## 0.5.36-beta, merchant goods and the Reagents button
+
+NpcObserver records the profession goods of a merchant (itemID, stack price, stack size, stock, extendedCost) next to the recipes, NpcSources.VendorsFor lists the merchants of an item, the reagent window and its source menu use them, and ProfessionButton.lua adds a Reagents button to ProfessionsFrame.CraftingPage left of CreateAllButton (anchor evidence: Gethe/wow-ui-source branch forever, Blizzard_ProfessionsCrafting). Pending live checks: a merchant window with reagents is recorded (npcLog shows goods=N), the Reagents button appears in the profession window and passes the crafts number, the Buy line in the reagent window.
+
+## 0.5.37-beta, auction prices
+
+AuctionScan.lua reads the full auction list (C_AuctionHouse.ReplicateItems, REPLICATE_ITEM_LIST_UPDATE, GetNumReplicateItems, GetReplicateItemInfo; API evidence: Gethe/wow-ui-source branch forever, AuctionHouseDocumentation.lua) in steps of 250 and keeps the lowest buyout per unit, quantity and auction count for catalogue items per realm in saved variables key auction. The scan has a 15 minute cooldown, a 15 second answer timeout and a log (auctionLog). The reagent window shows the Auction each column and the cost of the missing reagents. Pending live checks: the Scan prices button below AuctionHouseFrame, that REPLICATE_ITEM_LIST_UPDATE arrives and the list can be read (auctionLog shows done or no-answer), how long the steps take on a busy realm, and the prices in the reagent window.
+
+## 0.5.38-beta, Reagents button in the header and recipe menu entry
+
+Live report on 0.5.36: the Reagents button sat in the recipe list and displayed wrongly. 0.5.38 anchors it left of ProfessionsFrame.MaximizeMinimize (CloseButton fallback), as a child of the maximize button, and adds a Reagents entry to the recipe list menu through Menu.ModifyMenu on MENU_PROFESSIONS_RECIPE_LIST_FAVORITE (evidence: Gethe/wow-ui-source branch forever, Blizzard_ProfessionsRecipeList.lua and Blizzard_ProfessionsFrame.lua). Pending live check: header button position and visibility on the recipes tab and on other tabs, the menu entry on a learned recipe.
+
+## 0.5.39-beta, auction scan progress
+
+Live report: the scan gave no sign of what it was doing. AuctionScan now keeps a phase (waiting, reading) with the number read, shows a progress bar beside the Scan prices button and prints the answer, every quarter of a list over 1000 auctions and the result in the chat. Pending live check: the bar below AuctionHouseFrame, how long the phases take on the real realm (the auctionLog has the seconds of a finished scan).
+
+## 0.5.40-beta, auction scan answer time
+
+Live log on 0.5.39: auctionLog had "requested" at 1794686014 and "no-answer" at 1794686029; the scan never stored anything. Evidence from the client documentation: ReplicateItems is a throttled message with the events AUCTION_HOUSE_THROTTLED_MESSAGE_QUEUED, SENT, RESPONSE_RECEIVED and DROPPED, so the request may have been queued or dropped. 0.5.40 waits 120 seconds, counts the seconds in the bar, shows and logs those events and logs ignored updates. Pending live check: read auctionLog after another scan (event names in the log, whether the update arrives late).

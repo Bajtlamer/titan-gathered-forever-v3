@@ -32,6 +32,11 @@ function Mini:CreatePin()
     ns.PinStyle.Apply(pin, 'minimap')
     pin:SetScript('OnEnter', function(button)
         GameTooltip:SetOwner(button, 'ANCHOR_LEFT')
+        if button.node.npcID and ns.NpcSources then
+            ns.NpcSources.FillTooltip(GameTooltip, button.node)
+            GameTooltip:Show()
+            return
+        end
         if button.node.kind == 'PvP' then
             GameTooltip:AddLine(ns.PinStyle.Label(button.node.kind))
             GameTooltip:AddLine('Open-world PvP honorable kills')
@@ -57,7 +62,8 @@ function Mini:CreatePin()
 end
 
 function Mini:Refresh()
-    if not ns.settings.gatheringMap or ns.settings.mapMinimap == false then
+    local npcs = ns.NpcSources and ns.NpcSources.Enabled()
+    if not (ns.settings.gatheringMap or npcs) or ns.settings.mapMinimap == false then
         self.overlay:Hide(); self:HidePins(); return
     end
     self.overlay:Show()
@@ -83,7 +89,14 @@ function Mini:Refresh()
     local extent = style.size / 2 * (style.shape == 'square' and math.sqrt(2) or 1) * (style.border and 1.1 or 1)
     local clip = math.min(0.85, math.max(0, 1 - extent / math.min(halfWidth, halfHeight)))
     local cosine, sine, visible = math.cos(facing), math.sin(facing), 0
-    for _, node in ipairs(self.controller:List(mapID)) do
+    local combined = {}
+    if ns.settings.gatheringMap then
+        for _, node in ipairs(self.controller:List(mapID)) do combined[#combined + 1] = node end
+    end
+    if npcs then
+        for _, node in ipairs(ns.NpcSources.List(mapID)) do combined[#combined + 1] = node end
+    end
+    for _, node in ipairs(combined) do
         local east, north = (node.x - x) * width, (y - node.y) * height
         local dx, dy = (east * cosine + north * sine) / radius, (-east * sine + north * cosine) / radius
         local px, py = dx * halfWidth, dy * halfHeight
@@ -92,6 +105,7 @@ function Mini:Refresh()
             local pin = self.pins[visible] or self:CreatePin()
             pin:SetSize(style.size, style.size)
             ns.PinStyle.Apply(pin, 'minimap')
+            ns.PinStyle.Highlight(pin, node.npcID ~= nil and ns.NpcSources ~= nil and ns.NpcSources.IsHighlighted(node.npcID))
             pin.node = node
             pin:ClearAllPoints()
             pin:SetPoint('CENTER', self.overlay, 'CENTER', px, py)

@@ -27,6 +27,12 @@ end
 CreateFrame=function()return frame()end;UIParent=frame();UISpecialFrames={}
 local generated=0
 ns.Export.Current=function(options)generated=generated+1;return ns.Export.Build(f.sources,options)end
+local function pick(control,label)
+ local previous=MenuUtil;local actions={}
+ MenuUtil={CreateContextMenu=function(owner,fn)fn(owner,{CreateButton=function(_,l,cb)actions[l]=cb end})end}
+ control.scripts.OnClick(control);MenuUtil=previous;actions[label]()
+end
+assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TGF v3',ns)
 assert(loadfile('TitanGatheredForeverV3/ExportView.lua'))('TGF v3',ns)
 test('opening exports current character with identity off and no collector mutation',function()
  ns.ExportView.Show();local w=ns.ExportView.window
@@ -37,10 +43,10 @@ test('opening exports current character with identity off and no collector mutat
 end)
 test('scope and identity controls regenerate selected snapshots explicitly',function()
  local w=ns.ExportView.window
- w.scope.scripts.OnClick();eq(w.scopeMode,'combined')
+ pick(w.scope,'All characters');eq(w.scopeMode,'combined')
  assert(table.concat(w.parts):find('combined',1,true))
- w.identity.scripts.OnClick();eq(w.includeIdentity,true);assert(table.concat(w.parts):find('Player-private-A',1,true))
- w.identity.scripts.OnClick();assert(not table.concat(w.parts):find('Player-private',1,true))
+ pick(w.identity,'Include names/GUIDs: On');eq(w.includeIdentity,true);assert(table.concat(w.parts):find('Player-private-A',1,true))
+ pick(w.identity,'Include names/GUIDs: Off');assert(not table.concat(w.parts):find('Player-private',1,true))
 end)
 test('paging copy selection and accidental editing preserve the generated part',function()
  local w=ns.ExportView.window;local original=ns.Export.Parts
@@ -59,7 +65,7 @@ test('snapshots remain stable until the user generates again',function()
  w.generate.scripts.OnClick();assert(table.concat(w.parts)~=before)
 end)
 test('hide clears copy data and identity and reopening returns to safe defaults',function()
- local w=ns.ExportView.window;w.identity.scripts.OnClick();assert(w.includeIdentity)
+ local w=ns.ExportView.window;pick(w.identity,'Include names/GUIDs: On');assert(w.includeIdentity)
  w:Hide();eq(w.editor:GetText(),'');eq(#w.parts,0);eq(w.includeIdentity,false);eq(w.editor.focus,false)
  ns.ExportView.Show();eq(w.scopeMode,'character');eq(w.includeIdentity,false)
  assert(not table.concat(w.parts):find('Player-private',1,true))
@@ -71,7 +77,7 @@ test('native truncation disables copying rather than offering incomplete JSON',f
  w.editor.truncate=false;w.generate.scripts.OnClick();assert(w.copyValid)
 end)
 test('generation errors clear previous sensitive content',function()
- local w=ns.ExportView.window;w.identity.scripts.OnClick();local original=ns.Export.Current
+ local w=ns.ExportView.window;pick(w.identity,'Include names/GUIDs: On');local original=ns.Export.Current
  ns.Export.Current=function()error('bad data')end;w.generate.scripts.OnClick()
  eq(#w.parts,0);eq(w.editor:GetText(),'');eq(w.copyValid,false)
  ns.Export.Current=original
