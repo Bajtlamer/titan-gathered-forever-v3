@@ -498,3 +498,7 @@ Live report on 0.5.36: the Reagents button sat in the recipe list and displayed 
 ## 0.5.39-beta, auction scan progress
 
 Live report: the scan gave no sign of what it was doing. AuctionScan now keeps a phase (waiting, reading) with the number read, shows a progress bar beside the Scan prices button and prints the answer, every quarter of a list over 1000 auctions and the result in the chat. Pending live check: the bar below AuctionHouseFrame, how long the phases take on the real realm (the auctionLog has the seconds of a finished scan).
+
+## 0.5.40-beta, auction scan answer time
+
+Live log on 0.5.39: auctionLog had "requested" at 1794686014 and "no-answer" at 1794686029; the scan never stored anything. Evidence from the client documentation: ReplicateItems is a throttled message with the events AUCTION_HOUSE_THROTTLED_MESSAGE_QUEUED, SENT, RESPONSE_RECEIVED and DROPPED, so the request may have been queued or dropped. 0.5.40 waits 120 seconds, counts the seconds in the bar, shows and logs those events and logs ignored updates. Pending live check: read auctionLog after another scan (event names in the log, whether the update arrives late).
