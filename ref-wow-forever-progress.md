@@ -474,3 +474,7 @@ navProbe on 0.5.31 held a single show with correct widths (button = text + 20): 
 ## 0.5.33-beta, tab widths: unconstrained measurement
 
 navProbe on 0.5.32 at creation: every tab button 72 wide, text 52, string widths 49 to 53 (the cut text), unchanged by the resize at 0.1, 0.5 and 1.5 s. After hide and show: button 114, text 94, string 94. Cause: the tab text has a fixed width of 52 until the template resizes it, so GetStringWidth reports the cut text. 0.5.33 sets the text width to 0 before measuring. Pending live check on the first open after a game start.
+
+## 0.5.34-beta, tab width log removed
+
+Live: after 0.5.33 the tabs of the first window are correct after a game restart. The navProbe diagnostic is removed. The tab width problem chain: the first Show of a new frame fires no OnShow (0.5.32), and the fixed 52 pixel text width made GetStringWidth report the cut text (0.5.33).

@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.33-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.34-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Tab width measurement log removed, 0.5.34-beta
+
+- The tab widths of the first window are confirmed correct live after 0.5.33, so the measurement log (saved variables key navProbe) is removed. Lines already saved under that key stay in the saved variables file until the client rewrites it without them and are harmless.
 
 ## Tab widths: measure without the fixed text width, 0.5.33-beta
 
