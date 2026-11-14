@@ -490,3 +490,7 @@ NpcObserver records the profession goods of a merchant (itemID, stack price, sta
 ## 0.5.37-beta, auction prices
 
 AuctionScan.lua reads the full auction list (C_AuctionHouse.ReplicateItems, REPLICATE_ITEM_LIST_UPDATE, GetNumReplicateItems, GetReplicateItemInfo; API evidence: Gethe/wow-ui-source branch forever, AuctionHouseDocumentation.lua) in steps of 250 and keeps the lowest buyout per unit, quantity and auction count for catalogue items per realm in saved variables key auction. The scan has a 15 minute cooldown, a 15 second answer timeout and a log (auctionLog). The reagent window shows the Auction each column and the cost of the missing reagents. Pending live checks: the Scan prices button below AuctionHouseFrame, that REPLICATE_ITEM_LIST_UPDATE arrives and the list can be read (auctionLog shows done or no-answer), how long the steps take on a busy realm, and the prices in the reagent window.
+
+## 0.5.38-beta, Reagents button in the header and recipe menu entry
+
+Live report on 0.5.36: the Reagents button sat in the recipe list and displayed wrongly. 0.5.38 anchors it left of ProfessionsFrame.MaximizeMinimize (CloseButton fallback), as a child of the maximize button, and adds a Reagents entry to the recipe list menu through Menu.ModifyMenu on MENU_PROFESSIONS_RECIPE_LIST_FAVORITE (evidence: Gethe/wow-ui-source branch forever, Blizzard_ProfessionsRecipeList.lua and Blizzard_ProfessionsFrame.lua). Pending live check: header button position and visibility on the recipes tab and on other tabs, the menu entry on a learned recipe.
