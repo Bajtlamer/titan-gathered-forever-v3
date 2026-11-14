@@ -13,7 +13,7 @@ end
 -- A fake client: auctions are { itemID, count, buyout }; timers are collected and run by hand.
 local function fixture(auctions)
     local ns = load()
-    local f = { ns = ns, auctions = auctions, timers = {}, open = true, now = 1000, requests = 0, said = {}, changed = 0, logs = {} }
+    local f = { ns = ns, auctions = auctions, timers = {}, open = true, now = 1000, requests = 0, said = {}, changed = 0, logs = {}, progress = {} }
     local api = {
         Open = function() return f.open end, Now = function() return f.now end, Clock = function() return 0 end,
         After = function(_, fn) f.timers[#f.timers + 1] = fn end,
@@ -26,6 +26,7 @@ local function fixture(auctions)
         Say = function(message) f.said[#f.said + 1] = message end,
         Changed = function() f.changed = f.changed + 1 end,
         Log = function(result, details) f.logs[#f.logs + 1] = result; f.lastDetails = details end,
+        Progress = function() f.progress[#f.progress + 1] = { f.scan.phase, f.scan.done, f.scan.total } end,
     }
     f.scan = ns.AuctionScan.New(api)
     function f.run() while #f.timers > 0 do local fn = table.remove(f.timers, 1); fn() end end
@@ -40,7 +41,7 @@ test('a scan keeps the lowest buyout per unit of the profession items, with quan
     eq(items[2589].min, 40); eq(items[2589].qty, 25); eq(items[2589].n, 2)   -- 200 for 5 is 40 each; the bid-only one is ignored
     eq(items[2592].min, 300); eq(items[9999], nil)                         -- not a profession item
     eq(f.saved.entries, 5); eq(f.saved.at, 1000)
-    assert(f.said[1]:find('2 profession items priced', 1, true)); eq(f.scan.scanning, false)
+    assert(f.said[#f.said]:find('2 profession items priced', 1, true)); eq(f.scan.scanning, false)
 end)
 
 test('a big list is read in steps and each step leaves the game a moment', function()
@@ -54,6 +55,41 @@ test('a big list is read in steps and each step leaves the game a moment', funct
     f.run()
     eq(f.saved.items[2589].n, 11); eq(f.saved.items[2589].min, 101)
     f.ns.AuctionScan.STEP = 250
+end)
+
+test('the display is told what the scan is doing: waiting, reading with a fraction, then idle', function()
+    local auctions = {}
+    for i = 1, 8 do auctions[i] = { 2589, 1, 100 } end
+    local f = fixture(auctions)
+    f.ns.AuctionScan.STEP = 3
+    eq(f.scan:Describe(), nil)
+    f.scan:Request()
+    eq(f.scan.phase, 'waiting'); eq((f.scan:Describe()), 'Waiting for the auction house to send its list...')
+    f.timers = {}
+    f.scan:Updated()                                                        -- the first step reads three of eight
+    local text, fraction = f.scan:Describe()
+    eq(text, 'Reading auctions: 37% (3 of 8)'); assert(math.abs(fraction - 0.375) < 0.0001)
+    f.run()
+    eq(f.scan.phase, nil); eq((f.scan:Describe()), nil)
+    local phases = {}
+    for _, entry in ipairs(f.progress) do phases[#phases + 1] = tostring(entry[1]) end
+    eq(table.concat(phases, ','), 'waiting,reading,reading,reading,nil')   -- waiting, 0 read, 3, 6, finished
+    f.ns.AuctionScan.STEP = 250
+end)
+
+test('long lists report every quarter in the chat, short ones only the start and the end', function()
+    local auctions = {}
+    for i = 1, 2000 do auctions[i] = { 2589, 1, 100 } end
+    local f = fixture(auctions)
+    f.scan:Request(); f.scan:Updated(); f.run()
+    eq(f.said[1], 'The auction house sent 2000 auctions. Reading them...')
+    eq(f.said[2], 'Auction scan: 25% (500 of 2000)'); eq(f.said[3], 'Auction scan: 50% (1000 of 2000)')
+    eq(f.said[4], 'Auction scan: 75% (1500 of 2000)'); assert(f.said[5]:find('Auction scan done', 1, true)); eq(#f.said, 5)
+    local small = fixture({ { 2589, 1, 10 }, { 2589, 1, 11 } })
+    small.scan:Request(); small.scan:Updated(); small.run()
+    eq(#small.said, 2)                                                         -- the answer and the result
+    local g = fixture({ { 2589, 1, 10 } })
+    g.scan:Request(); g.scan:Closed(); eq(g.scan.phase, nil)                  -- closing the window clears the display
 end)
 
 test('a request needs an open auction house, respects the cooldown and cannot overlap', function()
@@ -135,6 +171,11 @@ test('the button appears with the auction house window and starts a scan with a 
         function f:SetSize() end; function f:SetText(v) self.text = v end; function f:SetPoint(...) self.point = { ... } end
         function f:SetScript(name, fn) self.scripts[name] = fn end; function f:SetEnabled(v) self.enabled = v end
         function f:SetJustifyH() end
+        function f:SetShown(v) self.shown = v end; function f:Hide() self.shown = false end
+        function f:SetMinMaxValues() end; function f:SetValue(v) self.value = v end
+        function f:SetStatusBarTexture() end; function f:SetStatusBarColor() end
+        function f:SetAllPoints() end; function f:SetColorTexture() end
+        function f:CreateTexture() return frame() end
         function f:CreateFontString() return frame() end
         function f:RegisterEvent(e) self.events = (self.events or 0) + 1 end
         return f
@@ -152,6 +193,15 @@ test('the button appears with the auction house window and starts a scan with a 
     ns.AuctionScan.instance = ns.AuctionScan.New({ Open = function() return false end, Now = function() return 1 end,
         LastRequest = function() end, SetLastRequest = function() end, Log = function() end })
     button.scripts.OnClick(); eq(ns.printed[1], 'Open the auction house first.')
+    -- while a scan runs the bar shows the text and the fraction and the idle status is hidden
+    local bar, label = ns.AuctionScan.bar, ns.AuctionScan.label
+    eq(bar.shown, false); eq(label.shown, true)
+    ns.AuctionScan.instance.phase, ns.AuctionScan.instance.done, ns.AuctionScan.instance.total = 'reading', 50, 200
+    ns.AuctionScan.RefreshButton()
+    eq(bar.shown, true); eq(label.shown, false); eq(bar.value, 0.25); eq(bar.text.text, 'Reading auctions: 25% (50 of 200)')
+    ns.AuctionScan.instance.phase = nil
+    ns.AuctionScan.RefreshButton()
+    eq(bar.shown, false); eq(label.shown, true)
     ns.AuctionScan.Initialize()
     eq(ns.AuctionScan.frame.events, 3)
     _G.AuctionHouseFrame, CreateFrame, C_Timer = nil, nil, nil

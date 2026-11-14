@@ -20,6 +20,22 @@ function Scan:Log(result, details)
     if log then log(result, details) end
 end
 
+-- Tells the display what is going on: phase is nil (idle), 'waiting' for the answer or 'reading' the list.
+function Scan:Progress(phase, done, total)
+    self.phase, self.done, self.total = phase, done or 0, total or 0
+    if self.api.Progress then self.api.Progress() end
+end
+
+-- What the scan is doing, in words, and how far it is (0 to 1).
+function Scan:Describe()
+    if self.phase == 'waiting' then return 'Waiting for the auction house to send its list...', 0 end
+    if self.phase == 'reading' then
+        local fraction = self.total > 0 and self.done / self.total or 0
+        return string.format('Reading auctions: %d%% (%d of %d)', math.floor(fraction * 100), self.done, self.total), fraction
+    end
+    return nil, 0
+end
+
 -- Asks for a full scan. Returns true when the request was sent, otherwise false and the reason.
 function Scan:Request()
     if self.scanning then return false, 'busy' end
@@ -33,9 +49,11 @@ function Scan:Request()
     self.api.SetLastRequest(now)
     self.api.Replicate()
     self:Log('requested')
+    self:Progress('waiting')
     self.api.After(Scan.ANSWER_WAIT, function()
         if self.scanning and not self.reading and self.generation == generation then
             self.scanning = false
+            self:Progress(nil)
             self:Log('no-answer')
             self.api.Say('The auction house gave no answer. It allows a full scan about every 15 minutes.')
             self.api.Changed()
@@ -49,6 +67,7 @@ function Scan:Closed()
     if self.scanning then self:Log('closed-during-scan') end
     self.scanning, self.reading = false, false
     self.generation = (self.generation or 0) + 1
+    self:Progress(nil)
 end
 
 -- REPLICATE_ITEM_LIST_UPDATE: the list is ready; read it in steps so the game does not stall.
@@ -57,11 +76,16 @@ function Scan:Updated()
     local total = self.api.Count()
     if type(total) ~= 'number' or total < 1 then
         self.scanning = false
+        self:Progress(nil)
         self:Log('empty')
+        self.api.Say('The auction house sent an empty list.')
         self.api.Changed()
         return
     end
     self.reading = true
+    self.api.Say(string.format('The auction house sent %d auctions. Reading them...', total))
+    self:Progress('reading', 0, total)
+    local milestone = 25
     local generation = self.generation
     local items, index, started = {}, 1, self.api.Clock()
     local function step()
@@ -78,11 +102,21 @@ function Scan:Updated()
             end
         end
         index = last + 1
-        if index <= total then self.api.After(0, step); return end
+        if index <= total then
+            self:Progress('reading', last, total)
+            -- A line in the chat at every quarter, only for lists long enough to take a while.
+            while total > 1000 and milestone < 100 and last * 100 >= milestone * total do
+                self.api.Say(string.format('Auction scan: %d%% (%d of %d)', milestone, last, total))
+                milestone = milestone + 25
+            end
+            self.api.After(0, step)
+            return
+        end
         local found = 0
         for _ in pairs(items) do found = found + 1 end
         self.api.Save({ at = self.api.Now(), entries = total, items = items })
         self.scanning, self.reading = false, false
+        self:Progress(nil)
         self:Log('done', { entries = total, items = found, seconds = self.api.Clock() - started })
         self.api.Say(string.format('Auction scan done: %d auctions, %d profession items priced.', total, found))
         self.api.Changed()
@@ -149,6 +183,7 @@ function Scan.DefaultAPI()
             items = result.items }
     end
     api.Say = function(message) ns.Print(message) end
+    api.Progress = function() if Scan.RefreshButton then Scan.RefreshButton() end end
     api.Changed = function()
         if ns.CraftingView and ns.CraftingView.Refresh then ns.CraftingView.Refresh() end
         if Scan.RefreshButton then Scan.RefreshButton() end
@@ -164,12 +199,23 @@ function Scan.DefaultAPI()
     return api
 end
 
--- The button below the window of the auction house.
+-- The button, the idle status and the progress bar below the window of the auction house.
 function Scan.RefreshButton()
-    local button, label = Scan.button, Scan.label
+    local button, label, bar = Scan.button, Scan.label, Scan.bar
     if not button then return end
-    button:SetEnabled(not (Scan.instance and Scan.instance.scanning))
-    label:SetText(Scan.instance and Scan.instance.scanning and 'Scanning...' or Scan.Status())
+    local instance = Scan.instance
+    local text, fraction
+    if instance then text, fraction = instance:Describe() end
+    local busy = text ~= nil
+    button:SetEnabled(not (instance and instance.scanning))
+    label:SetShown(not busy)
+    bar:SetShown(busy)
+    if busy then
+        bar:SetValue(fraction)
+        bar.text:SetText(text)
+    else
+        label:SetText(Scan.Status())
+    end
 end
 
 function Scan.Attach()
@@ -193,6 +239,20 @@ function Scan.Attach()
     Scan.label = label
     label:SetPoint('RIGHT', button, 'LEFT', -8, 0)
     label:SetJustifyH('RIGHT')
+    local bar = CreateFrame('StatusBar', nil, frame)
+    Scan.bar = bar
+    bar:SetSize(300, 16)
+    bar:SetPoint('RIGHT', button, 'LEFT', -8, 0)
+    bar:SetStatusBarTexture('Interface\\TargetingFrame\\UI-StatusBar')
+    bar:SetStatusBarColor(0.1, 0.6, 0.9)
+    bar:SetMinMaxValues(0, 1)
+    bar:SetValue(0)
+    local background = bar:CreateTexture(nil, 'BACKGROUND')
+    background:SetAllPoints(bar)
+    background:SetColorTexture(0, 0, 0, 0.5)
+    bar.text = bar:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
+    bar.text:SetPoint('CENTER')
+    bar:Hide()
     Scan.RefreshButton()
     return true
 end
