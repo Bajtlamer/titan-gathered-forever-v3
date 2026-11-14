@@ -79,10 +79,19 @@ test('tabs use the classic panel tab template and select the active tab', functi
     window.Tabs[1].Text = { GetStringWidth = function() return 77 end }
     C_Timer = { After = function(_, fn) timers[#timers + 1] = fn end }
     window.IsShown = function() return true end
+    resized, timers = 0, {}
     window.scripts.OnShow()
     eq(resized, 8); eq(textWidth, 77); eq(#timers, 3)
     timers[1](); eq(resized, 16)
     timers[3](); eq(resized, 24)
+    PanelTemplates_TabResize, C_Timer = nil, nil
+    -- A frame that is already shown never fires OnShow for its first Show, so the tabs measure at creation too.
+    local created = 0
+    PanelTemplates_TabResize = function() created = created + 1 end
+    C_Timer = { After = function() end }
+    local fresh = frame(); fresh.IsShown = function() return true end
+    ns.Nav.Tabs(fresh, 'recipes')
+    eq(created, 8)
     PanelTemplates_TabResize, C_Timer = nil, nil
 end)
 

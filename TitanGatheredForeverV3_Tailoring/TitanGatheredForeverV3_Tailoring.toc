@@ -1,7 +1,7 @@
 ## Interface: 16001
 ## Title: Titan Gathered Forever v3: Tailoring
 ## Notes: Optional Tailoring material catalogue for Titan Gathered Forever v3.
-## Version: 0.5.31-beta
+## Version: 0.5.32-beta
 ## Dependencies: Titan, TitanGatheredForeverV3
 
 Data.lua

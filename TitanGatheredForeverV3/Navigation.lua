@@ -137,6 +137,9 @@ local function panelTabs(window, id)
         end
     end
     if window.HookScript then window:HookScript('OnShow', onShow) else window:SetScript('OnShow', onShow) end
+    -- A new frame is already shown, so its first Show never fires OnShow: that was the whole bug, the fit ran only
+    -- after the window had been hidden and shown again. Measure once now as well.
+    onShow()
 end
 
 local function buttonTabs(window, id)

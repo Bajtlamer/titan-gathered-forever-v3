@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.31-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.32-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Tab widths: the first show never fired, 0.5.32-beta
+
+- Cause found from the measurement log: a new frame is already shown, so the first Show of a tab window does not fire OnShow, and the tab measuring that 0.5.29 to 0.5.31 attached to OnShow only ran after the window was hidden and shown again (which is why clicking another tab and back repaired the tabs). The tabs are now measured at creation as well, and again after 0.1, 0.5 and 1.5 seconds. The measurement log stays for one more version to confirm the fix.
 
 ## Tab width fallback and measurement log, 0.5.31-beta
 
