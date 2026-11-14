@@ -18,13 +18,19 @@ function K.Normalize(name) return K.Strip(name):lower() end
 
 local function store() return ns.db and ns.db.knownRecipes end
 
-function K.Record(character, kind, names, now)
+-- ids are the recipe IDs of the learned recipes, when the client gave them (older records have names only).
+function K.Record(character, kind, names, now, ids)
     local saved = store()
     if not saved or not character then return end
     saved[character] = saved[character] or {}
     local set = {}
     for _, name in ipairs(names) do set[K.Normalize(name)] = true end
-    saved[character][kind] = { at = now, names = set }
+    local known
+    if ids then
+        known = {}
+        for _, id in ipairs(ids) do known[id] = true end
+    end
+    saved[character][kind] = { at = now, names = set, ids = known }
 end
 
 -- true: known, false: read and not known, nil: this profession was never read for this character.
@@ -33,6 +39,15 @@ function K.IsKnown(character, kind, name)
     local entry = saved and saved[character] and saved[character][kind]
     if not entry then return nil end
     return entry.names[K.Normalize(name)] == true
+end
+
+-- true: the recipe ID is learned; false: the profession was read and it is not; nil: never read, or read before the
+-- recipe IDs were kept (then only the name can tell).
+function K.IsKnownID(character, kind, recipeID)
+    local saved = store()
+    local entry = saved and saved[character] and saved[character][kind]
+    if not entry or not entry.ids then return nil end
+    return entry.ids[recipeID] == true
 end
 
 function K.ReadAt(character, kind)
@@ -46,7 +61,7 @@ function K.Scan()
     if not C_TradeSkillUI or not C_TradeSkillUI.GetAllRecipeIDs or not ns.characterID then return end
     local ok, ids = pcall(C_TradeSkillUI.GetAllRecipeIDs)
     if not ok or not ns.IsPublic(ids) or type(ids) ~= 'table' or #ids == 0 or #ids > 4096 then return end
-    local byKind = {}
+    local byKind, byIDs = {}, {}
     for _, id in ipairs(ids) do
         local okInfo, info = pcall(C_TradeSkillUI.GetRecipeInfo, id)
         local okProfession, profession = pcall(C_TradeSkillUI.GetProfessionInfoByRecipeID, id)
@@ -56,16 +71,21 @@ function K.Scan()
             if kind and ns.IsPublic(info.name) and type(info.name) == 'string'
                 and ns.IsPublic(info.learned) and type(info.learned) == 'boolean' then
                 byKind[kind] = byKind[kind] or {}
-                if info.learned then byKind[kind][#byKind[kind] + 1] = info.name end
+                byIDs[kind] = byIDs[kind] or {}
+                if info.learned then
+                    byKind[kind][#byKind[kind] + 1] = info.name
+                    byIDs[kind][#byIDs[kind] + 1] = id
+                end
             end
         end
     end
     local now = time and time() or 0
     for kind, names in pairs(byKind) do
-        K.Record(ns.characterID, kind, names, now)
+        K.Record(ns.characterID, kind, names, now, byIDs[kind])
         if ns.DebugLog then ns.DebugLog.Add('recipes', kind .. ' read, ' .. #names .. ' learned recipes') end
     end
     if ns.RecipeBrowser and ns.RecipeBrowser.Refresh then ns.RecipeBrowser.Refresh() end
+    if ns.ProfitBrowser and ns.ProfitBrowser.Refresh then ns.ProfitBrowser.Refresh() end
 end
 
 local pending = false

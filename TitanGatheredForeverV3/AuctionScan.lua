@@ -268,6 +268,7 @@ function Scan.DefaultAPI()
     api.Progress = function() if Scan.RefreshButton then Scan.RefreshButton() end end
     api.Changed = function()
         if ns.CraftingView and ns.CraftingView.Refresh then ns.CraftingView.Refresh() end
+        if ns.ProfitBrowser and ns.ProfitBrowser.Refresh then ns.ProfitBrowser.Refresh() end
         if Scan.RefreshButton then Scan.RefreshButton() end
     end
     api.Log = function(result, details)

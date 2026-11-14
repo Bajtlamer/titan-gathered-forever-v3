@@ -42,6 +42,12 @@ function Crafting.Read(recipeID)
         and integer(schematic.quantityMin,1000)and integer(schematic.quantityMax,1000)and schematic.quantityMax>=schematic.quantityMin then
         output,low,high=schematic.outputItemID,schematic.quantityMin,schematic.quantityMax
     end
+    -- The number a craft makes is kept for the profit list, which otherwise assumes one.
+    local makes=output and ns.db and ns.db.recipeMakes
+    if type(makes)=='table'then
+        local saved=makes[recipeID]
+        if not saved or saved[1]~=low or saved[2]~=high then makes[recipeID]={low,high}end
+    end
     return {recipeID=recipeID,name=info.name,learned=info.learned,kind=kind,slots=schematic.reagentSlotSchematics,
         outputItemID=output,quantityMin=low,quantityMax=high}
 end

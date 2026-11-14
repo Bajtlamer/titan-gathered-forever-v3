@@ -449,6 +449,7 @@ frame:SetScript('OnEvent', function(_, event, ...)
                 itemRefreshQueued = false
                 ns.Reports.Refresh()
                 ns.RecipeBrowser.Refresh()
+                if ns.ProfitBrowser then ns.ProfitBrowser.Refresh() end
             end)
         end
     end

@@ -74,6 +74,7 @@ function ns.Settings.Initialize(saved)
     if type(saved.npcLog) ~= 'table' then saved.npcLog = {} end
     if type(saved.auctionLog) ~= 'table' then saved.auctionLog = {} end
     if type(saved.windowPositions) ~= 'table' then saved.windowPositions = {} end
+    if type(saved.recipeMakes) ~= 'table' then saved.recipeMakes = {} end
     if type(saved.debugLog) ~= 'table' then saved.debugLog = {} end
     if type(saved.knownRecipes) ~= 'table' then saved.knownRecipes = {} end
     return saved, settings

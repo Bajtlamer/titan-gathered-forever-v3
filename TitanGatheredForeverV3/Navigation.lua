@@ -14,6 +14,7 @@ Nav.tabs = {
     { id = 'chances', label = 'Observed chances' },
     { id = 'actions', label = 'Profession actions' },
     { id = 'production', label = 'Crafting and cooking' },
+    { id = 'profit', label = 'Crafting profit' },
     { id = 'reagentUsage', label = 'Reagent use' },
     { id = 'pvp', label = 'PvP Board' },
 }
@@ -21,12 +22,14 @@ Nav.tabs = {
 local function windowOf(id)
     if id == 'recipes' then return ns.RecipeBrowser and ns.RecipeBrowser.window end
     if id == 'trainers' then return ns.TrainerBrowser and ns.TrainerBrowser.window end
+    if id == 'profit' then return ns.ProfitBrowser and ns.ProfitBrowser.window end
     return ns.Reports and ns.Reports.windows[id]
 end
 
 function Nav.Open(id)
     if id == 'recipes' then ns.RecipeBrowser.Show()
     elseif id == 'trainers' then ns.TrainerBrowser.Show()
+    elseif id == 'profit' then ns.ProfitBrowser.Show()
     else ns.Reports.Show(id) end
 end
 

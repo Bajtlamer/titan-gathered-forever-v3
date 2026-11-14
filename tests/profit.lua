@@ -1,0 +1,91 @@
+local tests = {}
+local function test(name, fn) tests[#tests + 1] = { name, fn } end
+local function eq(actual, expected) assert(actual == expected, 'expected ' .. tostring(expected) .. ', got ' .. tostring(actual)) end
+
+-- Three recipes: A makes a profit, B makes a loss, C has a material without any price.
+local function fresh()
+    local ns = { IsPublic = function() return true end, db = { recipeMakes = {}, knownRecipes = {} }, characterID = 'C1' }
+    ns.RecipeBook = { complete = false, professions = { 'Alchemy', 'First Aid' }, recipes = {
+        [101] = { 5001, 1, { { 1, 2 }, { 2, 1 } } },        -- Alchemy, product 5001, 2 x item 1 and 1 x item 2
+        [102] = { 5002, 1, { { 1, 1 } } },
+        [103] = { 5003, 2, { { 3, 1 } } },                    -- First Aid, material 3 has no price
+    } }
+    ns.AuctionScan = { Price = function(id)
+        local prices = { [1] = 100, [2] = 50, [5001] = 1000, [5002] = 80 }
+        return prices[id] and { min = prices[id], n = 3 } or nil
+    end }
+    ns.NpcSources = { VendorsFor = function() return {} end, Coin = function(c) return c .. 'c' end }
+    C_Item = { GetItemInfo = function(id) if id == 5003 then return 'Bandage', nil, 1, 1, 1, 't', 's', 1, '', 1, 200 end return 'Item' .. id end }
+    C_Spell = { GetSpellInfo = function(id) return ({ [101] = { name = 'Potion A' }, [102] = { name = 'Potion B' } })[id] end,
+        RequestLoadSpellData = function() end }
+    assert(loadfile('TitanGatheredForeverV3/KnownRecipes.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForeverV3/Economy.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForeverV3/Profit.lua'))('TitanGatheredForeverV3', ns)
+    return ns
+end
+
+test('every recipe gets its profit: product after the auction fee minus the materials, best first', function()
+    local ns = fresh()
+    local rows, info = ns.Profit.Rows('C1', {})
+    eq(#rows, 3); eq(info.looked, 3)
+    eq(rows[1].recipeID, 101); eq(rows[1].name, 'Potion A'); eq(rows[1].profession, 'Alchemy')
+    eq(rows[1].profit, 700)                                           -- 1000 less 5% is 950, the materials cost 250
+    eq(rows[1].product.best, 'auction'); eq(rows[1].product.materials, 250)
+    eq(rows[2].recipeID, 102); eq(rows[2].profit, -24)                -- 80 less 5% is 76, the material costs 100
+    eq(rows[3].recipeID, 103); eq(rows[3].profit, nil)                -- a material without a price: no profit
+    eq(rows[3].name, 'Bandage')                                       -- no spell name: the product name
+    eq(rows[3].product.vendor, 200); eq(rows[3].product.unpriced, 1)
+    eq(rows[1].assumed, true)                                         -- one per craft is assumed
+end)
+
+test('the number a craft makes comes from the reagent window when it was seen', function()
+    local ns = fresh()
+    ns.db.recipeMakes[101] = { 2, 4 }                                 -- three on average
+    local rows = ns.Profit.Rows('C1', {})
+    eq(rows[1].recipeID, 101); eq(rows[1].assumed, false); eq(rows[1].product.quantity, 3)
+    eq(rows[1].profit, 2850 - 250)                                    -- 3 x 950 less the materials
+    local low, high, assumed = ns.Profit.Makes(5); eq(low, 1); eq(high, 1); eq(assumed, true)
+end)
+
+test('a profession filter and a search limit the rows', function()
+    local ns = fresh()
+    eq(#ns.Profit.Rows('C1', { kind = 'Alchemy' }), 2)
+    eq(#ns.Profit.Rows('C1', { kind = 'FirstAid' }), 1)               -- the book says First Aid, the kind is FirstAid
+    eq(ns.Profit.Rows('C1', { search = 'potion b' })[1].recipeID, 102)
+    eq(#ns.Profit.Rows('C1', { search = 'alchemy' }), 2)              -- the profession is searched too
+    eq(#ns.Profit.Rows('C1', { search = 'zzz' }), 0)
+end)
+
+test('only the recipes of the character: by recipe ID first, then by name, and unread professions are reported', function()
+    local ns = fresh()
+    local rows, info = ns.Profit.Rows('C1', { mine = true })
+    eq(#rows, 0); eq(#info.unread, 2); eq(info.unread[1], 'Alchemy'); eq(info.unread[2], 'FirstAid')   -- nothing was ever read
+    ns.KnownRecipes.Record('C1', 'Alchemy', { 'Potion B' }, 1, { 101 })   -- the ID 101 is learned, and the name of 102
+    rows, info = ns.Profit.Rows('C1', { mine = true })
+    eq(#rows, 2); eq(rows[1].recipeID, 101); eq(rows[2].recipeID, 102)
+    eq(#info.unread, 1); eq(info.unread[1], 'FirstAid')
+    ns.KnownRecipes.Record('C1', 'Alchemy', { 'Potion A' }, 1)            -- an older record without IDs: names only
+    rows = ns.Profit.Rows('C1', { mine = true, kind = 'Alchemy' })
+    eq(#rows, 1); eq(rows[1].recipeID, 101)
+    ns.KnownRecipes.Record('C1', 'Alchemy', {}, 1, { 999 })               -- read, nothing learned that is in the book
+    eq(#ns.Profit.Rows('C1', { mine = true, kind = 'Alchemy' }), 0)
+    eq(ns.Profit.Learned('C1', 'Alchemy', 101, 'Potion A'), false); eq(ns.Profit.Learned('C1', 'FirstAid', 103, 'Bandage'), nil)
+end)
+
+test('without a recipe book or prices the list is empty or unpriced, never invented', function()
+    local ns = fresh()
+    ns.RecipeBook = nil
+    local rows, info = ns.Profit.Rows('C1', {}); eq(#rows, 0); eq(info.looked, 0)
+    ns = fresh(); ns.AuctionScan.Price = function() return nil end
+    rows = ns.Profit.Rows('C1', {})
+    for _, row in ipairs(rows) do eq(row.profit, nil) end
+    eq(ns.Profit.Name(7, 5003), 'Bandage'); eq(ns.Profit.Name(7, 0), 'Item0')
+    C_Item.GetItemInfo = function() return nil end
+    eq(ns.Profit.Name(7, 0), 'Recipe 7')
+end)
+
+for _, entry in ipairs(tests) do
+    local ok, err = pcall(entry[2])
+    if not ok then io.stderr:write('FAIL ' .. entry[1] .. ': ' .. tostring(err) .. '\n'); os.exit(1) end
+end
+print('PASS profit ' .. #tests .. ' checks')

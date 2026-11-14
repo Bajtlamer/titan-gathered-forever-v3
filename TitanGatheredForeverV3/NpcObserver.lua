@@ -221,6 +221,7 @@ function Obs.DefaultAPI()
     api.Changed = function()
         if ns.RecipeBrowser and ns.RecipeBrowser.Refresh then ns.RecipeBrowser.Refresh() end
         if ns.TrainerBrowser and ns.TrainerBrowser.Refresh then ns.TrainerBrowser.Refresh() end
+        if ns.ProfitBrowser and ns.ProfitBrowser.Refresh then ns.ProfitBrowser.Refresh() end
     end
     api.Npc = function()
         local inside, kind = IsInInstance()

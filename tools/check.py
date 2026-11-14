@@ -14,6 +14,7 @@ commands = [
     [sys.executable, '-m', 'unittest', 'discover', '-s', 'tests', '-p', 'test_*.py'],
     [sys.executable, 'tools/generate_catalog.py', '--check'],
     [sys.executable, 'tools/generate_npc_seed.py', '--check'],
+    [sys.executable, 'tools/generate_recipe_book.py', '--check'],
     [runtime, 'tests/run.lua'],
     [runtime, 'tests/integration.lua'],
     [runtime, 'tests/addon_loading.lua'],
@@ -45,6 +46,8 @@ commands = [
     [runtime, 'tests/profession_button.lua'],
     [runtime, 'tests/auction_scan.lua'],
     [runtime, 'tests/economy.lua'],
+    [runtime, 'tests/profit.lua'],
+    [runtime, 'tests/profit_browser.lua'],
     [runtime, 'tests/trainer_browser.lua'],
 ]
 for command in commands:
