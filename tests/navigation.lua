@@ -76,12 +76,15 @@ test('tabs use the classic panel tab template and select the active tab', functi
     local resized, timers = 0, {}
     local textWidth
     PanelTemplates_TabResize = function(tab, _, _, _, _, width) resized = resized + 1; if tab == window.Tabs[1] then textWidth = width end end
-    window.Tabs[1].Text = { GetStringWidth = function() return 77 end }
+    local order = {}
+    window.Tabs[1].Text = { SetWidth = function(_, w) order[#order + 1] = 'set' .. w end,
+        GetStringWidth = function() order[#order + 1] = 'get'; return 77 end }
     C_Timer = { After = function(_, fn) timers[#timers + 1] = fn end }
     window.IsShown = function() return true end
     resized, timers = 0, {}
     window.scripts.OnShow()
-    eq(resized, 8); eq(textWidth, 77); eq(#timers, 3)
+    eq(resized, 8); eq(textWidth, 77)
+    eq(order[1], 'set0'); eq(order[2], 'get')                -- the fixed text width goes first, then the measuring; eq(#timers, 3)
     timers[1](); eq(resized, 16)
     timers[3](); eq(resized, 24)
     PanelTemplates_TabResize, C_Timer = nil, nil
