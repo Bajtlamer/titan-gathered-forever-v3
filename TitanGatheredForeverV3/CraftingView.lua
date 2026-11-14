@@ -6,6 +6,7 @@ ns.CraftingView = View
 -- bank, what is missing and where it can be found. Green is ready, yellow is in the bank, red is missing.
 local ROWS, ROW_HEIGHT, WHEEL_STEP = 18, 22, 3
 local ROW_WIDTH = 785
+local TOP, MIN_ROWS = 217, 4   -- where the list starts, and the fewest rows the window keeps room for
 local columns = { { 'Reagent', 0, 205 }, { 'Need', 215, 50 }, { 'Bags', 270, 50 }, { 'Bank', 325, 50 },
     { 'Missing', 380, 60 }, { 'Auction each', 445, 100 }, { 'Where to get it', 550, 235 } }
 -- Problems first: what has to be done is at the top.
@@ -108,7 +109,9 @@ function View.AuctionText(itemID)
     return ns.NpcSources.Coin(price.min)
 end
 
--- The last column: what to do about this reagent.
+-- The last column: what to do about this reagent. A merchant that was seen selling it is named when it is the
+-- cheapest known way to buy it (or the only one); otherwise the best observed source; otherwise the auction house
+-- when a price is known.
 function View.Where(row, character)
     local Style = ns.Style
     if row.state == 'ready' then return Style.Text(Style.green, 'Ready') end
@@ -116,9 +119,9 @@ function View.Where(row, character)
         return Style.Text(Style.yellow, string.format('In the bank: take %d', row.fromBank))
     end
     if row.state == 'unknown' then return Style.Text(Style.gray, 'Count unknown') end
-    -- A merchant that was seen selling it is the clearest answer: what to pay and where.
     local vendor = ns.NpcSources and ns.NpcSources.VendorsFor(row.itemID)[1]
-    if vendor then
+    local _, cheapest = ns.Economy.UnitCost(row.itemID)
+    if vendor and cheapest ~= 'auction' then
         return string.format('Buy %s: %s%s', ns.NpcSources.UnitPriceText(vendor), vendor.name,
             vendor.zone and (', ' .. vendor.zone) or '')
     end
@@ -129,7 +132,60 @@ function View.Where(row, character)
     elseif evidence.spots[1] then
         return 'Seen in ' .. ns.Reports.Zone(evidence.spots[1].mapID)
     end
+    if cheapest == 'auction' then return 'Buy at the auction house' end
     return Style.Text(Style.gray, 'No recorded source')
+end
+
+-- Three lines about the product of the recipe: what it is and where one sells for more, its prices, and what the
+-- craft earns.
+function View.ProductLines(plan)
+    local Style = ns.Style
+    local product = ns.Economy.Product(plan)
+    if not product then return '', '', '' end
+    local Coin = ns.Economy.Coin
+    local count = product.quantity
+    local head = 'Makes ' .. ns.ItemName(product.itemID)
+    if count ~= 1 then
+        head = head .. string.format(' x%s', count == math.floor(count) and count or string.format('%.1f', count))
+    end
+    if product.best then
+        head = head .. '     ' .. Style.Text(Style.gold, 'Sells better to the ' .. (product.best == 'auction' and 'auction house' or 'vendor'))
+        if product.auction and product.vendor then
+            local other = product.best == 'auction' and product.vendor or product.auction.net
+            if other > 0 then
+                head = head .. Style.Text(Style.gray, string.format(' (%.1fx the other)', product.unitValue / other))
+            end
+        end
+    end
+    local parts = {}
+    if product.auction then
+        local n = product.auction.n or 0
+        parts[#parts + 1] = string.format('Auction %s each (%d %s, %s after the %d%% fee)', Coin(product.auction.min), n,
+            n == 1 and 'auction' or 'auctions', Coin(product.auction.net), math.floor(ns.Economy.CUT * 100 + 0.5))
+    else
+        parts[#parts + 1] = Style.Text(Style.gray, 'No auction price')
+    end
+    parts[#parts + 1] = product.vendor and ('Vendor pays ' .. Coin(product.vendor)) or Style.Text(Style.gray, 'Vendor price unknown')
+    local profit
+    if product.profit then
+        local good = product.profit >= 0
+        local paint = good and Style.green or Style.red
+        profit = string.format('Materials %s per craft (cheapest known prices)     Profit per craft: %s',
+            Coin(product.materials), Style.Text(paint, (good and '+' or '-') .. Coin(math.abs(product.profit))))
+        if plan.operations > 1 then
+            local total = product.profit * plan.operations
+            profit = profit .. string.format('     x%d crafts: %s', plan.operations,
+                Style.Text(paint, (total >= 0 and '+' or '-') .. Coin(math.abs(total))))
+        end
+    elseif not product.unitValue then
+        profit = Style.Text(Style.gray, 'Scan the auction house to see what this craft is worth.')
+    elseif product.partial then
+        profit = Style.Text(Style.gray, 'Only part of the recipe can be priced, so no profit is shown.')
+    else
+        profit = Style.Text(Style.gray, string.format('Materials %s and %d unpriced %s: no profit shown.', Coin(product.materials),
+            product.unpriced, product.unpriced == 1 and 'reagent' or 'reagents'))
+    end
+    return head, table.concat(parts, '     '), profit
 end
 
 local function setOperations(w, value)
@@ -147,6 +203,9 @@ function View.Refresh()
     w.plan = plan
     w.TitleText:SetText('TGF v3 Recipe reagents' .. (plan.name and (': ' .. plan.name) or ''))
     if not (w.operationsBox.HasFocus and w.operationsBox:HasFocus()) then w.operationsBox:SetText(tostring(w.operations)) end
+    local head, prices, profit = '', '', ''
+    if not plan.error then head, prices, profit = View.ProductLines(plan) end
+    w.product:SetText(head); w.prices:SetText(prices); w.profit:SetText(profit)
     if plan.error then
         w.sorted = {}
         w.summary:SetText(plan.error)
@@ -176,6 +235,12 @@ function View.Refresh()
         or string.format('Showing %d-%d of %d reagents. Click a reagent for observed sources.', w.offset + 1,
             math.min(#w.sorted, w.offset + ROWS), #w.sorted))
     ns.Nav.SyncScrollbar(w.slider, w.offset, last)
+    -- The window is as tall as its list: a short recipe does not leave a big empty area.
+    local visible = math.min(ROWS, math.max(MIN_ROWS, #w.sorted))
+    w:SetHeight(TOP + visible * ROW_HEIGHT + 40)
+    w.slider:SetHeight(visible * ROW_HEIGHT)
+    w.pageText:ClearAllPoints()
+    w.pageText:SetPoint('TOPLEFT', w, 'TOPLEFT', 15, -(TOP + visible * ROW_HEIGHT + 10))
     local character = ns.characterID or UnitGUID('player')
     for index, row in ipairs(w.rows) do
         local data = w.sorted[w.offset + index]
@@ -204,40 +269,42 @@ function View.Show(recipeID, operations)
         View.window = w
         if UISpecialFrames then table.insert(UISpecialFrames, name) end
         w.rows = {}
-        w:SetSize(845, 600)
+        w:SetSize(845, TOP + MIN_ROWS * ROW_HEIGHT + 40)
         w:SetPoint('CENTER', UIParent, 'CENTER', 0, 0)
         w:SetClampedToScreen(true); w:SetMovable(true); w:EnableMouse(true); w:RegisterForDrag('LeftButton')
-        w:SetScript('OnDragStart', function(self) self:StartMoving() end)
-        w:SetScript('OnDragStop', function(self) self:StopMovingOrSizing() end)
+        ns.Nav.Draggable(w, 'recipe')
         w.summary = text(w, 'GameFontHighlight', 15, -35, ROW_WIDTH)
         w.counts = text(w, 'GameFontHighlightSmall', 15, -56, ROW_WIDTH)
-        text(w, 'GameFontNormal', 15, -86, 60):SetText('Crafts')
-        button(w, '-', 75, -81, 26, function()
+        w.product = text(w, 'GameFontNormal', 15, -78, ROW_WIDTH)
+        w.prices = text(w, 'GameFontHighlightSmall', 15, -96, ROW_WIDTH)
+        w.profit = text(w, 'GameFontHighlightSmall', 15, -112, ROW_WIDTH)
+        text(w, 'GameFontNormal', 15, -140, 60):SetText('Crafts')
+        button(w, '-', 75, -135, 26, function()
             setOperations(w, w.operations - (IsShiftKeyDown and IsShiftKeyDown() and 5 or 1))
         end)
         local box = CreateFrame('EditBox', nil, w, 'InputBoxTemplate')
         w.operationsBox = box
-        box:SetSize(60, 22); box:SetPoint('TOPLEFT', w, 'TOPLEFT', 112, -81); box:SetAutoFocus(false)
+        box:SetSize(60, 22); box:SetPoint('TOPLEFT', w, 'TOPLEFT', 112, -135); box:SetAutoFocus(false)
         box:SetNumeric(true); box:SetMaxLetters(7)
         box:SetScript('OnEnterPressed', function(self) self:ClearFocus(); setOperations(w, self:GetText()) end)
         box:SetScript('OnEscapePressed', function(self) self:ClearFocus(); self:SetText(tostring(w.operations)) end)
-        button(w, '+', 178, -81, 26, function()
+        button(w, '+', 178, -135, 26, function()
             setOperations(w, w.operations + (IsShiftKeyDown and IsShiftKeyDown() and 5 or 1))
         end)
-        w.scope = text(w, 'GameFontHighlightSmall', 225, -86, 220)
-        button(w, 'Refresh', 460, -81, 90, function()
+        w.scope = text(w, 'GameFontHighlightSmall', 225, -140, 220)
+        button(w, 'Refresh', 460, -135, 90, function()
             if ns.ScheduleRefresh then ns.ScheduleRefresh() end
             View.Refresh()
         end)
-        w.note = text(w, 'GameFontHighlightSmall', 15, -112, ROW_WIDTH)
+        w.note = text(w, 'GameFontHighlightSmall', 15, -165, ROW_WIDTH)
         local header = CreateFrame('Frame', nil, w)
-        header:SetSize(ROW_WIDTH, 20); header:SetPoint('TOPLEFT', w, 'TOPLEFT', 15, -146)
+        header:SetSize(ROW_WIDTH, 20); header:SetPoint('TOPLEFT', w, 'TOPLEFT', 15, -(TOP - 20))
         for _, column in ipairs(columns) do text(header, 'GameFontNormalSmall', column[2], 0, column[3]):SetText(column[1]) end
         for index = 1, ROWS do
             local row = CreateFrame('Button', nil, w)
             w.rows[index] = row
             row:SetSize(ROW_WIDTH, ROW_HEIGHT)
-            row:SetPoint('TOPLEFT', w, 'TOPLEFT', 15, -166 - (index - 1) * ROW_HEIGHT)
+            row:SetPoint('TOPLEFT', w, 'TOPLEFT', 15, -TOP - (index - 1) * ROW_HEIGHT)
             row.name = text(row, 'GameFontNormal', columns[1][2], -4, columns[1][3])
             row.need = text(row, 'GameFontHighlightSmall', columns[2][2], -5, columns[2][3])
             row.bags = text(row, 'GameFontHighlightSmall', columns[3][2], -5, columns[3][3])
@@ -259,11 +326,11 @@ function View.Show(recipeID, operations)
             row:SetScript('OnLeave', function() GameTooltip:Hide() end)
         end
         local function scrollTo(offset) w.offset = offset; View.Refresh() end
-        w.slider = ns.Nav.Scrollbar(w, 15 + ROW_WIDTH + 8, -166, ROWS * ROW_HEIGHT, scrollTo,
+        w.slider = ns.Nav.Scrollbar(w, 15 + ROW_WIDTH + 8, -TOP, ROWS * ROW_HEIGHT, scrollTo,
             function(delta) scrollTo(w.offset - delta * WHEEL_STEP) end)
         w:EnableMouseWheel(true)
         w:SetScript('OnMouseWheel', function(_, delta) scrollTo(w.offset - delta * WHEEL_STEP) end)
-        w.pageText = text(w, 'GameFontHighlightSmall', 15, -570, ROW_WIDTH)
+        w.pageText = text(w, 'GameFontHighlightSmall', 15, -(TOP + MIN_ROWS * ROW_HEIGHT + 10), ROW_WIDTH)
     end
     w.recipeID, w.operations, w.offset = recipeID, operations or 1, 0
     ns.Crafting.Select({ recipeID = recipeID })

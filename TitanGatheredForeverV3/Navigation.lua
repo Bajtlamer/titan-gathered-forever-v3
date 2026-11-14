@@ -44,6 +44,52 @@ function Nav.Toggle()
     if id then window:Hide() else Nav.Open(Nav.last or 'recipes') end
 end
 
+-- Window positions are kept in the saved variables (windowPositions), one per window or group of windows, so a
+-- moved window opens where it was left, also after /reload and a restart. A position is { point, relative point, x, y }
+-- relative to the screen. Without saved variables (tests) it is kept in memory only.
+local memory = {}
+local function positions()
+    if ns.db then
+        if type(ns.db.windowPositions) ~= 'table' then ns.db.windowPositions = {} end
+        return ns.db.windowPositions
+    end
+    return memory
+end
+
+local function validPosition(saved)
+    return type(saved) == 'table' and type(saved[1]) == 'string' and type(saved[2]) == 'string'
+        and type(saved[3]) == 'number' and type(saved[4]) == 'number'
+        and saved[3] == saved[3] and saved[4] == saved[4] and math.abs(saved[3]) < 1e5 and math.abs(saved[4]) < 1e5
+end
+
+function Nav.SavePosition(key, window)
+    if not window or not window.GetPoint then return end
+    local point, _, relative, x, y = window:GetPoint()
+    if point then positions()[key] = { point, relative or point, x or 0, y or 0 } end
+end
+
+-- Puts a window where it was left. Returns whether a saved position was used.
+function Nav.RestorePosition(key, window)
+    local saved = positions()[key]
+    if not validPosition(saved) then return false end
+    window:ClearAllPoints()
+    window:SetPoint(saved[1], UIParent, saved[2], saved[3], saved[4])
+    return true
+end
+
+-- Forgets every saved position; the windows open in the middle of the screen again.
+function Nav.ResetPositions()
+    for key in pairs(positions()) do positions()[key] = nil end
+    Nav.point = nil
+end
+
+-- Moving a window keeps the position; the dragging itself is the same for every window.
+function Nav.Draggable(window, key)
+    window:SetScript('OnDragStart', function(self) self:StartMoving() end)
+    window:SetScript('OnDragStop', function(self) self:StopMovingOrSizing(); Nav.SavePosition(key, self) end)
+    Nav.RestorePosition(key, window)
+end
+
 -- Called by every tab window when it opens: hides the other tabs and takes over the shared position.
 function Nav.Activate(id, window)
     Nav.last = id
@@ -51,23 +97,17 @@ function Nav.Activate(id, window)
         local other = windowOf(tab.id)
         if other and other ~= window and other:IsShown() then other:Hide() end
     end
-    if Nav.point then
-        window:ClearAllPoints()
-        window:SetPoint(Nav.point[1], UIParent, Nav.point[2], Nav.point[3], Nav.point[4])
-    end
+    Nav.RestorePosition('nav', window)
 end
 
 function Nav.Remember(window)
-    if not window.GetPoint then return end
-    local point, _, relative, x, y = window:GetPoint()
-    if point then Nav.point = { point, relative or point, x or 0, y or 0 } end
+    Nav.SavePosition('nav', window)
 end
 
 -- Dragging, size and the tab strip common to all tab windows.
 function Nav.Frame(window, id)
     window:SetSize(Nav.WIDTH, Nav.HEIGHT)
-    window:SetScript('OnDragStart', function(self) self:StartMoving() end)
-    window:SetScript('OnDragStop', function(self) self:StopMovingOrSizing(); Nav.Remember(self) end)
+    Nav.Draggable(window, 'nav')
     Nav.Tabs(window, id)
 end
 

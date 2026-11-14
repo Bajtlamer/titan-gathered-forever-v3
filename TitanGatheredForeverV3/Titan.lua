@@ -131,6 +131,10 @@ function Titan.Menu(owner)
             ns.settings.showMinimapButton = ns.settings.showMinimapButton == false
             ns.MinimapButton.Update()
         end)
+        display:CreateButton('Reset window positions', function()
+            ns.Nav.ResetPositions()
+            ns.Print('Window positions reset: the windows open in the middle of the screen again.')
+        end)
         display:CreateButton('Next summary page', function() ns.ChangeSummaryPage(1) end)
         display:CreateButton('Previous summary page', function() ns.ChangeSummaryPage(-1) end)
         local professions = root:CreateButton('Professions')
@@ -173,6 +177,9 @@ function Titan.Menu(owner)
         auction:CreateButton('Scan now (the auction house must be open)', function() ns.AuctionScan.Run() end)
         auction:CreateCheckbox('Scan when the auction house opens (at most every 30 minutes)', function() return ns.settings.auctionAutoScan == true end, function()
             ns.settings.auctionAutoScan = ns.settings.auctionAutoScan ~= true
+        end)
+        auction:CreateCheckbox('Show auction prices in item tooltips', function() return ns.settings.auctionTooltips ~= false end, function()
+            ns.settings.auctionTooltips = ns.settings.auctionTooltips == false
         end)
         auction:CreateButton('Clear scanned prices', function()
             ns.AuctionScan.Clear(); if ns.CraftingView then ns.CraftingView.Refresh() end

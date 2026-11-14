@@ -154,7 +154,7 @@ local function fixture(interface, saved, noBroker, noModules)
     local ns = {}
     for _, path in ipairs({ 'Localization/enUS.lua', 'Style.lua', 'Data/Metadata.lua', 'Data/NpcSeed.lua', 'Catalog.lua',
                             'Settings.lua', 'DebugLog.lua', 'Professions.lua', 'KnownRecipes.lua', 'Inventory.lua', 'Gathering.lua', 'History.lua', 'Actions.lua', 'PvP.lua', 'Production.lua', 'Crafting.lua', 'Export.lua', 'Observations.lua', 'Sources.lua', 'NpcSources.lua', 'NpcObserver.lua', 'PinStyle.lua', 'IconConfig.lua', 'FlightPaths.lua', 'Map.lua', 'Minimap.lua',
-                            'Tooltips.lua', 'Reports.lua', 'CraftingView.lua', 'ProfessionButton.lua', 'AuctionScan.lua', 'RecipeBrowser.lua', 'MinimapButton.lua', 'Titan.lua', 'Core.lua' }) do
+                            'Tooltips.lua', 'Reports.lua', 'CraftingView.lua', 'ProfessionButton.lua', 'AuctionScan.lua', 'Economy.lua', 'RecipeBrowser.lua', 'MinimapButton.lua', 'Titan.lua', 'Core.lua' }) do
         assert(loadfile('TitanGatheredForeverV3/' .. path))('TitanGatheredForeverV3', ns)
     end
     -- Keep integration scenarios small; the generated data is validated separately.
@@ -261,6 +261,29 @@ test('the scanned auction price, what the held items are worth and the age of th
     assert(contains(tip.lines, 'Lowest buyout of 5 auctions (40 items), scanned 2 h ago'))
     ns.db.auction.items[2589] = nil
     tip:ClearLines(); s.post(tip, { id = 2589 }); assert(not contains(tip.lines, 'Auction:'))   -- no price for this item
+end)
+
+test('a product outside the catalogue gets its auction price, the vendor comparison and nothing else', function()
+    local s, ns = fixture(); s:Start()
+    local tip = CreateFrame('GameTooltip')
+    s.post(tip, { id = 99999 }); eq(#tip.lines, 0)                               -- no price: the tooltip is left alone
+    ns.db.auction = { at = time() - 60, entries = 10, items = {}, others = { [99999] = ns.AuctionScan.Pack(3200, 12) } }
+    tip:ClearLines(); s.post(tip, { id = 99999 })
+    assert(contains(tip.lines, 'Auction: '), 'price'); assert(contains(tip.lines, ' each'))
+    assert(contains(tip.lines, 'Lowest buyout of 12 auctions, scanned just now'))   -- no quantity for items outside the catalogue
+    assert(not contains(tip.lines, 'Bags:'), 'no counts for an item that is not a profession item')
+    assert(not contains(tip.lines, 'Vendor pays'))                                  -- the vendor price is not known here
+    local original = C_Item.GetItemInfo
+    C_Item.GetItemInfo = function(id) return s.itemNames[id], nil, 2, 1, 1, 't', 's', 1, '', 1, 400 end
+    tip:ClearLines(); s.post(tip, { id = 99999 })
+    assert(contains(tip.lines, 'Vendor pays: '), 'vendor price'); assert(contains(tip.lines, 'the auction house leaves 7.6x as much after its fee'))
+    C_Item.GetItemInfo = function(id) return s.itemNames[id], nil, 2, 1, 1, 't', 's', 1, '', 1, 9000 end
+    tip:ClearLines(); s.post(tip, { id = 99999 })
+    assert(contains(tip.lines, 'more than the auction house leaves after its fee'))
+    C_Item.GetItemInfo = original
+    ns.settings.auctionTooltips = false                                              -- the switch hides every price line
+    tip:ClearLines(); s.post(tip, { id = 99999 }); eq(#tip.lines, 0)
+    tip:ClearLines(); s.post(tip, { id = 2589 }); assert(not contains(tip.lines, 'Auction:'))
 end)
 
 test('unvisited bank omits redundant total and zero bank count', function()

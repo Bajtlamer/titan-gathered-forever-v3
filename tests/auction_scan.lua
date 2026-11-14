@@ -40,9 +40,10 @@ test('a scan keeps the lowest buyout per unit of the profession items, with quan
     f.scan:Updated(); f.run()
     local items = f.saved.items
     eq(items[2589].min, 40); eq(items[2589].qty, 25); eq(items[2589].n, 2)   -- 200 for 5 is 40 each; the bid-only one is ignored
-    eq(items[2592].min, 300); eq(items[9999], nil)                         -- not a profession item
-    eq(f.saved.entries, 5); eq(f.saved.at, 1000)
-    assert(f.said[#f.said]:find('2 profession items priced', 1, true)); eq(f.scan.scanning, false)
+    eq(items[2592].min, 300); eq(items[9999], nil)                         -- a record with quantity only for profession items
+    eq(f.saved.others[9999], 50001)                                        -- the other items are packed: 50 copper, 1 auction
+    eq(f.saved.distinct, 3); eq(f.saved.entries, 5); eq(f.saved.at, 1000)
+    assert(f.said[#f.said]:find('3 items priced (2 of the professions)', 1, true)); eq(f.scan.scanning, false)
 end)
 
 test('a big list is read in steps and each step leaves the game a moment', function()
@@ -158,6 +159,20 @@ test('the repeated updates of the client are logged once per scan', function()
     eq(ignored, 2)
 end)
 
+test('items outside the catalogue are packed into one number and found again with their lowest price', function()
+    local ns = load()
+    local S = ns.AuctionScan
+    eq(S.Pack(1250, 7), 1250007); local price, auctions = S.Unpack(1250007); eq(price, 1250); eq(auctions, 7)
+    eq(S.Pack(60, 5000), 60999)                                                -- the number of auctions is capped at 999
+    ns.db.auction = { at = 500, entries = 9, distinct = 3, items = { [2589] = { min = 40, qty = 25, n = 2 } },
+        others = { [4000] = S.Pack(3200, 12) } }
+    local a = S.Price(2589); eq(a.min, 40); eq(a.qty, 25); eq(a.packed, nil)
+    local b, at = S.Price(4000); eq(b.min, 3200); eq(b.n, 12); eq(b.packed, true); eq(b.qty, nil); eq(at, 500)
+    eq(S.Price(5), nil)
+    time = function() return 500 end
+    assert(S.Status():find('3 items priced (1 of the professions)', 1, true)); time = nil
+end)
+
 test('a request needs an open auction house, respects the cooldown and cannot overlap', function()
     local f = fixture({ { 2589, 1, 10 } })
     f.open = false
@@ -208,7 +223,7 @@ test('prices are looked up for this realm and described with their age', functio
     eq(ns.AuctionScan.Age(30), 'just now'); eq(ns.AuctionScan.Age(600), '10 min ago'); eq(ns.AuctionScan.Age(7200), '2 h ago')
     eq(ns.AuctionScan.Age(200000), '2 d ago')
     time = function() return 1600 end
-    assert(ns.AuctionScan.Status():find('Scanned 10 min ago: 1 profession items priced from 50 auctions', 1, true))
+    assert(ns.AuctionScan.Status():find('Scanned 10 min ago: 1 items priced (1 of the professions) from 50 auctions', 1, true))
     ns.AuctionScan.Clear(); eq(ns.db.auction, nil); assert(ns.AuctionScan.Status():find('No auction prices', 1, true))
     time = nil
 end)

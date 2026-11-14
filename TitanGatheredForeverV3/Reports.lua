@@ -182,7 +182,17 @@ function Reports.ItemSources(owner,itemID,character)
     local rates=ns.history:Rates(character,itemID)
     local evidence=ns.Crafting and ns.Crafting.Evidence(itemID,character)or{spots={}}
     MenuUtil.CreateContextMenu(owner,function(_,root)
-        root:CreateTitle(ns.Style.ItemName(itemID));ns.Style.MenuNote(root,'Observed sources; complete loot samples only')
+        root:CreateTitle(ns.Style.ItemName(itemID))
+        -- What it costs at the auction house, from the last scan, and what a vendor pays for it.
+        local price,scannedAt
+        if ns.AuctionScan then price,scannedAt=ns.AuctionScan.Price(itemID)end
+        if price then
+            root:CreateTitle(string.format('Auction: %s each (%d auctions, scanned %s)',ns.Economy.Coin(price.min),price.n or 0,
+                scannedAt and time and ns.AuctionScan.Age(math.max(0,time()-scannedAt))or'earlier'))
+        end
+        local sell=ns.Economy and ns.Economy.VendorSell(itemID)
+        if sell then root:CreateTitle('Vendor pays: '..ns.Economy.Coin(sell))end
+        ns.Style.MenuNote(root,'Observed sources; complete loot samples only')
         ns.Style.MenuNote(root,'Grouped by source and zone; not a probability at a coordinate.')
         local vendors=ns.NpcSources and ns.NpcSources.VendorsFor(itemID)or{}
         if #vendors>0 then
@@ -210,7 +220,9 @@ function Reports.ItemSources(owner,itemID,character)
         local record=ns.Catalog.Get and ns.Catalog.Get(itemID)
         if ns.CraftingView and record then for index=1,math.min(2,#record.recipes)do
             local recipeID=record.recipes[index]
-            root:CreateButton('Plan recipe #'..recipeID..' reagents',function()ns.CraftingView.Show(recipeID,1)end)
+            local info=C_Spell and C_Spell.GetSpellInfo and C_Spell.GetSpellInfo(recipeID)
+            local name=info and ns.IsPublic(info.name)and type(info.name)=='string'and info.name or('recipe #'..recipeID)
+            root:CreateButton('Plan reagents: '..name,function()ns.CraftingView.Show(recipeID,1)end)
         end end
         root:SetScrollMode(350)
     end)

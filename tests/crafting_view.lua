@@ -1,12 +1,13 @@
 local passed=0
 local function eq(a,b)assert(a==b,tostring(a)..' != '..tostring(b))end
 local function test(n,f)local ok,e=pcall(f);if not ok then error(n..': '..e)end;passed=passed+1 end
-local function region()return{SetPoint=function()end,SetWidth=function()end,SetJustifyH=function()end,SetWordWrap=function()end,SetText=function(self,v)self.text=v end}end
+local function region()return{SetPoint=function()end,ClearAllPoints=function()end,SetWidth=function()end,SetJustifyH=function()end,SetWordWrap=function()end,SetText=function(self,v)self.text=v end}end
 local function frame()
  local f={scripts={},shown=false,TitleText=region(),buttons={}}
- for _,m in ipairs({'SetSize','SetPoint','ClearAllPoints','SetOrientation','SetMinMaxValues','SetValueStep','SetObeyStepOnDrag','SetThumbTexture','EnableMouseWheel','SetValue','SetColorTexture','SetAllPoints','SetClampedToScreen','SetMovable','EnableMouse','RegisterForDrag','StartMoving','StopMovingOrSizing','SetNumeric','SetMaxLetters','SetAutoFocus','ClearFocus'})do f[m]=function()end end
+ for _,m in ipairs({'SetSize','SetPoint','ClearAllPoints','SetOrientation','SetMinMaxValues','SetValueStep','SetObeyStepOnDrag','SetThumbTexture','EnableMouseWheel','SetValue','SetColorTexture','SetAllPoints','SetClampedToScreen','SetMovable','EnableMouse','RegisterForDrag','StartMoving','StopMovingOrSizing','SetNumeric','SetMaxLetters','SetAutoFocus','ClearFocus','SetHeight'})do f[m]=function()end end
  function f:SetScript(k,fn)self.scripts[k]=fn end
  function f:SetText(v)self.text=v end
+ function f:SetHeight(v)self.height=v end
  function f:GetText()return self.text end
  function f:HasFocus()return false end
  function f:CreateFontString()return region()end
@@ -37,7 +38,7 @@ C_TradeSkillUI={GetRecipeInfo=function(id)if id==2536 then return{recipeID=id,na
  GetProfessionInfoByRecipeID=function()return{professionID=185}end,
  GetRecipeSchematic=function(id)return{recipeID=id,recipeType=1,isRecraft=false,reagentSlotSchematics=slots}end}
 ns.inventory={Get=function(_,id)return{bags=id-1000,bagsState='current',bank=10,bankState='cached',bankObservedAt=100}end}
-for _,file in ipairs({'Style.lua','History.lua','Crafting.lua','Navigation.lua','Reports.lua','CraftingView.lua','AuctionScan.lua'})do assert(loadfile('TitanGatheredForeverV3/'..file))('TGF v3',ns)end
+for _,file in ipairs({'Style.lua','History.lua','Crafting.lua','Navigation.lua','Reports.lua','CraftingView.lua','AuctionScan.lua','Economy.lua'})do assert(loadfile('TitanGatheredForeverV3/'..file))('TGF v3',ns)end
 ns.Style.ItemName=function(id)return'Item '..id end
 ns.history=ns.History.New({})
 ns.history:Observe('a','A',{id='one',kind='Mining',source='123',mapID=4,at=100,complete=true,items={[1001]=1}})
@@ -137,6 +138,51 @@ test('the auction column shows the scanned unit price and the line adds up what 
  ns.db.auction.items[1001]=nil;ns.CraftingView.Refresh()
  assert(not plain(w.counts.text):find('auction',1,true))                               -- nothing priced: no cost line
  ns.db=nil;ns.CraftingView.Show(2536,3)
+end)
+test('a reagent without a merchant or source says to buy it at the auction house when it has a price',function()
+ ns.db={auction={at=1,entries=9,items={[1001]={min=40,qty=5,n=1},[1002]={min=100,qty=9,n=3}}}}
+ ns.CraftingView.Show(2536,3);local w=ns.CraftingView.window
+ assert(plain(w.rows[1].where.text):find('1 of 1 samples',1,true))                      -- an observed source comes before the auction wording
+ eq(plain(w.rows[2].where.text),'Buy at the auction house')
+ ns.db.auction.items[1002]=nil;ns.CraftingView.Refresh()
+ eq(plain(w.rows[2].where.text),'No recorded source')                                  -- without a price there is nothing to say
+ ns.db=nil;ns.CraftingView.Show(2536,3)
+end)
+test('the product lines compare auction and vendor and show the profit of a craft',function()
+ local Pack=ns.AuctionScan.Pack
+ local base=C_TradeSkillUI.GetRecipeSchematic
+ C_TradeSkillUI.GetRecipeSchematic=function(id,recraft)local t=base(id,recraft);t.outputItemID=5001;t.quantityMin=1;t.quantityMax=1;return t end
+ local sell=1500
+ C_Item={GetItemInfo=function(id)if id==5001 then return'Name','link',1,1,1,'t','s',1,'',1,sell end return'Name'end}
+ local items={}
+ for id=1001,1007 do items[id]={min=100,qty=1,n=1}end                                  -- seven reagents at 1s each
+ ns.db={auction={at=1,entries=9,items=items,others={[5001]=Pack(2000,6)}}}
+ ns.CraftingView.Show(2536,1);local w=ns.CraftingView.window
+ local head,prices,profit=plain(w.product.text),plain(w.prices.text),plain(w.profit.text)
+ assert(head:find('Makes Item 5001',1,true));assert(head:find('Sells better to the auction house (1.3x the other)',1,true))
+ assert(prices:find('Auction 20s each (6 auctions, 19s after the 5% fee)',1,true));assert(prices:find('Vendor pays 15s',1,true))
+ assert(profit:find('Materials 7s per craft',1,true));assert(profit:find('Profit per craft: +12s',1,true))
+ assert(not profit:find('x1 crafts',1,true))
+ assert(w.profit.text:find(ns.Style.green,1,true))
+ ns.CraftingView.Show(2536,3);assert(plain(w.profit.text):find('x3 crafts: +36s',1,true))     -- three crafts
+ sell=2500;ns.CraftingView.Refresh()                                                     -- the vendor pays more than the auction leaves
+ assert(plain(w.product.text):find('Sells better to the vendor',1,true));assert(plain(w.profit.text):find('Profit per craft: +18s',1,true))
+ items[1007]=nil;ns.CraftingView.Refresh()                                                -- one reagent has no price
+ assert(plain(w.profit.text):find('1 unpriced reagent: no profit shown',1,true));assert(not plain(w.profit.text):find('Profit per craft',1,true))
+ for id=1001,1007 do items[id]={min=1000,qty=1,n=1}end                                    -- materials cost more than the product
+ sell=nil;ns.CraftingView.Refresh()
+ assert(plain(w.profit.text):find('Profit per craft: -51s',1,true));assert(w.profit.text:find(ns.Style.red,1,true))   -- 19s less 70s
+ ns.db.auction.others={};ns.CraftingView.Refresh()                                       -- nothing is known about the product
+ assert(plain(w.profit.text):find('Scan the auction house',1,true));eq(w.prices.text:find('Auction 2',1,true),nil)
+ assert(plain(w.prices.text):find('No auction price',1,true));assert(plain(w.prices.text):find('Vendor price unknown',1,true))
+ C_TradeSkillUI.GetRecipeSchematic=base;C_Item=nil;ns.db=nil;ns.CraftingView.Show(2536,3)
+end)
+test('the window is as tall as its list and keeps room for at least four rows',function()
+ local w=ns.CraftingView.window
+ ns.CraftingView.Show(2536,1)
+ local height=w.height;assert(height)
+ eq(height,217+7*22+40)                                                                   -- seven reagents
+ eq(w.slider.height,7*22)
 end)
 test('map history label cannot imply a probability at one pin',function()
  assert(loadfile('TitanGatheredForeverV3/PinStyle.lua'))('TGF v3',ns)

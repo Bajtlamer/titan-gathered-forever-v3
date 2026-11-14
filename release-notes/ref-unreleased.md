@@ -1,6 +1,15 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.42-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.43-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Product prices, profit and window positions, 0.5.43-beta
+
+- The auction scan keeps the lowest buyout of every item on the auction house, not only of the profession catalogue: the catalogue items keep quantity and auction count, every other item (the products of recipes included) is stored in one number (lowest buyout times 1000 plus the number of auctions, capped at 999) to keep the saved data small. Run a new scan to fill them; scans from earlier versions have the catalogue items only.
+- The reagent window shows the product of the recipe in three lines: what it makes and where one unit sells for more (the vendor price against the lowest buyout after the 5 percent auction fee, which is an assumption and not read from the client), the auction and vendor prices, and the profit of one craft against the materials at the cheapest known price (auction or a merchant that was seen selling it), also for the planned number of crafts. A reagent without a price, or a recipe the window cannot price completely, shows no profit instead of a guess. The window is as tall as its list (at least four rows). The product and the number made come from the recipe schematic (outputItemID, quantityMin and quantityMax); a range counts as its average.
+- The last column says "Buy at the auction house" for a reagent that has an auction price but no merchant and no observed source. A merchant is named when it is the cheapest known way to buy the reagent; an observed source comes next.
+- The source menu of a reagent shows the auction price with the scan age and what a vendor pays, and names the recipes ("Plan reagents: Rough Copper Bomb") instead of recipe numbers.
+- Item tooltips show the auction price of any item that has one (not only profession items) with the worth of what you hold, what a vendor pays and which of the two leaves more after the fee, the number of auctions and the age. Titan menu > Auction prices > Show auction prices in item tooltips switches this off.
+- Every window remembers where it was left, also after /reload and a restart: the tabbed window (one position for all tabs), the reagent window, the export window and the icon appearance window. Titan menu > Display > Reset window positions forgets them. New file Economy.lua, so a full game restart is needed.
 
 ## Auction price in item tooltips, 0.5.42-beta
 

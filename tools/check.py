@@ -44,6 +44,7 @@ commands = [
     [runtime, 'tests/navigation.lua'],
     [runtime, 'tests/profession_button.lua'],
     [runtime, 'tests/auction_scan.lua'],
+    [runtime, 'tests/economy.lua'],
     [runtime, 'tests/trainer_browser.lua'],
 ]
 for command in commands:

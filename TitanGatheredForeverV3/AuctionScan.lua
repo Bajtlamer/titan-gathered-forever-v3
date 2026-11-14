@@ -1,8 +1,10 @@
 local _, ns = ...
 -- Prices from the auction house. One full scan (C_AuctionHouse.ReplicateItems, answered with
--- REPLICATE_ITEM_LIST_UPDATE) is read in small steps and reduced to the items of the profession catalogue: the
--- lowest buyout per unit, the quantity on offer and the number of auctions. Only buyout prices count, because a
--- bid-only auction has no price that can be paid at once. The client allows a full scan about every 15 minutes, and a
+-- REPLICATE_ITEM_LIST_UPDATE) is read in small steps and reduced to one lowest buyout per unit and item. The items of
+-- the profession catalogue (the reagents) keep the quantity on offer and the number of auctions as well; every
+-- other item, which includes the products of recipes, is stored in one number (lowest buyout and number of
+-- auctions) to keep the saved data small. Only buyout prices count, because a bid-only auction has no price that
+-- can be paid at once. The client allows a full scan about every 15 minutes, and a
 -- request goes through the throttled message system of the auction house, whose events are shown and logged.
 local Scan = {}
 Scan.__index = Scan
@@ -139,7 +141,7 @@ function Scan:Updated()
             local chunkEnd = math.min(total, last + (deadline and Scan.CHUNK or Scan.STEP))
             for position = last + 1, chunkEnd do
                 local itemID, count, buyout = self.api.Item(position)
-                if itemID and count and buyout and count > 0 and buyout > 0 and self.api.Wanted(itemID) then
+                if itemID and count and buyout and count > 0 and buyout > 0 then
                     local unit = math.max(1, math.floor(buyout / count + 0.5))
                     local entry = items[itemID]
                     if not entry then entry = { min = unit, qty = 0, n = 0 }; items[itemID] = entry end
@@ -160,24 +162,46 @@ function Scan:Updated()
             self.api.After(0, step)
             return
         end
-        local found = 0
-        for _ in pairs(items) do found = found + 1 end
-        self.api.Save({ at = self.api.Now(), entries = total, items = items })
+        -- The catalogue items keep their full record, every other item is packed into one number.
+        local kept, others, found, distinct = {}, {}, 0, 0
+        for itemID, entry in pairs(items) do
+            distinct = distinct + 1
+            if self.api.Wanted(itemID) then
+                kept[itemID] = entry
+                found = found + 1
+            else
+                others[itemID] = Scan.Pack(entry.min, entry.n)
+            end
+        end
+        self.api.Save({ at = self.api.Now(), entries = total, items = kept, others = others, distinct = distinct })
         self.scanning, self.reading = false, false
         self:Progress(nil)
-        self:Log('done', { entries = total, items = found, seconds = self.api.Clock() - started })
-        self.api.Say(string.format('Auction scan done: %d auctions, %d profession items priced.', total, found))
+        self:Log('done', { entries = total, items = found, distinct = distinct, seconds = self.api.Clock() - started })
+        self.api.Say(string.format('Auction scan done: %d auctions, %d items priced (%d of the professions).',
+            total, distinct, found))
         self.api.Changed()
     end
     step()
 end
 
--- Price of an item from the last scan on this realm: { min, qty, n } or nil, and the time of the scan.
+-- One number holds the lowest buyout and the number of auctions (up to 999) of an item outside the catalogue.
+function Scan.Pack(minimum, auctions) return minimum * 1000 + math.min(auctions, 999) end
+function Scan.Unpack(value) return math.floor(value / 1000), value % 1000 end
+
+-- Price of an item from the last scan on this realm: { min, n } and for catalogue items qty as well, or nil, and
+-- the time of the scan.
 function Scan.Price(itemID)
     local saved = ns.db and ns.db.auction
     if type(saved) ~= 'table' or type(saved.items) ~= 'table' then return nil end
     if saved.realm and GetRealmName and saved.realm ~= GetRealmName() then return nil end
-    return saved.items[itemID], saved.at
+    local record = saved.items[itemID]
+    if record then return record, saved.at end
+    local packed = type(saved.others) == 'table' and saved.others[itemID]
+    if packed then
+        local minimum, auctions = Scan.Unpack(packed)
+        return { min = minimum, n = auctions, packed = true }, saved.at
+    end
+    return nil, saved.at
 end
 
 -- Text for an age in seconds: "5 min ago", "3 h ago", "2 d ago".
@@ -198,8 +222,8 @@ function Scan.Status()
     end
     local count = 0
     for _ in pairs(saved.items or {}) do count = count + 1 end
-    return string.format('Scanned %s: %d profession items priced from %d auctions.',
-        Scan.Age(math.max(0, (time and time() or saved.at) - saved.at)), count, saved.entries or 0)
+    return string.format('Scanned %s: %d items priced (%d of the professions) from %d auctions.',
+        Scan.Age(math.max(0, (time and time() or saved.at) - saved.at)), saved.distinct or count, count, saved.entries or 0)
 end
 
 function Scan.Clear()
@@ -238,7 +262,7 @@ function Scan.DefaultAPI()
     api.Save = function(result)
         if not ns.db then return end
         ns.db.auction = { realm = GetRealmName and GetRealmName() or nil, at = result.at, entries = result.entries,
-            items = result.items }
+            items = result.items, others = result.others, distinct = result.distinct }
     end
     api.Say = function(message) ns.Print(message) end
     api.Progress = function() if Scan.RefreshButton then Scan.RefreshButton() end end

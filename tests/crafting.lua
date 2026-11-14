@@ -122,6 +122,17 @@ test('live schematics supply quantities even for an unlearned ordinary recipe',f
  liveAPI();local r=ns.Crafting.Read(2536);eq(r.kind,'Cooking');eq(r.learned,false);eq(r.slots[1].quantityRequired,2)
  ns.inventory=inventory({[2672]=7});local p=ns.Crafting.Plan(2536,3);eq(p.craftable,3);eq(p.rows[1].required,6)
 end)
+test('the product and how many one craft makes come from the schematic and stay nil when unreadable',function()
+ liveAPI();local r=ns.Crafting.Read(2536);eq(r.outputItemID,nil);eq(r.quantityMin,nil)      -- the plain schematic has no product
+ local base=C_TradeSkillUI.GetRecipeSchematic
+ C_TradeSkillUI.GetRecipeSchematic=function(id,recraft)local t=base(id,recraft);t.outputItemID=5001;t.quantityMin=1;t.quantityMax=3;return t end
+ r=ns.Crafting.Read(2536);eq(r.outputItemID,5001);eq(r.quantityMin,1);eq(r.quantityMax,3)
+ ns.inventory=inventory({[2672]=7});local p=ns.Crafting.Plan(2536,1);eq(p.outputItemID,5001);eq(p.quantityMax,3)
+ C_TradeSkillUI.GetRecipeSchematic=function(id,recraft)local t=base(id,recraft);t.outputItemID=5001;t.quantityMin=3;t.quantityMax=1;return t end
+ r=ns.Crafting.Read(2536);eq(r.outputItemID,nil);assert(r.slots)                              -- a maximum below the minimum is not trusted
+ C_TradeSkillUI.GetRecipeSchematic=function(id,recraft)local t=base(id,recraft);t.outputItemID=secret;t.quantityMin=1;t.quantityMax=1;return t end
+ r=ns.Crafting.Read(2536);eq(r.outputItemID,nil);assert(r.slots)                              -- a protected value only loses the product
+end)
 test('disabled and missing modules cannot supply a recipe estimate',function()
  liveAPI();ns.settings.categories.Cooking=false;eq(ns.Crafting.Read(2536),nil)
  ns.settings.categories={};ns.Catalog.modules={};eq(ns.Crafting.Read(2536),nil)

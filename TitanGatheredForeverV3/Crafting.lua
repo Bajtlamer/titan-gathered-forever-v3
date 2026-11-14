@@ -36,7 +36,14 @@ function Crafting.Read(recipeID)
     if not readable(schematic,{'recipeID','isRecraft','recipeType','reagentSlotSchematics'})or schematic.recipeID~=recipeID
         or schematic.isRecraft~=false or (schematic.recipeType~=1 and schematic.recipeType~=3)
         or not array(schematic.reagentSlotSchematics)then return end
-    return {recipeID=recipeID,name=info.name,learned=info.learned,kind=kind,slots=schematic.reagentSlotSchematics}
+    -- The product and how many one craft makes; both stay nil when the client does not give them.
+    local output,low,high
+    if readable(schematic,{'outputItemID','quantityMin','quantityMax'})and integer(schematic.outputItemID,2147483647)
+        and integer(schematic.quantityMin,1000)and integer(schematic.quantityMax,1000)and schematic.quantityMax>=schematic.quantityMin then
+        output,low,high=schematic.outputItemID,schematic.quantityMin,schematic.quantityMax
+    end
+    return {recipeID=recipeID,name=info.name,learned=info.learned,kind=kind,slots=schematic.reagentSlotSchematics,
+        outputItemID=output,quantityMin=low,quantityMax=high}
 end
 function Crafting.Plan(recipeID,operations)
     local recipe=Crafting.Read(recipeID)
@@ -82,6 +89,7 @@ function Crafting.Compute(recipe,inventory,showBank,operations)
     if not integer(operations)then p.error='Operations must be a whole number from 1 to 1000000.';return p end
     if not recipe or not array(recipe.slots)then p.error='Recipe reagent data is unavailable.';return p end
     p.recipeID,p.name,p.kind,p.learned=recipe.recipeID,recipe.name,recipe.kind,recipe.learned
+    p.outputItemID,p.quantityMin,p.quantityMax=recipe.outputItemID,recipe.quantityMin,recipe.quantityMax
     local quantities,indices={},{}
     for _,slot in ipairs(recipe.slots)do
         local valid=readable(slot,{'required','reagentType','slotIndex'})

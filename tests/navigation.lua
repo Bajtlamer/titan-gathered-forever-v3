@@ -113,4 +113,58 @@ test('tabs fall back to buttons when the panel tab template is missing', functio
     eq(window.tabButtons.history.template, 'UIPanelButtonTemplate')
 end)
 
+test('a moved window is saved with its position and put back where it was left, also in the saved variables', function()
+    UIParent = {}
+    local ns = load()
+    ns.db = {}
+    local function movable()
+        local f = frame()
+        f.points = {}
+        function f:GetPoint() return unpack(self.stored or {}) end
+        function f:SetPoint(point, relativeTo, relativePoint, x, y) self.points[#self.points + 1] = { point, relativeTo, relativePoint, x, y } end
+        function f:StartMoving() self.moving = true end
+        function f:StopMovingOrSizing() self.moving = false end
+        return f
+    end
+    local window = movable()
+    ns.Nav.Draggable(window, 'recipe')
+    eq(#window.points, 0)                                                     -- nothing saved yet: the window keeps its default place
+    window.scripts.OnDragStart(window); eq(window.moving, true)
+    window.stored = { 'TOPLEFT', UIParent, 'BOTTOMLEFT', 120.5, 800 }
+    window.scripts.OnDragStop(window); eq(window.moving, false)
+    local saved = ns.db.windowPositions.recipe
+    eq(saved[1], 'TOPLEFT'); eq(saved[2], 'BOTTOMLEFT'); eq(saved[3], 120.5); eq(saved[4], 800)
+    local reopened = movable()                                                  -- a new window of the next session
+    ns.Nav.Draggable(reopened, 'recipe')
+    eq(#reopened.points, 1); eq(reopened.points[1][1], 'TOPLEFT'); eq(reopened.points[1][2], UIParent)
+    eq(reopened.points[1][3], 'BOTTOMLEFT'); eq(reopened.points[1][4], 120.5); eq(reopened.points[1][5], 800)
+    local other = movable(); ns.Nav.Draggable(other, 'export'); eq(#other.points, 0)   -- every window has its own place
+    ns.db.windowPositions.broken = { 'CENTER', 'CENTER', 'x', 0 }
+    local third = movable(); eq(ns.Nav.RestorePosition('broken', third), false); eq(#third.points, 0)
+    eq(ns.Nav.RestorePosition('recipe', movable()), true)
+    ns.Nav.ResetPositions()
+    eq(next(ns.db.windowPositions), nil); eq(ns.Nav.RestorePosition('recipe', movable()), false)
+    UIParent = nil
+end)
+
+test('the tab windows share one saved position and take it over when they open', function()
+    UIParent = {}
+    local ns = load()
+    ns.db = {}
+    ns.RecipeBrowser, ns.Reports = nil, nil
+    local function movable()
+        local f = frame(); f.points = {}
+        function f:GetPoint() return unpack(self.stored or {}) end
+        function f:SetPoint(...) self.points[#self.points + 1] = { ... } end
+        return f
+    end
+    local window = movable()
+    window.stored = { 'CENTER', UIParent, 'CENTER', 33, -44 }
+    ns.Nav.Remember(window)
+    eq(ns.db.windowPositions.nav[3], 33)
+    local next_ = movable(); ns.Nav.Activate('history', next_)
+    eq(#next_.points, 1); eq(next_.points[1][4], 33); eq(next_.points[1][5], -44)
+    UIParent = nil
+end)
+
 print('PASS ' .. passed .. ' navigation checks')
