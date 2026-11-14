@@ -6,8 +6,8 @@ ns.CraftingView = View
 -- bank, what is missing and where it can be found. Green is ready, yellow is in the bank, red is missing.
 local ROWS, ROW_HEIGHT, WHEEL_STEP = 18, 22, 3
 local ROW_WIDTH = 785
-local columns = { { 'Reagent', 0, 215 }, { 'Need', 225, 55 }, { 'Bags', 285, 55 }, { 'Bank', 345, 55 },
-    { 'Missing', 405, 65 }, { 'Where to get it', 480, 305 } }
+local columns = { { 'Reagent', 0, 205 }, { 'Need', 215, 50 }, { 'Bags', 270, 50 }, { 'Bank', 325, 50 },
+    { 'Missing', 380, 60 }, { 'Auction each', 445, 100 }, { 'Where to get it', 550, 235 } }
 -- Problems first: what has to be done is at the top.
 local order = { missing = 1, unknown = 2, bank = 3, ready = 4 }
 
@@ -71,12 +71,41 @@ function View.Headline(plan)
     return Style.Text(Style.red, 'You cannot craft this yet.')
 end
 
+-- What the missing reagents would cost at the auction house, from the last scan: the amount and how many of the
+-- missing reagents have a price. nil when nothing missing could be priced.
+function View.AuctionCost(plan)
+    if not ns.AuctionScan then return nil end
+    local total, priced, missing = 0, 0, 0
+    for _, row in ipairs(plan.rows) do
+        if row.missing > 0 then
+            missing = missing + 1
+            local price = ns.AuctionScan.Price(row.itemID)
+            if price then total, priced = total + price.min * row.missing, priced + 1 end
+        end
+    end
+    if priced == 0 then return nil end
+    return total, priced, missing
+end
+
 function View.CountsLine(plan)
     local Style = ns.Style
     local counts = plan.counts
-    return Style.Text(Style.red, 'Missing ' .. counts.missing) .. '   ' .. Style.Text(Style.yellow, 'In bank ' .. counts.bank)
+    local line = Style.Text(Style.red, 'Missing ' .. counts.missing) .. '   ' .. Style.Text(Style.yellow, 'In bank ' .. counts.bank)
         .. '   ' .. Style.Text(Style.green, 'Ready ' .. counts.ready)
         .. (counts.unknown > 0 and ('   ' .. Style.Text(Style.gray, 'Unknown ' .. counts.unknown)) or '')
+    local total, priced, missing = View.AuctionCost(plan)
+    if total then
+        line = line .. '   ' .. Style.Text(Style.gray, 'Missing at auction: ') .. ns.NpcSources.Coin(total)
+            .. (priced < missing and Style.Text(Style.gray, string.format(' (%d of %d priced)', priced, missing)) or '')
+    end
+    return line
+end
+
+-- The auction column: the lowest buyout each from the last scan.
+function View.AuctionText(itemID)
+    local price = ns.AuctionScan and ns.AuctionScan.Price(itemID)
+    if not price then return ns.Style.Text(ns.Style.gray, '-') end
+    return ns.NpcSources.Coin(price.min)
 end
 
 -- The last column: what to do about this reagent.
@@ -159,6 +188,7 @@ function View.Refresh()
             row.bags:SetText(tostring(data.bags))
             row.bank:SetText(data.bank and tostring(data.bank) or '-')
             row.missing:SetText(data.missing > 0 and ns.Style.Text(ns.Style.red, tostring(data.missing)) or '-')
+            row.auction:SetText(View.AuctionText(data.itemID))
             row.where:SetText(View.Where(data, character))
         else
             row:Hide()
@@ -213,7 +243,8 @@ function View.Show(recipeID, operations)
             row.bags = text(row, 'GameFontHighlightSmall', columns[3][2], -5, columns[3][3])
             row.bank = text(row, 'GameFontHighlightSmall', columns[4][2], -5, columns[4][3])
             row.missing = text(row, 'GameFontHighlightSmall', columns[5][2], -5, columns[5][3])
-            row.where = text(row, 'GameFontHighlightSmall', columns[6][2], -5, columns[6][3])
+            row.auction = text(row, 'GameFontHighlightSmall', columns[6][2], -5, columns[6][3])
+            row.where = text(row, 'GameFontHighlightSmall', columns[7][2], -5, columns[7][3])
             row.where:SetWordWrap(false)
             row:SetScript('OnClick', function(self)
                 if self.data then ns.Reports.ItemSources(self, self.data.itemID, ns.characterID or UnitGUID('player')) end

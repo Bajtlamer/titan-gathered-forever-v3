@@ -283,6 +283,7 @@ local function start()
     ns.Tooltips.Initialize()
     ns.Crafting.Initialize()
     ns.ProfessionButton.Initialize()
+    ns.AuctionScan.Initialize()
     ns.Titan.Initialize()
     ns.MinimapButton.Attach()
     for _, event in ipairs({ 'BAG_UPDATE_DELAYED', 'BANKFRAME_OPENED', 'BANKFRAME_CLOSED',
