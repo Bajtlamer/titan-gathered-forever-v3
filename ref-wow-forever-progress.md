@@ -458,3 +458,7 @@ Live report: the first opening after the game starts lags. Cause found by measur
 ## 0.5.29-beta, tab widths on the first window
 
 Live report with screenshot: the first window after starting the game shows narrow, cut tabs ("Unlearn...", "Lifetime..."); later windows are right. Probable cause: the tab texts are measured before the fonts are ready. 0.5.29 calls PanelTemplates_TabResize again on show and 0.1 s later. The cause is inferred, not proven. Pending live check on the first open after a game start.
+
+## 0.5.30-beta, tab widths with the string width
+
+Live: 0.5.29 left the first window unchanged; clicking another tab and back repaired it, so a later show measures correctly. Inferred cause: the template reads GetWidth of the tab text before the first layout pass. 0.5.30 passes GetStringWidth to PanelTemplates_TabResize (sixth argument, absolute text size) and repeats the resize at 0.1, 0.5 and 1.5 seconds. Whether this client version honors the sixth argument is unverified; if the first window is still cut, set the tab widths directly.

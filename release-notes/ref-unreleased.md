@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.29-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.30-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Tab widths measured with the string width, 0.5.30-beta
+
+- 0.5.29 did not help: clicking another tab and back repaired the tabs, but the first show did not. The template measures the tab text with GetWidth, which is still 0 before the first layout pass. The tabs are now resized with the exact GetStringWidth passed as the text width, on show and again after 0.1, 0.5 and 1.5 seconds while the window is open.
 
 ## Tab widths on the first window, 0.5.29-beta
 

@@ -91,15 +91,23 @@ local function panelTabs(window, id)
     end
     PanelTemplates_SetNumTabs(window, #Nav.tabs)
     PanelTemplates_SetTab(window, window.activeTab or 1)
-    -- The first window after the game starts measured its tab texts before the fonts were ready and cut them
-    -- ("Unlearn..."); measuring again once the window is on screen gives the same widths as later windows.
+    -- The first window after the game starts cut its tab names ("Unlearn..."): the template measures the text
+    -- with GetWidth, which is still 0 before the first layout pass. GetStringWidth is exact at once, so it is
+    -- handed to the resize as the text width, and the resize is repeated a few times while the window is open.
     local function fit()
         if not PanelTemplates_TabResize then return end
-        for _, b in ipairs(window.Tabs) do pcall(PanelTemplates_TabResize, b, nil) end
+        for _, b in ipairs(window.Tabs) do
+            local label = b.Text or (b.GetName and b:GetName() and _G[b:GetName() .. 'Text'])
+            local width = label and label.GetStringWidth and label:GetStringWidth()
+            if type(width) ~= 'number' or width <= 0 then width = nil end
+            pcall(PanelTemplates_TabResize, b, nil, nil, nil, nil, width)
+        end
     end
     local function onShow()
         fit()
-        if C_Timer and C_Timer.After then C_Timer.After(0.1, fit) end
+        if C_Timer and C_Timer.After then
+            for _, delay in ipairs({ 0.1, 0.5, 1.5 }) do C_Timer.After(delay, function() if window:IsShown() then fit() end end) end
+        end
     end
     if window.HookScript then window:HookScript('OnShow', onShow) else window:SetScript('OnShow', onShow) end
 end
