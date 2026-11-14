@@ -462,3 +462,7 @@ Live report with screenshot: the first window after starting the game shows narr
 ## 0.5.30-beta, tab widths with the string width
 
 Live: 0.5.29 left the first window unchanged; clicking another tab and back repaired it, so a later show measures correctly. Inferred cause: the template reads GetWidth of the tab text before the first layout pass. 0.5.30 passes GetStringWidth to PanelTemplates_TabResize (sixth argument, absolute text size) and repeats the resize at 0.1, 0.5 and 1.5 seconds. Whether this client version honors the sixth argument is unverified; if the first window is still cut, set the tab widths directly.
+
+## 0.5.31-beta, tab width measurement log
+
+Live: 0.5.30 still shows cut tabs on the first window after a game start; hiding and showing the window (click another tab and back) repairs them with no extra code. 0.5.31 sets a width directly when a tab is narrower than its text and logs measured widths to SavedVariables key navProbe (button/text/string width at show and +0.1, +0.5, +1.5 s). To read it: start the game, open the window once without touching the tabs, switch to another tab and back, /reload. Then read navProbe. Remove the probe when the cause is fixed.
