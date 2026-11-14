@@ -94,19 +94,46 @@ local function panelTabs(window, id)
     -- The first window after the game starts cut its tab names ("Unlearn..."): the template measures the text
     -- with GetWidth, which is still 0 before the first layout pass. GetStringWidth is exact at once, so it is
     -- handed to the resize as the text width, and the resize is repeated a few times while the window is open.
+    local function labelOf(b)
+        return b.Text or (b.GetName and b:GetName() and _G[b:GetName() .. 'Text'])
+    end
     local function fit()
-        if not PanelTemplates_TabResize then return end
         for _, b in ipairs(window.Tabs) do
-            local label = b.Text or (b.GetName and b:GetName() and _G[b:GetName() .. 'Text'])
+            local label = labelOf(b)
             local width = label and label.GetStringWidth and label:GetStringWidth()
             if type(width) ~= 'number' or width <= 0 then width = nil end
-            pcall(PanelTemplates_TabResize, b, nil, nil, nil, nil, width)
+            if PanelTemplates_TabResize then pcall(PanelTemplates_TabResize, b, nil, nil, nil, nil, width) end
+            -- Still narrower than its own text: set the width directly.
+            if width and b.GetWidth and b.SetWidth and (b:GetWidth() or 0) < width + 16 then b:SetWidth(width + 30) end
         end
     end
+    -- Saved in the saved variables (key navProbe) so the widths seen by the client can be read afterwards.
+    local function probe(stage)
+        local db = ns.db
+        if type(db) ~= 'table' then return end
+        local list = db.navProbe or {}
+        db.navProbe = list
+        local parts = { stage .. ' t=' .. tostring(GetTime and GetTime()) }
+        for index, b in ipairs(window.Tabs) do
+            local label = labelOf(b)
+            local function get(object, method)
+                if not object or not object[method] then return '?' end
+                local ok, value = pcall(object[method], object)
+                return ok and type(value) == 'number' and string.format('%.1f', value) or '?'
+            end
+            parts[#parts + 1] = index .. ':' .. get(b, 'GetWidth') .. '/' .. get(label, 'GetWidth') .. '/' .. get(label, 'GetStringWidth')
+        end
+        list[#list + 1] = table.concat(parts, ' ')
+        while #list > 24 do table.remove(list, 1) end
+    end
     local function onShow()
+        probe('show-before')
         fit()
+        probe('show-after')
         if C_Timer and C_Timer.After then
-            for _, delay in ipairs({ 0.1, 0.5, 1.5 }) do C_Timer.After(delay, function() if window:IsShown() then fit() end end) end
+            for _, delay in ipairs({ 0.1, 0.5, 1.5 }) do
+                C_Timer.After(delay, function() if window:IsShown() then probe('t+' .. delay .. '-before'); fit(); probe('t+' .. delay .. '-after') end end)
+            end
         end
     end
     if window.HookScript then window:HookScript('OnShow', onShow) else window:SetScript('OnShow', onShow) end

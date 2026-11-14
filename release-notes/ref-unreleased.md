@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.30-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.31-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Tab width fallback and measurement log, 0.5.31-beta
+
+- 0.5.30 did not fix the first window either (hiding and showing the window repairs it, which no code of ours does). A tab that is still narrower than its own text now gets a width set directly. To find the real cause, every show of a tab window writes the widths of the tab buttons and their texts (button / text / string width, before and after the resize, and again at 0.1, 0.5 and 1.5 seconds) to the saved variables key navProbe, at most 24 lines. This is diagnostic and will be removed once the cause is known.
 
 ## Tab widths measured with the string width, 0.5.30-beta
 
