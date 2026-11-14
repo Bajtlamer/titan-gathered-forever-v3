@@ -1,6 +1,7 @@
 local addonName, ns = ...
 TitanGatheredForeverV3 = ns
 local pendingItems, scheduled, bankAttempts, bankVisit = {}, false, 0, 0
+local itemRefreshQueued = false
 
 function ns.Print(message)
     DEFAULT_CHAT_FRAME:AddMessage(message)
@@ -438,8 +439,16 @@ frame:SetScript('OnEvent', function(_, event, ...)
         local itemID, success = ...
         if not ns.IsPublic(itemID) or type(itemID) ~= 'number' then return end
         if success then pendingItems[itemID] = nil else pendingItems[itemID] = false end
-        ns.Reports.Refresh()
-        ns.RecipeBrowser.Refresh()
+        -- Opening the recipes window asks for hundreds of items at once and every answer arrives as its own
+        -- event. One redraw after the burst replaces a full recomputation per item.
+        if not itemRefreshQueued then
+            itemRefreshQueued = true
+            C_Timer.After(0.3, function()
+                itemRefreshQueued = false
+                ns.Reports.Refresh()
+                ns.RecipeBrowser.Refresh()
+            end)
+        end
     end
     ns.ScheduleRefresh()
 end)
