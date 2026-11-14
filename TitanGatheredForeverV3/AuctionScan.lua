@@ -2,13 +2,14 @@ local _, ns = ...
 -- Prices from the auction house. One full scan (C_AuctionHouse.ReplicateItems, answered with
 -- REPLICATE_ITEM_LIST_UPDATE) is read in small steps and reduced to the items of the profession catalogue: the
 -- lowest buyout per unit, the quantity on offer and the number of auctions. Only buyout prices count, because a
--- bid-only auction has no price that can be paid at once. The client allows a full scan about every 15 minutes.
+-- bid-only auction has no price that can be paid at once. The client allows a full scan about every 15 minutes, and a
+-- request goes through the throttled message system of the auction house, whose events are shown and logged.
 local Scan = {}
 Scan.__index = Scan
 ns.AuctionScan = Scan
 
 Scan.STEP = 250          -- auctions read per step
-Scan.ANSWER_WAIT = 15    -- seconds to wait for the answer before giving up
+Scan.ANSWER_WAIT = 120   -- seconds to wait for the answer before giving up (the server answers a full scan slowly)
 Scan.COOLDOWN = 900      -- seconds the client wants between full scans
 
 function Scan.New(api)
@@ -28,7 +29,10 @@ end
 
 -- What the scan is doing, in words, and how far it is (0 to 1).
 function Scan:Describe()
-    if self.phase == 'waiting' then return 'Waiting for the auction house to send its list...', 0 end
+    if self.phase == 'waiting' then
+        local seconds = math.max(0, math.floor(self.api.Clock() - (self.waitStarted or 0)))
+        return string.format('%s (%d s)', self.note or 'Waiting for the auction house to send its list...', seconds), 0
+    end
     if self.phase == 'reading' then
         local fraction = self.total > 0 and self.done / self.total or 0
         return string.format('Reading auctions: %d%% (%d of %d)', math.floor(fraction * 100), self.done, self.total), fraction
@@ -48,18 +52,48 @@ function Scan:Request()
     local generation = self.generation
     self.api.SetLastRequest(now)
     self.api.Replicate()
-    self:Log('requested')
+    self.note, self.waitStarted = nil, self.api.Clock()
+    self:Log('requested', { ready = self.api.Ready and self.api.Ready() })
     self:Progress('waiting')
+    -- The bar counts the seconds while the answer is awaited.
+    local function tick()
+        if self.scanning and not self.reading and self.generation == generation then
+            self:Progress('waiting')
+            self.api.After(1, tick)
+        end
+    end
+    self.api.After(1, tick)
     self.api.After(Scan.ANSWER_WAIT, function()
         if self.scanning and not self.reading and self.generation == generation then
             self.scanning = false
             self:Progress(nil)
-            self:Log('no-answer')
-            self.api.Say('The auction house gave no answer. It allows a full scan about every 15 minutes.')
+            self:Log('no-answer', { waited = Scan.ANSWER_WAIT })
+            self.api.Say(string.format('The auction house gave no answer within %d seconds. It allows a full scan about every 15 minutes.', Scan.ANSWER_WAIT))
             self.api.Changed()
         end
     end)
     return true
+end
+
+-- The throttled message system of the auction house reports what became of the request.
+local throttleText = {
+    AUCTION_HOUSE_THROTTLED_MESSAGE_QUEUED = 'The auction house queued the request...',
+    AUCTION_HOUSE_THROTTLED_MESSAGE_SENT = 'The request was sent to the server...',
+    AUCTION_HOUSE_THROTTLED_MESSAGE_RESPONSE_RECEIVED = 'The server answered, receiving the list...',
+}
+function Scan:Throttle(event)
+    self:Log('event', { name = event })
+    if not self.scanning or self.reading then return end
+    if event == 'AUCTION_HOUSE_THROTTLED_MESSAGE_DROPPED' then
+        self.scanning = false
+        self.generation = (self.generation or 0) + 1
+        self:Progress(nil)
+        self.api.Say('The auction house dropped the request because of too many requests. Try again in a minute.')
+        self.api.Changed()
+    elseif throttleText[event] then
+        self.note = throttleText[event]
+        self:Progress('waiting')
+    end
 end
 
 -- The window of the auction house closed: nothing more is read.
@@ -72,7 +106,10 @@ end
 
 -- REPLICATE_ITEM_LIST_UPDATE: the list is ready; read it in steps so the game does not stall.
 function Scan:Updated()
-    if not self.scanning or self.reading then return end
+    if not self.scanning or self.reading then
+        self:Log('update-ignored', { entries = self.api.Count() })
+        return
+    end
     local total = self.api.Count()
     if type(total) ~= 'number' or total < 1 then
         self.scanning = false
@@ -142,7 +179,12 @@ end
 
 function Scan.Status()
     local saved = ns.db and ns.db.auction
-    if type(saved) ~= 'table' or not saved.at then return 'No auction prices scanned yet.' end
+    if type(saved) ~= 'table' or not saved.at then
+        local log = ns.db and ns.db.auctionLog
+        local last = log and log[#log]
+        if last and last.result == 'no-answer' then return 'The last scan got no answer from the auction house.' end
+        return 'No auction prices scanned yet.'
+    end
     local count = 0
     for _ in pairs(saved.items or {}) do count = count + 1 end
     return string.format('Scanned %s: %d profession items priced from %d auctions.',
@@ -163,6 +205,10 @@ function Scan.DefaultAPI()
     api.LastRequest = function() return ns.db and ns.db.auctionRequestedAt end
     api.SetLastRequest = function(value) if ns.db then ns.db.auctionRequestedAt = value end end
     api.Replicate = function() C_AuctionHouse.ReplicateItems() end
+    api.Ready = function()
+        local ok, value = pcall(C_AuctionHouse.IsThrottledMessageSystemReady)
+        if ok and ns.IsPublic(value) and type(value) == 'boolean' then return value end
+    end
     api.Count = function()
         local ok, value = pcall(C_AuctionHouse.GetNumReplicateItems)
         if ok and ns.IsPublic(value) and type(value) == 'number' then return value end
@@ -194,7 +240,7 @@ function Scan.DefaultAPI()
         local entry = { at = time(), result = result }
         for key, value in pairs(details or {}) do entry[key] = value end
         log[#log + 1] = entry
-        while #log > 12 do table.remove(log, 1) end
+        while #log > 30 do table.remove(log, 1) end
     end
     return api
 end
@@ -287,9 +333,13 @@ function Scan.Initialize()
             Scan.instance:Closed()
         elseif event == 'REPLICATE_ITEM_LIST_UPDATE' then
             Scan.instance:Updated()
+        else
+            Scan.instance:Throttle(event)
         end
     end)
-    for _, event in ipairs({ 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'REPLICATE_ITEM_LIST_UPDATE' }) do
+    for _, event in ipairs({ 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'REPLICATE_ITEM_LIST_UPDATE',
+        'AUCTION_HOUSE_THROTTLED_MESSAGE_QUEUED', 'AUCTION_HOUSE_THROTTLED_MESSAGE_SENT',
+        'AUCTION_HOUSE_THROTTLED_MESSAGE_RESPONSE_RECEIVED', 'AUCTION_HOUSE_THROTTLED_MESSAGE_DROPPED' }) do
         frame:RegisterEvent(event)
     end
 end

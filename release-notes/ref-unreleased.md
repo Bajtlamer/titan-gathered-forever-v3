@@ -1,6 +1,11 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.39-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.40-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Auction scan: longer wait and the server's own messages, 0.5.40-beta
+
+- The first live scan logged "requested" and, 15 seconds later, "no-answer": no REPLICATE_ITEM_LIST_UPDATE arrived in time. The wait is now 120 seconds, the bar counts the seconds, and the throttled message events of the auction house are shown in the bar and written to auctionLog: AUCTION_HOUSE_THROTTLED_MESSAGE_QUEUED, SENT, RESPONSE_RECEIVED and DROPPED (a dropped request ends the scan with a message to wait a minute). A list that arrives while no scan was asked for is logged as update-ignored with its size, and the log keeps 30 entries and records whether the throttled message system was ready at the request. The status line says when the last scan got no answer instead of "No auction prices scanned yet".
+- The line "No auction prices scanned yet" beside the button was correct: nothing had been stored, because the scan had not finished.
 
 ## Progress of the auction scan, 0.5.39-beta
 

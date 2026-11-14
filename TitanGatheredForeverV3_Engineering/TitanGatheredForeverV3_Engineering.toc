@@ -1,7 +1,7 @@
 ## Interface: 16001
 ## Title: Titan Gathered Forever v3: Engineering
 ## Notes: Optional Engineering material catalogue for Titan Gathered Forever v3.
-## Version: 0.5.39-beta
+## Version: 0.5.40-beta
 ## Dependencies: Titan, TitanGatheredForeverV3
 
 Data.lua

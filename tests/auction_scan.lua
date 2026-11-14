@@ -15,7 +15,7 @@ local function fixture(auctions)
     local ns = load()
     local f = { ns = ns, auctions = auctions, timers = {}, open = true, now = 1000, requests = 0, said = {}, changed = 0, logs = {}, progress = {} }
     local api = {
-        Open = function() return f.open end, Now = function() return f.now end, Clock = function() return 0 end,
+        Open = function() return f.open end, Now = function() return f.now end, Clock = function() return f.clock or 0 end,
         After = function(_, fn) f.timers[#f.timers + 1] = fn end,
         LastRequest = function() return f.last end, SetLastRequest = function(v) f.last = v end,
         Replicate = function() f.requests = f.requests + 1 end,
@@ -64,7 +64,7 @@ test('the display is told what the scan is doing: waiting, reading with a fracti
     f.ns.AuctionScan.STEP = 3
     eq(f.scan:Describe(), nil)
     f.scan:Request()
-    eq(f.scan.phase, 'waiting'); eq((f.scan:Describe()), 'Waiting for the auction house to send its list...')
+    eq(f.scan.phase, 'waiting'); eq((f.scan:Describe()), 'Waiting for the auction house to send its list... (0 s)')
     f.timers = {}
     f.scan:Updated()                                                        -- the first step reads three of eight
     local text, fraction = f.scan:Describe()
@@ -90,6 +90,42 @@ test('long lists report every quarter in the chat, short ones only the start and
     eq(#small.said, 2)                                                         -- the answer and the result
     local g = fixture({ { 2589, 1, 10 } })
     g.scan:Request(); g.scan:Closed(); eq(g.scan.phase, nil)                  -- closing the window clears the display
+end)
+
+test('the wait counts seconds, shows what the throttled message system reports and survives a long answer time', function()
+    local f = fixture({ { 2589, 1, 10 } })
+    f.scan:Request()
+    f.clock = 7
+    eq((f.scan:Describe()), 'Waiting for the auction house to send its list... (7 s)')
+    f.scan:Throttle('AUCTION_HOUSE_THROTTLED_MESSAGE_QUEUED')
+    eq((f.scan:Describe()), 'The auction house queued the request... (7 s)')
+    f.scan:Throttle('AUCTION_HOUSE_THROTTLED_MESSAGE_SENT'); f.clock = 40
+    eq((f.scan:Describe()), 'The request was sent to the server... (40 s)')
+    f.scan:Throttle('AUCTION_HOUSE_THROTTLED_MESSAGE_RESPONSE_RECEIVED')
+    assert((f.scan:Describe()):find('The server answered', 1, true))
+    f.scan:Updated(); f.run()                                                    -- the list arrives long after fifteen seconds
+    assert(f.saved ~= nil); eq(f.ns.AuctionScan.ANSWER_WAIT, 120)
+    local seen = 0
+    for _, name in ipairs(f.logs) do if name == 'event' then seen = seen + 1 end end
+    eq(seen, 3)                                                                  -- every event is logged
+end)
+
+test('a dropped request ends the scan with a clear message, and events outside a scan only go to the log', function()
+    local f = fixture({ { 2589, 1, 10 } })
+    f.scan:Throttle('AUCTION_HOUSE_THROTTLED_MESSAGE_SENT'); eq(f.scan.phase, nil)
+    f.scan:Request(); f.timers = {}
+    f.scan:Throttle('AUCTION_HOUSE_THROTTLED_MESSAGE_DROPPED')
+    eq(f.scan.scanning, false); eq(f.scan.phase, nil); assert(f.said[#f.said]:find('dropped the request', 1, true))
+    f.scan:Updated(); eq(f.logs[#f.logs], 'update-ignored')                    -- a list that nobody asked for is only logged
+    eq(f.saved, nil)
+end)
+
+test('the status line says when the last scan got no answer', function()
+    local ns = load()
+    ns.db.auctionLog = { { at = 1, result = 'requested' }, { at = 2, result = 'no-answer' } }
+    assert(ns.AuctionScan.Status():find('no answer', 1, true))
+    ns.db.auctionLog = { { at = 1, result = 'done' } }
+    assert(ns.AuctionScan.Status():find('No auction prices scanned yet', 1, true))
 end)
 
 test('a request needs an open auction house, respects the cooldown and cannot overlap', function()
@@ -203,7 +239,7 @@ test('the button appears with the auction house window and starts a scan with a 
     ns.AuctionScan.RefreshButton()
     eq(bar.shown, false); eq(label.shown, true)
     ns.AuctionScan.Initialize()
-    eq(ns.AuctionScan.frame.events, 3)
+    eq(ns.AuctionScan.frame.events, 7)
     _G.AuctionHouseFrame, CreateFrame, C_Timer = nil, nil, nil
 end)
 
