@@ -1,7 +1,7 @@
 local passed=0
 local function eq(a,b)assert(a==b,tostring(a)..' != '..tostring(b))end
 local function test(n,f)local ok,e=pcall(f);if not ok then error(n..': '..e)end;passed=passed+1 end
-local function region()return{SetPoint=function()end,SetWidth=function()end,SetJustifyH=function()end,SetText=function(self,v)self.text=v end}end
+local function region()return{SetPoint=function()end,SetWidth=function()end,SetJustifyH=function()end,SetWordWrap=function()end,SetText=function(self,v)self.text=v end}end
 local function frame()
  local f={scripts={},shown=false,TitleText=region(),buttons={}}
  for _,m in ipairs({'SetSize','SetPoint','ClearAllPoints','SetOrientation','SetMinMaxValues','SetValueStep','SetObeyStepOnDrag','SetThumbTexture','EnableMouseWheel','SetValue','SetColorTexture','SetAllPoints','SetClampedToScreen','SetMovable','EnableMouse','RegisterForDrag','StartMoving','StopMovingOrSizing','SetNumeric','SetMaxLetters','SetAutoFocus','ClearFocus'})do f[m]=function()end end
@@ -107,6 +107,22 @@ test('with the bank counted, reagents that are only in the bank turn yellow and 
  assert(w.note.text:find('Material limit: 11 crafts (cached estimate)',1,true));assert(w.scope.text:find('Bags + Bank',1,true))
  assert(w.note.text:find('Bank observed',1,true));assert(w.note.text:find('100',1,true))
  ns.settings.showBank=false
+end)
+test('a merchant seen selling a reagent is named in the last column and in the source menu',function()
+ assert(loadfile('TitanGatheredForeverV3/NpcSources.lua'))('TGF v3',ns)
+ ns.db={npcs={[50]={name='Vendor Vic',mapID=4,x=.5,y=.5,lastSeen=1,
+  goods={{itemID=1001,price=250,stack=5},{itemID=1002,price=100,extendedCost=true}}}}}
+ ns.NpcSources.Invalidate()
+ ns.CraftingView.Show(2536,3);local w=ns.CraftingView.window
+ eq(plain(w.rows[1].where.text),'Buy 50c each: Vendor Vic, Zone 4')       -- 250 copper for a stack of 5
+ eq(plain(w.rows[2].where.text),'Buy special cost: Vendor Vic, Zone 4')   -- paid with something other than money
+ local row=w.rows[1];row.scripts.OnClick(row)
+ local combined=table.concat(menu.titles,' ');assert(combined:find('Sold by',1,true))
+ local callback=menu.buttons['Vendor Vic: 50c each, Zone 4'];assert(callback)
+ local opened;OpenWorldMap=function(id)opened=id end;GetTime=function()return 100 end
+ callback();eq(opened,4);eq(ns.NpcSources.IsHighlighted(50),true)
+ ns.NpcSources.SetHighlight(nil);OpenWorldMap=nil;ns.db=nil
+ ns.CraftingView.Show(2536,3)
 end)
 test('map history label cannot imply a probability at one pin',function()
  assert(loadfile('TitanGatheredForeverV3/PinStyle.lua'))('TGF v3',ns)

@@ -184,6 +184,15 @@ function Reports.ItemSources(owner,itemID,character)
     MenuUtil.CreateContextMenu(owner,function(_,root)
         root:CreateTitle(ns.Style.ItemName(itemID));ns.Style.MenuNote(root,'Observed sources; complete loot samples only')
         ns.Style.MenuNote(root,'Grouped by source and zone; not a probability at a coordinate.')
+        local vendors=ns.NpcSources and ns.NpcSources.VendorsFor(itemID)or{}
+        if #vendors>0 then
+            root:CreateTitle('Sold by (observed merchants, cheapest first)')
+            for index=1,math.min(5,#vendors)do
+                local vendor=vendors[index]
+                root:CreateButton(string.format('%s: %s%s',vendor.name,ns.NpcSources.UnitPriceText(vendor),
+                    vendor.zone and(', '..vendor.zone)or''),function()ns.NpcSources.ShowOnMap(vendor.npcID)end)
+            end
+        end
         if #rates==0 then ns.Style.MenuNote(root,'No complete source samples recorded yet.')end
         for _,r in ipairs(rates)do
             local mapID=r.mapID

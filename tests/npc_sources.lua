@@ -380,6 +380,42 @@ test('settings defaults preserve explicit choices', function()
     eq(type(saved.npcs), 'table'); eq(type(saved.knownRecipes), 'table')
 end)
 
+test('merchants that sell a profession item are listed cheapest unit price first, with zone and money text', function()
+    local ns = fresh()
+    ns.db.npcs[10] = { name = 'Dear Dan', mapID = 1429, x = 0.3, y = 0.4, lastSeen = 5,
+        goods = { { itemID = 2320, price = 500, stack = 5 } } }                       -- 100 each
+    ns.db.npcs[11] = { name = 'Cheap Cora', mapID = 1430, x = 0.1, y = 0.2, lastSeen = 6,
+        goods = { { itemID = 2320, price = 250, stack = 5 }, { itemID = 99, price = 1, stack = 1 } } }   -- 50 each
+    ns.db.npcs[12] = { name = 'Odd Ora', mapID = 1429, x = 0.5, y = 0.5, lastSeen = 7,
+        goods = { { itemID = 2320, extendedCost = true, stack = 1 } } }
+    ns.NpcSources.Invalidate()
+    local vendors = ns.NpcSources.VendorsFor(2320)
+    eq(#vendors, 3); eq(vendors[1].name, 'Cheap Cora'); eq(vendors[2].name, 'Dear Dan'); eq(vendors[3].name, 'Odd Ora')
+    eq(vendors[1].zone, 'Zone 1430'); eq(vendors[1].mapID, 1430); eq(vendors[1].unit, 50)
+    eq(ns.NpcSources.UnitPriceText(vendors[1]), '50c each'); eq(ns.NpcSources.UnitPriceText(vendors[3]), 'special cost')
+    eq(#ns.NpcSources.VendorsFor(99), 1); eq(#ns.NpcSources.VendorsFor(12345), 0)
+end)
+
+test('a merchant with goods only shows on the map only while it is marked, and the tooltip lists its goods', function()
+    local ns = fresh()
+    ns.db.npcs[10] = { name = 'Goods Gus', mapID = 1429, x = 0.3, y = 0.4, lastSeen = 5,
+        goods = { { itemID = 2320, price = 500, stack = 5 } } }
+    ns.NpcSources.Invalidate()
+    local found
+    for _, node in ipairs(ns.NpcSources.Nodes(1429)) do if node.npcID == 10 then found = node end end
+    assert(found, 'the merchant has a node'); eq(found.kind, 'RecipeVendor')
+    eq(ns.NpcSources.Visible(found), false)                -- no recipes: no ordinary pin
+    GetTime = function() return 100 end
+    ns.NpcSources.SetHighlight({ 10 }); eq(ns.NpcSources.Visible(found), true); ns.NpcSources.SetHighlight(nil)
+    local tip = { lines = {} }
+    function tip:AddLine(text) self.lines[#self.lines + 1] = text end
+    function tip:AddDoubleLine(left, right) self.lines[#self.lines + 1] = left .. ' | ' .. right end
+    ns.NpcSources.FillTooltip(tip, found)
+    local combined = table.concat(tip.lines, '\n')
+    assert(combined:find('Also sells for the professions', 1, true)); assert(combined:find('Recipe: Item2320', 1, true))
+    assert(not combined:find('No recipes recorded yet', 1, true))
+end)
+
 for _, entry in ipairs(tests) do
     local ok, err = pcall(entry[2])
     if not ok then io.stderr:write('FAIL ' .. entry[1] .. ': ' .. tostring(err) .. '\n'); os.exit(1) end

@@ -1,4 +1,4 @@
-# Titan Gathered Forever v3 0.5.35-beta
+# Titan Gathered Forever v3 0.5.36-beta
 
 First beta. It contains everything since the last built download set, 0.4.2-alpha. Per-step history is in ref-unreleased.md. This text is the changelog for the website; the release itself is not published yet.
 
@@ -38,7 +38,7 @@ First beta. It contains everything since the last built download set, 0.4.2-alph
 
 ### Recipe reagents
 
-- The reagent window of /tgf recipe shows one reagent per line: the amount needed, in the bags, in the bank, missing and where to get it. Green means ready, yellow means enough but in the bank (the line says how many to take) and red means missing (the line names the best source you have observed). The missing reagents come first. A headline says whether the planned crafts can be made, the - and + buttons and a number box set the number of crafts, and 18 reagents fit on the screen.
+- The reagent window of /tgf recipe shows one reagent per line: the amount needed, in the bags, in the bank, missing and where to get it. Green means ready, yellow means enough but in the bank (the line says how many to take) and red means missing (the line names the best source you have observed). The missing reagents come first. A headline says whether the planned crafts can be made, the - and + buttons and a number box set the number of crafts, and 18 reagents fit on the screen. A Reagents button in the profession window opens it for the selected recipe. Merchants seen selling a reagent are named with the price each and the zone, and the map marks them on a click.
 
 ### Menu and diagnostics
 
