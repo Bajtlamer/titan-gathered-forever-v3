@@ -97,25 +97,34 @@ function Crafting.Compute(recipe,inventory,showBank,operations)
         end
     end
     local limit=math.huge
+    p.counts={missing=0,bank=0,ready=0,unknown=0}
     for id,perOperation in pairs(quantities)do
         local ok,count=pcall(inventory.Get,inventory,id)
         if not ok or type(count)~='table'then count={}end
+        local itemUnknown=false
         local function amount(value,state)
             if (state~='current'and state~='cached')or type(value)~='number'or value<0 or value~=math.floor(value)or value==math.huge then
-                p.unknown=true;return 0
+                p.unknown=true;itemUnknown=true;return 0
             end
             if state=='cached'then p.cached=true end
             return value
         end
-        local available=amount(count.bags,count.bagsState)
+        local bags=amount(count.bags,count.bagsState)
+        local available,bank=bags,nil
         if showBank then
-            available=available+amount(count.bank,count.bankState)
+            bank=amount(count.bank,count.bankState)
+            available=available+bank
             if count.bankState=='cached'and type(count.bankObservedAt)=='number'then
                 p.bankObservedAt=math.min(p.bankObservedAt or count.bankObservedAt,count.bankObservedAt)
             end
         end
         local required=perOperation*operations
-        p.rows[#p.rows+1]={itemID=id,perOperation=perOperation,required=required,available=available,missing=math.max(0,required-available)}
+        -- ready: enough in the bags; bank: enough only with the bank; missing: not enough anywhere that is counted.
+        local state=itemUnknown and'unknown'or bags>=required and'ready'or available>=required and'bank'or'missing'
+        p.counts[state]=p.counts[state]+1
+        p.rows[#p.rows+1]={itemID=id,perOperation=perOperation,required=required,available=available,
+            missing=math.max(0,required-available),bags=bags,bank=bank,state=state,
+            fromBank=state=='bank'and required-bags or 0}
         limit=math.min(limit,math.floor(available/perOperation))
     end
     if #p.rows==0 then p.issues[#p.issues+1]='No complete fixed item-reagent requirements are available.'end

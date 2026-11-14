@@ -23,6 +23,18 @@ test('bank scope follows display selection and never leaks hidden bank quantitie
  local bags=ns.Crafting.Compute(recipe(),inv,false,1);eq(bags.craftable,1);eq(bags.cached,false);eq(bags.bankObservedAt,nil)
  local total=ns.Crafting.Compute(recipe(),inv,true,1);eq(total.craftable,5);eq(total.scope,'Bags + Bank');eq(total.cached,true);eq(total.bankObservedAt,100)
 end)
+test('each reagent is ready, in the bank, missing or unknown, with bags and bank counted apart',function()
+ local inv=inventory({[2672]=4,[159]=1},{[2672]=3,[159]=0},'current','current')
+ local p=ns.Crafting.Compute(recipe({slot(2672,2),slot(159,1,2)}),inv,true,3)   -- needs 6 of 2672 and 3 of 159
+ local by={};for _,row in ipairs(p.rows)do by[row.itemID]=row end
+ eq(by[2672].state,'bank');eq(by[2672].bags,4);eq(by[2672].bank,3);eq(by[2672].fromBank,2);eq(by[2672].missing,0)
+ eq(by[159].state,'missing');eq(by[159].missing,2);eq(by[159].fromBank,0)
+ eq(p.counts.bank,1);eq(p.counts.missing,1);eq(p.counts.ready,0);eq(p.counts.unknown,0)
+ local bagsOnly=ns.Crafting.Compute(recipe({slot(2672,2)}),inv,false,2)       -- 4 needed, 4 in the bags
+ eq(bagsOnly.rows[1].state,'ready');eq(bagsOnly.rows[1].bank,nil);eq(bagsOnly.counts.ready,1)
+ local unknown=ns.Crafting.Compute(recipe({slot(2672,2)}),inventory({},nil,'unknown'),false,1)
+ eq(unknown.rows[1].state,'unknown');eq(unknown.counts.unknown,1)
+end)
 test('repeated item slots are aggregated before determining capacity',function()
  local p=ns.Crafting.Compute(recipe({slot(2672,2),slot(2672,3,2)}),inventory({[2672]=9}),false,2)
  eq(#p.rows,1);eq(p.rows[1].perOperation,5);eq(p.rows[1].missing,1);eq(p.craftable,1)

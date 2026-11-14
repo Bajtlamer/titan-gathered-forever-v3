@@ -1,4 +1,4 @@
-# Titan Gathered Forever v3 0.5.34-beta
+# Titan Gathered Forever v3 0.5.35-beta
 
 First beta. It contains everything since the last built download set, 0.4.2-alpha. Per-step history is in ref-unreleased.md. This text is the changelog for the website; the release itself is not published yet.
 
@@ -35,6 +35,10 @@ First beta. It contains everything since the last built download set, 0.4.2-alph
 - The window has classic tabs along the bottom: Unlearned recipes, Trainers, Lifetime materials, Observed chances, Profession actions, Crafting and cooking, Reagent use and PvP Board. All tabs share one size and one remembered position and keep their own filters and scroll position.
 - Every list scrolls with the mouse wheel and a scroll bar instead of Previous and Next buttons (only the export parts keep them). Lists have a search box. Observed chances can be grouped by item, with a button to expand the sources of each item.
 - Every choice (profession, scope, source, grouping, export identity) is a Blizzard style combo box. If a client lacks the template, a button with a menu takes its place.
+
+### Recipe reagents
+
+- The reagent window of /tgf recipe shows one reagent per line: the amount needed, in the bags, in the bank, missing and where to get it. Green means ready, yellow means enough but in the bank (the line says how many to take) and red means missing (the line names the best source you have observed). The missing reagents come first. A headline says whether the planned crafts can be made, the - and + buttons and a number box set the number of crafts, and 18 reagents fit on the screen.
 
 ### Menu and diagnostics
 
