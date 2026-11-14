@@ -466,3 +466,7 @@ Live: 0.5.29 left the first window unchanged; clicking another tab and back repa
 ## 0.5.31-beta, tab width measurement log
 
 Live: 0.5.30 still shows cut tabs on the first window after a game start; hiding and showing the window (click another tab and back) repairs them with no extra code. 0.5.31 sets a width directly when a tab is narrower than its text and logs measured widths to SavedVariables key navProbe (button/text/string width at show and +0.1, +0.5, +1.5 s). To read it: start the game, open the window once without touching the tabs, switch to another tab and back, /reload. Then read navProbe. Remove the probe when the cause is fixed.
+
+## 0.5.32-beta, tab widths: first Show does not fire OnShow
+
+navProbe on 0.5.31 held a single show with correct widths (button = text + 20): the one logged show was the re-show after clicking another tab, which matches the report that the tabs are only repaired then. A frame is shown when created, so the first Show() fires no OnShow. 0.5.32 measures the tabs when they are created too. Pending live check on the first open after a game start; navProbe stays one more version and should then show a show-before line at creation time.
