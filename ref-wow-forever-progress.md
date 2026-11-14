@@ -522,3 +522,7 @@ The recipe book (Data/RecipeBook.lua) comes from catalogue/forever-recipes.json:
 ## 0.5.45-beta, opaque windows
 
 Live report with screenshot: the reagent window opened over the profit tab showed the tab through it. Nav.Solid adds an opaque dark layer (BACKGROUND, sublevel -8) behind the frame art of every window (Nav.Draggable calls it) and SetToplevel; the reagent window raises itself on show. Pending live check: the look of the dark layer against the frame art (edge and title bar) and that a clicked window comes to the front.
+
+## 0.5.46-beta, header button and movable client windows
+
+Live report with screenshot: no Reagents button in the header of the profession window (the window has no visible maximize button). Cause: the button was a child of ProfessionsFrame.MaximizeMinimize, which this client keeps hidden. Now a child of CraftingPage, anchored by Button.Place left of the maximize button when shown, otherwise left of CloseButton; professionLog records what was found. New Movable.lua makes ProfessionsFrame and AuctionHouseFrame draggable (setting moveBlizzard), keeps the position in windowPositions and re-applies it on show and after UpdateUIPanelPositions. Pending live checks: the header button, dragging and the kept position of both windows (and that the client does not undo the position), whether the window of the client reacts to drag on empty places only.

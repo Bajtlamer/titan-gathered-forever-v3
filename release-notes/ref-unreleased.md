@@ -1,6 +1,11 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.45-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.46-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Reagents button visible, movable client windows, 0.5.46-beta
+
+- The Reagents button of 0.5.38 to 0.5.45 did not show in the profession window. It hung on the maximize button, which this window has but keeps hidden, so the button was hidden with it. The button is now a child of the recipes page (shown exactly there), placed left of the maximize button when that is on screen and otherwise left of the close button, and the place is chosen again whenever the page is shown. What was found is written to a small log (saved variables key professionLog: whether the window, the page, the close and maximize buttons exist and whether the maximize button is shown), for the case that it still does not show.
+- The profession window and the auction house window of the client can be moved now: drag any empty place of the window. The position is kept like the positions of the other windows (also after /reload and a restart) and put back after the client lays its windows out again. Titan menu > Display > Let me move the profession and auction house windows switches this off, and Reset window positions forgets them. New file Movable.lua, so a full game restart is needed. Other windows of the client (trainer, merchant, bank) are not touched.
 
 ## Opaque windows, 0.5.45-beta
 

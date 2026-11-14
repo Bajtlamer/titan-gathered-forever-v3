@@ -53,20 +53,45 @@ function Button.HookMenu()
     return Button.menuHooked
 end
 
+-- A bounded log of what was found when the button was attached, for the case that it does not show.
+local function log(stage, details)
+    local entries = ns.db and ns.db.professionLog
+    if type(entries) ~= 'table' then return end
+    local entry = { at = time and time() or 0, stage = stage }
+    for key, value in pairs(details or {}) do entry[key] = value end
+    entries[#entries + 1] = entry
+    while #entries > 12 do table.remove(entries, 1) end
+end
+
+-- The header button goes left of the maximize button when that one is on screen, otherwise left of the close button.
+-- It is a child of the recipes page, so it is shown exactly on that page and never hidden by a button it is not part of.
+function Button.Place()
+    local frame, button = _G.ProfessionsFrame, Button.button
+    if not frame or not button then return end
+    local maximize = frame.MaximizeMinimize
+    local neighbour = (maximize and maximize.IsShown and maximize:IsShown()) and maximize or frame.CloseButton
+    if not neighbour then return end
+    button:ClearAllPoints()
+    button:SetPoint('RIGHT', neighbour, 'LEFT', -6, 0)
+end
+
 -- Adds the header button once the profession window exists. Returns whether the button is there.
 function Button.Attach()
     if Button.button then return true end
     local frame = _G.ProfessionsFrame
-    if not frame then return false end
-    -- The maximize button belongs to the recipes tab, so a child of it is shown exactly there.
-    local neighbour = frame.MaximizeMinimize or frame.CloseButton
-    if not neighbour then return false end
-    local parent = frame.MaximizeMinimize or frame
-    local button = CreateFrame('Button', nil, parent, 'UIPanelButtonTemplate')
+    local page = frame and frame.CraftingPage
+    if not frame or not (frame.MaximizeMinimize or frame.CloseButton) then
+        if not Button.missingLogged then
+            Button.missingLogged = true
+            log('no-frame', { frame = frame ~= nil, close = frame and frame.CloseButton ~= nil or false })
+        end
+        return false
+    end
+    local button = CreateFrame('Button', nil, page or frame, 'UIPanelButtonTemplate')
     Button.button = button
     button:SetSize(80, 20)
     button:SetText('Reagents')
-    button:SetPoint('RIGHT', neighbour, 'LEFT', -6, 0)
+    if button.SetFrameLevel and (page or frame).GetFrameLevel then button:SetFrameLevel(((page or frame):GetFrameLevel() or 0) + 20) end
     button:SetScript('OnClick', function() Button.Open(frame.CraftingPage) end)
     button:SetScript('OnEnter', function(self)
         GameTooltip:SetOwner(self, 'ANCHOR_BOTTOM')
@@ -75,6 +100,12 @@ function Button.Attach()
         GameTooltip:Show()
     end)
     button:SetScript('OnLeave', function() GameTooltip:Hide() end)
+    Button.Place()
+    local host = page or frame
+    if host.HookScript then host:HookScript('OnShow', Button.Place) end
+    log('attached', { page = page ~= nil, maximize = frame.MaximizeMinimize ~= nil,
+        maximizeShown = frame.MaximizeMinimize and frame.MaximizeMinimize.IsShown and frame.MaximizeMinimize:IsShown() or false,
+        close = frame.CloseButton ~= nil })
     return true
 end
 

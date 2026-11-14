@@ -27,6 +27,7 @@ function ns.Settings.Initialize(saved)
     if type(settings.recordNpcs) ~= 'boolean' then settings.recordNpcs = true end
     if type(settings.auctionAutoScan) ~= 'boolean' then settings.auctionAutoScan = false end
     if type(settings.auctionTooltips) ~= 'boolean' then settings.auctionTooltips = true end
+    if type(settings.moveBlizzard) ~= 'boolean' then settings.moveBlizzard = true end
     if type(settings.npcAxisSwap) ~= 'boolean' then settings.npcAxisSwap = false end
     if type(settings.mapNpcProfessions) ~= 'table' then settings.mapNpcProfessions = {} end
     if type(settings.recordHistory) ~= 'boolean' then settings.recordHistory = true end
@@ -75,6 +76,7 @@ function ns.Settings.Initialize(saved)
     if type(saved.auctionLog) ~= 'table' then saved.auctionLog = {} end
     if type(saved.windowPositions) ~= 'table' then saved.windowPositions = {} end
     if type(saved.recipeMakes) ~= 'table' then saved.recipeMakes = {} end
+    if type(saved.professionLog) ~= 'table' then saved.professionLog = {} end
     if type(saved.debugLog) ~= 'table' then saved.debugLog = {} end
     if type(saved.knownRecipes) ~= 'table' then saved.knownRecipes = {} end
     return saved, settings

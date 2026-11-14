@@ -44,6 +44,7 @@ commands = [
     [runtime, 'tests/recipe_browser.lua'],
     [runtime, 'tests/navigation.lua'],
     [runtime, 'tests/profession_button.lua'],
+    [runtime, 'tests/movable.lua'],
     [runtime, 'tests/auction_scan.lua'],
     [runtime, 'tests/economy.lua'],
     [runtime, 'tests/profit.lua'],

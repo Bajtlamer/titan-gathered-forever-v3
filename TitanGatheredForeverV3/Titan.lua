@@ -131,6 +131,9 @@ function Titan.Menu(owner)
             ns.settings.showMinimapButton = ns.settings.showMinimapButton == false
             ns.MinimapButton.Update()
         end)
+        display:CreateCheckbox('Let me move the profession and auction house windows', function() return ns.settings.moveBlizzard ~= false end, function()
+            ns.settings.moveBlizzard = ns.settings.moveBlizzard == false
+        end)
         display:CreateButton('Reset window positions', function()
             ns.Nav.ResetPositions()
             ns.Print('Window positions reset: the windows open in the middle of the screen again.')
