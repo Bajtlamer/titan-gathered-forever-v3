@@ -30,6 +30,19 @@ function Obs.MerchantInfo(info)
     return price, info.hasExtendedCost == true or nil
 end
 
+-- Price of a whole stack in copper, the stack size and the number on offer (nil when unlimited) from the modern
+-- merchant item info table. Items paid with something other than money have no usable price.
+function Obs.GoodsInfo(info)
+    if type(info) ~= 'table' or not ns.IsPublic(info) then return nil end
+    local function number(value) return ns.IsPublic(value) and type(value) == 'number' and value or nil end
+    local price, stack, available = number(info.price), number(info.stackCount), number(info.numAvailable)
+    if not stack or stack < 1 then stack = 1 end
+    if available and available < 0 then available = nil end
+    local extended = info.hasExtendedCost == true or nil
+    if extended then price = nil end
+    return price, stack, available, extended
+end
+
 function Obs.New(api) return setmetatable({ api = api }, Obs) end
 
 function Obs:Save(npc, fields)
@@ -167,16 +180,20 @@ function Obs:ReadMerchant(event)
     local npc = self.api.Npc()
     if not npc then self:Log(event, 'no-npc'); return end
     local rows = self.api.MerchantRecipes()
-    if #rows == 0 then
+    local goods = self.api.MerchantGoods and self.api.MerchantGoods() or {}
+    if #rows == 0 and #goods == 0 then
         if event == 'MERCHANT_UPDATE' then
             if self.emptyMerchantLogged then return end
             self.emptyMerchantLogged = true
         end
-        self:Log(event, 'no-recipes', { npc = npc.id, recipes = 0 })
+        self:Log(event, 'no-recipes', { npc = npc.id, recipes = 0, goods = 0 })
         return
     end
-    self:Save(npc, { vendor = rows })
-    self:Log(event, 'saved', { npc = npc.id, recipes = #rows })
+    local fields = {}
+    if #rows > 0 then fields.vendor = rows end
+    if #goods > 0 then fields.goods = goods end
+    self:Save(npc, fields)
+    self:Log(event, 'saved', { npc = npc.id, recipes = #rows, goods = #goods })
 end
 
 function Obs:MerchantShown()
@@ -351,6 +368,24 @@ function Obs.DefaultAPI()
                     skillName = public(skillName, 'string') and skillName or nil,
                     skillRank = public(skillRank, 'number') and skillRank or nil,
                     level = public(level, 'number') and level > 0 and level or nil }
+            end
+        end
+        return result
+    end
+    -- Goods that belong to the professions of the catalogue (reagents and the like). Everything else a merchant sells
+    -- is left alone, and a merchant without such goods is not recorded for them.
+    api.MerchantGoods = function()
+        local result = {}
+        local count = call(GetMerchantNumItems)
+        if not public(count, 'number') or count < 1 or count > 400 then return result end
+        for index = 1, count do
+            local link = call(GetMerchantItemLink, index)
+            local itemID = public(link, 'string') and tonumber(link:match('item:(%d+)')) or nil
+            if itemID and ns.Catalog and ns.Catalog.Get(itemID) then
+                local info = C_MerchantFrame and C_MerchantFrame.GetItemInfo and call(C_MerchantFrame.GetItemInfo, index)
+                local price, stack, available, extended = Obs.GoodsInfo(info)
+                result[#result + 1] = { itemID = itemID, price = price, stack = stack, stock = available,
+                    extendedCost = extended }
             end
         end
         return result

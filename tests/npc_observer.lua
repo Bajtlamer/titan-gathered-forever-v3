@@ -92,6 +92,37 @@ test('trainer and vendor data for one npc are kept together', function()
     eq(ns.db.npcs[3167].profession, 'Cooking'); eq(#ns.db.npcs[3167].trainer, 1); eq(#ns.db.npcs[3167].vendor, 1)
 end)
 
+test('merchant goods are read per stack, money only, and recorded without any recipes', function()
+    local ns, observer = fresh({ MerchantGoods = function() return {
+        { itemID = 2320, price = 250, stack = 5 }, { itemID = 4291, extendedCost = true } } end })
+    observer:MerchantShown()
+    local saved = ns.db.npcs[3167]
+    eq(#saved.goods, 2); eq(saved.goods[1].price, 250); eq(saved.goods[1].stack, 5); eq(saved.vendor, nil)
+    eq(ns.db.npcLog[#ns.db.npcLog].goods, 2); eq(ns.db.npcLog[#ns.db.npcLog].result, 'saved')
+    local price, stack, available, extended = ns.NpcObserver.GoodsInfo({ price = 250, stackCount = 5, numAvailable = 3 })
+    eq(price, 250); eq(stack, 5); eq(available, 3); eq(extended, nil)
+    price, stack, available, extended = ns.NpcObserver.GoodsInfo({ price = 100, stackCount = 0, numAvailable = -1, hasExtendedCost = true })
+    eq(price, nil); eq(stack, 1); eq(available, nil); eq(extended, true)   -- unlimited stock, no usable money price
+    eq(ns.NpcObserver.GoodsInfo(nil), nil)
+end)
+
+test('a merchant with neither recipes nor goods of the professions is not recorded', function()
+    local ns, observer = fresh()
+    observer:MerchantShown()
+    eq(next(ns.db.npcs), nil); eq(ns.db.npcLog[#ns.db.npcLog].result, 'no-recipes')
+end)
+
+test('recipes and goods of one merchant are kept together and later updates keep both', function()
+    local goods = { { itemID = 2320, price = 10, stack = 1 } }
+    local ns, observer = fresh({ MerchantRecipes = function() return { { itemID = 5, kind = 'Cooking' } } end,
+        MerchantGoods = function() return goods end })
+    observer:MerchantShown()
+    eq(#ns.db.npcs[3167].vendor, 1); eq(#ns.db.npcs[3167].goods, 1)
+    goods = { { itemID = 2320, price = 10, stack = 1 }, { itemID = 2321, price = 20, stack = 1 } }
+    observer:MerchantUpdated()
+    eq(#ns.db.npcs[3167].goods, 2); eq(#ns.db.npcs[3167].vendor, 1)
+end)
+
 test('every trainer attempt is logged with the reason it did or did not record', function()
     local services = {}
     local npc = nil

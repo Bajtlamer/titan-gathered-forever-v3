@@ -1,6 +1,12 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.35-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.36-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Merchants with reagents and a button in the profession window, 0.5.36-beta
+
+- When a merchant window opens, the goods that belong to the professions of the catalogue (reagents and the like) are recorded with the price of a stack, the stack size and the stock, together with the recipes the merchant sells. Merchants without such goods are not recorded for them, and goods paid with something other than money are marked as special cost. The seed has no reagent goods, so this is observed data only.
+- The reagent window names such a merchant in its last column ("Buy 50c each: Name, Zone", cheapest first), and the source menu of a reagent has a Sold by section that opens the map and marks the merchant with the red ring. The pin tooltip of a merchant lists the goods as well. A merchant with goods only gets a pin only while it is marked, so the map is not crowded.
+- The profession window of the client has a Reagents button beside the Create buttons. It opens the reagent window for the selected recipe with the number of crafts typed in the profession window, so /tgf recipe is no longer needed. The chat command and the Titan menu entry stay. New file ProfessionButton.lua, so a full game restart is needed. The anchor (CreateAllButton of the crafting page) comes from the client source of the forever branch and is not yet verified in game; the button is simply absent if the frame differs.
 
 ## Recipe reagent window redesigned, 0.5.35-beta
 

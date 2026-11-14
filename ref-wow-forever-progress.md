@@ -482,3 +482,7 @@ Live: after 0.5.33 the tabs of the first window are correct after a game restart
 ## 0.5.35-beta, recipe reagent window redesigned
 
 CraftingView.lua rewritten: one line per reagent with columns Need, Bags, Bank, Missing and Where to get it, green, yellow, red states (ready, in the bank, missing), gray for unknown counts, missing first, - and + with a number box, 18 rows. Crafting.Compute rows gained bags, bank, state and fromBank, and the plan gained counts. Pending live check: the look of the colors and columns, the plus and minus buttons and the number box with real inventory and bank data.
+
+## 0.5.36-beta, merchant goods and the Reagents button
+
+NpcObserver records the profession goods of a merchant (itemID, stack price, stack size, stock, extendedCost) next to the recipes, NpcSources.VendorsFor lists the merchants of an item, the reagent window and its source menu use them, and ProfessionButton.lua adds a Reagents button to ProfessionsFrame.CraftingPage left of CreateAllButton (anchor evidence: Gethe/wow-ui-source branch forever, Blizzard_ProfessionsCrafting). Pending live checks: a merchant window with reagents is recorded (npcLog shows goods=N), the Reagents button appears in the profession window and passes the crafts number, the Buy line in the reagent window.

@@ -96,6 +96,7 @@ function Npc.Record(npcID)
         end
         record.trainer = rows
     end
+    record.goods = saw and saw.goods
     local vendor = {}
     if saw and saw.vendor then
         for _, row in ipairs(saw.vendor) do
@@ -167,9 +168,9 @@ function Npc.Nodes(mapID)
                 nodes[#nodes + 1] = { kind = 'Trainer', npcID = id, mapID = mapID, x = x, y = y,
                     profession = record.profession }
             end
-            if record.vendor then
+            if record.vendor or record.goods then
                 local kinds = {}
-                for _, row in ipairs(record.vendor) do kinds[row.kind] = true end
+                for _, row in ipairs(record.vendor or {}) do kinds[row.kind] = true end
                 nodes[#nodes + 1] = { kind = 'RecipeVendor', npcID = id, mapID = mapID, x = x, y = y,
                     professions = kinds }
             end
@@ -325,9 +326,23 @@ function Npc.FillTooltip(tooltip, node)
         tooltip:AddLine(Style.Text(Style.gray, string.format('and %d more', #ordered - shown)))
         small(tooltip)
     end
-    if #ordered == 0 then
+    local goods = node.kind ~= 'Trainer' and record.goods or {}
+    if #ordered == 0 and #goods == 0 then
         tooltip:AddLine(Style.Text(Style.gray, 'No recipes recorded yet.'))
         small(tooltip)
+    end
+    if #goods > 0 then
+        tooltip:AddLine(Style.Text(Style.gray, 'Also sells for the professions (price each):'))
+        small(tooltip)
+        for index = 1, math.min(#goods, SHOWN) do
+            local good = goods[index]
+            local right = Style.Text(Style.gray, 'special cost')
+            if good.price and not good.extendedCost then
+                right = Npc.CoinIcons(math.max(1, math.floor(good.price / (good.stack or 1) + 0.5)))
+            end
+            tooltip:AddDoubleLine(ns.ItemName(good.itemID), right)
+            small(tooltip)
+        end
     end
     if #unreadKinds > 0 then
         table.sort(unreadKinds)
@@ -335,6 +350,50 @@ function Npc.FillTooltip(tooltip, node)
             .. table.concat(unreadKinds, ', ') .. ').'))
         small(tooltip)
     end
+end
+
+-- Merchants seen selling an item that belongs to the professions, the cheapest unit price first. Only what the
+-- player observed is listed; the seed has no reagent goods.
+function Npc.VendorsFor(itemID)
+    local result = {}
+    for id, saw in pairs(observed()) do
+        for _, good in ipairs(saw.goods or {}) do
+            if good.itemID == itemID then
+                local where = Npc.Location(id)
+                local stack = good.stack or 1
+                result[#result + 1] = { npcID = id, name = saw.name or ('NPC ' .. id), price = good.price, stack = stack,
+                    unit = good.price and good.price / stack or nil, stock = good.stock, extendedCost = good.extendedCost,
+                    zone = where and where.zone, mapID = where and where.mapID, lastSeen = saw.lastSeen }
+            end
+        end
+    end
+    table.sort(result, function(a, b)
+        local left, right = a.unit or math.huge, b.unit or math.huge
+        if left ~= right then return left < right end
+        if a.name ~= b.name then return a.name < b.name end
+        return a.npcID < b.npcID
+    end)
+    return result
+end
+
+-- Opens the world map at an NPC and marks it with the red ring (the same mark as in the recipes window).
+function Npc.ShowOnMap(npcID)
+    Npc.SetHighlight({ npcID })
+    local place = Npc.Location(npcID)
+    local mapID = place and place.mapID or Npc.ContinentMap(npcID)
+    if mapID then
+        if OpenWorldMap then OpenWorldMap(mapID)
+        elseif WorldMapFrame and WorldMapFrame.SetMapID then WorldMapFrame:Show(); WorldMapFrame:SetMapID(mapID) end
+    end
+    if ns.Map and ns.Map.Update then ns.Map.Update() end
+    if ns.Minimap and ns.Minimap.Update then ns.Minimap.Update() end
+end
+
+-- A unit price in words: "2s 5c each", or "special cost" for goods paid with something other than money.
+function Npc.UnitPriceText(vendor)
+    if vendor.extendedCost or not vendor.unit then return 'special cost' end
+    local copper = math.max(1, math.floor(vendor.unit + 0.5))
+    return Npc.Coin(copper) .. ' each'
 end
 
 -- Where to find an NPC: zone name and coordinates in percent. Observed position first; a seed NPC is

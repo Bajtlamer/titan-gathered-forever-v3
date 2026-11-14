@@ -87,6 +87,12 @@ function View.Where(row, character)
         return Style.Text(Style.yellow, string.format('In the bank: take %d', row.fromBank))
     end
     if row.state == 'unknown' then return Style.Text(Style.gray, 'Count unknown') end
+    -- A merchant that was seen selling it is the clearest answer: what to pay and where.
+    local vendor = ns.NpcSources and ns.NpcSources.VendorsFor(row.itemID)[1]
+    if vendor then
+        return string.format('Buy %s: %s%s', ns.NpcSources.UnitPriceText(vendor), vendor.name,
+            vendor.zone and (', ' .. vendor.zone) or '')
+    end
     local evidence = ns.Crafting.Evidence(row.itemID, character)
     local source = evidence.rates[1]
     if source then
@@ -208,6 +214,7 @@ function View.Show(recipeID, operations)
             row.bank = text(row, 'GameFontHighlightSmall', columns[4][2], -5, columns[4][3])
             row.missing = text(row, 'GameFontHighlightSmall', columns[5][2], -5, columns[5][3])
             row.where = text(row, 'GameFontHighlightSmall', columns[6][2], -5, columns[6][3])
+            row.where:SetWordWrap(false)
             row:SetScript('OnClick', function(self)
                 if self.data then ns.Reports.ItemSources(self, self.data.itemID, ns.characterID or UnitGUID('player')) end
             end)
