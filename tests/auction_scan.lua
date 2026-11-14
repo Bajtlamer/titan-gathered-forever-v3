@@ -11,7 +11,7 @@ local function load()
 end
 
 -- A fake client: auctions are { itemID, count, buyout }; timers are collected and run by hand.
-local function fixture(auctions)
+local function fixture(auctions, withClock)
     local ns = load()
     local f = { ns = ns, auctions = auctions, timers = {}, open = true, now = 1000, requests = 0, said = {}, changed = 0, logs = {}, progress = {} }
     local api = {
@@ -28,6 +28,7 @@ local function fixture(auctions)
         Log = function(result, details) f.logs[#f.logs + 1] = result; f.lastDetails = details end,
         Progress = function() f.progress[#f.progress + 1] = { f.scan.phase, f.scan.done, f.scan.total } end,
     }
+    if withClock then f.ms = 0; api.Millis = function() f.ms = f.ms + 1; return f.ms end end
     f.scan = ns.AuctionScan.New(api)
     function f.run() while #f.timers > 0 do local fn = table.remove(f.timers, 1); fn() end end
     return f
@@ -126,6 +127,35 @@ test('the status line says when the last scan got no answer', function()
     assert(ns.AuctionScan.Status():find('no answer', 1, true))
     ns.db.auctionLog = { { at = 1, result = 'done' } }
     assert(ns.AuctionScan.Status():find('No auction prices scanned yet', 1, true))
+end)
+
+test('with a clock the list is read as much as fits into a time budget per frame, not a fixed number', function()
+    local auctions = {}
+    for i = 1, 40 do auctions[i] = { 2589, 1, 100 + i } end
+    local f = fixture(auctions, true)
+    f.ns.AuctionScan.CHUNK, f.ns.AuctionScan.BUDGET = 2, 3
+    f.scan:Request(); f.timers = {}
+    f.scan:Updated()
+    local steps = 1
+    while #f.timers > 0 do local fn = table.remove(f.timers, 1); fn(); steps = steps + 1 end
+    eq(f.saved.items[2589].n, 40); eq(f.saved.items[2589].min, 101)           -- everything was read
+    assert(steps < 40 / 2, 'several chunks per frame, got ' .. steps .. ' frames')
+    f.ns.AuctionScan.CHUNK, f.ns.AuctionScan.BUDGET = 100, 6
+end)
+
+test('the repeated updates of the client are logged once per scan', function()
+    local f = fixture({ { 2589, 1, 10 }, { 2589, 1, 11 } })
+    f.scan:Request(); f.scan:Updated()
+    for _ = 1, 30 do f.scan:Updated() end                                     -- the client repeats the update while the list is read
+    f.run()
+    local ignored = 0
+    for _, name in ipairs(f.logs) do if name == 'update-ignored' then ignored = ignored + 1 end end
+    eq(ignored, 1)
+    f.last = nil
+    f.scan:Request(); f.scan:Updated(); f.scan:Updated(); f.run()             -- the next scan logs its own
+    ignored = 0
+    for _, name in ipairs(f.logs) do if name == 'update-ignored' then ignored = ignored + 1 end end
+    eq(ignored, 2)
 end)
 
 test('a request needs an open auction house, respects the cooldown and cannot overlap', function()

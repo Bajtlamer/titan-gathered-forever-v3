@@ -8,7 +8,9 @@ local Scan = {}
 Scan.__index = Scan
 ns.AuctionScan = Scan
 
-Scan.STEP = 250          -- auctions read per step
+Scan.STEP = 250          -- auctions read per step when the client clock is not available
+Scan.BUDGET = 6          -- milliseconds of reading per frame; the first live scan read 250 per frame and took 19 s
+Scan.CHUNK = 100         -- auctions read between two looks at the clock
 Scan.ANSWER_WAIT = 120   -- seconds to wait for the answer before giving up (the server answers a full scan slowly)
 Scan.COOLDOWN = 900      -- seconds the client wants between full scans
 
@@ -52,7 +54,7 @@ function Scan:Request()
     local generation = self.generation
     self.api.SetLastRequest(now)
     self.api.Replicate()
-    self.note, self.waitStarted = nil, self.api.Clock()
+    self.note, self.waitStarted, self.ignoredLogged = nil, self.api.Clock(), false
     self:Log('requested', { ready = self.api.Ready and self.api.Ready() })
     self:Progress('waiting')
     -- The bar counts the seconds while the answer is awaited.
@@ -107,7 +109,11 @@ end
 -- REPLICATE_ITEM_LIST_UPDATE: the list is ready; read it in steps so the game does not stall.
 function Scan:Updated()
     if not self.scanning or self.reading then
-        self:Log('update-ignored', { entries = self.api.Count() })
+        -- The client repeats the update many times; one log line per scan is enough.
+        if not self.ignoredLogged then
+            self.ignoredLogged = true
+            self:Log('update-ignored', { entries = self.api.Count() })
+        end
         return
     end
     local total = self.api.Count()
@@ -127,17 +133,22 @@ function Scan:Updated()
     local items, index, started = {}, 1, self.api.Clock()
     local function step()
         if not self.reading or self.generation ~= generation then return end
-        local last = math.min(total, index + Scan.STEP - 1)
-        for position = index, last do
-            local itemID, count, buyout = self.api.Item(position)
-            if itemID and count and buyout and count > 0 and buyout > 0 and self.api.Wanted(itemID) then
-                local unit = math.max(1, math.floor(buyout / count + 0.5))
-                local entry = items[itemID]
-                if not entry then entry = { min = unit, qty = 0, n = 0 }; items[itemID] = entry end
-                if unit < entry.min then entry.min = unit end
-                entry.qty, entry.n = entry.qty + count, entry.n + 1
+        local last = index - 1
+        local deadline = self.api.Millis and (self.api.Millis() + Scan.BUDGET) or nil
+        repeat
+            local chunkEnd = math.min(total, last + (deadline and Scan.CHUNK or Scan.STEP))
+            for position = last + 1, chunkEnd do
+                local itemID, count, buyout = self.api.Item(position)
+                if itemID and count and buyout and count > 0 and buyout > 0 and self.api.Wanted(itemID) then
+                    local unit = math.max(1, math.floor(buyout / count + 0.5))
+                    local entry = items[itemID]
+                    if not entry then entry = { min = unit, qty = 0, n = 0 }; items[itemID] = entry end
+                    if unit < entry.min then entry.min = unit end
+                    entry.qty, entry.n = entry.qty + count, entry.n + 1
+                end
             end
-        end
+            last = chunkEnd
+        until last >= total or not deadline or self.api.Millis() >= deadline
         index = last + 1
         if index <= total then
             self:Progress('reading', last, total)
@@ -201,6 +212,7 @@ function Scan.DefaultAPI()
     api.Open = function() return _G.AuctionHouseFrame ~= nil and _G.AuctionHouseFrame:IsShown() end
     api.Now = function() return time() end
     api.Clock = function() return GetTime and GetTime() or 0 end
+    api.Millis = debugprofilestop
     api.After = function(seconds, fn) C_Timer.After(seconds, fn) end
     api.LastRequest = function() return ns.db and ns.db.auctionRequestedAt end
     api.SetLastRequest = function(value) if ns.db then ns.db.auctionRequestedAt = value end end

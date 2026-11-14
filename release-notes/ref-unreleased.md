@@ -1,6 +1,11 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.40-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.41-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Faster auction scan reading, 0.5.41-beta
+
+- The first successful scan read 281,892 auctions in 18.8 seconds: the reading took 250 auctions per frame, so it was limited by the frame rate (1,128 frames at 60 per second), not by the work. The reading now takes as many auctions per frame as fit into 6 milliseconds (looking at the clock every 100 auctions), which should cut the time to a few seconds with a short, small hitch per frame. Without the clock function it keeps the fixed 250 per frame.
+- The client repeats REPLICATE_ITEM_LIST_UPDATE dozens of times while the list is read, and every repetition was logged; the 30 line log was full of them. They are now logged once per scan.
 
 ## Auction scan: longer wait and the server's own messages, 0.5.40-beta
 

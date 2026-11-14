@@ -502,3 +502,7 @@ Live report: the scan gave no sign of what it was doing. AuctionScan now keeps a
 ## 0.5.40-beta, auction scan answer time
 
 Live log on 0.5.39: auctionLog had "requested" at 1794686014 and "no-answer" at 1794686029; the scan never stored anything. Evidence from the client documentation: ReplicateItems is a throttled message with the events AUCTION_HOUSE_THROTTLED_MESSAGE_QUEUED, SENT, RESPONSE_RECEIVED and DROPPED, so the request may have been queued or dropped. 0.5.40 waits 120 seconds, counts the seconds in the bar, shows and logs those events and logs ignored updates. Pending live check: read auctionLog after another scan (event names in the log, whether the update arrives late).
+
+## 0.5.41-beta, first auction scan result and faster reading
+
+Live scan on realm "CAMWOW EU5 Realm 4 PvP" (saved key auction, at 1794694588): the full list had 281,892 auctions, 484 profession items were priced from 80,339 of those auctions (813,706 items in total), the reading took 18.8 s at 250 auctions per frame, the answer to ReplicateItems came about 19 s after the request (so the 15 s wait of 0.5.37 to 0.5.39 was too short), and REPLICATE_ITEM_LIST_UPDATE fired dozens of times in the same second. The prices look plausible (cheapest 3 copper for item 3030, dearest 175 gold for item 16206, 4 items with a single auction). 0.5.41 reads by time budget (6 ms per frame) and logs repeated updates once. Pending live check: the scan time with the budget, the progress bar and the Auction each column and cost line in the reagent window.
