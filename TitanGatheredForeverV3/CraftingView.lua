@@ -338,3 +338,14 @@ function View.Show(recipeID, operations)
     if w.Raise then w:Raise() end   -- above the tab window that may have opened it
     View.Refresh()
 end
+
+-- Opens the window, or closes it when it already shows this recipe (the button of the profession window works like the
+-- minimap button). A window that shows another recipe is switched to this one.
+function View.Toggle(recipeID, operations)
+    local w = View.window
+    if w and w:IsShown() and w.recipeID == recipeID then
+        w:Hide()
+    else
+        View.Show(recipeID, operations)
+    end
+end

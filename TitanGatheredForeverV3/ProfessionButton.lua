@@ -26,7 +26,7 @@ function Button.Open(page)
         ns.Print('Select a recipe in the profession window first.')
         return
     end
-    ns.CraftingView.Show(recipeID, Button.Operations(page))
+    ns.CraftingView.Toggle(recipeID, Button.Operations(page))
 end
 
 -- The recipe of a recipe list button: its element is a tree node whose data holds the recipe info.

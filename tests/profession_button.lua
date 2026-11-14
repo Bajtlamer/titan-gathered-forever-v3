@@ -28,7 +28,8 @@ local function fresh()
     local ns = { IsPublic = function() return true end, printed = {}, shown = {} }
     ns.Print = function(message) ns.printed[#ns.printed + 1] = message end
     ns.Crafting = { Resolve = function(info) return info.recipeID end }
-    ns.CraftingView = { Show = function(id, operations) ns.shown[#ns.shown + 1] = { id, operations } end }
+    ns.CraftingView = { Show = function(id, operations) ns.shown[#ns.shown + 1] = { id, operations } end,
+        Toggle = function(id, operations) ns.toggled = (ns.toggled or 0) + 1; ns.shown[#ns.shown + 1] = { id, operations } end }
     CreateFrame = function(_, _, parent) local f = frame(); f.parent = parent; return f end
     C_Timer = { After = function() end }
     GameTooltip = { SetOwner = function() end, AddLine = function() end, Show = function() end, Hide = function() end }
@@ -117,7 +118,7 @@ test('a click opens the selected recipe with the number of crafts typed in the p
     eq(#ns.shown, 0); eq(ns.printed[1], 'Select a recipe in the profession window first.')
     ns.Crafting.selectedID = 2536
     ns.ProfessionButton.button.scripts.OnClick()
-    eq(ns.shown[1][1], 2536); eq(ns.shown[1][2], 12)
+    eq(ns.shown[1][1], 2536); eq(ns.shown[1][2], 12); eq(ns.toggled, 1)                  -- the button toggles the window
     eq(ns.ProfessionButton.Operations({ CreateMultipleInputBox = { GetNumber = function() return 0 end } }), 1)
     eq(ns.ProfessionButton.Operations(nil), 1)
     eq(ns.ProfessionButton.Operations({ CreateMultipleInputBox = { GetNumber = function() error('boom') end } }), 1)

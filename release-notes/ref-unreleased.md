@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.47-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.48-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## The Reagents button closes the window again, 0.5.48-beta
+
+- The Reagents button of the profession window works like the minimap button: a second click closes the reagent window when it shows the selected recipe, and a window that shows another recipe is switched to the selected one instead of being closed. The entry in the recipe menu still only opens.
 
 ## Reagents button as a child of the screen, 0.5.47-beta
 

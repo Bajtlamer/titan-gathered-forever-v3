@@ -184,6 +184,14 @@ test('the window is as tall as its list and keeps room for at least four rows',f
  eq(height,217+7*22+40)                                                                   -- seven reagents
  eq(w.slider.height,7*22)
 end)
+test('toggling closes the window of the same recipe, and switches a window that shows another recipe',function()
+ ns.CraftingView.Show(2536,3);local w=ns.CraftingView.window
+ assert(w:IsShown())
+ ns.CraftingView.Toggle(2536,3);eq(w:IsShown(),false)                                  -- the same recipe again: closed
+ ns.CraftingView.Toggle(2536,2);eq(w:IsShown(),true);eq(w.operations,2)                -- opened again, with the new number
+ ns.CraftingView.Toggle(999,1);eq(w:IsShown(),true);eq(w.recipeID,999)                 -- another recipe: switched, not closed
+ ns.CraftingView.Show(2536,3)
+end)
 test('map history label cannot imply a probability at one pin',function()
  assert(loadfile('TitanGatheredForeverV3/PinStyle.lua'))('TGF v3',ns)
  local _,note=ns.PinStyle.HistoryLines({itemID=1001,mapID=4,kind='Mining'})

@@ -530,3 +530,7 @@ Live report with screenshot: no Reagents button in the header of the profession 
 ## 0.5.47-beta, Reagents button as a child of the screen
 
 Live professionLog on 0.5.46: stage attached with page = true, close = true, maximize = false, maximizeShown = false, and still no button on screen. 0.5.47 makes the button a child of UIParent (strata HIGH, level of the window + 50) anchored to the close button, with visibility synchronised with the window and the recipes page, and logs a "placed" line one second later (visible, left, top, width, close position, frame and page shown, strata, level, scale). Pending live check: the button on screen; if it is still missing, read the placed line.
+
+## 0.5.48-beta, the Reagents button toggles
+
+Live: the button of 0.5.47 is visible. CraftingView.Toggle(recipeID, operations) closes the window when it shows that recipe and otherwise shows it; the header button uses it. Pending live check: click, click again, and a click with another recipe selected.
