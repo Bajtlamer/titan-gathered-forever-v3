@@ -1,6 +1,11 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.38-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.39-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Progress of the auction scan, 0.5.39-beta
+
+- The scan now shows what it is doing. A progress bar appears beside the Scan prices button with the phase: "Waiting for the auction house to send its list..." and then "Reading auctions: 40% (12000 of 30000)". The idle status line returns when the scan ends, fails or the window closes, and the button is disabled while a scan runs.
+- The chat gets a line when the list arrives ("The auction house sent N auctions. Reading them..."), at 25, 50 and 75 percent of a list longer than 1000 auctions, and the existing line at the end. An empty list is reported as well.
 
 ## Reagents button in the header and a recipe menu entry, 0.5.38-beta
 

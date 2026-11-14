@@ -494,3 +494,7 @@ AuctionScan.lua reads the full auction list (C_AuctionHouse.ReplicateItems, REPL
 ## 0.5.38-beta, Reagents button in the header and recipe menu entry
 
 Live report on 0.5.36: the Reagents button sat in the recipe list and displayed wrongly. 0.5.38 anchors it left of ProfessionsFrame.MaximizeMinimize (CloseButton fallback), as a child of the maximize button, and adds a Reagents entry to the recipe list menu through Menu.ModifyMenu on MENU_PROFESSIONS_RECIPE_LIST_FAVORITE (evidence: Gethe/wow-ui-source branch forever, Blizzard_ProfessionsRecipeList.lua and Blizzard_ProfessionsFrame.lua). Pending live check: header button position and visibility on the recipes tab and on other tabs, the menu entry on a learned recipe.
+
+## 0.5.39-beta, auction scan progress
+
+Live report: the scan gave no sign of what it was doing. AuctionScan now keeps a phase (waiting, reading) with the number read, shows a progress bar beside the Scan prices button and prints the answer, every quarter of a list over 1000 auctions and the result in the chat. Pending live check: the bar below AuctionHouseFrame, how long the phases take on the real realm (the auctionLog has the seconds of a finished scan).
