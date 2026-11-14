@@ -100,8 +100,8 @@ local function panelTabs(window, id)
     local function fit()
         for _, b in ipairs(window.Tabs) do
             local label = labelOf(b)
-            -- Live measurement (navProbe): a new tab text has a fixed width of 52, so GetStringWidth only reports the
-            -- cut text ("Unlearn..." is about 50). Without the fixed width it reports the real 94.
+            -- Measured live: a new tab text has a fixed width of 52, so GetStringWidth only reports the cut text
+            -- ("Unlearn..." is about 50). Without the fixed width it reports the real 94.
             if label and label.SetWidth then label:SetWidth(0) end
             local width = label and label.GetStringWidth and label:GetStringWidth()
             if type(width) ~= 'number' or width <= 0 then width = nil end
@@ -110,32 +110,11 @@ local function panelTabs(window, id)
             if width and b.GetWidth and b.SetWidth and (b:GetWidth() or 0) < width + 16 then b:SetWidth(width + 30) end
         end
     end
-    -- Saved in the saved variables (key navProbe) so the widths seen by the client can be read afterwards.
-    local function probe(stage)
-        local db = ns.db
-        if type(db) ~= 'table' then return end
-        local list = db.navProbe or {}
-        db.navProbe = list
-        local parts = { stage .. ' t=' .. tostring(GetTime and GetTime()) }
-        for index, b in ipairs(window.Tabs) do
-            local label = labelOf(b)
-            local function get(object, method)
-                if not object or not object[method] then return '?' end
-                local ok, value = pcall(object[method], object)
-                return ok and type(value) == 'number' and string.format('%.1f', value) or '?'
-            end
-            parts[#parts + 1] = index .. ':' .. get(b, 'GetWidth') .. '/' .. get(label, 'GetWidth') .. '/' .. get(label, 'GetStringWidth')
-        end
-        list[#list + 1] = table.concat(parts, ' ')
-        while #list > 24 do table.remove(list, 1) end
-    end
     local function onShow()
-        probe('show-before')
         fit()
-        probe('show-after')
         if C_Timer and C_Timer.After then
             for _, delay in ipairs({ 0.1, 0.5, 1.5 }) do
-                C_Timer.After(delay, function() if window:IsShown() then probe('t+' .. delay .. '-before'); fit(); probe('t+' .. delay .. '-after') end end)
+                C_Timer.After(delay, function() if window:IsShown() then fit() end end)
             end
         end
     end
