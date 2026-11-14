@@ -1,6 +1,12 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.36-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.37-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Auction prices, 0.5.37-beta
+
+- A Scan prices button appears below the auction house window (and Titan menu > Auction prices > Scan now). It reads the whole auction house with the client's full scan (C_AuctionHouse.ReplicateItems, answered with REPLICATE_ITEM_LIST_UPDATE), in steps of 250 auctions so the game does not stall, and keeps for each item of the profession catalogue the lowest buyout per unit, the quantity on offer and the number of auctions. Bid-only auctions are ignored. The client allows a full scan about every 15 minutes: an early request is refused with the minutes left, and a scan that gets no answer within 15 seconds ends with a message. The prices are saved per realm. The menu can scan automatically when the auction house opens (at most every 30 minutes, off by default) and can clear the prices; an auction scan log with the last 12 outcomes is kept in the saved variables (auctionLog).
+- The reagent window has an Auction each column with the lowest buyout per unit, and its line shows what the missing reagents would cost at auction, with how many of them are priced. The reagent window still names merchants first in the last column.
+- New file AuctionScan.lua, so a full game restart is needed. The API shape comes from the client documentation of the forever branch (the position of the values returned by GetReplicateItemInfo is covered by a test); it is not yet verified in game, and the button is placed below the window of the auction house (AuctionHouseFrame) without knowing its layout.
 
 ## Merchants with reagents and a button in the profession window, 0.5.36-beta
 

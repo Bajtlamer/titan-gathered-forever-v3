@@ -37,7 +37,7 @@ C_TradeSkillUI={GetRecipeInfo=function(id)if id==2536 then return{recipeID=id,na
  GetProfessionInfoByRecipeID=function()return{professionID=185}end,
  GetRecipeSchematic=function(id)return{recipeID=id,recipeType=1,isRecraft=false,reagentSlotSchematics=slots}end}
 ns.inventory={Get=function(_,id)return{bags=id-1000,bagsState='current',bank=10,bankState='cached',bankObservedAt=100}end}
-for _,file in ipairs({'Style.lua','History.lua','Crafting.lua','Navigation.lua','Reports.lua','CraftingView.lua'})do assert(loadfile('TitanGatheredForeverV3/'..file))('TGF v3',ns)end
+for _,file in ipairs({'Style.lua','History.lua','Crafting.lua','Navigation.lua','Reports.lua','CraftingView.lua','AuctionScan.lua'})do assert(loadfile('TitanGatheredForeverV3/'..file))('TGF v3',ns)end
 ns.Style.ItemName=function(id)return'Item '..id end
 ns.history=ns.History.New({})
 ns.history:Observe('a','A',{id='one',kind='Mining',source='123',mapID=4,at=100,complete=true,items={[1001]=1}})
@@ -123,6 +123,20 @@ test('a merchant seen selling a reagent is named in the last column and in the s
  callback();eq(opened,4);eq(ns.NpcSources.IsHighlighted(50),true)
  ns.NpcSources.SetHighlight(nil);OpenWorldMap=nil;ns.db=nil
  ns.CraftingView.Show(2536,3)
+end)
+test('the auction column shows the scanned unit price and the line adds up what the missing reagents would cost',function()
+ assert(loadfile('TitanGatheredForeverV3/NpcSources.lua'))('TGF v3',ns)
+ ns.db={auction={at=1,entries=9,items={[1001]={min=40,qty=5,n=1},[1002]={min=100,qty=9,n=3},[1003]={min=7,qty=1,n=1}}}}
+ ns.CraftingView.Show(2536,3);local w=ns.CraftingView.window
+ eq(plain(w.rows[1].auction.text),'40c');eq(plain(w.rows[2].auction.text),'1s')      -- 100 copper is 1 silver
+ eq(plain(w.rows[3].auction.text),'7c');eq(plain(w.rows[4].auction.text),'-')        -- 1003 is ready but still priced; 1004 has no price
+ assert(plain(w.counts.text):find('Missing at auction: 1s 80c',1,true))              -- 2 x 40 and 1 x 100
+ assert(not plain(w.counts.text):find('priced',1,true))
+ ns.db.auction.items[1002]=nil;ns.CraftingView.Refresh()
+ assert(plain(w.counts.text):find('Missing at auction: 80c (1 of 2 priced)',1,true))
+ ns.db.auction.items[1001]=nil;ns.CraftingView.Refresh()
+ assert(not plain(w.counts.text):find('auction',1,true))                               -- nothing priced: no cost line
+ ns.db=nil;ns.CraftingView.Show(2536,3)
 end)
 test('map history label cannot imply a probability at one pin',function()
  assert(loadfile('TitanGatheredForeverV3/PinStyle.lua'))('TGF v3',ns)

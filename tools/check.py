@@ -43,6 +43,7 @@ commands = [
     [runtime, 'tests/recipe_browser.lua'],
     [runtime, 'tests/navigation.lua'],
     [runtime, 'tests/profession_button.lua'],
+    [runtime, 'tests/auction_scan.lua'],
     [runtime, 'tests/trainer_browser.lua'],
 ]
 for command in commands:
