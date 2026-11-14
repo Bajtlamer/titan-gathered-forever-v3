@@ -91,6 +91,17 @@ local function panelTabs(window, id)
     end
     PanelTemplates_SetNumTabs(window, #Nav.tabs)
     PanelTemplates_SetTab(window, window.activeTab or 1)
+    -- The first window after the game starts measured its tab texts before the fonts were ready and cut them
+    -- ("Unlearn..."); measuring again once the window is on screen gives the same widths as later windows.
+    local function fit()
+        if not PanelTemplates_TabResize then return end
+        for _, b in ipairs(window.Tabs) do pcall(PanelTemplates_TabResize, b, nil) end
+    end
+    local function onShow()
+        fit()
+        if C_Timer and C_Timer.After then C_Timer.After(0.1, fit) end
+    end
+    if window.HookScript then window:HookScript('OnShow', onShow) else window:SetScript('OnShow', onShow) end
 end
 
 local function buttonTabs(window, id)

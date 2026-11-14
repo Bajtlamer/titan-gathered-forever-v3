@@ -454,3 +454,7 @@ New tab Trainers (TrainerBrowser.lua, NpcSources.Trainers): all profession train
 ## 0.5.28-beta, first opening of the recipes window
 
 Live report: the first opening after the game starts lags. Cause found by measurement: Unlearned() requests the names of about 550 vendor recipe items; each ITEM_DATA_LOAD_RESULT redrew the list (one computation takes about 6 ms in LuaJIT on a desktop, so hundreds of them add up). 0.5.28 coalesces the redraw (0.3 s after the first answer) and requests item names only for the professions in view. Pending live check of the first opening. The window construction itself and the item requests (about 550 at once on an All professions list) were not measured in game.
+
+## 0.5.29-beta, tab widths on the first window
+
+Live report with screenshot: the first window after starting the game shows narrow, cut tabs ("Unlearn...", "Lifetime..."); later windows are right. Probable cause: the tab texts are measured before the fonts are ready. 0.5.29 calls PanelTemplates_TabResize again on show and 0.1 s later. The cause is inferred, not proven. Pending live check on the first open after a game start.

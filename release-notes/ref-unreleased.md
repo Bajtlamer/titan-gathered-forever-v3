@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.28-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.29-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Tab widths on the first window, 0.5.29-beta
+
+- The tabs along the bottom of the first window opened after the game starts were too narrow and cut their names ("Unlearn..."); they fixed themselves once other tab windows were created. The tab widths are now measured again when the window is shown, right away and 0.1 seconds later. A /reload is enough.
 
 ## Faster first opening of the recipes window, 0.5.28-beta
 
