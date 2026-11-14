@@ -1,6 +1,12 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.37-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.38-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Reagents button in the header and a recipe menu entry, 0.5.38-beta
+
+- The Reagents button of 0.5.36 was drawn inside the recipe list and displayed wrongly. It is now in the header of the profession window, left of the maximize button (left of the close button when the window has none), as a child of the maximize button so that it shows only on the recipes tab.
+- A right click on a learned recipe in the recipe list has a new entry Reagents that opens the reagent window for that recipe (one craft). It is added to the menu the client opens there (tag MENU_PROFESSIONS_RECIPE_LIST_FAVORITE) with Menu.ModifyMenu, and uses the highest learned rank like the selection does (new Crafting.Resolve).
+- The anchors come from the client source of the forever branch (ProfessionsFrame.MaximizeMinimize, CloseButton, the menu tag) and are not yet verified in game.
 
 ## Auction prices, 0.5.37-beta
 

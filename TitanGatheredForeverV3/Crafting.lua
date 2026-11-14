@@ -52,8 +52,9 @@ function Crafting.FixedReagents(recipe)
     for _,row in ipairs(plan.rows)do reagents[row.itemID]=row.perOperation end
     return reagents,true
 end
-function Crafting.Select(info,native)
-    Crafting.selectedID=nil
+-- The recipe ID a recipe info stands for: the highest learned rank for a native selection, nil when it cannot be
+-- resolved. Select stores it as the selected recipe; the context menu of the recipe list only reads it.
+function Crafting.Resolve(info,native)
     if native and readable(info,{'recipeID','nextRecipeID'})then
         if Professions and type(Professions.GetHighestLearnedRecipe)=='function'then
             local ok,highest=pcall(Professions.GetHighestLearnedRecipe,info)
@@ -61,7 +62,10 @@ function Crafting.Select(info,native)
             if highest then info=highest end
         elseif info.nextRecipeID~=nil then return end
     elseif native then return end
-    if readable(info,{'recipeID'})and integer(info.recipeID,2147483647)then Crafting.selectedID=info.recipeID end
+    if readable(info,{'recipeID'})and integer(info.recipeID,2147483647)then return info.recipeID end
+end
+function Crafting.Select(info,native)
+    Crafting.selectedID=Crafting.Resolve(info,native)
 end
 function Crafting.Initialize()
     if Crafting.registered or not EventRegistry or not EventRegistry.RegisterCallback then return end
