@@ -72,6 +72,14 @@ test('tabs use the classic panel tab template and select the active tab', functi
     ns.Nav.Tabs(window, 'chances')
     eq(numTabs, #ns.Nav.tabs); eq(selected, 4); eq(window.tabButtons.pvp.template, 'PanelTabButtonTemplate')
     eq(#window.Tabs, 8); eq(window.Tabs[2].calls.SetID[1], 2)
+    -- Tab widths are measured again when the window is shown, right away and a moment later.
+    local resized, timers = 0, {}
+    PanelTemplates_TabResize = function() resized = resized + 1 end
+    C_Timer = { After = function(_, fn) timers[#timers + 1] = fn end }
+    window.scripts.OnShow()
+    eq(resized, 8); eq(#timers, 1)
+    timers[1](); eq(resized, 16)
+    PanelTemplates_TabResize, C_Timer = nil, nil
 end)
 
 test('tabs fall back to buttons when the panel tab template is missing', function()
