@@ -478,8 +478,11 @@ function Npc.Unlearned(character, vendorOnly, kindFilter)
             end
         end
         for _, row in ipairs(record.vendor or {}) do
-            local name = Npc.ItemRecipeName(row.itemID)
-            if name then add(id, record.name, row.kind, name, row.skill, row.price, 'Vendor')
+            -- Only the professions in view are looked up: every lookup of an unknown item is a request to the server.
+            local wanted = recipeKinds[row.kind] and (not kindFilter or row.kind == kindFilter)
+            local name = wanted and Npc.ItemRecipeName(row.itemID)
+            if not wanted then -- not listed, nothing to load
+            elseif name then add(id, record.name, row.kind, name, row.skill, row.price, 'Vendor')
             else pending = pending + 1 end
         end
     end

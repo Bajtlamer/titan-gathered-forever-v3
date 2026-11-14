@@ -327,6 +327,17 @@ test('metadata requests are deduplicated and successful item loading refreshes n
     eq(ns.ItemName(249391), 'Localized Pyrite')
 end)
 
+test('a burst of item answers redraws the recipe list once', function()
+    local s, ns = fixture(); s:Start()
+    local redraws = 0
+    ns.RecipeBrowser.Refresh = function() redraws = redraws + 1 end
+    for id = 1, 50 do s:Event('ITEM_DATA_LOAD_RESULT', id, true) end
+    s:Flush()
+    eq(redraws, 1)
+    s:Event('ITEM_DATA_LOAD_RESULT', 51, true); s:Flush()
+    eq(redraws, 2)
+end)
+
 test('right-click menu toggles actual settings', function()
     local s, ns = fixture(); s:Start()
     s.broker.OnClick({}, 'RightButton')

@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.27-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.28-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Faster first opening of the recipes window, 0.5.28-beta
+
+- The first opening of the window after starting the game lagged for a long time. The recipes list asks the client for the names of about 550 vendor recipe items at once, every answer arrives as its own event, and each event recomputed and redrew the whole list. The redraw now happens once after a burst of answers (0.3 seconds after the first one), and item names are only requested for the professions in view (the profession filter limits the requests). The measured cost of one computation of the list is a few milliseconds on a desktop, so several hundred of them in a row were the lag.
 
 ## Trainers tab, 0.5.27-beta
 

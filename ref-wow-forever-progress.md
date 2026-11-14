@@ -450,3 +450,7 @@ Live log on 0.5.25: the Mining trainer (npc 5392) was recorded without an error,
 ## 0.5.27-beta, Trainers tab
 
 New tab Trainers (TrainerBrowser.lua, NpcSources.Trainers): all profession trainers with zone, coordinates and status, default list of trainers not visited yet, status and profession combo boxes, search over name, profession and zone, hover tooltip of what the trainer teaches and a map click that rings the trainer. Visited means a recorded trainer window, not only a merchant visit. Pending live check: the look of the eight tabs along the bottom (they may be wider than the window), the converted coordinates of unvisited trainers and the map click.
+
+## 0.5.28-beta, first opening of the recipes window
+
+Live report: the first opening after the game starts lags. Cause found by measurement: Unlearned() requests the names of about 550 vendor recipe items; each ITEM_DATA_LOAD_RESULT redrew the list (one computation takes about 6 ms in LuaJIT on a desktop, so hundreds of them add up). 0.5.28 coalesces the redraw (0.3 s after the first answer) and requests item names only for the professions in view. Pending live check of the first opening. The window construction itself and the item requests (about 550 at once on an All professions list) were not measured in game.
