@@ -1,6 +1,14 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.34-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.35-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Recipe reagent window redesigned, 0.5.35-beta
+
+- The window of /tgf recipe now has one line per reagent in columns: Need, Bags, Bank, Missing and Where to get it. The reagent name and the last column are green when the bags hold enough, yellow when enough is only in the bank (the line says how many to take) and red when it is missing (the line shows the best observed source, or says that none is recorded). Reagents with a count the client has not given are gray. The missing ones are listed first, then unknown, in the bank and ready; inside a group they follow the item name.
+- A headline says whether the planned crafts can be made (ready, enough but in the bank, only some, not yet) and a line counts the missing, in bank and ready reagents.
+- Fewer and More are replaced by - and + buttons beside a number box. Typing a number works up to a million, Shift adds or removes five.
+- 18 reagents fit on the screen instead of 6, because a reagent is one short line. Click a reagent still opens the observed sources, and hovering shows the item.
+- The bank column shows a dash when Display > Show bank counts is off, and the yellow state is not used then. The addon has no data about which reagents vendors sell, so it cannot mark a reagent as something to buy; it shows only sources observed by the player.
 
 ## Tab width measurement log removed, 0.5.34-beta
 

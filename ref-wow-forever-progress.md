@@ -478,3 +478,7 @@ navProbe on 0.5.32 at creation: every tab button 72 wide, text 52, string widths
 ## 0.5.34-beta, tab width log removed
 
 Live: after 0.5.33 the tabs of the first window are correct after a game restart. The navProbe diagnostic is removed. The tab width problem chain: the first Show of a new frame fires no OnShow (0.5.32), and the fixed 52 pixel text width made GetStringWidth report the cut text (0.5.33).
+
+## 0.5.35-beta, recipe reagent window redesigned
+
+CraftingView.lua rewritten: one line per reagent with columns Need, Bags, Bank, Missing and Where to get it, green, yellow, red states (ready, in the bank, missing), gray for unknown counts, missing first, - and + with a number box, 18 rows. Crafting.Compute rows gained bags, bank, state and fromBank, and the plan gained counts. Pending live check: the look of the colors and columns, the plus and minus buttons and the number box with real inventory and bank data.
