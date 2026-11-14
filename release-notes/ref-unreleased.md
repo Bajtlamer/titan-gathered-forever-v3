@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.32-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.33-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Tab widths: measure without the fixed text width, 0.5.33-beta
+
+- The measurement log of 0.5.32 showed the real reason: a new tab has a fixed text width of 52, so GetStringWidth only reports the cut text (about 50 for "Unlearned recipes") and every earlier resize used that wrong number. Re-showing the window repaired the tabs because the template measures again on its own then (text 94, tab 114). The fit now removes the fixed text width first and then measures. The measurement log stays one more version.
 
 ## Tab widths: the first show never fired, 0.5.32-beta
 

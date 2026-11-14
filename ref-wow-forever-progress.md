@@ -470,3 +470,7 @@ Live: 0.5.30 still shows cut tabs on the first window after a game start; hiding
 ## 0.5.32-beta, tab widths: first Show does not fire OnShow
 
 navProbe on 0.5.31 held a single show with correct widths (button = text + 20): the one logged show was the re-show after clicking another tab, which matches the report that the tabs are only repaired then. A frame is shown when created, so the first Show() fires no OnShow. 0.5.32 measures the tabs when they are created too. Pending live check on the first open after a game start; navProbe stays one more version and should then show a show-before line at creation time.
+
+## 0.5.33-beta, tab widths: unconstrained measurement
+
+navProbe on 0.5.32 at creation: every tab button 72 wide, text 52, string widths 49 to 53 (the cut text), unchanged by the resize at 0.1, 0.5 and 1.5 s. After hide and show: button 114, text 94, string 94. Cause: the tab text has a fixed width of 52 until the template resizes it, so GetStringWidth reports the cut text. 0.5.33 sets the text width to 0 before measuring. Pending live check on the first open after a game start.

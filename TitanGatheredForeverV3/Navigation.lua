@@ -100,6 +100,9 @@ local function panelTabs(window, id)
     local function fit()
         for _, b in ipairs(window.Tabs) do
             local label = labelOf(b)
+            -- Live measurement (navProbe): a new tab text has a fixed width of 52, so GetStringWidth only reports the
+            -- cut text ("Unlearn..." is about 50). Without the fixed width it reports the real 94.
+            if label and label.SetWidth then label:SetWidth(0) end
             local width = label and label.GetStringWidth and label:GetStringWidth()
             if type(width) ~= 'number' or width <= 0 then width = nil end
             if PanelTemplates_TabResize then pcall(PanelTemplates_TabResize, b, nil, nil, nil, nil, width) end
