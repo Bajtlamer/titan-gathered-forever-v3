@@ -147,6 +147,31 @@ test('a moved window is saved with its position and put back where it was left, 
     UIParent = nil
 end)
 
+test('every window gets a solid background behind its art and is raised by a click', function()
+    UIParent = {}
+    local ns = load()
+    ns.db = {}
+    local drawn = {}
+    local window = frame()
+    function window:CreateTexture(name, layer, template, sublevel)
+        local texture = { points = {} }
+        function texture:SetPoint(...) self.points[#self.points + 1] = { ... } end
+        function texture:SetColorTexture(r, g, b, a) self.color = { r, g, b, a } end
+        drawn[#drawn + 1] = { layer = layer, sublevel = sublevel, texture = texture }
+        return texture
+    end
+    function window:SetToplevel(value) self.toplevel = value end
+    function window:GetPoint() end
+    ns.Nav.Draggable(window, 'recipe')
+    eq(#drawn, 1); eq(drawn[1].layer, 'BACKGROUND'); eq(drawn[1].sublevel, -8)       -- under the template art
+    local texture = drawn[1].texture
+    eq(texture.color[4], 1)                                                           -- fully opaque
+    eq(texture.points[1][1], 'TOPLEFT'); eq(texture.points[2][1], 'BOTTOMRIGHT')
+    eq(window.toplevel, true); eq(window.solidBackground, texture)
+    local plain = frame(); ns.Nav.Solid(plain)                                        -- a frame without textures is left alone
+    UIParent = nil
+end)
+
 test('the tab windows share one saved position and take it over when they open', function()
     UIParent = {}
     local ns = load()

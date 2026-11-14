@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.44-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.45-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Opaque windows, 0.5.45-beta
+
+- The art of the window frame is partly transparent, so a window over another (the reagent window opened from the profit list, for example) showed the window below through it and the texts mixed. Every window now has a solid dark layer behind the frame art, and a click raises a window above the others; the reagent window also opens above the window that opened it. This covers the tabbed window, the reagent window, the export window and the icon appearance window (all go through Nav.Draggable).
 
 ## Crafting profit list, 0.5.44-beta
 

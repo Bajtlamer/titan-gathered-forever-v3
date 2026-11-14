@@ -11,7 +11,7 @@ local function frame()
  function f:GetText()return self.text end
  function f:HasFocus()return false end
  function f:CreateFontString()return region()end
- function f:CreateTexture()return{SetAllPoints=function()end,SetColorTexture=function()end}end
+ function f:CreateTexture()return{SetAllPoints=function()end,SetPoint=function()end,SetColorTexture=function()end}end
  function f:GetThumbTexture()return{SetSize=function()end}end
  function f:Show()self.shown=true end
  function f:Hide()self.shown=false end

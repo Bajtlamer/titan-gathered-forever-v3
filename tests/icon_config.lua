@@ -9,6 +9,7 @@ local function region()
  function t:SetText(text)self.text=text end
  function t:AddMaskTexture(mask)self.mask=mask end
  function t:RemoveMaskTexture()self.mask=nil end
+ function t:SetColorTexture()end
  function t:Show()self.shown=true end
  function t:Hide()self.shown=false end
  return t

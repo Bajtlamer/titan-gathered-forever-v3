@@ -86,8 +86,22 @@ function Nav.ResetPositions()
     Nav.point = nil
 end
 
+-- The art of a window frame is partly transparent, so windows that overlap showed through each other. A solid dark
+-- layer behind the art makes a window opaque, and a click raises a window above the others.
+function Nav.Solid(window)
+    if window.CreateTexture then
+        local background = window:CreateTexture(nil, 'BACKGROUND', nil, -8)
+        background:SetPoint('TOPLEFT', window, 'TOPLEFT', 3, -3)
+        background:SetPoint('BOTTOMRIGHT', window, 'BOTTOMRIGHT', -3, 3)
+        background:SetColorTexture(0.07, 0.07, 0.08, 1)
+        window.solidBackground = background
+    end
+    if window.SetToplevel then window:SetToplevel(true) end
+end
+
 -- Moving a window keeps the position; the dragging itself is the same for every window.
 function Nav.Draggable(window, key)
+    Nav.Solid(window)
     window:SetScript('OnDragStart', function(self) self:StartMoving() end)
     window:SetScript('OnDragStop', function(self) self:StopMovingOrSizing(); Nav.SavePosition(key, self) end)
     Nav.RestorePosition(key, window)

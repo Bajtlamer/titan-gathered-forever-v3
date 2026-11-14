@@ -518,3 +518,7 @@ AuctionScan stores every item of the scan (catalogue items with quantity and auc
 ## 0.5.44-beta, crafting profit list
 
 The recipe book (Data/RecipeBook.lua) comes from catalogue/forever-recipes.json: 1971 recipes (spell ID, product, profession, materials) of the client tables mirror for 1.60.1, complete = false. Profit.Rows prices every recipe through Economy.Product (vendor against auction after an assumed 5 percent fee; materials at the cheapest known price) with the number made from recipeMakes (one when unseen, flagged). KnownRecipes now also keeps the learned recipe IDs. ProfitBrowser is the tab Crafting profit. Pending live checks: the tab with real prices after a scan, My recipes after reading the professions (IDs against names), the number of recipes missing from the mirror compared with what the profession windows list, recipes whose product quantity is not one.
+
+## 0.5.45-beta, opaque windows
+
+Live report with screenshot: the reagent window opened over the profit tab showed the tab through it. Nav.Solid adds an opaque dark layer (BACKGROUND, sublevel -8) behind the frame art of every window (Nav.Draggable calls it) and SetToplevel; the reagent window raises itself on show. Pending live check: the look of the dark layer against the frame art (edge and title bar) and that a clicked window comes to the front.

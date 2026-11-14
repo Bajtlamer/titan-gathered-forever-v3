@@ -27,7 +27,7 @@ local function frame()
  function f:SetScript(k,fn)self.scripts[k]=fn end
  function f:SetText(v)self.text=v end
  function f:CreateFontString()return region()end
- function f:CreateTexture()return{SetAllPoints=function()end,SetColorTexture=function()end}end
+ function f:CreateTexture()return{SetAllPoints=function()end,SetPoint=function()end,SetColorTexture=function()end}end
  function f:GetThumbTexture()return{SetSize=function()end}end
  function f:SetValue(v)self.value=v end
  function f:GetText()return self.text or ''end

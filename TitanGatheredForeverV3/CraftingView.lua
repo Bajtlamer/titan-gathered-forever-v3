@@ -335,5 +335,6 @@ function View.Show(recipeID, operations)
     w.recipeID, w.operations, w.offset = recipeID, operations or 1, 0
     ns.Crafting.Select({ recipeID = recipeID })
     w:Show()
+    if w.Raise then w:Raise() end   -- above the tab window that may have opened it
     View.Refresh()
 end
