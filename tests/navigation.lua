@@ -74,11 +74,15 @@ test('tabs use the classic panel tab template and select the active tab', functi
     eq(#window.Tabs, 8); eq(window.Tabs[2].calls.SetID[1], 2)
     -- Tab widths are measured again when the window is shown, right away and a moment later.
     local resized, timers = 0, {}
-    PanelTemplates_TabResize = function() resized = resized + 1 end
+    local textWidth
+    PanelTemplates_TabResize = function(tab, _, _, _, _, width) resized = resized + 1; if tab == window.Tabs[1] then textWidth = width end end
+    window.Tabs[1].Text = { GetStringWidth = function() return 77 end }
     C_Timer = { After = function(_, fn) timers[#timers + 1] = fn end }
+    window.IsShown = function() return true end
     window.scripts.OnShow()
-    eq(resized, 8); eq(#timers, 1)
+    eq(resized, 8); eq(textWidth, 77); eq(#timers, 3)
     timers[1](); eq(resized, 16)
+    timers[3](); eq(resized, 24)
     PanelTemplates_TabResize, C_Timer = nil, nil
 end)
 
