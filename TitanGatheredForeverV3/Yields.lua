@@ -36,6 +36,14 @@ function Yields.Worth(items)
     return value, unpriced
 end
 
+-- The gathering professions that are installed and switched on, in the order of Yields.kinds. Empty when the player
+-- has none of them, which every view of this data has to cope with.
+function Yields.Available()
+    local list = {}
+    for _, kind in ipairs(Yields.kinds) do if not hidden(kind) and (not ns.Catalog.modules or ns.Catalog.modules[kind]) then list[#list + 1] = kind end end
+    return list
+end
+
 -- Rows for the window: for every visible gathering profession two summary lines and its most collected items.
 -- sort is 'quantity' or 'value'. A row is { summary = true, text } or { itemID, quantity, share, unit, source, value }.
 function Yields.Rows(character, filter, sort)

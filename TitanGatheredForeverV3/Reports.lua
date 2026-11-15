@@ -110,6 +110,14 @@ local contentTop,contentBottom=132,510
 local function viewMode(window)
     return window.mode=='actions' and window.view and window.view~='summary' and 'yield' or window.mode
 end
+-- The gathered views show one profession at a time: the filter is always one of the available gathering professions
+-- (the first one when it was empty or is gone), and nil when the player has none.
+local function gatheredFilter(window)
+    local available=ns.Yields and ns.Yields.Available()or{}
+    for _,kind in ipairs(available)do if window.filter==kind then return available end end
+    window.filter=available[1]
+    return available
+end
 -- Moves the header and the cells of a window to the columns of its current view.
 local function layoutCells(window)
     local layout=layouts[viewMode(window)]
@@ -351,7 +359,8 @@ function Reports.Update(window)
             {label='Addon tracked deaths, total',value=stats.deaths and stats.deaths.total or 0},
             {label='Addon tracking coverage begins',value=coverage}}
     elseif viewMode(window)=='yield' then
-        rows=ns.Yields and ns.Yields.Rows(character,window.filter,window.view)or{}
+        gatheredFilter(window)
+        rows=window.filter and ns.Yields and ns.Yields.Rows(character,window.filter,window.view)or{}
     else rows,metadata=Reports.Rows(window.mode,character,window.filter)end
     rows=Reports.Search(window.mode,rows,window.searchText)
     if window.mode=='chances' and window.grouped then rows=Reports.GroupByItem(rows)end
@@ -373,7 +382,8 @@ function Reports.Update(window)
     window.empty:SetText(#rows==0 and (window.searchText and window.searchText~=''and'Nothing matches this search.'
         or window.mode=='reagentUsage'and'No supported reagent use is recorded in this coverage period.'
         or window.mode=='production'and'No recipe operations recorded for this view. Earlier inventory cannot reconstruct production.'
-        or viewMode(window)=='yield' and 'Nothing gathered is recorded for this view. Earlier loot history cannot be split by profession.'
+        or viewMode(window)=='yield' and(window.filter==nil and 'No gathering profession (Mining, Herbalism, Skinning, Fishing) is installed or switched on.'
+            or'Nothing gathered is recorded for this profession. Earlier loot history cannot be split by profession.')
         or window.mode=='actions' and 'No actions recorded for this view. Earlier loot history cannot reconstruct actions.'
         or 'No recorded observations for this view yet. History starts with this version.')or'')
     Reports.Draw(window)
@@ -450,7 +460,10 @@ function Reports.Show(mode)
         end,function()return w.combined and true or false end,function(value)w.combined=value or nil;w.offset=0;Reports.Update(w)end)
         w.filterButton=ns.Nav.Dropdown(w,175,-65,190,function()
             local list={{value=false,label='All professions'}}
-            if mode=='actions' then
+            if mode=='actions' and viewMode(w)=='yield' then
+                list={}      -- one profession at a time in the gathered views, there is no combined entry
+                for _,id in ipairs(gatheredFilter(w))do list[#list+1]={value=id,label=labels[id]}end
+            elseif mode=='actions' then
                 for _,id in ipairs({'Mining','Herbs','Skinning','Fishing','Enchanting'}) do if not hidden(id)then list[#list+1]={value=id,label=labels[id]}end end
             elseif mode=='production'then
                 local kinds={};for kind in pairs(ns.Production.labels)do kinds[#kinds+1]=kind end;table.sort(kinds)
@@ -468,7 +481,7 @@ function Reports.Show(mode)
             end,function()return w.view end,function(value)
                 w.view=value;w.offset=0;layoutCells(w)
                 w.note:SetText(value=='summary'and ACTIONS_NOTE
-                    or'Items from complete loot windows of each gathering profession, valued at the better of the vendor price and the auction price after the fee. A rate per hour uses only the active time that is measured, with the items collected in that time. Click an item for its sources.')
+                    or'Items from complete loot windows of the chosen gathering profession, valued at the better of the vendor price and the auction price after the fee. A rate per hour uses only the active time that is measured, with the items collected in that time. Click an item for its sources.')
                 Reports.Update(w)
             end)
         end

@@ -150,7 +150,7 @@ test('actions report shows coverage and counts without item interactions',functi
 end)
 test('the actions window can show what was gathered and what it is worth',function()
  ns.Economy={Coin=function(copper)return copper..'c'end}
- ns.Yields={Rows=function(character,filter,sort)
+ ns.Yields={Available=function()return ns.available or{'Mining','Fishing'}end,Rows=function(character,filter,sort)
   ns.Yields.last={filter=filter,sort=sort}
   return{{summary=true,title=true,kind='Mining',text='Mining',gold=true},{summary=true,kind='Mining',text='Mining: 5 completed, 12 items collected, worth 90c'},
    {summary=true,kind='Mining',text='Active time 10 min'},
@@ -164,8 +164,12 @@ test('the actions window can show what was gathered and what it is worth',functi
  eq(w.rows[4].cells[2].text,'10');eq(w.rows[4].cells[3].text,'83.3%');eq(w.rows[4].cells[4].text,'5c');eq(w.rows[4].cells[5].text,'50c');eq(w.rows[4].cells[6].text,'vendor')
  eq(w.rows[5].cells[4].text,'No price');eq(w.rows[5].cells[5].text,'Unknown')
  assert(w.note.text:find('valued at',1,true))
- w.filter='Mining';ns.Reports.Update(w);eq(ns.Yields.last.filter,'Mining')
- pick(w.group,'Actions summary');eq(w.headers[1].text,'Profession');eq(w.headers[8].text,'Recording began');assert(w.note.text:find('gaps',1,true))
+ eq(w.filter,'Mining')                                        -- the first available profession, never a combined entry
+ w.filter='Fishing';ns.Reports.Update(w);eq(ns.Yields.last.filter,'Fishing')
+ w.filter='Herbs';ns.Reports.Update(w);eq(w.filter,'Mining')       -- a profession that is gone falls back to the first one
+ ns.available={};ns.Reports.Update(w);eq(w.filter,nil);eq(w.rows[1]:IsShown(),false)
+ assert(w.empty.text:find('No gathering profession',1,true));ns.available=nil;ns.Reports.Update(w);eq(w.filter,'Mining')
+ w.filter=nil;pick(w.group,'Actions summary');eq(w.headers[1].text,'Profession');eq(w.headers[8].text,'Recording began');assert(w.note.text:find('gaps',1,true))
  w.filter=nil;ns.Economy,ns.Yields=nil,nil
 end)
 test('production report distinguishes completions matched results and explicit flag denominators',function()
@@ -397,5 +401,17 @@ test('data of a profession that is not installed or is switched off stays out of
  history=ids(ns.Reports.Rows('history','a'));assert(not history[2770],'a hidden profession item stays hidden even though its module lists it')
  ns.Catalog.Modules=function()return{{id='Cooking',label='Cooking'}}end
  ns.Catalog.Hidden=nil;ns.history,ns.production,ns.actions=previousHistory,previousProduction,previousActions
+end)
+test('every report copes with a player who has no profession addon installed',function()
+ local modules,hiddenKind=ns.Catalog.Modules,ns.Catalog.Hidden
+ ns.Catalog.Modules=function()return{}end;ns.Catalog.Hidden=function()return true end
+ ns.Yields={Available=function()return{}end,Rows=function()return{}end};ns.Economy={Coin=function(c)return c..'c'end}
+ for _,mode in ipairs({'history','chances','production','actions','reagentUsage'})do
+  ns.Reports.Show(mode);local w=ns.Reports.windows[mode];assert(w:IsShown(),mode)
+ end
+ local w=ns.Reports.windows.actions;pick(w.group,'Gathered, most items')
+ eq(w.filter,nil);eq(w.rows[1]:IsShown(),false);assert(w.empty.text:find('No gathering profession',1,true))
+ pick(w.group,'Actions summary')
+ ns.Catalog.Modules,ns.Catalog.Hidden=modules,hiddenKind;ns.Yields,ns.Economy=nil,nil
 end)
 print('PASS '..passed..' history/report window checks')

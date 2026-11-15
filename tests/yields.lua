@@ -50,6 +50,16 @@ test('rows list the most collected items with value, share and unpriced counts',
     eq(rows[7].itemID, 3)
 end)
 
+test('the available gathering professions follow the installed and switched on ones', function()
+    local ns = fresh({ hidden = { Herbs = true, Skinning = true, Enchanting = true } })
+    ns.Catalog.modules = { Mining = {}, Fishing = {}, Herbs = {} }
+    local list = ns.Yields.Available()
+    eq(#list, 2); eq(list[1], 'Mining'); eq(list[2], 'Fishing')
+    ns = fresh({ hidden = { Mining = true, Herbs = true, Skinning = true, Fishing = true, Enchanting = true } })
+    eq(#ns.Yields.Available(), 0)
+    eq(#ns.Yields.Rows(nil, nil, 'quantity'), 0)             -- no profession: nothing to list and no error
+end)
+
 test('a blank row separates one profession from the next', function()
     local ns = fresh({ vendor = prices.vendor, auction = prices.auction, rates = rates })
     local rows, spacers, titles = ns.Yields.Rows(nil, nil, 'quantity'), 0, 0

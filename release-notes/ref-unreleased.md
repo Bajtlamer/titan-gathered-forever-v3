@@ -1,6 +1,11 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.78-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.79-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## One gathering profession at a time, 0.5.79-beta
+
+- The gathered views of the Profession actions window show one profession per page. The profession box lists only the installed and switched on gathering professions (no All professions entry there), starts with the first one, and falls back to the first one when the chosen profession is switched off or gone. The Actions summary view keeps All professions.
+- A player without any gathering profession gets the message No gathering profession (Mining, Herbalism, Skinning, Fishing) is installed or switched on instead of an empty page, and a test opens every report with no profession addon installed.
 
 ## Green dates and a gap before the item list, 0.5.78-beta
 
