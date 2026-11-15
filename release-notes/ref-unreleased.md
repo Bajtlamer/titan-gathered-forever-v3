@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.64-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.65-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Own menu for the sea routes, 0.5.65-beta
+
+- The boat and zeppelin settings have their own Titan menu entry, Boat and zeppelin routes (Show routes on the map, and a Line style submenu with Thickness and Pattern). The Flight points menu keeps only its own switch again.
 
 ## Lines submenu, 0.5.64-beta
 

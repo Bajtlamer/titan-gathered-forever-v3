@@ -175,11 +175,12 @@ function Titan.Menu(owner)
             ns.settings.flightPoints = not ns.settings.flightPoints
             ns.FlightPaths.Update()
         end)
-        flights:CreateCheckbox('Show boat and zeppelin routes', function() return ns.settings.transportRoutes ~= false end, function()
+        local routes = root:CreateButton('Boat and zeppelin routes')
+        routes:CreateCheckbox('Show routes on the map', function() return ns.settings.transportRoutes ~= false end, function()
             ns.settings.transportRoutes = ns.settings.transportRoutes == false
             ns.Transport.Update()
         end)
-        local lines = flights:CreateButton('Lines')
+        local lines = routes:CreateButton('Line style')
         lines:CreateTitle('Thickness')
         lines:CreateCheckbox('Thin', function() return ns.settings.transportStyle ~= 'clear' end, function()
             ns.settings.transportStyle = 'thin'
