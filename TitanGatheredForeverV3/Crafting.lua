@@ -36,7 +36,20 @@ function Crafting.Read(recipeID)
     if not readable(schematic,{'recipeID','isRecraft','recipeType','reagentSlotSchematics'})or schematic.recipeID~=recipeID
         or schematic.isRecraft~=false or (schematic.recipeType~=1 and schematic.recipeType~=3)
         or not array(schematic.reagentSlotSchematics)then return end
-    return {recipeID=recipeID,name=info.name,learned=info.learned,kind=kind,slots=schematic.reagentSlotSchematics}
+    -- The product and how many one craft makes; both stay nil when the client does not give them.
+    local output,low,high
+    if readable(schematic,{'outputItemID','quantityMin','quantityMax'})and integer(schematic.outputItemID,2147483647)
+        and integer(schematic.quantityMin,1000)and integer(schematic.quantityMax,1000)and schematic.quantityMax>=schematic.quantityMin then
+        output,low,high=schematic.outputItemID,schematic.quantityMin,schematic.quantityMax
+    end
+    -- The number a craft makes is kept for the profit list, which otherwise assumes one.
+    local makes=output and ns.db and ns.db.recipeMakes
+    if type(makes)=='table'then
+        local saved=makes[recipeID]
+        if not saved or saved[1]~=low or saved[2]~=high then makes[recipeID]={low,high}end
+    end
+    return {recipeID=recipeID,name=info.name,learned=info.learned,kind=kind,slots=schematic.reagentSlotSchematics,
+        outputItemID=output,quantityMin=low,quantityMax=high}
 end
 function Crafting.Plan(recipeID,operations)
     local recipe=Crafting.Read(recipeID)
@@ -52,8 +65,9 @@ function Crafting.FixedReagents(recipe)
     for _,row in ipairs(plan.rows)do reagents[row.itemID]=row.perOperation end
     return reagents,true
 end
-function Crafting.Select(info,native)
-    Crafting.selectedID=nil
+-- The recipe ID a recipe info stands for: the highest learned rank for a native selection, nil when it cannot be
+-- resolved. Select stores it as the selected recipe; the context menu of the recipe list only reads it.
+function Crafting.Resolve(info,native)
     if native and readable(info,{'recipeID','nextRecipeID'})then
         if Professions and type(Professions.GetHighestLearnedRecipe)=='function'then
             local ok,highest=pcall(Professions.GetHighestLearnedRecipe,info)
@@ -61,7 +75,52 @@ function Crafting.Select(info,native)
             if highest then info=highest end
         elseif info.nextRecipeID~=nil then return end
     elseif native then return end
-    if readable(info,{'recipeID'})and integer(info.recipeID,2147483647)then Crafting.selectedID=info.recipeID end
+    if readable(info,{'recipeID'})and integer(info.recipeID,2147483647)then return info.recipeID end
+end
+function Crafting.Select(info,native)
+    Crafting.selectedID=Crafting.Resolve(info,native)
+end
+-- The name of a profession kind as the recipe book writes it.
+local labels={FirstAid='First Aid'}
+local HARVEST_STEP=40
+
+-- Reads the schematic of every recipe of an open profession (the IDs come from its recipe list) in small steps: Read
+-- keeps the number a craft makes, and a recipe that the recipe book lacks is kept with its product and materials, so
+-- the recipe table fills itself from the windows of the professions. Recipes that were read before are skipped.
+function Crafting.Harvest(ids)
+    if not ns.db or type(ids)~='table'then return 0 end
+    local book=ns.Catalog and ns.Catalog.Book()or{}
+    local makes,extra=ns.db.recipeMakes,ns.db.recipeExtra
+    local queue={}
+    for _,id in ipairs(ids)do
+        if integer(id,2147483647)and not(type(makes)=='table'and makes[id]and(book[id]or(type(extra)=='table'and extra[id])))then
+            queue[#queue+1]=id
+        end
+    end
+    local index=1
+    local function step()
+        local last=math.min(#queue,index+HARVEST_STEP-1)
+        for position=index,last do
+            local id=queue[position]
+            local recipe=Crafting.Read(id)
+            if recipe and recipe.outputItemID and not book[id]and type(extra)=='table'then
+                local reagents,supported=Crafting.FixedReagents(recipe)
+                if supported then
+                    local list={}
+                    for item,quantity in pairs(reagents)do list[#list+1]={item,quantity}end
+                    table.sort(list,function(a,b)return a[1]<b[1]end)
+                    extra[id]={out=recipe.outputItemID,kind=recipe.kind,profession=labels[recipe.kind]or recipe.kind,reagents=list}
+                    ns.Catalog.productCache=nil   -- the product joins the items of interest of the next auction scan
+                end
+            end
+        end
+        index=last+1
+        if index<=#queue then
+            if C_Timer and C_Timer.After then C_Timer.After(0,step)else step()end
+        end
+    end
+    if #queue>0 then step()end
+    return #queue
 end
 function Crafting.Initialize()
     if Crafting.registered or not EventRegistry or not EventRegistry.RegisterCallback then return end
@@ -78,6 +137,7 @@ function Crafting.Compute(recipe,inventory,showBank,operations)
     if not integer(operations)then p.error='Operations must be a whole number from 1 to 1000000.';return p end
     if not recipe or not array(recipe.slots)then p.error='Recipe reagent data is unavailable.';return p end
     p.recipeID,p.name,p.kind,p.learned=recipe.recipeID,recipe.name,recipe.kind,recipe.learned
+    p.outputItemID,p.quantityMin,p.quantityMax=recipe.outputItemID,recipe.quantityMin,recipe.quantityMax
     local quantities,indices={},{}
     for _,slot in ipairs(recipe.slots)do
         local valid=readable(slot,{'required','reagentType','slotIndex'})
@@ -97,25 +157,34 @@ function Crafting.Compute(recipe,inventory,showBank,operations)
         end
     end
     local limit=math.huge
+    p.counts={missing=0,bank=0,ready=0,unknown=0}
     for id,perOperation in pairs(quantities)do
         local ok,count=pcall(inventory.Get,inventory,id)
         if not ok or type(count)~='table'then count={}end
+        local itemUnknown=false
         local function amount(value,state)
             if (state~='current'and state~='cached')or type(value)~='number'or value<0 or value~=math.floor(value)or value==math.huge then
-                p.unknown=true;return 0
+                p.unknown=true;itemUnknown=true;return 0
             end
             if state=='cached'then p.cached=true end
             return value
         end
-        local available=amount(count.bags,count.bagsState)
+        local bags=amount(count.bags,count.bagsState)
+        local available,bank=bags,nil
         if showBank then
-            available=available+amount(count.bank,count.bankState)
+            bank=amount(count.bank,count.bankState)
+            available=available+bank
             if count.bankState=='cached'and type(count.bankObservedAt)=='number'then
                 p.bankObservedAt=math.min(p.bankObservedAt or count.bankObservedAt,count.bankObservedAt)
             end
         end
         local required=perOperation*operations
-        p.rows[#p.rows+1]={itemID=id,perOperation=perOperation,required=required,available=available,missing=math.max(0,required-available)}
+        -- ready: enough in the bags; bank: enough only with the bank; missing: not enough anywhere that is counted.
+        local state=itemUnknown and'unknown'or bags>=required and'ready'or available>=required and'bank'or'missing'
+        p.counts[state]=p.counts[state]+1
+        p.rows[#p.rows+1]={itemID=id,perOperation=perOperation,required=required,available=available,
+            missing=math.max(0,required-available),bags=bags,bank=bank,state=state,
+            fromBank=state=='bank'and required-bags or 0}
         limit=math.min(limit,math.floor(available/perOperation))
     end
     if #p.rows==0 then p.issues[#p.issues+1]='No complete fixed item-reagent requirements are available.'end

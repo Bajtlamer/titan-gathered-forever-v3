@@ -23,6 +23,18 @@ test('bank scope follows display selection and never leaks hidden bank quantitie
  local bags=ns.Crafting.Compute(recipe(),inv,false,1);eq(bags.craftable,1);eq(bags.cached,false);eq(bags.bankObservedAt,nil)
  local total=ns.Crafting.Compute(recipe(),inv,true,1);eq(total.craftable,5);eq(total.scope,'Bags + Bank');eq(total.cached,true);eq(total.bankObservedAt,100)
 end)
+test('each reagent is ready, in the bank, missing or unknown, with bags and bank counted apart',function()
+ local inv=inventory({[2672]=4,[159]=1},{[2672]=3,[159]=0},'current','current')
+ local p=ns.Crafting.Compute(recipe({slot(2672,2),slot(159,1,2)}),inv,true,3)   -- needs 6 of 2672 and 3 of 159
+ local by={};for _,row in ipairs(p.rows)do by[row.itemID]=row end
+ eq(by[2672].state,'bank');eq(by[2672].bags,4);eq(by[2672].bank,3);eq(by[2672].fromBank,2);eq(by[2672].missing,0)
+ eq(by[159].state,'missing');eq(by[159].missing,2);eq(by[159].fromBank,0)
+ eq(p.counts.bank,1);eq(p.counts.missing,1);eq(p.counts.ready,0);eq(p.counts.unknown,0)
+ local bagsOnly=ns.Crafting.Compute(recipe({slot(2672,2)}),inv,false,2)       -- 4 needed, 4 in the bags
+ eq(bagsOnly.rows[1].state,'ready');eq(bagsOnly.rows[1].bank,nil);eq(bagsOnly.counts.ready,1)
+ local unknown=ns.Crafting.Compute(recipe({slot(2672,2)}),inventory({},nil,'unknown'),false,1)
+ eq(unknown.rows[1].state,'unknown');eq(unknown.counts.unknown,1)
+end)
 test('repeated item slots are aggregated before determining capacity',function()
  local p=ns.Crafting.Compute(recipe({slot(2672,2),slot(2672,3,2)}),inventory({[2672]=9}),false,2)
  eq(#p.rows,1);eq(p.rows[1].perOperation,5);eq(p.rows[1].missing,1);eq(p.craftable,1)
@@ -109,6 +121,42 @@ end
 test('live schematics supply quantities even for an unlearned ordinary recipe',function()
  liveAPI();local r=ns.Crafting.Read(2536);eq(r.kind,'Cooking');eq(r.learned,false);eq(r.slots[1].quantityRequired,2)
  ns.inventory=inventory({[2672]=7});local p=ns.Crafting.Plan(2536,3);eq(p.craftable,3);eq(p.rows[1].required,6)
+end)
+test('the product and how many one craft makes come from the schematic and stay nil when unreadable',function()
+ liveAPI();local r=ns.Crafting.Read(2536);eq(r.outputItemID,nil);eq(r.quantityMin,nil)      -- the plain schematic has no product
+ local base=C_TradeSkillUI.GetRecipeSchematic
+ C_TradeSkillUI.GetRecipeSchematic=function(id,recraft)local t=base(id,recraft);t.outputItemID=5001;t.quantityMin=1;t.quantityMax=3;return t end
+ r=ns.Crafting.Read(2536);eq(r.outputItemID,5001);eq(r.quantityMin,1);eq(r.quantityMax,3)
+ ns.inventory=inventory({[2672]=7});local p=ns.Crafting.Plan(2536,1);eq(p.outputItemID,5001);eq(p.quantityMax,3)
+ C_TradeSkillUI.GetRecipeSchematic=function(id,recraft)local t=base(id,recraft);t.outputItemID=5001;t.quantityMin=3;t.quantityMax=1;return t end
+ r=ns.Crafting.Read(2536);eq(r.outputItemID,nil);assert(r.slots)                              -- a maximum below the minimum is not trusted
+ C_TradeSkillUI.GetRecipeSchematic=function(id,recraft)local t=base(id,recraft);t.outputItemID=secret;t.quantityMin=1;t.quantityMax=1;return t end
+ r=ns.Crafting.Read(2536);eq(r.outputItemID,nil);assert(r.slots)                              -- a protected value only loses the product
+end)
+test('harvesting reads a profession in steps, keeps the number made and records the recipes the book lacks',function()
+ liveAPI()
+ local base=C_TradeSkillUI.GetRecipeSchematic
+ C_TradeSkillUI.GetRecipeSchematic=function(id,recraft)local t=base(id,recraft);t.outputItemID=9000+id;t.quantityMin=1;t.quantityMax=2;return t end
+ ns.db={recipeMakes={},recipeExtra={}}
+ ns.Catalog.Book=function()return{[2536]={9536,'Cooking',{{2672,2}},'Cooking'}}end
+ local timers={}
+ C_Timer={After=function(_,fn)timers[#timers+1]=fn end}
+ local ids={2536,3000};for i=1,60 do ids[#ids+1]=4000+i end
+ eq(ns.Crafting.Harvest(ids),62)
+ eq(#timers,1)                                                          -- forty recipes now, the rest in the next step
+ eq(ns.db.recipeMakes[2536][2],2);assert(ns.db.recipeMakes[3000]);assert(ns.db.recipeMakes[4038]);eq(ns.db.recipeMakes[4039],nil)
+ eq(ns.db.recipeExtra[2536],nil)                                        -- a recipe of the book is not copied
+ local extra=ns.db.recipeExtra[3000]
+ eq(extra.out,12000);eq(extra.profession,'Cooking');eq(extra.kind,'Cooking');eq(extra.reagents[1][1],2672);eq(extra.reagents[1][2],2)
+ table.remove(timers,1)()
+ assert(ns.db.recipeMakes[4060]);eq(#timers,0);assert(ns.db.recipeExtra[4060])
+ eq(ns.Crafting.Harvest(ids),0)                                         -- read before: nothing to do
+ ids[#ids+1]=5000;eq(ns.Crafting.Harvest(ids),1)                        -- only the new one
+ C_Timer=nil;ns.db={recipeMakes={},recipeExtra={}}
+ eq(ns.Crafting.Harvest({6000,6001,6002}),3);assert(ns.db.recipeExtra[6002])   -- without timers everything is read at once
+ eq(ns.Crafting.Harvest(nil),0);eq(ns.Crafting.Harvest({'x',-1,0}),0)
+ ns.db=nil;eq(ns.Crafting.Harvest({1}),0)
+ C_TradeSkillUI.GetRecipeSchematic=base;ns.Catalog.Book=nil
 end)
 test('disabled and missing modules cannot supply a recipe estimate',function()
  liveAPI();ns.settings.categories.Cooking=false;eq(ns.Crafting.Read(2536),nil)

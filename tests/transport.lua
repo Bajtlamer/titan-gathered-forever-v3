@@ -1,0 +1,118 @@
+local tests = {}
+local function test(name, fn) tests[#tests + 1] = { name, fn } end
+local function eq(actual, expected) assert(actual == expected, 'expected ' .. tostring(expected) .. ', got ' .. tostring(actual)) end
+
+-- Map 1 is the world, maps 2 and 3 are continents inside it, maps 4 and 5 are zones of 2 and 3.
+local parents = { [2] = 1, [3] = 1, [4] = 2, [5] = 3 }
+local rects = { [2] = { 0, .5, 0, 1 }, [3] = { .5, 1, 0, 1 }, [4] = { .2, .4, .5, .75 }, [5] = { 0, .5, 0, .5 } }
+local function fresh(nodes)
+    local printed = {}
+    local ns = { db = {}, settings = {}, Print = function(text) printed[#printed + 1] = text end }
+    C_Map = {
+        GetMapInfo = function(id) return { parentMapID = parents[id] or 0 } end,
+        GetMapRectOnMap = function(id) local r = rects[id]; return r[1], r[2], r[3], r[4] end,
+    }
+    C_TaxiMap = nodes and { GetTaxiNodesForMap = function(id) return nodes[id] or {} end } or nil
+    ns.IsPublic = function() return true end
+    assert(loadfile('TitanGatheredForeverV3/Transport.lua'))('TitanGatheredForeverV3', ns)
+    return ns, printed
+end
+
+test('a point is carried up through the parent maps', function()
+    local ns = fresh()
+    local x, y = ns.Transport.ToMap(4, .5, .5, 1)
+    assert(math.abs(x - (.5 * (.2 + .5 * .2))) < 1e-9 and math.abs(y - (.5 + .5 * .25) * 1) < 1e-9, x .. ' ' .. y)
+    eq(select(1, ns.Transport.ToMap(4, .5, .5, 4)), .5)
+    eq(ns.Transport.ToMap(4, .5, .5, 3), nil)               -- not an ancestor
+end)
+
+test('dock names match by unique prefix and refuse ambiguity', function()
+    local ns = fresh()
+    eq(ns.Transport.Match('menethil'), 'Menethil Harbor')
+    eq(ns.Transport.Match('  BOOTY bay '), 'Booty Bay')
+    local name, problem = ns.Transport.Match('s'); eq(name, nil); eq(problem, 'ambiguous')
+    name, problem = ns.Transport.Match('zzz'); eq(problem, 'unknown')
+end)
+
+test('recording validates the position and stores the dock', function()
+    local ns = fresh()
+    eq(ns.Transport.Record('Auberdine', 1439, 1.5, .2), false)
+    eq(ns.Transport.Record('Auberdine', 1439, .4, .2), true)
+    eq(ns.Transport.Dock('Auberdine').map, 1439)
+    ns.Transport.Forget('Auberdine'); eq(ns.Transport.Dock('Auberdine'), nil)
+end)
+
+test('a route is a line only on a map that holds both docks, a dock is a point on its own map', function()
+    local ns = fresh()
+    ns.Transport.Record('Auberdine', 5, .5, .5); ns.Transport.Record('Menethil Harbor', 4, .5, .5)
+    local points, lines = ns.Transport.Layout(1)
+    assert(points['Auberdine'] and points['Menethil Harbor']); eq(#lines, 1); eq(lines[1].route[3], 'Alliance')
+    points, lines = ns.Transport.Layout(5)
+    assert(points['Auberdine']); eq(points['Menethil Harbor'], nil); eq(#lines, 0)
+    eq(#points['Auberdine'].routes, 4)                      -- Stormwind, Menethil, Southshore and Rut'theran routes name it
+end)
+
+test('a route is an arc that bends the same way every time and ends at both docks', function()
+    local ns = fresh()
+    local curve = ns.Transport.Curve(0, 0, 100, 0, 'A|B')
+    eq(#curve, 49); eq(curve[1][1], 0); assert(math.abs(curve[49][1] - 100) < 1e-9)
+    local top = 0
+    for _, point in ipairs(curve) do if math.abs(point[2]) > math.abs(top) then top = point[2] end end
+    assert(math.abs(top) > 5, 'the arc must not be straight')
+    eq(ns.Transport.Curve(0, 0, 100, 0, 'A|B')[25][2], curve[25][2])
+    eq(#ns.Transport.Curve(5, 5, 5, 5, 'A|B'), 1)
+end)
+
+test('the line style falls back to thin and clear is stronger', function()
+    local ns = fresh()
+    eq(ns.Transport.Style('x').thickness, 1)
+    assert(ns.Transport.Style('clear').thickness > ns.Transport.Style('thin').thickness)
+    eq(ns.Transport.Style('clear').alpha, 1)
+end)
+
+test('dashes follow the polyline with gaps and stay bounded', function()
+    local ns = fresh()
+    local d = ns.Transport.Dashes({ { 0, 0 }, { 100, 0 } }, 5, 5)
+    eq(#d, 10); eq(d[1][1], 0); eq(d[1][3], 5); eq(d[2][1], 10)
+    local bent = ns.Transport.Dashes({ { 0, 0 }, { 3, 0 }, { 3, 8 } }, 5, 5)   -- a dash may turn a corner
+    eq(#bent, 3)
+    assert(#ns.Transport.Dashes({ { 0, 0 }, { 1e6, 0 } }, 5, 5) <= 600)
+end)
+
+test('an unrecorded dock is estimated from the flight point of its town and a recording wins', function()
+    local function node(name, x, y) return { name = name, position = { GetXY = function() return x, y end } } end
+    parents[2], parents[3] = 1, 1
+    local ns = fresh({ [2] = { node('Booty Bay, Stranglethorn Vale', .5, .5), node('Other', .1, .1) },
+        [3] = { node('Ratchet, The Barrens', .5, .25) } })
+    ns.Transport.continents = { 2, 3 }
+    eq(ns.Transport.Estimate('Booty Bay').estimated, true); eq(ns.Transport.Estimate('Booty Bay').map, 2)
+    eq(ns.Transport.Estimate('Steamwheedle Port'), nil)
+    local points, lines = ns.Transport.Layout(1)
+    assert(points['Booty Bay'] and points['Ratchet']); eq(#lines, 1); eq(points['Ratchet'].estimated, true)
+    ns.Transport.Record('Ratchet', 3, .6, .3)
+    eq(ns.Transport.Dock('Ratchet').estimated, nil); eq(ns.Transport.Dock('Ratchet').x, .6)
+end)
+
+test('a solid line has a piece per sample segment', function()
+    local ns = fresh()
+    local solid = ns.Transport.Solid({ { 0, 0 }, { 1, 1 }, { 2, 0 } })
+    eq(#solid, 2); eq(solid[2][1], 1); eq(solid[2][4], 0)
+    eq(#ns.Transport.Solid(ns.Transport.Curve(0, 0, 100, 0, 'A|B')), 48)
+end)
+
+test('the dock command lists, records and forgets', function()
+    local ns, printed = fresh()
+    C_Map.GetBestMapForUnit = function() return 5 end
+    C_Map.GetPlayerMapPosition = function() return { GetXY = function() return .25, .75 end } end
+    ns.Transport.Command('rut')
+    assert(printed[#printed]:find('Recorded'), printed[#printed]); eq(ns.Transport.Dock("Rut'theran Village").y, .75)
+    ns.Transport.Command(''); assert(printed[#printed]:find('1 of 15'), printed[#printed])
+    ns.Transport.Command('forget rut'); eq(ns.Transport.Dock("Rut'theran Village"), nil)
+    ns.Transport.Command('s'); assert(printed[#printed]:find('More than one'))
+end)
+
+for _, entry in ipairs(tests) do
+    local ok, err = pcall(entry[2])
+    if not ok then error(entry[1] .. ': ' .. tostring(err), 0) end
+end
+print('PASS transport ' .. #tests .. ' checks')

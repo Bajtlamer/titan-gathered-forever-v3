@@ -9,6 +9,7 @@ local function region()
  function t:SetText(text)self.text=text end
  function t:AddMaskTexture(mask)self.mask=mask end
  function t:RemoveMaskTexture()self.mask=nil end
+ function t:SetColorTexture()end
  function t:Show()self.shown=true end
  function t:Hide()self.shown=false end
  return t
@@ -36,6 +37,7 @@ local refreshes={world=0,minimap=0,flight=0}
 local ns={settings={},Map={Update=function()refreshes.world=refreshes.world+1 end},
  Minimap={Update=function()refreshes.minimap=refreshes.minimap+1 end},FlightPaths={Update=function()refreshes.flight=refreshes.flight+1 end}}
 assert(loadfile('TitanGatheredForeverV3/PinStyle.lua'))('TGF',ns)
+assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TGF',ns)
 local load=loadfile('TitanGatheredForeverV3/IconConfig.lua');assert(load,'Icon appearance window is not implemented');load('TGF',ns)
 local function click(button)button.scripts.OnClick(button)end
 

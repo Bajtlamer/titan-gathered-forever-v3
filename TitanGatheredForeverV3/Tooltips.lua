@@ -14,7 +14,7 @@ end
 function Tooltips.BankObservation(count)
     if not ns.settings.showBank then return nil end
     if count.bankState == 'cached' and count.bankObservedAt then
-        return string.format(ns.L.bankObserved, date('%Y-%m-%d %H:%M', count.bankObservedAt))
+        return string.format(ns.L.bankObserved, ns.Style.Date(date('%Y-%m-%d %H:%M', count.bankObservedAt)))
     end
 end
 
@@ -33,6 +33,44 @@ function Tooltips.CountValues(count)
     return Tooltips.ShowCount(count.bags) and ns.Style.Count(count.bags, 'bags') or ''
 end
 
+-- Whether the item has a price from the last auction scan and the player wants prices in tooltips.
+function Tooltips.HasPrice(itemID)
+    if not ns.settings or ns.settings.auctionTooltips == false or not ns.AuctionScan then return false end
+    return (ns.AuctionScan.Price(itemID)) ~= nil
+end
+
+-- The lowest buyout of the last auction scan per unit, what the items held here are worth at it, what a vendor pays
+-- and which of the two leaves more, and how old the scan is.
+function Tooltips.PriceLines(itemID, counts, lines, note, rule)
+    if not Tooltips.HasPrice(itemID) then return end
+    local price, scannedAt = ns.AuctionScan.Price(itemID)
+    local function coin(copper)
+        return ns.NpcSources and ns.NpcSources.CoinIcons(copper) or (tostring(copper) .. 'c')
+    end
+    if rule then lines[#lines + 1] = false end   -- a rule before the price, when other lines come first
+    lines[#lines + 1] = ns.Style.Text(ns.Style.gold, 'Auction: ') .. coin(price.min) .. ns.Style.Text(ns.Style.gray, ' each')
+    local held = counts.bags + (ns.settings.showBank and counts.bank or 0)
+    if held > 0 then
+        lines[#lines + 1] = ns.Style.Text(ns.Style.gold, 'Worth: ') .. coin(price.min * held)
+            .. ns.Style.Text(ns.Style.gray, string.format(' for %d at this price', held))
+    end
+    local vendor = ns.Economy and ns.Economy.VendorSell(itemID)
+    if vendor then
+        local net = ns.Economy.Net(price.min)
+        local verdict
+        if net >= vendor then
+            verdict = string.format(' (the auction house leaves %.1fx as much after its fee)', net / vendor)
+        else
+            verdict = ' (more than the auction house leaves after its fee)'
+        end
+        lines[#lines + 1] = ns.Style.Text(ns.Style.gold, 'Vendor pays: ') .. coin(vendor) .. ns.Style.Text(ns.Style.gray, verdict)
+    end
+    local age = scannedAt and time and ns.AuctionScan.Age(math.max(0, time() - scannedAt)) or 'earlier'
+    local quantity = price.qty and string.format(' (%d items)', price.qty) or ''
+    note(ns.Style.Text(ns.Style.gray, string.format('Lowest buyout of %d %s%s, scanned %s. Scan prices at the auction house.',
+        price.n or 0, (price.n or 0) == 1 and 'auction' or 'auctions', quantity, age)))
+end
+
 function Tooltips.Lines(itemID)
     local record = ns.Catalog.Get(itemID)
     if not ns.inventory then return {} end
@@ -40,7 +78,13 @@ function Tooltips.Lines(itemID)
     local crafted=ns.production and ns.production:Total(character,itemID)or 0
     local reagent,plan
     if ns.Crafting then reagent,plan=ns.Crafting.Context(itemID)end
-    if not record and (not ns.history or ns.history:Total(character, itemID) == 0)and crafted==0 and not reagent then return {} end
+    if not record and (not ns.history or ns.history:Total(character, itemID) == 0)and crafted==0 and not reagent then
+        -- Not a profession item: only the price, when there is one.
+        local only, onlyNotes = {}, {}
+        local function onlyNote(value) only[#only + 1] = value; onlyNotes[#only] = true end
+        Tooltips.PriceLines(itemID, Tooltips.DisplayCounts(ns.inventory:Get(itemID)), only, onlyNote, false)
+        return only, onlyNotes
+    end
     record = record or { professions = {}, recipes = {}, recipeCounts = {}, uses = {} }
     local lines, notes = {}, {}
     local function note(value)
@@ -80,6 +124,7 @@ function Tooltips.Lines(itemID)
     end
     local observation = Tooltips.BankObservation(observed)
     if observation then note(ns.Style.Text(ns.Style.gray, observation)) end
+    Tooltips.PriceLines(itemID, counts, lines, note, true)
     if reagent then
         lines[#lines+1]=false
         lines[#lines+1]=ns.Style.Text(ns.Style.violet,string.format('For %s: %d per operation; missing %d (%s)',
@@ -127,7 +172,8 @@ function Tooltips.Append(tooltip, data)
         or not data or not ns.IsPublic(data.id) or type(data.id) ~= 'number'
         or (not ns.Catalog.Get(data.id) and (not ns.history or ns.history:Total((ns.characterID or UnitGUID('player')), data.id) == 0)
             and (not ns.production or ns.production:Total((ns.characterID or UnitGUID('player')),data.id)==0)
-            and (not ns.Crafting or not ns.Crafting.Context(data.id))) then return end
+            and (not ns.Crafting or not ns.Crafting.Context(data.id))
+            and not Tooltips.HasPrice(data.id)) then return end
     if tooltip.IsForbidden and tooltip:IsForbidden() then return end
     if not tooltip.tgForeverHooked then
         tooltip:HookScript('OnTooltipCleared', function(self) self.tgForeverItemID = nil end)
@@ -144,6 +190,66 @@ function Tooltips.Append(tooltip, data)
     end
 end
 
+-- Object IDs are matched only to mining sources observed in saved history.
+-- Tooltip names and ore item IDs are not reliable game-object identities.
+function Tooltips.AppendObject(tooltip, data)
+    if not ns.settings or not ns.settings.historyTooltips or not ns.history or type(data) ~= 'table'
+        or (tooltip.IsForbidden and tooltip:IsForbidden()) then return end
+    if not ns.IsPublic(data.id) or not ns.IsPublic(data.guid) then return end
+    local id = data.id
+    if type(data.guid) == 'string' then
+        local entry = data.guid:match('^GameObject%-%d+%-%d+%-%d+%-%d+%-(%d+)%-')
+        if not entry then return end
+        entry = tonumber(entry)
+        if id ~= nil and id ~= entry then return end
+        id = entry
+    end
+    if type(id) ~= 'number' or id <= 0 or id ~= math.floor(id) or id == math.huge then return end
+    local source, known = tostring(id), false
+    for _, character in pairs(ns.history.saved.characters) do
+        for _, group in pairs(character.groups) do
+            if group.kind == 'Mining' and tostring(group.source) == source then known = true; break end
+        end
+        if known then break end
+    end
+    if not known then return end
+    local mapID = C_Map and C_Map.GetBestMapForUnit and C_Map.GetBestMapForUnit('player')
+    local _, context = IsInInstance()
+    if not ns.IsPublic(mapID) or type(mapID) ~= 'number' or not ns.IsPublic(context)
+        or type(context) ~= 'string' then return end
+    local key = source .. ':' .. mapID .. ':' .. context
+    if tooltip.tgfMiningSource == key then return end
+    if not tooltip.tgfMiningHooked then
+        tooltip:HookScript('OnTooltipCleared', function(self) self.tgfMiningSource = nil end)
+        tooltip.tgfMiningHooked = true
+    end
+    tooltip.tgfMiningSource = key
+    ns.Style.Separator(tooltip)
+    tooltip:AddLine(ns.Style.Text(ns.Style.gold, 'TGF observed mining drops'))
+    local rows, trials = {}, 0
+    for _, row in ipairs(ns.history:Rates(ns.characterID or UnitGUID('player'))) do
+        if row.kind == 'Mining' and tostring(row.source) == source and row.mapID == mapID
+            and (row.instanceType or 'none') == context then
+            rows[#rows + 1] = row
+            trials = math.max(trials, row.trials)
+        end
+    end
+    if #rows == 0 then
+        ns.Style.Note(tooltip, 'Drop chances: Unknown; no complete mining loot samples for this character and zone.')
+        return
+    end
+    tooltip:AddLine(string.format('Complete mining loot samples: %d', trials))
+    for _, row in ipairs(rows) do
+        tooltip:AddLine(string.format('%s: %.1f%% (%d / %d samples); %d items',
+            ns.Style.ItemName(row.itemID), row.percent, row.hits, row.trials, row.quantity), 1, 1, 1, true)
+    end
+    ns.Style.Separator(tooltip)
+    ns.Style.Note(tooltip, 'Observed for this source and zone; samples are loot operations, not depleted veins.')
+end
+
 function Tooltips.Initialize()
     TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, Tooltips.Append)
+    if Enum.TooltipDataType.Object then
+        TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Object, Tooltips.AppendObject)
+    end
 end

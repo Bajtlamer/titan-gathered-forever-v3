@@ -6,8 +6,8 @@ Titan Gathered Forever v3 targets WoW Forever 1.60.1, interface 16001, with Tita
 
 - TitanGatheredForeverV3/ contains the shared runtime, English localization, generated metadata and required artwork. Its .toc loads Lua in the declared order.
 - Twelve profession addons and a separate Auction Items addon publish compact catalogue records. Preserve their exact folder/manifest names and dependencies on Titan and the shared core.
-- catalogue/, tools/, tests/, release-notes/ and prefixed Markdown documents live at repository root. Runtime folders contain only manifest-loaded code and allowlisted artwork. Keep private archives, generated distributions, SavedVariables and temporary files out of Git.
-- Follow the user's document prefixes: plan-, ref-, book-, Codex-, budget-, bom- and tmp-. Temporary tmp-* files must be ignored and deleted after use. Avoid emoji, decorative glyphs and em dashes.
+- catalogue/, tools/, tests/, release-notes/ and the ref- and book- Markdown documents live at repository root; every plan- document lives in plans/. Runtime folders contain only manifest-loaded code and allowlisted artwork. Keep private archives, generated distributions, SavedVariables and temporary files out of Git.
+- Follow the user's document prefixes: plan-, ref-, book-, Codex-, budget-, bom- and tmp-. Every plan-* document lives in plans/ and nowhere else (not in the repository root); ref-, book- and release notes stay where they are. Temporary tmp-* files must be ignored and deleted after use. Avoid emoji, decorative glyphs and em dashes.
 
 ## Development and verification
 
@@ -28,9 +28,15 @@ Preserve existing settings, acquired/produced statistics, per-character coverage
 
 ## Documentation, commits and review
 
-README.md describes current behavior, plan-next-development.md is the continuation roadmap, ref-wow-forever-progress.md records current status/history, and release-notes/ref-unreleased.md records changes since published versioned notes. Historical plans preserve original execution evidence; clearly mark superseded designs.
+Commit messages and pull request descriptions carry no attribution to an AI tool: no Co-Authored-By trailer and no "Generated with" line. The owner does not want an assistant listed as a contributor. Check a message before committing.
+
+README.md describes current behavior, plans/plan-live-verification-and-optimization.md is the continuation plan (live checks and the optimization backlog; plans/plan-next-development.md keeps the older milestone status), ref-wow-forever-progress.md records current status/history, and release-notes/ref-unreleased.md records changes since published versioned notes. Historical plans preserve original execution evidence; clearly mark superseded designs.
 
 Run checks appropriate to changes and document live reproduction/results separately from automated validation. Before source publication, inspect staged files for private data and ignored artifacts. Use concise imperative commit subjects. PR descriptions should state behavior, affected modules, validation and remaining live/client limitations. Do not claim a source push publishes release assets or updates hosting.
+
+## Text and price style in every window
+
+Informational text (notes, summaries, footers, labels) is small and gold; product data is white or colored by meaning, so the two never run together. Prices always use the game money format with gold, silver and copper icons (ns.Economy.Coin, ns.NpcSources.CoinIcons), never plain "1g 2s" text. A label with a colon and its value, and the numbers inside a sentence, are told apart: Style.Label for the words, Style.Value for the data, Style.Range for "Showing a-b of n", and Style.Date (green) for every date or time of day. Check every new string against this and sweep the neighbouring windows. Tests that compare such text use tests/style_stub.lua.
 
 ## Automatic Live Installation
 
@@ -44,3 +50,7 @@ The user explicitly authorizes installing every completed addon update and new v
 - This authorization is for the local game installation. It does not authorize publishing releases, pushing commits or changing hosting.
 
 The matching editor rule is `.cursor/rules/automatic-live-install.mdc`.
+
+## Version every completed update
+
+The user requires a version increment for every completed addon update or improvement. Increment the patch version while retaining the current beta suffix until a different release stage is requested. The project left alpha at 0.5.0-beta; earlier 0.4.x-alpha versions are historical. Synchronize the shared core manifest, generator VERSION and all generated profession manifests before checks, installation and packaging. A source-only edit/test iteration or documentation evidence commit is not a separate deployed update. Website versions are independent and increment for each completed website update. Do not silently overwrite an existing versioned download set with different runtime bytes.

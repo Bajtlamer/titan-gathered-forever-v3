@@ -18,9 +18,11 @@ end
 function Catalog.RegisterModule(module)
     assert(type(module) == 'table' and type(module.id) == 'string'
         and type(module.label) == 'string' and type(module.items) == 'table'
-        and type(module.recipes) == 'table', 'Invalid Gathered profession module')
+        and type(module.recipes) == 'table' and (module.book == nil or type(module.book) == 'table'),
+        'Invalid Gathered profession module')
     assert(not Catalog.modules[module.id], 'Duplicate Gathered profession module')
     Catalog.modules[module.id] = module
+    Catalog.bookCache, Catalog.productCache = nil, nil
     if ns.settings then
         Catalog.Rebuild(ns.settings)
         if ns.UpdateGathering then ns.UpdateGathering() end
@@ -29,6 +31,7 @@ function Catalog.RegisterModule(module)
 end
 
 function Catalog.Rebuild(settings)
+    Catalog.bookCache, Catalog.productCache = nil, nil
     local items, recipes, ids, seen = {}, {}, {}, {}
     local categories = settings.categories or {}
     for _, module in ipairs(Catalog.Modules()) do
@@ -88,4 +91,77 @@ end
 
 function Catalog.List()
     return Catalog.ids
+end
+
+-- Everything below works with the profession addons that are installed and switched on, and nothing else: a player
+-- who installed only Engineering carries the recipes, prices and pins of Engineering only.
+
+-- Whether the addon of a profession (a module id such as Engineering or FirstAid) is installed and not switched off.
+function Catalog.Installed(kind)
+    if not Catalog.modules[kind] then return false end
+    local categories = ns.settings and ns.settings.categories
+    return not categories or categories[kind] ~= false
+end
+
+-- The professions of the game, installed or not. Data recorded for one of them that is not installed or is switched
+-- off stays in the saved variables but is left out of the reports.
+Catalog.professionKinds = { Alchemy = true, Blacksmithing = true, Cooking = true, Enchanting = true, Engineering = true,
+    FirstAid = true, Fishing = true, Herbs = true, Leatherworking = true, Mining = true, Skinning = true, Tailoring = true }
+function Catalog.Hidden(kind)
+    return Catalog.professionKinds[kind] == true and not Catalog.Installed(kind)
+end
+
+-- The modules of the installed professions, by label.
+function Catalog.InstalledKinds()
+    local result = {}
+    for _, module in ipairs(Catalog.Modules()) do
+        if Catalog.Installed(module.id) then result[#result + 1] = module.id end
+    end
+    return result
+end
+
+local labelKinds = { ['First Aid'] = 'FirstAid', Herbalism = 'Herbs' }
+-- The module id of a profession written in words.
+function Catalog.KindOfLabel(label) return labelKinds[label] or label end
+
+-- The recipes of the installed professions by recipe ID: { product, kind, { { item, quantity }, ... }, label }.
+function Catalog.Book()
+    if Catalog.bookCache then return Catalog.bookCache end
+    local book = {}
+    for _, module in ipairs(Catalog.Modules()) do
+        if module.book and Catalog.Installed(module.id) then
+            for recipeID, recipe in pairs(module.book) do
+                book[recipeID] = { recipe[1], module.id, recipe[2], module.label }
+            end
+        end
+    end
+    Catalog.bookCache = book
+    return book
+end
+
+-- Recipes of an installed profession that the books lack and the profession windows showed (Crafting.Harvest keeps
+-- them in the saved variables): { product, kind, reagents, label } by recipe ID, never one that the books have.
+function Catalog.ExtraRecipes()
+    local result = {}
+    local extra = ns.db and ns.db.recipeExtra
+    if type(extra) ~= 'table' then return result end
+    local book = Catalog.Book()
+    for recipeID, recipe in pairs(extra) do
+        if not book[recipeID] and type(recipe) == 'table' and recipe.out and recipe.profession and recipe.reagents then
+            local kind = recipe.kind or Catalog.KindOfLabel(recipe.profession)
+            if Catalog.Installed(kind) then result[recipeID] = { recipe.out, kind, recipe.reagents, recipe.profession } end
+        end
+    end
+    return result
+end
+
+-- The products of the recipes of the installed professions (the books and the recipes taken from the windows), as a set.
+function Catalog.IsProduct(itemID)
+    if not Catalog.productCache then
+        local set = {}
+        for _, recipe in pairs(Catalog.Book()) do set[recipe[1]] = true end
+        for _, recipe in pairs(Catalog.ExtraRecipes()) do set[recipe[1]] = true end
+        Catalog.productCache = set
+    end
+    return Catalog.productCache[itemID] == true
 end

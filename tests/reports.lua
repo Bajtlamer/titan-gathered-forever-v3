@@ -19,7 +19,7 @@ local function region()
 end
 local function frame()
  local f={scripts={},shown=false,TitleText=region()}
- for _,m in ipairs({'SetClampedToScreen','SetMovable','EnableMouse','RegisterForDrag','StartMoving','StopMovingOrSizing'})do f[m]=function()end end
+ for _,m in ipairs({'SetClampedToScreen','SetMovable','EnableMouse','RegisterForDrag','StartMoving','StopMovingOrSizing','SetOrientation','SetMinMaxValues','SetValueStep','SetObeyStepOnDrag','SetThumbTexture','EnableMouseWheel','SetColorTexture','SetAllPoints','SetAutoFocus','ClearFocus'})do f[m]=function()end end
  function f:SetSize(w,h)self.width,self.height=w,h end
  function f:SetHeight(h)self.height=h end
  function f:ClearAllPoints()self.point=nil end
@@ -27,6 +27,10 @@ local function frame()
  function f:SetScript(k,fn)self.scripts[k]=fn end
  function f:SetText(v)self.text=v end
  function f:CreateFontString()return region()end
+ function f:CreateTexture()local t={shown=true};for _,m in ipairs({'SetAllPoints','SetPoint','SetColorTexture','SetHeight'})do t[m]=function()end end;function t:Show()self.shown=true end;function t:Hide()self.shown=false end;return t end
+ function f:GetThumbTexture()return{SetSize=function()end}end
+ function f:SetValue(v)self.value=v end
+ function f:GetText()return self.text or ''end
  function f:Show()self.shown=true end
  function f:Hide()self.shown=false end
  function f:IsShown()return self.shown end
@@ -34,11 +38,17 @@ local function frame()
 end
 CreateFrame=function()return frame()end;UIParent=frame();UISpecialFrames={};UnitGUID=function()return'a'end
 C_Map={GetMapInfo=function(id)return{name='Zone '..id}end};GameTooltip={SetOwner=function()end,SetItemByID=function(self,id)self.item=id end,Show=function()end,Hide=function()end}
+local function pick(control,label)
+ local previous=MenuUtil;local actions={}
+ MenuUtil={CreateContextMenu=function(owner,fn)fn(owner,{CreateButton=function(_,l,cb)actions[l]=cb end})end}
+ control.scripts.OnClick(control);MenuUtil=previous;actions[label]()
+end
 local ns={ItemName=function(id)return'Item '..id end,Style={ItemName=function(id)return'Item '..id end},Catalog={modules={Cooking={label='Cooking',items={[769]=true}}}}}
 ns.Style.MenuNote=function(root,value)return root:CreateTitle(value)end
+dofile('tests/style_stub.lua')(ns.Style)
 ns.Production={labels={Tailoring='Tailoring',FirstAid='First Aid'}}
 ns.Catalog.Modules=function()return{{id='Cooking',label='Cooking'}}end
-assert(loadfile('TitanGatheredForeverV3/History.lua'))('TGF v3',ns);assert(loadfile('TitanGatheredForeverV3/Reports.lua'))('TGF v3',ns)
+assert(loadfile('TitanGatheredForeverV3/History.lua'))('TGF v3',ns);assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TGF v3',ns);assert(loadfile('TitanGatheredForeverV3/Reports.lua'))('TGF v3',ns)
 ns.history=ns.History.New({})
 local function seed(char,id,item,qty)
  ns.history:Observe(char,char,{id=id,kind='Loot',source='123',mapID=1,x=.4,y=.6,at=100,complete=true,items={[item]=qty}})
@@ -51,18 +61,18 @@ test('switching reports hides previous content and preserves independent scope a
  ns.Reports.Show('history');assert(h:IsShown()and not c:IsShown())
  eq(_G.height,nil)
  eq(h.rows[1].cells[2].text,'2')
- h.scope.scripts.OnClick();eq(h.rows[1].cells[2].text,'5');eq(h.rows[1].cells[3].text,'Loot - Zone 1: 100.0% (2/2)');eq(c.combined,nil)
+ pick(h.scope,'All characters');eq(h.rows[1].cells[2].text,'5');eq(h.rows[1].cells[3].text,'1 source');eq(c.combined,nil)
  h.filter='Cooking';ns.Reports.Update(h)
  ns.Reports.Show('chances');eq(c.rows[1].cells[2].text,'100.0%');eq(c.rows[1].cells[3].text,'1 / 1')
  ns.Reports.Show('history');eq(h.filter,'Cooking');eq(h.combined,true);eq(h.rows[1].cells[2].text,'5')
- h.filter=nil;h.scope.scripts.OnClick();eq(#UISpecialFrames,2)
+ h.filter=nil;pick(h.scope,'This character');eq(#UISpecialFrames,2)
 end)
 test('lifetime values replace the last location with observed source chances',function()
  local w=ns.Reports.windows.history
- eq(w.headers[2].text,'Lifetime obtained');eq(w.headers[3].text,'Observed drop chance');eq(w.headers[4],nil)
+ eq(w.headers[2].text,'Lifetime obtained');eq(w.headers[3].text,'Observed source');eq(w.headers[4].text,'Chance');eq(w.headers[5].text,'Hits / samples')
  local r=w.rows[1]
  eq(r.cells[1].text,'Item 769');eq(r.cells[2].text,'2')
- eq(r.cells[3].text,'Loot - Zone 1: 100.0% (1/1)')
+ eq(r.cells[3].text,'1 source')
  assert(r.cells[3].point[4]>300);assert(r.height<37)
 end)
 test('global reagent report shows leading profession share and opens full breakdown',function()
@@ -77,8 +87,8 @@ test('global reagent report shows leading profession share and opens full breakd
  assert(w:IsShown()and not ns.Reports.windows.history:IsShown())
  eq(w.rows[1].cells[1].text,'Item 159');eq(w.rows[1].cells[2].text,'100')
  eq(w.rows[1].cells[3].text,'Tailoring');eq(w.rows[1].cells[4].text,'75.0%')
- assert(w.note.text:find('Coverage since 100',1,true));assert(w.note.text:find('2 completed recipes',1,true))
- w.scope.scripts.OnClick();eq(selected,nil);eq(w.scope.text,'All characters')
+ assert(w.note.text:find('Coverage since '..ns.Style.Date('100'),1,true));assert(w.note.text:find('2 completed recipes',1,true))
+ pick(w.scope,'All characters');eq(selected,nil);eq(w.scope.text,'All characters')
  local previousMenu=MenuUtil;local titles={};MenuUtil={CreateContextMenu=function(_,fn)
   fn({}, {CreateTitle=function(_,value)titles[#titles+1]=value end,SetScrollMode=function()end})
  end}
@@ -90,7 +100,7 @@ test('lifetime obtained quantity includes the item crafted output total',functio
  ns.production={Totals=function()return{{itemID=769,quantity=12},{itemID=2680,quantity=7}}end}
  ns.Reports.Show('history');local w=ns.Reports.windows.history
  eq(w.headers[2].text,'Lifetime obtained')
- eq(w.headers[3].text,'Observed drop chance');eq(w.headers[4],nil)
+ eq(w.headers[3].text,'Observed source');eq(w.headers[4].text,'Chance');eq(w.headers[5].text,'Hits / samples')
  local rows={};for _,row in ipairs(w.rows)do if row.data then rows[row.data.itemID]=row end end
  eq(rows[769].cells[2].text,'14')
  eq(rows[2680].cells[2].text,'7')
@@ -102,7 +112,7 @@ test('lifetime list shows quantities without an extra source occurrence counter'
   groups={old={kind='Loot',source='123',mapID=1,trials=1,items={[769]={hits=1,quantity=2}}}}}}})
  ns.Reports.Show('history');local w=ns.Reports.windows.history
  eq(w.rows[1].cells[2].text,'8');eq(w.rows[2].cells[2].text,'3')
- eq(w.headers[3].text,'Observed drop chance')
+ eq(w.headers[3].text,'Observed source')
  ns.history=previous;ns.Reports.Update(w)
 end)
 test('report rows filter by consuming profession and source kind',function()
@@ -110,7 +120,7 @@ test('report rows filter by consuming profession and source kind',function()
  eq(#ns.Reports.Rows('history','a','Mining'),0)
 end)
 test('paging bounds and empty views do not display stale rows',function()
- local h=ns.Reports.windows.history;h.page=99;ns.Reports.Update(h);eq(h.page,1)
+ local h=ns.Reports.windows.history;h.offset=99;ns.Reports.Update(h);eq(h.offset,0)
  h.filter='Mining';ns.Reports.Update(h);eq(h.rows[1]:IsShown(),false);assert(h.empty.text~='')
  h.filter=nil;ns.Reports.Update(h);eq(h.rows[1]:IsShown(),true)
 end)
@@ -135,8 +145,32 @@ test('actions report shows coverage and counts without item interactions',functi
  eq(cells[4].text,'0');eq(cells[5].text,'0');eq(cells[6].text,'0');eq(cells[7].text,'0')
  assert(cells[8].text~='');assert(w.note.text:find('gaps',1,true))
  GameTooltip.item=nil;w.rows[1].scripts.OnEnter(w.rows[1]);eq(GameTooltip.item,nil)
- w.scope.scripts.OnClick();eq(cells[2].text,'2');eq(cells[4].text,'1')
+ pick(w.scope,'All characters');eq(cells[2].text,'2');eq(cells[4].text,'1')
  w.filter='Cooking';ns.Reports.Update(w);eq(w.rows[1]:IsShown(),false)
+end)
+test('the actions window can show what was gathered and what it is worth',function()
+ ns.Economy={Coin=function(copper)return copper..'c'end}
+ ns.Yields={Available=function()return ns.available or{'Mining','Fishing'}end,Rows=function(character,filter,sort)
+  ns.Yields.last={filter=filter,sort=sort}
+  return{{summary=true,title=true,kind='Mining',text='Mining',gold=true},{summary=true,kind='Mining',text='Mining: 5 completed, 12 items collected, worth 90c'},
+   {summary=true,kind='Mining',text='Active time 10 min'},
+   {itemID=769,kind='Mining',quantity=10,share=83.3,unit=5,value=50,source='vendor'},
+   {itemID=770,kind='Mining',quantity=2,share=16.7,unit=nil,value=nil}}
+ end}
+ ns.Reports.Show('actions');local w=ns.Reports.windows.actions
+ pick(w.group,'Gathered, most valuable')
+ eq(ns.Yields.last.sort,'value');eq(w.headers[1].text,'Item');eq(w.headers[5].text,'Total value');eq(w.headers[7].text,'')
+ eq(w.rows[1].cells[1].text,ns.Style.Text(ns.Style.gold,'Mining'));assert(w.rows[2].cells[1].text:find('Mining: 5 completed',1,true));eq(w.rows[2].cells[2].text,'')
+ eq(w.rows[4].cells[2].text,'10');eq(w.rows[4].cells[3].text,'83.3%');eq(w.rows[4].cells[4].text,'5c');eq(w.rows[4].cells[5].text,'50c');eq(w.rows[4].cells[6].text,'vendor')
+ eq(w.rows[5].cells[4].text,'No price');eq(w.rows[5].cells[5].text,'Unknown')
+ assert(w.note.text:find('valued at',1,true))
+ eq(w.filter,'Mining')                                        -- the first available profession, never a combined entry
+ w.filter='Fishing';ns.Reports.Update(w);eq(ns.Yields.last.filter,'Fishing')
+ w.filter='Herbs';ns.Reports.Update(w);eq(w.filter,'Mining')       -- a profession that is gone falls back to the first one
+ ns.available={};ns.Reports.Update(w);eq(w.filter,nil);eq(w.rows[1]:IsShown(),false)
+ assert(w.empty.text:find('No gathering profession',1,true));ns.available=nil;ns.Reports.Update(w);eq(w.filter,'Mining')
+ w.filter=nil;pick(w.group,'Actions summary');eq(w.headers[1].text,'Profession');eq(w.headers[8].text,'Recording began');assert(w.note.text:find('gaps',1,true))
+ w.filter=nil;ns.Economy,ns.Yields=nil,nil
 end)
 test('production report distinguishes completions matched results and explicit flag denominators',function()
  assert(loadfile('TitanGatheredForeverV3/Production.lua'))('TGF v3',ns)
@@ -148,7 +182,7 @@ test('production report distinguishes completions matched results and explicit f
   ns.production:Cast('UNIT_SPELLCAST_SUCCEEDED','player','c'..i,2500+i)
   ns.production:Result({operationID=i,itemID=2680,itemGUID='Item-output',quantity=2,firstCraftReward=false,isEnchant=false,bonusCraft=false,multicraft=0})
  end
- ns.Reports.Show('production');local w=ns.Reports.windows.production;assert(w and w:IsShown());eq(#w.rows,16)
+ ns.Reports.Show('production');local w=ns.Reports.windows.production;assert(w and w:IsShown());eq(#w.rows,18)
  assert(not ns.Reports.windows.actions:IsShown())
  assert(w.rows[1].name.text:find('Cook 2501',1,true));eq(w.rows[1].cells[2].text,'1');eq(w.rows[1].cells[3].text,'1')
  eq(w.rows[1].cells[4].text,'100.0%');eq(w.rows[1].cells[5].text,'1')
@@ -170,7 +204,7 @@ test('crafted-only lifetime rows show the total without inventing a loot locatio
  assert(found);eq(found.cells[2].text,'12')
  eq(found.cells[3].text,'Unknown')
 end)
-test('wrapped report rows paginate without overlap lost entries or resetting another report page',function()
+test('wrapped report rows scroll without overlap lost entries or resetting another report scroll position',function()
  local original=ns.Reports.Rows
  local originalName=ns.Style.ItemName
  ns.Style.ItemName=function(id)return id==1 and string.rep('Long material name ',15)or originalName(id)end
@@ -179,29 +213,73 @@ test('wrapped report rows paginate without overlap lost entries or resetting ano
   sourceName=string.rep('Long creature name ',i==1 and 15 or 3),mapID=1}end
  ns.Reports.Rows=function(mode,...)if mode=='chances'then return rows end;return original(mode,...)end
  ns.Reports.Show('chances');local w=ns.Reports.windows.chances
- assert(w.rows[1].height>22)
- local total=tonumber(w.pageText.text:match('/ (%d+)'));assert(total>1)
- local seen={};local count=0
- for page=1,total do
-  w.page=page;ns.Reports.Update(w)
+ assert(w.rows[1].height>22);assert(w.rangeText.text:find('35',1,true))
+ local seen={};local last=0
+ local offset=0
+ repeat
+  ns.Reports.ScrollTo(w,offset)
   local bottom=0
   for _,r in ipairs(w.rows)do if r:IsShown()then
    local top=-r.point[5]
    assert(top>=bottom);bottom=top+r.height;assert(bottom<=510)
-   assert(not seen[r.data.itemID]);seen[r.data.itemID]=true;count=count+1
+   seen[r.data.itemID]=true;last=r.data.itemID
    eq(r.cells[2].text,'25.0%');eq(r.cells[3].text,'1 / 4');eq(r.cells[4].text,tostring(r.data.quantity))
   end end
- end
- eq(count,35)
- ns.Reports.Show('history');assert(not w:IsShown())
- ns.Reports.Show('chances');eq(w.page,total)
- w.page=999;ns.Reports.Update(w);eq(w.page,total)
- w.page=-1;ns.Reports.Update(w);eq(w.page,1)
+  offset=offset+3
+ until offset>40
+ eq(last,35);local count=0;for _ in pairs(seen)do count=count+1 end;eq(count,35)
+ w.offset=7;ns.Reports.Show('history');assert(not w:IsShown())
+ ns.Reports.Show('chances');eq(w.offset,7)
+ ns.Reports.Scroll(w,-100);eq(w.offset,0)
+ ns.Reports.Scroll(w,1000);assert(w.offset>0 and w.offset<35);eq(w.slider.value,w.offset)
+ ns.Reports.ScrollTo(w,0)
  rows[1].sourceName=string.rep('Very long source ',500)
  ns.Reports.Update(w);assert(w.rows[1].height<=378)
- rows={};ns.Reports.Update(w);eq(w.page,1);eq(w.rows[1]:IsShown(),false);assert(w.empty.text~='')
+ rows={};ns.Reports.Update(w);eq(w.offset,0);eq(w.rows[1]:IsShown(),false);assert(w.empty.text~='');eq(w.rangeText.text,'No entries')
  ns.Reports.Rows=original
  ns.Style.ItemName=originalName
+end)
+test('search keeps matching names and clearing it restores the list',function()
+ local original=ns.Reports.Rows
+ local rows={}
+ for i=1,5 do rows[i]={itemID=i,quantity=i,percent=25,hits=1,trials=4,kind='Loot',source='123',sourceName='W',mapID=1}end
+ ns.Reports.Rows=function(mode,...)if mode=='chances'then return rows end;return original(mode,...)end
+ ns.Reports.Show('chances');local w=ns.Reports.windows.chances
+ w.search.scripts.OnTextChanged({GetText=function()return 'item 3'end},true)
+ eq(w.rows[1].data.itemID,3);eq(w.rows[2]:IsShown(),false);assert(w.rangeText.text:find(ns.Style.Value(1),1,true))
+ w.search.scripts.OnTextChanged({GetText=function()return 'nothing'end},true)
+ eq(w.rows[1]:IsShown(),false);eq(w.empty.text,'Nothing matches this search.')
+ w.search.scripts.OnTextChanged({GetText=function()return ''end},true)
+ assert(w.rows[5]:IsShown());eq(w.empty.text,'')
+ ns.Reports.Rows=original
+end)
+test('chances can be grouped by item with expandable sources',function()
+ local original=ns.Reports.Rows
+ local rows={
+  {itemID=7,quantity=2,percent=50,hits=1,trials=2,kind='Mining',source='1',mapID=1},
+  {itemID=7,quantity=3,percent=100,hits=1,trials=1,kind='Loot',source='2',sourceName='Wolf',mapID=1},
+  {itemID=8,quantity=1,percent=10,hits=1,trials=10,kind='Loot',source='3',sourceName='Bear',mapID=1}}
+ ns.Reports.Rows=function(mode,...)if mode=='chances'then return rows end;return original(mode,...)end
+ ns.Reports.Show('chances');local w=ns.Reports.windows.chances
+ eq(w.rows[3]:IsShown(),true);eq(w.group.text,'All sources')
+ pick(w.group,'Grouped by item')
+ eq(w.group.text,'Grouped by item');eq(w.rows[3]:IsShown(),false)
+ eq(w.rows[1].cells[4].text,'5');eq(w.rows[1].cells[5].text,'2 sources');eq(w.rows[2].cells[5].text,'1 source')
+ assert(w.rows[1].expand:IsShown())
+ w.rows[1].expand.scripts.OnClick(w.rows[1].expand)
+ eq(w.rows[2].data.sourceRate.kind,'Mining');eq(w.rows[2].cells[2].text,'50.0%');eq(w.rows[3].cells[3].text,'1 / 1')
+ eq(w.rows[4].data.itemID,8);assert(not w.rows[2].expand:IsShown())
+ pick(w.group,'All sources');eq(w.rows[3]:IsShown(),true);eq(w.rows[3].cells[1].text,'Item 8')
+ ns.Reports.Rows=original
+end)
+test('every tab window shares the strip position and replaces the others',function()
+ ns.Reports.Show('history');local h=ns.Reports.windows.history
+ eq(h.width,985);assert(h.tabButtons.pvp and h.tabButtons.recipes and h.tabButtons.chances)
+ h.tabButtons.chances.scripts.OnClick();assert(ns.Reports.windows.chances:IsShown()and not h:IsShown());eq(ns.Nav.last,'chances')
+ ns.Nav.Toggle();assert(not ns.Reports.windows.chances:IsShown())
+ ns.Nav.Toggle();assert(ns.Reports.windows.chances:IsShown())
+ h.GetPoint=function()return 'TOPLEFT',UIParent,'TOPLEFT',40,-50 end
+ h.scripts.OnDragStop(h);ns.Reports.Show('history');eq(h.point[1],'TOPLEFT');eq(h.point[4],40);eq(h.point[5],-50)
 end)
 test('PvP Board keeps client totals separate from addon tracked outdoor estimates and deaths',function()
  ns.pvp={Snapshot=function(_,character)
@@ -230,9 +308,110 @@ test('lifetime chances retain distinct source denominators and zero outcomes',fu
  ns.history:Observe('a','A',{id='no',kind='Mining',source='1',mapID=1,at=2,complete=true,items={}})
  ns.history:Observe('a','A',{id='other',kind='Loot',source='2',mapID=1,at=3,complete=true,items={[769]=1}})
  ns.Reports.Show('history');local w=ns.Reports.windows.history
- local value=w.rows[1].cells[3].text
- assert(value:find('Mining - Zone 1: 50.0% (1/2)',1,true))
- assert(value:find('Loot - Zone 1: 100.0% (1/1)',1,true))
+ eq(w.rows[1].cells[3].text,'2 sources')
+ local rates=w.rows[1].data.sources;eq(#rates,2)
+ local byKind={};for _,rate in ipairs(rates)do byKind[rate.kind]=rate end
+ eq(byKind.Mining.hits,1);eq(byKind.Mining.trials,2)
+ eq(byKind.Loot.hits,1);eq(byKind.Loot.trials,1)
  ns.history=previous;ns.Reports.Update(w)
+end)
+test('lifetime parent rows stay compact and expand independent source evidence',function()
+ local previous,production=ns.history,ns.production
+ ns.history=ns.History.New({});ns.production=nil
+ ns.history:Observe('a','A',{id='yes',kind='Mining',source='1',mapID=1,at=1,complete=true,items={[769]=4}})
+ ns.history:Observe('a','A',{id='no',kind='Mining',source='1',mapID=1,at=2,complete=true,items={}})
+ ns.history:Observe('a','A',{id='other',kind='Loot',source='2',mapID=1,at=3,complete=true,items={[769]=1}})
+ ns.Reports.Show('history');local w=ns.Reports.windows.history
+ w.combined=nil;w.filter=nil;w.page=1;w.expanded={};ns.Reports.Update(w)
+ local parent=w.rows[1]
+ eq(parent.cells[2].text,'5');eq(parent.cells[3].text,'2 sources')
+ assert(parent.expand:IsShown());eq(parent.expand.text,'+')
+ assert(parent.height<37);eq(w.rows[2]:IsShown(),false)
+ parent.expand.scripts.OnClick(parent.expand)
+ eq(parent.expand.text,'-');assert(w.rows[2]:IsShown()and w.rows[3]:IsShown())
+ local observed={}
+ for _,view in ipairs(w.rows)do if view.data and view.data.sourceRate then
+  observed[view.data.sourceRate.kind]={view.cells[4].text,view.cells[5].text}
+  eq(view.cells[1].text,'');eq(view.cells[2].text,'');assert(not view.expand:IsShown())
+ end end
+ eq(observed.Mining[1],'50.0%');eq(observed.Mining[2],'1 / 2')
+ eq(observed.Loot[1],'100.0%');eq(observed.Loot[2],'1 / 1')
+ ns.Reports.Show('chances');ns.Reports.Show('history');assert(w.expanded[769])
+ parent.expand.scripts.OnClick(parent.expand);eq(w.rows[2]:IsShown(),false)
+ eq(ns.history:Total('a',769),5)
+ ns.history,ns.production=previous,production;w.expanded={};ns.Reports.Update(w)
+end)
+test('expanded history scrolls through every source with no overlap',function()
+ local previous,production=ns.history,ns.production
+ ns.history=ns.History.New({});ns.production=nil
+ for i=1,50 do ns.history:Observe('a','A',{id='source'..i,kind='Loot',source=tostring(i),
+  sourceName=i==25 and string.rep('Very long source name ',150)or('Wolf '..i),mapID=1,at=i,complete=true,items={[769]=1}})end
+ ns.Reports.Show('history');local w=ns.Reports.windows.history
+ w.combined=nil;w.filter=nil;w.offset=0;w.expanded={[769]=true};ns.Reports.Update(w)
+ local seen={};local count=0
+ for offset=0,60 do
+  ns.Reports.ScrollTo(w,offset)
+  local bottom=132
+  for _,view in ipairs(w.rows)do if view:IsShown()then
+   local top=-view.point[5];assert(top>=bottom);bottom=top+view.height;assert(bottom<=510)
+   if view.data.sourceRate then
+    local id=view.data.sourceRate.source
+    if not seen[id]then seen[id]=true;count=count+1 end
+   end
+  end end
+ end
+ eq(count,50)
+ ns.Reports.ScrollTo(w,0);eq(w.rows[1].data.sourceRate,nil);eq(w.rows[1].cells[2].text,'50')
+ w.rows[1].expand.scripts.OnClick(w.rows[1].expand)
+ eq(w.offset,0);eq(w.rows[2]:IsShown(),false)
+ ns.history,ns.production=previous,production;w.expanded={};ns.Reports.Update(w)
+end)
+test('unknown chances have no expander and combined sources use summed trials',function()
+ local previous,production=ns.history,ns.production
+ ns.history=ns.History.New({});ns.production=nil
+ ns.history:Observe('a','A',{id='partial',kind='Loot',source='1',mapID=1,at=1,complete=false,items={[770]=2}})
+ ns.history:Observe('a','A',{id='hit-a',kind='Mining',source='2',mapID=1,at=2,complete=true,items={[769]=1}})
+ ns.history:Observe('b','B',{id='hit-b',kind='Mining',source='2',mapID=1,at=3,complete=true,items={[769]=1}})
+ ns.history:Observe('b','B',{id='miss-b',kind='Mining',source='2',mapID=1,at=4,complete=true,items={}})
+ ns.Reports.Show('history');local w=ns.Reports.windows.history
+ w.combined=nil;w.filter=nil;w.page=1;w.expanded={[769]=true};ns.Reports.Update(w)
+ eq(w.rows[2].cells[4].text,'100.0%');eq(w.rows[2].cells[5].text,'1 / 1')
+ local unknown=w.rows[3];eq(unknown.data.itemID,770);eq(unknown.cells[3].text,'Unknown');assert(not unknown.expand:IsShown())
+ pick(w.scope,'All characters');eq(w.rows[2].cells[4].text,'66.7%');eq(w.rows[2].cells[5].text,'2 / 3')
+ eq(w.rows[1].cells[2].text,'2');eq(w.rows[3].cells[2].text,'2')
+ ns.Reports.Show('chances');ns.Reports.Show('history');assert(w.expanded[769])
+ ns.history,ns.production=previous,production;w.combined=nil;w.expanded={};ns.Reports.Update(w)
+end)
+test('data of a profession that is not installed or is switched off stays out of the reports',function()
+ local previousHistory,previousProduction,previousActions=ns.history,ns.production,ns.actions
+ ns.history=ns.History.New({})
+ ns.history:Observe('a','a',{id='m',kind='Mining',source='9',mapID=1,x=.4,y=.6,at=100,complete=true,items={[2770]=3}})
+ ns.history:Observe('a','a',{id='l',kind='Loot',source='8',mapID=1,x=.4,y=.6,at=100,complete=true,items={[769]=1}})
+ ns.production={Totals=function()return{}end,Rows=function()return{{kind='Mining',outputs={}},{kind='Cooking',outputs={}}}end}
+ ns.actions={Rows=function()return{{kind='Mining'},{kind='Herbs'}}end}
+ local function ids(rows)local r={};for _,row in ipairs(rows)do r[row.itemID or row.kind]=true end;return r end
+ ns.Catalog.Hidden=nil
+ assert(ids(ns.Reports.Rows('history','a'))[2770] and ids(ns.Reports.Rows('chances','a'))[2770])
+ ns.Catalog.Hidden=function(kind)return kind=='Mining'end
+ local history=ids(ns.Reports.Rows('history','a'));assert(history[769] and not history[2770])
+ local chances=ids(ns.Reports.Rows('chances','a'));assert(chances[769] and not chances[2770])
+ local production=ids(ns.Reports.Rows('production','a'));assert(production.Cooking and not production.Mining)
+ local actions=ids(ns.Reports.Rows('actions','a'));assert(actions.Herbs and not actions.Mining)
+ ns.Catalog.Modules=function()return{{id='Cooking',label='Cooking',items={[769]=true}},{id='Mining',label='Mining',items={[2770]=true}}}end
+ history=ids(ns.Reports.Rows('history','a'));assert(not history[2770],'a hidden profession item stays hidden even though its module lists it')
+ ns.Catalog.Modules=function()return{{id='Cooking',label='Cooking'}}end
+ ns.Catalog.Hidden=nil;ns.history,ns.production,ns.actions=previousHistory,previousProduction,previousActions
+end)
+test('every report copes with a player who has no profession addon installed',function()
+ local modules,hiddenKind=ns.Catalog.Modules,ns.Catalog.Hidden
+ ns.Catalog.Modules=function()return{}end;ns.Catalog.Hidden=function()return true end
+ ns.Yields={Available=function()return{}end,Rows=function()return{}end};ns.Economy={Coin=function(c)return c..'c'end}
+ for _,mode in ipairs({'history','chances','production','actions','reagentUsage'})do
+  ns.Reports.Show(mode);local w=ns.Reports.windows[mode];assert(w:IsShown(),mode)
+ end
+ local w=ns.Reports.windows.actions;pick(w.group,'Gathered, most items')
+ eq(w.filter,nil);eq(w.rows[1]:IsShown(),false);assert(w.empty.text:find('No gathering profession',1,true))
+ pick(w.group,'Actions summary')
+ ns.Catalog.Modules,ns.Catalog.Hidden=modules,hiddenKind;ns.Yields,ns.Economy=nil,nil
 end)
 print('PASS '..passed..' history/report window checks')

@@ -38,7 +38,7 @@ C_Item = { GetItemIconByID = function(id) return id + 1000 end }
 GameTooltip = { SetOwner = function() end, AddLine = function() end, Show = function() end, Hide = function() end }
 local ns = { settings = { gatheringMap = true, mapMinimap = true }, IsPublic = function() return true end,
     Catalog = { modules = { Herbs = {} } },
-    Style = { ItemName = function(id) return 'Item ' .. id end } }
+    Style = { Separator = function(tooltip) tooltip:AddLine(' ') end, ItemName = function(id) return 'Item ' .. id end } }
 local nodes = { { mapID = 1412, itemID = 765, kind = 'Herbs', x = 0.55, y = 0.5, count = 1 } }
 ns.gathering = { List = function(_, mapID) return mapID == 1412 and nodes or {} end }
 assert(loadfile('TitanGatheredForeverV3/PinStyle.lua'))('TitanGatheredForeverV3', ns)
@@ -98,6 +98,9 @@ test('hovering a mapped material shows observed history without losing native to
     local pin=ns.Minimap.instance.pins[1];pin.scripts.OnEnter(pin)
     local found=false;for _,line in ipairs(lines)do if line:find('50.0%',1,true)then found=true end end
     assert(found)
+    local countFound=false
+    for _,line in ipairs(lines)do if line:find('Observed '..pin.node.count..' times',1,true)then countFound=true end end
+    assert(countFound,'Minimap hover omitted the saved gathering count')
 end)
 test('minimap appearance applies independently and large icons remain within its edge',function()
     ns.settings.iconAppearance={minimap={size=30,shape='square',border=false}}
@@ -131,5 +134,50 @@ test('outdoor PvP markers render and provide a tooltip without an item ID',funct
     pin.scripts.OnEnter(pin)
     local count=false;for _,line in ipairs(lines)do if line:find('3 honorable kills',1,true)then count=true end end
     assert(count,'PvP minimap tooltip omitted its total')
+end)
+test('trainer and recipe vendor pins use their own icons and tooltip',function()
+    local filled
+    ns.NpcSources={
+        Enabled=function()return true end,IsHighlighted=function()return false end,
+        List=function(mapID)
+            return {{kind='Trainer',npcID=7,mapID=mapID,x=.55,y=.5,profession='Alchemy'},
+                {kind='RecipeVendor',npcID=8,mapID=mapID,x=.55,y=.5,professions={Alchemy=true}}}
+        end,
+        FillTooltip=function(_,node)filled=node.npcID end}
+    state.x,state.y,state.radius,state.rotate=.5,.5,100,false
+    nodes={}
+    ns.Minimap.instance:Refresh()
+    local icons={}
+    for _,pin in ipairs(ns.Minimap.instance.pins)do if pin.shown then icons[pin.icon]=pin end end
+    local trainer=icons['Interface\\Icons\\INV_Misc_Book_11']
+    assert(trainer,'trainer pin missing')
+    assert(icons['Interface\\Icons\\INV_Scroll_03'],'vendor pin missing')
+    trainer.scripts.OnEnter(trainer)
+    assert(filled==7,'npc tooltip not used')
+    ns.settings.gatheringMap=false
+    ns.Minimap.instance:Refresh()
+    assert(ns.Minimap.instance.visibleCount==2,'npc pins must not depend on the gathering map switch')
+    ns.settings.gatheringMap=true
+    ns.NpcSources=nil
+    ns.Minimap.instance:Refresh()
+end)
+test('the highlighted npc pin on the minimap gets the gold ring',function()
+    local lit,real={},ns.PinStyle.Highlight
+    ns.PinStyle.Highlight=function(pin,on)lit[pin]=on end
+    ns.NpcSources={Enabled=function()return true end,IsHighlighted=function(id)return id==7 end,
+        List=function(mapID)
+            return {{kind='Trainer',npcID=7,mapID=mapID,x=.55,y=.5,profession='Alchemy'},
+                {kind='RecipeVendor',npcID=8,mapID=mapID,x=.55,y=.5,professions={Alchemy=true}}}
+        end,FillTooltip=function()end}
+    state.x,state.y,state.radius,state.rotate=.5,.5,100,false
+    nodes={}
+    ns.Minimap.instance:Refresh()
+    local ringed,plain=0,0
+    for _,pin in ipairs(ns.Minimap.instance.pins)do
+        if pin.shown and pin.node and pin.node.npcID==7 then assert(lit[pin]==true);ringed=ringed+1 end
+        if pin.shown and pin.node and pin.node.npcID==8 then assert(lit[pin]==false);plain=plain+1 end
+    end
+    assert(ringed==1 and plain==1)
+    ns.PinStyle.Highlight=real;ns.NpcSources=nil;ns.Minimap.instance:Refresh()
 end)
 print('PASS ' .. passed .. ' minimap icon projection, rotation, zoom, reuse and toggle checks')

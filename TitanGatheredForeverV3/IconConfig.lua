@@ -42,8 +42,7 @@ function View.Show(kind)
         if UISpecialFrames then table.insert(UISpecialFrames, name) end
         w:SetSize(430, 340); w:SetPoint('CENTER', UIParent, 'CENTER', 0, 0)
         w:SetClampedToScreen(true); w:SetMovable(true); w:EnableMouse(true); w:RegisterForDrag('LeftButton')
-        w:SetScript('OnDragStart', function(self) self:StartMoving() end)
-        w:SetScript('OnDragStop', function(self) self:StopMovingOrSizing() end)
+        ns.Nav.Draggable(w, 'icons')
         w:SetScript('OnHide', function(self) self.draft = nil end)
         w.TitleText:SetText('TGF v3 Icon appearance')
         w.groups = {}

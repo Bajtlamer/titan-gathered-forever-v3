@@ -1,9 +1,12 @@
 local _, ns = ...
 local PinStyle = {}
 ns.PinStyle = PinStyle
-local labels = { Mining = 'TGF v3 Mining spot', Herbs = 'TGF v3 Herbalism spot', Skinning = 'TGF v3 Skinning area', Fishing = 'TGF v3 Fishing spot', Rare = 'TGF v3 Rare loot', PvP = 'TGF v3 PvP kill spot' }
+local labels = { Mining = 'TGF v3 Mining spot', Herbs = 'TGF v3 Herbalism spot', Skinning = 'TGF v3 Skinning area', Fishing = 'TGF v3 Fishing spot', Rare = 'TGF v3 Rare loot', PvP = 'TGF v3 PvP kill spot',
+                Trainer = 'TGF v3 Profession trainer', RecipeVendor = 'TGF v3 Recipe vendor' }
+local historyNote = 'Source/zone observations, not a chance at this coordinate.'
 local icons = { Mining = 'Interface\\Icons\\Trade_Mining', Herbs = 'Interface\\Icons\\Trade_Herbalism',
-                Skinning = 'Interface\\Icons\\INV_Misc_Pelt_Wolf_01', PvP = 'Interface\\Icons\\INV_Sword_04' }
+                Skinning = 'Interface\\Icons\\INV_Misc_Pelt_Wolf_01', PvP = 'Interface\\Icons\\INV_Sword_04',
+                Trainer = 'Interface\\Icons\\INV_Misc_Book_11', RecipeVendor = 'Interface\\Icons\\INV_Scroll_03' }
 
 function PinStyle.Label(kind) return labels[kind] or ('TGF v3 ' .. kind .. ' material source') end
 function PinStyle.Icon(itemID, kind)
@@ -17,6 +20,31 @@ end
 function PinStyle.HistoryLines(node)
     local lines={}
     if node.kind == 'PvP' or not node.itemID then return lines end
+    if node.kind == 'Mining' then
+        local rates = ns.history and ns.history:Rates((ns.characterID or UnitGUID('player'))) or {}
+        local sources, order = {}, {}
+        for _, row in ipairs(rates) do
+            if row.itemID == node.itemID and row.kind == 'Mining' and row.mapID == node.mapID
+                and (row.instanceType or 'none') == 'none' then
+                local key = tostring(row.source)
+                if not sources[key] then sources[key] = row; order[#order + 1] = key end
+            end
+        end
+        for _, key in ipairs(order) do
+            local source = sources[key]
+            lines[#lines + 1] = ns.Reports.Source(source)
+            lines[#lines + 1] = string.format('Complete mining loot samples: %d', source.trials)
+            for _, row in ipairs(rates) do
+                if row.kind == 'Mining' and row.mapID == node.mapID and tostring(row.source) == key
+                    and (row.instanceType or 'none') == 'none' then
+                    lines[#lines + 1] = string.format('%s: %.1f%% (%d / %d samples); %d items',
+                        ns.Style.ItemName(row.itemID), row.percent, row.hits, row.trials, row.quantity)
+                end
+            end
+        end
+        if #order == 0 then lines[#lines + 1] = 'Drop chances: Unknown; no complete mining loot samples recorded.' end
+        return lines, #order > 0 and historyNote or nil
+    end
     if not ns.history or not ns.Reports then return lines end
     for _,row in ipairs(ns.history:Rates((ns.characterID or UnitGUID('player')),node.itemID))do
         if row.mapID==node.mapID and (row.kind==node.kind or row.kind=='Loot') then
@@ -24,8 +52,7 @@ function PinStyle.HistoryLines(node)
             if #lines==2 then break end
         end
     end
-    if #lines>0 then lines[#lines+1]='Source/zone observations, not a chance at this coordinate.'end
-    return lines
+    return lines, #lines > 0 and historyNote or nil
 end
 
 local defaults = {
@@ -105,6 +132,44 @@ function PinStyle.Apply(pin, kind, override)
         pin.texture:SetAllPoints(pin)
     end
     PinStyle.Texture(pin, pin.texture, PinStyle.Get(kind, override))
+end
+
+-- Marks a pin the player asked to find: three concentric red rings that pulse and form one thick band, and a
+-- frame level above the neighbouring pins. Switching it off restores the ordinary pin. The rings reuse the
+-- circle outline artwork.
+function PinStyle.Highlight(pin, on)
+    if not on then
+        if not pin.tgfRingOn then return end
+        pin.tgfRingOn = false
+        for _, ring in ipairs(pin.tgfRings) do ring:Hide() end
+        local parent = pin:GetParent()
+        pin:SetFrameLevel((parent and parent:GetFrameLevel() or 0) + 1)
+        pin:SetScript('OnUpdate', nil)
+        return
+    end
+    if not pin.tgfRings then
+        pin.tgfRings = {}
+        for index = 1, 3 do
+            local ring = pin:CreateTexture(nil, 'OVERLAY')
+            ring:SetTexture('Interface\\AddOns\\TitanGatheredForeverV3\\Artwork\\PinOutlineCircle.tga')
+            ring:SetVertexColor(1, 0.13, 0.13, 1)
+            ring:SetPoint('CENTER', pin, 'CENTER')
+            pin.tgfRings[index] = ring
+        end
+    end
+    local base = math.max(pin:GetWidth() * 1.7, 24)
+    for index, ring in ipairs(pin.tgfRings) do
+        local size = base + (index - 1) * 2.5
+        ring:SetSize(size, size)
+    end
+    for _, ring in ipairs(pin.tgfRings) do ring:Show() end
+    local parent = pin:GetParent()
+    pin:SetFrameLevel((parent and parent:GetFrameLevel() or 0) + 50)
+    pin:SetScript('OnUpdate', function()
+        local alpha = 0.65 + 0.35 * math.sin(GetTime() * 4)
+        for _, ring in ipairs(pin.tgfRings) do ring:SetAlpha(alpha) end
+    end)
+    pin.tgfRingOn = true
 end
 
 function PinStyle.RestoreNative(pin)

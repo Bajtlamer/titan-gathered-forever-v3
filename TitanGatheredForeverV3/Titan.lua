@@ -30,9 +30,9 @@ function Titan.Show(owner)
     tooltip:ClearLines()
     local skills = ns.Professions.Rows()
     if #skills > 0 then
-        tooltip:AddLine(ns.Style.Text(ns.Style.orange, 'Learned professions'))
+        tooltip:AddLine(ns.Style.Text(ns.Style.gold, 'Learned professions'))
         for _, skill in ipairs(skills) do
-            tooltip:AddDoubleLine(ns.Style.Text(ns.Style.gold, skill.name), ns.Style.Skill(skill.rank, skill.maxRank))
+            tooltip:AddDoubleLine(ns.Style.Text(ns.Style.SkillColor(skill.rank, skill.maxRank), skill.name), ns.Style.Skill(skill.rank, skill.maxRank))
         end
         ns.Style.Separator(tooltip)
     end
@@ -49,6 +49,7 @@ function Titan.Show(owner)
         tooltip:AddDoubleLine(ns.Style.ItemName(row.itemID), ns.Tooltips.CountValues(c), 1, 1, 1, 1, 1, 1)
     end
     if #rows == 0 then tooltip:AddLine(ns.L.noItems, 1, 1, 1, true) end
+    ns.Style.Separator(tooltip)
     local observation = ns.Tooltips.BankObservation(ns.inventory:Get(0))
     if observation then ns.Style.Note(tooltip, ns.Style.Text(ns.Style.gray, observation)) end
     if ns.inventory:Get(0).bagsState == 'cached' then
@@ -76,7 +77,7 @@ function Titan.ClearSpotsMenu(owner, world)
     if not ns.gathering then return end
     local mapID = world:GetMapID()
     MenuUtil.CreateContextMenu(owner, function(_, root)
-        root:CreateTitle(ns.Style.Text(ns.Style.orange, 'Clear saved TGF v3 spots'))
+        root:CreateTitle(ns.Style.Text(ns.Style.gold, 'Clear saved TGF v3 spots'))
         if not ns.IsPublic(mapID) or type(mapID) ~= 'number' or mapID <= 0 then
             root:CreateTitle('No map selected.'); return
         end
@@ -110,7 +111,7 @@ end
 function Titan.Menu(owner)
     Titan.Hide()
     MenuUtil.CreateContextMenu(owner, function(_, root)
-        root:CreateTitle(ns.Style.Text(ns.Style.orange, ns.L.title))
+        root:CreateTitle(ns.Style.Text(ns.Style.gold, ns.L.title))
         local display = root:CreateButton('Display')
         local function toggle(parent, label, key)
             parent:CreateCheckbox(label, function() return ns.settings[key] end, function()
@@ -126,11 +127,29 @@ function Titan.Menu(owner)
             ns.ScheduleRefresh()
             Titan.Refresh()
         end)
+        display:CreateCheckbox('Show minimap button', function() return ns.settings.showMinimapButton ~= false end, function()
+            ns.settings.showMinimapButton = ns.settings.showMinimapButton == false
+            ns.MinimapButton.Update()
+        end)
+        display:CreateCheckbox('Let me move the profession and auction house windows', function() return ns.settings.moveBlizzard ~= false end, function()
+            ns.settings.moveBlizzard = ns.settings.moveBlizzard == false
+        end)
+        display:CreateButton('Reset window positions', function()
+            ns.Nav.ResetPositions()
+            ns.Print('Window positions reset: the windows open in the middle of the screen again.')
+        end)
+        display:CreateButton('Next summary page', function() ns.ChangeSummaryPage(1) end)
+        display:CreateButton('Previous summary page', function() ns.ChangeSummaryPage(-1) end)
         local professions = root:CreateButton('Professions')
         professions:SetScrollMode(300)
+        local learned = {}
+        for _, skill in ipairs(ns.Professions.Rows()) do learned[skill.kind] = skill end
         local function moduleToggle(parent, module)
             local key = module.id
-            parent:CreateCheckbox(ns.Style.Text(ns.Style.gold, module.label), function() return ns.settings.categories[key] ~= false end, function()
+            local skill = learned[key]
+            local label = ns.Style.Text(ns.Style.gold, module.label)
+            if skill then label = label .. ' ' .. ns.Style.Skill(skill.rank, skill.maxRank) end
+            parent:CreateCheckbox(label, function() return ns.settings.categories[key] ~= false end, function()
                 ns.settings.categories[key] = ns.settings.categories[key] == false
                 ns.Catalog.Rebuild(ns.settings)
                 ns.UpdateGathering()
@@ -155,6 +174,75 @@ function Titan.Menu(owner)
         flights:CreateCheckbox('Show flight points', function() return ns.settings.flightPoints end, function()
             ns.settings.flightPoints = not ns.settings.flightPoints
             ns.FlightPaths.Update()
+        end)
+        local routes = root:CreateButton('Boat and zeppelin routes')
+        routes:CreateCheckbox('Show routes on the map', function() return ns.settings.transportRoutes ~= false end, function()
+            ns.settings.transportRoutes = ns.settings.transportRoutes == false
+            ns.Transport.Update()
+        end)
+        local icons = routes:CreateButton('Dock icon')
+        icons:CreateCheckbox('Game icons (boat, airship)', function() return ns.settings.transportIcon ~= 'anchor' end, function()
+            ns.settings.transportIcon = 'game'
+            ns.Transport.Update()
+        end)
+        icons:CreateCheckbox('Anchor', function() return ns.settings.transportIcon == 'anchor' end, function()
+            ns.settings.transportIcon = 'anchor'
+            ns.Transport.Update()
+        end)
+        local lines = routes:CreateButton('Line style')
+        lines:CreateTitle('Thickness')
+        lines:CreateCheckbox('Thin', function() return ns.settings.transportStyle ~= 'clear' end, function()
+            ns.settings.transportStyle = 'thin'
+            ns.Transport.Update()
+        end)
+        lines:CreateCheckbox('Clear', function() return ns.settings.transportStyle == 'clear' end, function()
+            ns.settings.transportStyle = 'clear'
+            ns.Transport.Update()
+        end)
+        lines:CreateTitle('Pattern')
+        for _, pattern in ipairs({ 'dashed', 'dotted', 'solid' }) do
+            lines:CreateCheckbox(pattern:sub(1, 1):upper() .. pattern:sub(2), function() return ns.settings.transportPattern == pattern end, function()
+                ns.settings.transportPattern = pattern
+                ns.Transport.Update()
+            end)
+        end
+        local auction = root:CreateButton('Auction prices')
+        auction:CreateTitle(ns.AuctionScan.Status())
+        auction:CreateButton('Scan now (the auction house must be open)', function() ns.AuctionScan.Run() end)
+        auction:CreateCheckbox('Scan when the auction house opens (at most every 30 minutes)', function() return ns.settings.auctionAutoScan == true end, function()
+            ns.settings.auctionAutoScan = ns.settings.auctionAutoScan ~= true
+        end)
+        auction:CreateCheckbox('Show auction prices in item tooltips', function() return ns.settings.auctionTooltips ~= false end, function()
+            ns.settings.auctionTooltips = ns.settings.auctionTooltips == false
+        end)
+        auction:CreateButton('Clear scanned prices', function()
+            ns.AuctionScan.Clear(); if ns.CraftingView then ns.CraftingView.Refresh() end
+        end)
+        local npcs = root:CreateButton('Trainers and recipe vendors')
+        local function redrawNpcs() ns.Map.Update(); ns.Minimap.Update() end
+        npcs:CreateCheckbox('Show profession trainers', function() return ns.settings.mapTrainers ~= false end, function()
+            ns.settings.mapTrainers = ns.settings.mapTrainers == false; redrawNpcs()
+        end)
+        npcs:CreateCheckbox('Show recipe vendors', function() return ns.settings.mapRecipeVendors ~= false end, function()
+            ns.settings.mapRecipeVendors = ns.settings.mapRecipeVendors == false; redrawNpcs()
+        end)
+        npcs:CreateCheckbox('Record trainers and vendors when I open their window', function() return ns.settings.recordNpcs ~= false end, function()
+            ns.settings.recordNpcs = ns.settings.recordNpcs == false
+        end)
+        local npcProfessions = npcs:CreateButton('Profession filter')
+        npcProfessions:SetScrollMode(300)
+        for _, kind in ipairs(ns.NpcSources.InstalledKinds(ns.NpcSources.Kinds)) do
+            local id = kind
+            npcProfessions:CreateCheckbox(ns.NpcSources.Label(id) .. ' pins', function() return ns.settings.mapNpcProfessions[id] ~= false end, function()
+                ns.settings.mapNpcProfessions[id] = ns.settings.mapNpcProfessions[id] == false; redrawNpcs()
+            end)
+        end
+        npcs:CreateButton('Unlearned recipes...', function() ns.RecipeBrowser.Show() end)
+        npcs:CreateButton('Trainers...', function() ns.TrainerBrowser.Show() end)
+        local placement = npcs:CreateButton('Pin placement')
+        placement:CreateButton('Find nearest trainer or vendor pin', function() ns.NpcNearest() end)
+        placement:CreateCheckbox('Swap map axes (use if pins look mirrored)', function() return ns.settings.npcAxisSwap == true end, function()
+            ns.NpcToggleAxes()
         end)
         local gathering = root:CreateButton('Gathering map')
         local function mapToggle(parent, label, key)
@@ -213,6 +301,7 @@ function Titan.Menu(owner)
         reports:CreateButton('Observed chances', function() ns.Reports.Show('chances') end)
         reports:CreateButton('Profession actions', function() ns.Reports.Show('actions') end)
         reports:CreateButton('Crafting and cooking', function() ns.Reports.Show('production') end)
+        reports:CreateButton('Crafting profit', function() ns.ProfitBrowser.Show() end)
         reports:CreateButton('Reagent use estimates', function() ns.Reports.Show('reagentUsage') end)
         reports:CreateButton('Export statistics',function()ns.ExportView.Show()end)
         reports:CreateButton('Plan selected recipe reagents',function()
@@ -271,6 +360,15 @@ function Titan.Menu(owner)
         end)
         local diagnostics = root:CreateButton('Diagnostics')
         toggle(diagnostics, 'Debug mode', 'debugMode')
+        ns.Style.MenuNote(diagnostics, 'Debug mode writes events to the debug log in the saved variables file. The file is written on /reload and logout.')
+        toggle(diagnostics, 'Also show debug messages in chat', 'debugChat')
+        diagnostics:CreateButton('Clear debug log', function()
+            ns.DebugLog.Clear()
+            ns.Print('Debug log cleared.')
+        end)
+        diagnostics:CreateButton('Refresh inventory', function() ns.ScheduleRefresh() end)
+        diagnostics:CreateButton('Show status report', function() ns.ShowStatus(true) end)
+        diagnostics:CreateButton('Show NPC recording log', function() ns.NpcObserver.PrintLog() end)
     end)
 end
 

@@ -11,7 +11,7 @@ from urllib.parse import urlsplit
 PROFESSIONS = {'Alchemy', 'Blacksmithing', 'Cooking', 'Enchanting', 'Engineering',
                'First Aid', 'Fishing', 'Herbalism', 'Leatherworking', 'Mining', 'Skinning', 'Tailoring'}
 MODULE_IDS = {'First Aid': 'FirstAid', 'Herbalism': 'Herbs'}
-VERSION = '0.4.1-alpha'
+VERSION = '0.5.81-beta'
 MINING_ORES = {2770, 2771, 2772, 2775, 2776, 3858, 7911, 10620, 11370, 18562}
 SCARCE_MINERALS = {249391, 249425, 249426}
 SCARCE_HERBS = {249274, 249399, 249424}
@@ -372,6 +372,14 @@ def build_modules(dataset, curated, memberships):
             modules[module_id] = {'id': module_id, 'label': profession, 'kind': 'profession',
                                   'folder': 'TitanGatheredForeverV3_' + module_id,
                                   'items': {item_id: items[item_id] for item_id in sorted(selected)}}
+            # The recipe book of the profession: its own recipes with the product and the materials, so the profit of
+            # a craft can be worked out. It travels with the profession addon: a player without the addon carries
+            # none of it. Recipes without a product item (enchants) are left out.
+            book = {recipe['spellID']: [recipe['outputItemID'], [[r['itemID'], r['quantity']] for r in recipe['reagents']]]
+                    for recipe in recipes.values()
+                    if recipe['profession'] == profession and recipe.get('outputItemID') and recipe['reagents']}
+            if book:
+                modules[module_id]['book'] = dict(sorted(book.items()))
     auction_ids = {use['itemID'] for use in curated if use['kind'] == 'auction'}
     if auction_ids:
         modules['Auction'] = {'id': 'Auction', 'label': 'Auction items', 'kind': 'auction',
@@ -436,7 +444,8 @@ def generate(root, check=False):
             f'## Notes: Optional {module["label"]} material catalogue for Titan Gathered Forever v3.\n'
             f'## Version: {VERSION}\n## Dependencies: Titan, TitanGatheredForeverV3\n\nData.lua\n')
         module_index.append({key: module[key] for key in ['id', 'label', 'kind', 'folder']} |
-                            {'itemCount': len(module['items']), 'recipeCount': len(module['recipes'])})
+                            {'itemCount': len(module['items']), 'recipeCount': len(module['recipes']),
+                             'bookCount': len(module.get('book', {}))})
     outputs['catalogue/modules.json'] = json.dumps(module_index, indent=2) + '\n'
     outputs['catalogue/reconciliation.json'] = json.dumps(reconciliation, indent=2, sort_keys=True) + '\n'
     old_ids = sorted({row['itemID'] for row in legacy})

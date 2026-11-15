@@ -1,30 +1,54 @@
 local _, ns = ...
-local Style = { gold = 'ffeda55f', orange = 'ffff8020', gray = 'ff9d9d9d',
-                white = 'ffffffff', cyan = 'ff53c9ff', green = 'ff20ff20', violet = 'ffb48cfa', note = 'ff8fbaaa' }
+local Style = { gold = 'ffffd100', red = 'ffff2020', orange = 'ffff8020', brown = 'ffb87333', gray = 'ff9d9d9d',
+                white = 'ffffffff', yellow = 'ffffff00', cyan = 'ff53c9ff', green = 'ff20ff20', violet = 'ffb48cfa', note = 'ff8fbaaa' }
 ns.Style = Style
 
 function Style.Text(color, text)
     return '|c' .. color .. tostring(text) .. '|r'
 end
 
--- Resize only addon-owned supporting text, preserving native tooltip fonts.
+-- Informational text is small and gold (the font of a note already is); the data in it is white, so that a label and
+-- its value, or a sentence and its numbers, never run together. Label is for the words, Value for the data.
+-- A date or time of day is green, so it stands out from both the labels and the other values.
+function Style.Date(text) return Style.Text(Style.green, text) end
+function Style.Label(text) return Style.Text(Style.gold, text) end
+function Style.Value(text) return Style.Text(Style.white, text) end
+-- 'Showing 1-18 of 40' with the numbers as values.
+function Style.Range(first, last, total, what)
+    return Style.Label('Showing ') .. Style.Value(first .. '-' .. last) .. Style.Label(' of ') .. Style.Value(total)
+        .. (what and Style.Label(' ' .. what) or '')
+end
+
+-- Resize only addon-owned supporting text, preserving native tooltip fonts. The original font is restored
+-- when the tooltip is recycled.
+local function shrink(tooltip, line)
+    if not line or not line.SetFontObject then return end
+    if not tooltip.tgfNoteFonts then
+        tooltip.tgfNoteFonts = {}
+        tooltip:HookScript('OnTooltipCleared', function(self)
+            for region, font in pairs(self.tgfNoteFonts) do region:SetFontObject(font) end
+            self.tgfNoteFonts = {}
+        end)
+    end
+    if not tooltip.tgfNoteFonts[line] then
+        tooltip.tgfNoteFonts[line] = line.GetFontObject and line:GetFontObject() or 'GameTooltipText'
+    end
+    line:SetFontObject('GameFontHighlightSmall')
+end
+
 function Style.Note(tooltip, value)
     tooltip:AddLine(value, 1, 1, 1, true)
     local name = tooltip.GetName and tooltip:GetName()
-    local line = name and _G[name .. 'TextLeft' .. tooltip:NumLines()]
-    if line and line.SetFontObject then
-        if not tooltip.tgfNoteFonts then
-            tooltip.tgfNoteFonts = {}
-            tooltip:HookScript('OnTooltipCleared', function(self)
-                for region, font in pairs(self.tgfNoteFonts) do region:SetFontObject(font) end
-                self.tgfNoteFonts = {}
-            end)
-        end
-        if not tooltip.tgfNoteFonts[line] then
-            tooltip.tgfNoteFonts[line] = line.GetFontObject and line:GetFontObject() or 'GameTooltipText'
-        end
-        line:SetFontObject('GameFontHighlightSmall')
-    end
+    shrink(tooltip, name and _G[name .. 'TextLeft' .. tooltip:NumLines()])
+end
+
+-- Shrink the line that was just added, in both columns of a two-column line.
+function Style.Small(tooltip)
+    local name = tooltip.GetName and tooltip:GetName()
+    if not name then return end
+    local index = tooltip:NumLines()
+    shrink(tooltip, _G[name .. 'TextLeft' .. index])
+    shrink(tooltip, _G[name .. 'TextRight' .. index])
 end
 
 function Style.MenuNote(parent, value)
@@ -78,13 +102,18 @@ end
 
 function Style.Section(tooltip, title)
     Style.Separator(tooltip)
-    tooltip:AddLine(Style.Text(Style.orange, title))
+    tooltip:AddLine(Style.Text(Style.gold, title))
+end
+
+function Style.SkillColor(rank, maximum)
+    local ratio = maximum > 0 and rank / maximum or 0
+    local color = ratio >= 0.75 and Style.green
+        or (ratio >= 0.5 and Style.yellow or (ratio >= 0.25 and Style.brown or Style.red))
+    return color
 end
 
 function Style.Skill(rank, maximum)
-    local ratio = maximum > 0 and rank / maximum or 0
-    local color = ratio >= 0.95 and Style.green or (ratio >= 0.5 and Style.gold or Style.orange)
-    return Style.Text(color, rank .. '/' .. maximum)
+    return Style.Text(Style.SkillColor(rank, maximum), rank .. '/' .. maximum)
 end
 
 function Style.Count(value, field)

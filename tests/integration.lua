@@ -63,7 +63,7 @@ local function fixture(interface, saved, noBroker, noModules)
     _G.COMBATLOG_HONORGAIN = '%s dies, honorable kill Rank: %s (Estimated Honor Points: %d)'
     _G.date = function(_, timestamp) return 'observed-' .. timestamp end
     _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS = 5
-    _G.Enum = { BankType = { Character = 0 }, TooltipDataType = { Item = 0 }, BagIndex = { Characterbanktab = -2 } }
+    _G.Enum = { BankType = { Character = 0 }, TooltipDataType = { Item = 0, Object = 4 }, BagIndex = { Characterbanktab = -2 } }
     _G.issecretvalue = function(value) return value == state.secret and state.secret ~= nil end
     _G.C_Timer = { After = function(_, fn) state.timers[#state.timers + 1] = fn end }
     _G.C_Container = {
@@ -114,7 +114,9 @@ local function fixture(interface, saved, noBroker, noModules)
     _G.Professions=nil
     _G.EventRegistry={RegisterCallback=function(_,event,callback,owner)state.callbacks[event]={fn=callback,owner=owner}end}
     _G.C_AddOns = { GetAddOnMetadata = function(_, key) return key == 'Version' and '0.1.0-alpha' or nil end }
-    _G.TooltipDataProcessor = { AddTooltipPostCall = function(kind, fn) eq(kind, 0); state.post = fn end }
+    _G.TooltipDataProcessor = { AddTooltipPostCall = function(kind, fn)
+        if kind==0 then state.post=fn elseif kind==4 then state.objectPost=fn else error('Unexpected tooltip kind')end
+    end }
     _G.MenuUtil = { CreateContextMenu = function(_, fn)
         local root = { checkboxes = {}, radios = {}, titles = {}, buttons = {}, submenus = {}, paths = {}, path = {} }
         function root:CreateTitle(title) self.titles[#self.titles + 1] = title end
@@ -129,7 +131,7 @@ local function fixture(interface, saved, noBroker, noModules)
             return setmetatable({ path = path }, { __index = root })
         end
         function root:CreateCheckbox(label, selected, callback)
-            root.checkboxes[plain(label)] = { selected = selected, callback = callback }
+            root.checkboxes[plain(label)] = { selected = selected, callback = callback, label = label }
             root.paths[plain(label)] = table.concat(self.path, '/')
             root.checkboxesByPath = root.checkboxesByPath or {}
             root.checkboxesByPath[table.concat(self.path, '/') .. '/' .. plain(label)] = root.checkboxes[plain(label)]
@@ -150,9 +152,9 @@ local function fixture(interface, saved, noBroker, noModules)
         state.message = message; state.messages[#state.messages + 1] = message
     end }
     local ns = {}
-    for _, path in ipairs({ 'Localization/enUS.lua', 'Style.lua', 'Data/Metadata.lua', 'Catalog.lua',
-                            'Settings.lua', 'Professions.lua', 'Inventory.lua', 'Gathering.lua', 'History.lua', 'Actions.lua', 'PvP.lua', 'Production.lua', 'Crafting.lua', 'Export.lua', 'Observations.lua', 'Sources.lua', 'PinStyle.lua', 'IconConfig.lua', 'FlightPaths.lua', 'Map.lua', 'Minimap.lua',
-                            'Tooltips.lua', 'Reports.lua', 'CraftingView.lua', 'Titan.lua', 'Core.lua' }) do
+    for _, path in ipairs({ 'Localization/enUS.lua', 'Style.lua', 'Data/Metadata.lua', 'Data/NpcSeed.lua', 'Catalog.lua',
+                            'Settings.lua', 'DebugLog.lua', 'Professions.lua', 'KnownRecipes.lua', 'Inventory.lua', 'Gathering.lua', 'History.lua', 'Actions.lua', 'PvP.lua', 'Production.lua', 'Crafting.lua', 'Export.lua', 'Observations.lua', 'Sources.lua', 'NpcSources.lua', 'NpcObserver.lua', 'PinStyle.lua', 'IconConfig.lua', 'FlightPaths.lua', 'Transport.lua', 'Map.lua', 'Minimap.lua',
+                            'Tooltips.lua', 'Reports.lua', 'CraftingView.lua', 'ProfessionButton.lua', 'Movable.lua', 'AuctionScan.lua', 'Economy.lua', 'Yields.lua', 'RecipeBrowser.lua', 'MinimapButton.lua', 'Titan.lua', 'Core.lua' }) do
         assert(loadfile('TitanGatheredForeverV3/' .. path))('TitanGatheredForeverV3', ns)
     end
     -- Keep integration scenarios small; the generated data is validated separately.
@@ -248,6 +250,42 @@ test('inventory events coalesce and bank closure preserves snapshots', function(
     eq(ns.inventory:Get(2589).bank, 7)
 end)
 
+test('the scanned auction price, what the held items are worth and the age of the scan are in the item tooltip', function()
+    local s, ns = fixture(); s:Start()
+    local tip = CreateFrame('GameTooltip')
+    s.post(tip, { id = 2589 }); assert(not contains(tip.lines, 'Auction:'))    -- nothing scanned yet
+    ns.db.auction = { at = time() - 7200, entries = 100, items = { [2589] = { min = 1250, qty = 40, n = 5 } } }
+    tip:ClearLines(); s.post(tip, { id = 2589 })
+    assert(contains(tip.lines, 'Auction: '), 'price line'); assert(contains(tip.lines, ' each'))
+    assert(contains(tip.lines, 'Worth: '), 'value of the three in the bags'); assert(contains(tip.lines, 'for 3 at this price'))
+    assert(contains(tip.lines, 'Lowest buyout of 5 auctions (40 items), scanned 2 h ago'))
+    ns.db.auction.items[2589] = nil
+    tip:ClearLines(); s.post(tip, { id = 2589 }); assert(not contains(tip.lines, 'Auction:'))   -- no price for this item
+end)
+
+test('a product outside the catalogue gets its auction price, the vendor comparison and nothing else', function()
+    local s, ns = fixture(); s:Start()
+    local tip = CreateFrame('GameTooltip')
+    s.post(tip, { id = 99999 }); eq(#tip.lines, 0)                               -- no price: the tooltip is left alone
+    ns.db.auction = { at = time() - 60, entries = 10, items = {}, others = { [99999] = ns.AuctionScan.Pack(3200, 12) } }
+    tip:ClearLines(); s.post(tip, { id = 99999 })
+    assert(contains(tip.lines, 'Auction: '), 'price'); assert(contains(tip.lines, ' each'))
+    assert(contains(tip.lines, 'Lowest buyout of 12 auctions, scanned just now'))   -- no quantity for items outside the catalogue
+    assert(not contains(tip.lines, 'Bags:'), 'no counts for an item that is not a profession item')
+    assert(not contains(tip.lines, 'Vendor pays'))                                  -- the vendor price is not known here
+    local original = C_Item.GetItemInfo
+    C_Item.GetItemInfo = function(id) return s.itemNames[id], nil, 2, 1, 1, 't', 's', 1, '', 1, 400 end
+    tip:ClearLines(); s.post(tip, { id = 99999 })
+    assert(contains(tip.lines, 'Vendor pays: '), 'vendor price'); assert(contains(tip.lines, 'the auction house leaves 7.6x as much after its fee'))
+    C_Item.GetItemInfo = function(id) return s.itemNames[id], nil, 2, 1, 1, 't', 's', 1, '', 1, 9000 end
+    tip:ClearLines(); s.post(tip, { id = 99999 })
+    assert(contains(tip.lines, 'more than the auction house leaves after its fee'))
+    C_Item.GetItemInfo = original
+    ns.settings.auctionTooltips = false                                              -- the switch hides every price line
+    tip:ClearLines(); s.post(tip, { id = 99999 }); eq(#tip.lines, 0)
+    tip:ClearLines(); s.post(tip, { id = 2589 }); assert(not contains(tip.lines, 'Auction:'))
+end)
+
 test('unvisited bank omits redundant total and zero bank count', function()
     local s, ns = fixture(); s:Start()
     local tip = CreateFrame('GameTooltip')
@@ -325,6 +363,17 @@ test('metadata requests are deduplicated and successful item loading refreshes n
     eq(ns.ItemName(249391), 'Localized Pyrite')
 end)
 
+test('a burst of item answers redraws the recipe list once', function()
+    local s, ns = fixture(); s:Start()
+    local redraws = 0
+    ns.RecipeBrowser.Refresh = function() redraws = redraws + 1 end
+    for id = 1, 50 do s:Event('ITEM_DATA_LOAD_RESULT', id, true) end
+    s:Flush()
+    eq(redraws, 1)
+    s:Event('ITEM_DATA_LOAD_RESULT', 51, true); s:Flush()
+    eq(redraws, 2)
+end)
+
 test('right-click menu toggles actual settings', function()
     local s, ns = fixture(); s:Start()
     s.broker.OnClick({}, 'RightButton')
@@ -336,6 +385,63 @@ test('right-click menu toggles actual settings', function()
     assert(ns.Catalog.Get(2589))
     eq(s.menu.checkboxes.Other, nil)
     assert(s.menu.checkboxes['Auction items'])
+end)
+
+test('trainer and recipe vendor menu toggles update their settings and redraw pins', function()
+    local s, ns = fixture(); s:Start()
+    s.broker.OnClick({}, 'RightButton')
+    local trainers, vendors = s.menu.checkboxes['Show profession trainers'], s.menu.checkboxes['Show recipe vendors']
+    eq(trainers.selected(), true); eq(vendors.selected(), true)
+    trainers.callback(); eq(ns.settings.mapTrainers, false); eq(trainers.selected(), false)
+    vendors.callback(); eq(ns.settings.mapRecipeVendors, false)
+    trainers.callback(); vendors.callback()
+    eq(ns.settings.mapTrainers, true); eq(ns.settings.mapRecipeVendors, true)
+    local alchemy = s.menu.checkboxes['Alchemy pins']
+    eq(alchemy.selected(), true); alchemy.callback(); eq(ns.settings.mapNpcProfessions.Alchemy, false)
+    local record = s.menu.checkboxes['Record trainers and vendors when I open their window']
+    eq(record.selected(), true); record.callback(); eq(ns.settings.recordNpcs, false)
+end)
+
+test('the minimap button can be hidden from the Display menu', function()
+    local s, ns = fixture(); s:Start()
+    s.broker.OnClick({}, 'RightButton')
+    local box = assert(s.menu.checkboxes['Show minimap button'], 'minimap button checkbox missing')
+    eq(box.selected(), true)
+    local updates = 0
+    ns.MinimapButton.Update = function() updates = updates + 1 end
+    box.callback(); eq(ns.settings.showMinimapButton, false); eq(updates, 1); eq(box.selected(), false)
+    box.callback(); eq(ns.settings.showMinimapButton, true); eq(updates, 2)
+end)
+
+test('menu offers every chat function that needs no parameter', function()
+    local s, ns = fixture(); s:Start()
+    s.broker.OnClick({}, 'RightButton')
+    local buttons = s.menu.buttons
+    for _, label in ipairs({ 'Refresh inventory', 'Show status report', 'Show NPC recording log', 'Next summary page', 'Previous summary page',
+        'Find nearest trainer or vendor pin', 'Unlearned recipes...', 'Trainers...' }) do
+        assert(type(buttons[label]) == 'function', 'menu lacks ' .. label)
+    end
+    local axes = s.menu.checkboxes['Swap map axes (use if pins look mirrored)']
+    assert(axes, 'menu lacks the axis swap checkbox')
+    local before = #s.messages
+    buttons['Show status report']()
+    assert(#s.messages > before and contains(s.messages, 'Titan Gathered Forever v3'), 'status report not printed')
+    ns.Titan.page = 1
+    buttons['Next summary page'](); eq(ns.Titan.page, 2)
+    buttons['Previous summary page'](); eq(ns.Titan.page, 1)
+    buttons['Previous summary page'](); eq(ns.Titan.page, 1)
+    eq(axes.selected(), false); axes.callback(); eq(ns.settings.npcAxisSwap, true); eq(axes.selected(), true)
+    axes.callback(); eq(ns.settings.npcAxisSwap, false)
+    before = #s.messages
+    buttons['Find nearest trainer or vendor pin']()
+    assert(#s.messages > before, 'nearest pin gave no feedback')
+    before = #s.messages
+    buttons['Show NPC recording log']()
+    assert(#s.messages == before + 1 and s.message:find('No NPC recording attempts yet', 1, true), 'empty log not explained')
+    local scheduled, original = 0, ns.ScheduleRefresh
+    ns.ScheduleRefresh = function() scheduled = scheduled + 1 end
+    buttons['Refresh inventory'](); eq(scheduled, 1)
+    ns.ScheduleRefresh = original
 end)
 
 test('private Titan summary omits confusing count labels and does not repeat shared reagents', function()
@@ -487,7 +593,7 @@ test('item tooltip distinguishes labels, professions, recipe names and explanato
     assert(not contains(tip.lines, ns.L.title), 'Redundant addon header remains')
     assert(contains(tip.lines, 'Reagent for First Aid'))
     local text = table.concat(tip.lines, '\n')
-    assert(text:find('|cffeda55fReagent for |r', 1, true), 'Label color missing')
+    assert(text:find('|cffffd100Reagent for |r', 1, true), 'Label color missing')
     assert(text:find('|cff53c9ffFirst Aid|r', 1, true), 'Profession color missing')
     assert(text:find('|cffb48cfaRecipe 1|r', 1, true), 'Recipe name color missing')
     tip:ClearLines(); s.post(tip, { id = 264019 })
@@ -673,34 +779,63 @@ test('runtime rejects dungeon and raid observations and clears pending gathers o
     eq(#ns.gathering:List(1), 0)
 end)
 
-test('debug mode defaults off, gates messages immediately and persists through reload', function()
+test('debug mode defaults off, writes to the saved log instead of chat and persists through reload', function()
     local s, ns = fixture(); s:Start()
-    eq(ns.settings.debugMode, false)
+    eq(ns.settings.debugMode, false); eq(ns.settings.debugChat, false)
     eq(#s.messages, 0)
-    ns.Debug('hidden debug message'); eq(#s.messages, 0)
+    ns.Debug('hidden debug message'); eq(#s.messages, 0); eq(#ns.db.debugLog, 0)
     s.broker.OnClick({}, 'RightButton')
     local toggle = assert(s.menu.checkboxes['Debug mode'], 'Debug checkbox missing')
     eq(toggle.selected(), false); toggle.callback(); eq(ns.settings.debugMode, true)
-    ns.Debug('visible debug message'); eq(s.message, 'visible debug message')
+    ns.Debug('logged debug message')
+    eq(#s.messages, 0)   -- the physical log only, not the chat
+    eq(#ns.db.debugLog, 1); assert(ns.db.debugLog[1]:find(' debug logged debug message', 1, true))
+    local chat = assert(s.menu.checkboxes['Also show debug messages in chat'], 'chat repeat checkbox missing')
+    eq(chat.selected(), false); chat.callback(); eq(ns.settings.debugChat, true)
+    ns.Debug('visible debug message'); eq(s.message, 'visible debug message'); eq(#ns.db.debugLog, 2)
+    chat.callback(); eq(ns.settings.debugChat, false)
     local saved = TitanGatheredForeverV3DB
-    s, ns = fixture(nil, saved); s:Start(); eq(ns.settings.debugMode, true)
+    s, ns = fixture(nil, saved); s:Start(); eq(ns.settings.debugMode, true); eq(#ns.db.debugLog, 2)
     s.broker.OnClick({}, 'RightButton'); s.menu.checkboxes['Debug mode'].callback()
-    local before = #s.messages
-    ns.Debug('hidden again'); eq(#s.messages, before)
+    local before, logged = #s.messages, #ns.db.debugLog
+    ns.Debug('hidden again'); eq(#s.messages, before); eq(#ns.db.debugLog, logged)
     s, ns = fixture(nil, TitanGatheredForeverV3DB); s:Start(); eq(ns.settings.debugMode, false)
+end)
+
+test('debug mode logs important events and the log can be cleared from the menu', function()
+    local s, ns = fixture(); s:Start()
+    s:Event('BANKFRAME_OPENED'); s:Flush()
+    eq(#ns.db.debugLog, 0)   -- nothing is written while debug mode is off
+    ns.settings.debugMode = true
+    s:Event('BANKFRAME_CLOSED'); s:Event('BAG_UPDATE_DELAYED'); s:Flush()
+    local found = false
+    for _, line in ipairs(ns.db.debugLog) do
+        if line:find(' event BANKFRAME_CLOSED', 1, true) then found = true end
+        assert(not line:find('BAG_UPDATE_DELAYED', 1, true), 'noisy event was logged')
+    end
+    assert(found, 'bank event was not logged')
+    s.broker.OnClick({}, 'RightButton')
+    local clear = assert(s.menu.buttons['Clear debug log'], 'clear button missing')
+    s.messages = {}
+    clear(); eq(#ns.db.debugLog, 0); assert(s.message:find('Debug log cleared', 1, true))
 end)
 
 test('explicit status works with debug disabled while normal commands stay quiet', function()
     local s, ns = fixture(); s:Start()
     SlashCmdList.TITANGATHEREDFOREVERV3('refresh'); s:Flush(); eq(#s.messages, 0)
     SlashCmdList.TITANGATHEREDFOREVERV3('')
-    eq(#s.messages, 1); assert(s.message:find('/tgf status', 1, true))
+    eq(#s.messages, 1); assert(s.message:find('/tgf recipe <recipeID> [operations]', 1, true))
+    assert(s.message:find('right-click menu', 1, true), 'help must point to the menu')
+    assert(not s.message:find('/tgf refresh', 1, true), 'help must not list commands that need no parameter')
     local before = #s.messages
     SlashCmdList.TITANGATHEREDFOREVERV3('status')
     eq(#s.messages, before + 4); assert(s.message:find('Gathering map:', 1, true))
     ns.settings.debugMode = true
-    before = #s.messages; SlashCmdList.TITANGATHEREDFOREVERV3('')
-    eq(#s.messages, before + 4)
+    before = #s.messages
+    local logged = #ns.db.debugLog
+    SlashCmdList.TITANGATHEREDFOREVERV3('')
+    eq(#s.messages, before)               -- the debug status goes to the log, not the chat
+    eq(#ns.db.debugLog, logged + 4)
 end)
 
 test('configuration checkboxes are grouped in submenus', function()
@@ -719,6 +854,60 @@ test('configuration checkboxes are grouped in submenus', function()
     eq(s.menu.paths['Mining spots'], 'Gathering map/Professions')
     eq(s.menu.paths[plain(ns.Style.ItemName(2770))], 'Gathering map/Map materials/Mining')
     eq(s.menu.paths['Debug mode'], 'Diagnostics')
+end)
+
+test('world ore vein tooltip shows source-specific observed drops and clears recycled state',function()
+    local s,ns=fixture();s:Start()
+    s.itemNames[2770]='Copper Ore';s.itemNames[774]='Malachite';s.itemNames[818]='Tigerseye';s.itemNames[2771]='Tin Ore'
+    assert(s.objectPost,'World-object tooltip callback was not registered')
+    local function sample(id,items,complete,source,map,character)
+        ns.history:Observe(character or UnitGUID('player'),'Miner',{id=id,kind='Mining',source=source or '1731',
+            mapID=map or 1,instanceType='none',items=items,complete=complete~=false,at=100})
+    end
+    sample('one',{[2770]=2,[774]=1})
+    sample('two',{[2770]=3})
+    sample('partial',{[774]=20},false)
+    sample('other vein',{[2771]=1,[818]=1},true,'1732')
+    sample('other zone',{[2770]=1,[818]=1},true,'1731',2)
+    sample('alt',{[2770]=1,[818]=1},true,'1731',1,'alt')
+    local tip=CreateFrame('GameTooltip');tip:AddLine('Copper Vein')
+    local data={id=1731,guid='GameObject-0-1-2-3-1731-9'}
+    s.objectPost(tip,data)
+    assert(contains(tip.lines,'Complete mining loot samples: 2'))
+    assert(contains(tip.lines,'Copper Ore: 100.0% (2 / 2 samples); 5 items'))
+    assert(contains(tip.lines,'Malachite: 50.0% (1 / 2 samples); 1 items'))
+    assert(not contains(tip.lines,'Tigerseye:') and not contains(tip.lines,'Tin Ore:'),'Unrelated vein drops leaked')
+    local count=#tip.lines;s.objectPost(tip,data);eq(#tip.lines,count)
+    tip:ClearLines();tip:AddLine('Copper Vein');s.objectPost(tip,data);eq(#tip.lines,count)
+    tip:ClearLines();tip:AddLine('Unrelated chest');s.objectPost(tip,{id=9999});eq(#tip.lines,1)
+    tip:ClearLines();s.objectPost(tip,{id=1732,guid=data.guid});eq(#tip.lines,0)
+    s.secret=data.guid;s.objectPost(tip,data);eq(#tip.lines,0);s.secret=nil
+    s.objectPost(tip,{guid=data.guid});assert(contains(tip.lines,'Complete mining loot samples: 2'))
+    tip:ClearLines();s.objectPost(tip,{id=1731});assert(contains(tip.lines,'Complete mining loot samples: 2'))
+    ns.settings.historyTooltips=false;tip:ClearLines();s.objectPost(tip,data);eq(#tip.lines,0)
+    ns.settings.historyTooltips=true;s.secret=data.id;s.objectPost(tip,data);eq(#tip.lines,0);s.secret=nil
+    tip:ClearLines();ns.history.saved.characters[UnitGUID('player')].groups={}
+    s.objectPost(tip,data);assert(contains(tip.lines,'Unknown'),'An identified vein without current-character samples needs Unknown')
+end)
+
+test('missing optional world-object tooltip enum preserves item tooltip registration',function()
+    local s=fixture();Enum.TooltipDataType.Object=nil;s:Start()
+    assert(s.post and not s.objectPost)
+end)
+
+test('learned profession names and ranks match while menu labels use gold', function()
+    local s, ns = fixture()
+    s.skills[197] = { name = 'Tailoring', rank = 68, maxRank = 75 }
+    s:Start()
+    s.broker.OnEnter({})
+    local label = '|cffffd100Tailoring|r'
+    local greenRank = '|cff20ff2068/75|r'
+    assert(table.concat(ns.Titan.tooltip.lines, '\n'):find('|cff20ff20Tailoring|r ' .. greenRank, 1, true))
+    s.broker.OnClick({}, 'RightButton')
+    eq(s.menu.checkboxes['Tailoring 68/75'].label, label .. ' ' .. greenRank)
+    s.skills[197].rank = 75
+    s.broker.OnEnter({})
+    assert(table.concat(ns.Titan.tooltip.lines, '\n'):find('|cff20ff20Tailoring|r |cff20ff2075/75|r', 1, true))
 end)
 
 test('map clear menu requires confirmation and captures the displayed map', function()

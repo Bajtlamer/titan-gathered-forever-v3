@@ -5,6 +5,7 @@ local spells = { [2575]='Mining', [2576]='Mining', [3564]='Mining', [10248]='Min
     [2366]='Herbs', [2368]='Herbs', [3570]='Herbs', [11993]='Herbs',
     [8613]='Skinning', [8617]='Skinning', [8618]='Skinning', [10768]='Skinning',
     [7620]='Fishing', [7731]='Fishing', [7732]='Fishing', [18248]='Fishing', [13262]='Enchanting' }
+Actions.GAP=120    -- seconds; a longer pause between two attempts ends a gathering session
 local starts = { UNIT_SPELLCAST_START=true, UNIT_SPELLCAST_CHANNEL_START=true }
 local results = { UNIT_SPELLCAST_FAILED='failed', UNIT_SPELLCAST_INTERRUPTED='interrupted',
     UNIT_SPELLCAST_STOP='stopped', UNIT_SPELLCAST_CHANNEL_STOP='stopped' }
@@ -81,6 +82,10 @@ function Actions:Cast(event, unit, guid, spell)
         end
         receipt={kind=kind,at=self.api.Now()};c.recent[guid]=receipt;c.order[#c.order+1]=guid
         row.attempts=row.attempts+1
+        -- Active time: the gaps between attempts of one profession that are short enough to be one gathering session.
+        row.timedBegan=row.timedBegan or at
+        if row.lastAt and at>row.lastAt and at-row.lastAt<=Actions.GAP then row.active=(row.active or 0)+(at-row.lastAt) end
+        row.lastAt=at
         if #c.order>1024 then c.recent[table.remove(c.order,1)]=nil end
     end
     c.name=self.api.Name();c.kinds[kind].lastSeen=at
@@ -90,6 +95,19 @@ function Actions:Cast(event, unit, guid, spell)
     if event=='UNIT_SPELLCAST_SUCCEEDED' and kind~='Fishing' then self:Change(c,receipt,'completed')
     elseif results[event] then self:Change(c,receipt,results[event]) end
     if self.api.Changed then self.api.Changed() end
+end
+-- Items obtained by an action profession, counted while its active time is measured, so that a value per hour
+-- divides two things measured over the same period.
+function Actions:Yield(kind,items)
+    if self.saved.schema~=1 or not Actions.labels[kind] or type(items)~='table' then return end
+    local character=self.api.Character();local c=character and self.saved.characters[character]
+    local row=c and c.kinds[kind];if not row then return end
+    row.timedItems=row.timedItems or{}
+    for itemID,quantity in pairs(items)do
+        if type(itemID)=='number' and type(quantity)=='number' and quantity>0 then
+            row.timedItems[itemID]=(row.timedItems[itemID] or 0)+quantity
+        end
+    end
 end
 function Actions:FishingLoot()
     local current=self.current; if not current or not self.api.Enabled('Fishing') then return end
@@ -113,6 +131,11 @@ function Actions:Rows(character)
                 end
                 row.began=math.min(row.began,source.began);row.lastSeen=math.max(row.lastSeen,source.lastSeen or 0)
                 row.attempts=row.attempts+source.attempts
+                row.active=(row.active or 0)+(source.active or 0)
+                if source.timedBegan then row.timedBegan=math.min(row.timedBegan or source.timedBegan,source.timedBegan) end
+                for itemID,quantity in pairs(source.timedItems or{})do
+                    row.timedItems=row.timedItems or{};row.timedItems[itemID]=(row.timedItems[itemID] or 0)+quantity
+                end
                 for _,field in ipairs(fields) do row[field]=row[field]+source[field] end
             end
         end
