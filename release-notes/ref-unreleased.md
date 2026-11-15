@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.63-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.64-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Lines submenu, 0.5.64-beta
+
+- The route line choices moved into a Lines submenu under Flight points, in two groups: Thickness (Thin, Clear) and Pattern (Dashed, Dotted, Solid). Flight points itself keeps the two visibility switches.
 
 ## Line style choices kept, 0.5.63-beta
 

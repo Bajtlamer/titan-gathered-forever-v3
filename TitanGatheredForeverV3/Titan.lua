@@ -179,16 +179,19 @@ function Titan.Menu(owner)
             ns.settings.transportRoutes = ns.settings.transportRoutes == false
             ns.Transport.Update()
         end)
-        flights:CreateCheckbox('Route lines: thin', function() return ns.settings.transportStyle ~= 'clear' end, function()
+        local lines = flights:CreateButton('Lines')
+        lines:CreateTitle('Thickness')
+        lines:CreateCheckbox('Thin', function() return ns.settings.transportStyle ~= 'clear' end, function()
             ns.settings.transportStyle = 'thin'
             ns.Transport.Update()
         end)
-        flights:CreateCheckbox('Route lines: clear', function() return ns.settings.transportStyle == 'clear' end, function()
+        lines:CreateCheckbox('Clear', function() return ns.settings.transportStyle == 'clear' end, function()
             ns.settings.transportStyle = 'clear'
             ns.Transport.Update()
         end)
+        lines:CreateTitle('Pattern')
         for _, pattern in ipairs({ 'dashed', 'dotted', 'solid' }) do
-            flights:CreateCheckbox('Route lines: ' .. pattern, function() return ns.settings.transportPattern == pattern end, function()
+            lines:CreateCheckbox(pattern:sub(1, 1):upper() .. pattern:sub(2), function() return ns.settings.transportPattern == pattern end, function()
                 ns.settings.transportPattern = pattern
                 ns.Transport.Update()
             end)
