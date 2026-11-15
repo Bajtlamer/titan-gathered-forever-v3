@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.79-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.80-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Normal row spacing in the gathered list, 0.5.80-beta
+
+- Since one profession is shown per page, the items of the gathered views are back to the normal row spacing of the other lists. Only the title and the summary lines keep their tighter layout.
 
 ## One gathering profession at a time, 0.5.79-beta
 

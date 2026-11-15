@@ -206,14 +206,14 @@ local function entriesFor(window,rows)
     local function add(row)
         local columns=values(viewMode(window),row)
         local tight=viewMode(window)=='yield'      -- the gathered lists are denser than the other reports
-        local height=tight and 12 or 16
+        local height=tight and row.summary and 12 or 16
         if tight and(row.title or row.spacer)then entries[#entries+1]={data=row,values=columns,height=row.title and 30 or(row.small and 8 or 26)};return end
         if tight then window.measure.cells[1]:SetWidth(row.summary and 920 or layouts.yield[1][3])end
         for i,value in ipairs(columns)do
             local measure=window.measure.cells[i];measure:SetText(value)
             height=math.max(height,measure:GetStringHeight())
         end
-        height=math.min(capacity,height+(tight and(row.summary and 4 or 2)or 6))
+        height=math.min(capacity,height+(tight and row.summary and 4 or 6))
         if window.mode=='history' and not row.sourceRate then height=math.min(height,82)end
         entries[#entries+1]={data=row,values=columns,height=height}
     end
@@ -401,7 +401,7 @@ function Reports.Draw(window)
             view.data=entry.data;view.character=character
             view:ClearAllPoints();view:SetPoint('TOPLEFT',window,'TOPLEFT',15,-y);view:SetHeight(entry.height)
             for column,value in ipairs(entry.values)do
-                view.cells[column]:SetHeight(math.max(10,entry.height-(viewMode(window)=='yield'and 2 or 6)));view.cells[column]:SetText(value)
+                view.cells[column]:SetHeight(math.max(10,entry.height-(viewMode(window)=='yield'and entry.data.summary and 2 or 6)));view.cells[column]:SetText(value)
             end
             if view.expand then
                 if expandable(window) and not entry.data.sourceRate and #(entry.data.sources or{})>0 then
