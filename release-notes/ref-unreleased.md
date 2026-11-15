@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.72-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.73-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Profession sections, 0.5.73-beta
+
+- Each profession in the gathered views starts with a large gold title and, from the second profession on, a thin gold line above it, so the end of one list and the start of the next is clear at a glance. The summary lines follow the title in the normal text.
 
 ## Denser gathered lists, 0.5.72-beta
 

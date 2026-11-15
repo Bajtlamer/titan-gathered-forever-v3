@@ -88,7 +88,8 @@ function Yields.Rows(character, filter, sort)
                 if date then second = second .. ', measured since ' .. date('%Y-%m-%d', action.timedBegan) end
             end
             if #list > 0 or (action.attempts or 0) > 0 then
-                rows[#rows + 1] = { summary = true, kind = kind, text = first, gold = true }
+                rows[#rows + 1] = { summary = true, title = true, kind = kind, text = label, gold = true }
+                rows[#rows + 1] = { summary = true, kind = kind, text = first }
                 rows[#rows + 1] = { summary = true, kind = kind, text = second }
                 for index = 1, math.min(#list, Yields.LIMIT) do rows[#rows + 1] = list[index] end
                 if #list > Yields.LIMIT then
