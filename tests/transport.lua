@@ -5,13 +5,15 @@ local function eq(actual, expected) assert(actual == expected, 'expected ' .. to
 -- Map 1 is the world, maps 2 and 3 are continents inside it, maps 4 and 5 are zones of 2 and 3.
 local parents = { [2] = 1, [3] = 1, [4] = 2, [5] = 3 }
 local rects = { [2] = { 0, .5, 0, 1 }, [3] = { .5, 1, 0, 1 }, [4] = { .2, .4, .5, .75 }, [5] = { 0, .5, 0, .5 } }
-local function fresh()
+local function fresh(nodes)
     local printed = {}
     local ns = { db = {}, settings = {}, Print = function(text) printed[#printed + 1] = text end }
     C_Map = {
         GetMapInfo = function(id) return { parentMapID = parents[id] or 0 } end,
         GetMapRectOnMap = function(id) local r = rects[id]; return r[1], r[2], r[3], r[4] end,
     }
+    C_TaxiMap = nodes and { GetTaxiNodesForMap = function(id) return nodes[id] or {} end } or nil
+    ns.IsPublic = function() return true end
     assert(loadfile('TitanGatheredForeverV3/Transport.lua'))('TitanGatheredForeverV3', ns)
     return ns, printed
 end
@@ -75,6 +77,20 @@ test('dashes follow the polyline with gaps and stay bounded', function()
     local bent = ns.Transport.Dashes({ { 0, 0 }, { 3, 0 }, { 3, 8 } }, 5, 5)   -- a dash may turn a corner
     eq(#bent, 3)
     assert(#ns.Transport.Dashes({ { 0, 0 }, { 1e6, 0 } }, 5, 5) <= 600)
+end)
+
+test('an unrecorded dock is estimated from the flight point of its town and a recording wins', function()
+    local function node(name, x, y) return { name = name, position = { GetXY = function() return x, y end } } end
+    parents[2], parents[3] = 1, 1
+    local ns = fresh({ [2] = { node('Booty Bay, Stranglethorn Vale', .5, .5), node('Other', .1, .1) },
+        [3] = { node('Ratchet, The Barrens', .5, .25) } })
+    ns.Transport.continents = { 2, 3 }
+    eq(ns.Transport.Estimate('Booty Bay').estimated, true); eq(ns.Transport.Estimate('Booty Bay').map, 2)
+    eq(ns.Transport.Estimate('Steamwheedle Port'), nil)
+    local points, lines = ns.Transport.Layout(1)
+    assert(points['Booty Bay'] and points['Ratchet']); eq(#lines, 1); eq(points['Ratchet'].estimated, true)
+    ns.Transport.Record('Ratchet', 3, .6, .3)
+    eq(ns.Transport.Dock('Ratchet').estimated, nil); eq(ns.Transport.Dock('Ratchet').x, .6)
 end)
 
 test('the dock command lists, records and forgets', function()

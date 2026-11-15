@@ -34,9 +34,48 @@ local function number(value)
     return type(value) == 'number' and value == value and value > -math.huge and value < math.huge
 end
 
+-- Until a dock is recorded in game, its position is estimated from the flight point of the same town, which the
+-- client reports and which stands close to the harbor or tower. Docks without such a point stay unknown.
+Transport.towns = {
+    ['Stormwind Harbour'] = 'stormwind', ['Menethil Harbor'] = 'menethil', ['Southshore'] = 'southshore',
+    ['Theramore Isle'] = 'theramore', ['Feathermoon Stronghold'] = 'feathermoon', ['Orgrimmar'] = 'orgrimmar',
+    ['Undercity'] = 'undercity', ["Grom'gol"] = "grom'gol", ['Ratchet'] = 'ratchet', ['Booty Bay'] = 'booty bay',
+    ['Auberdine'] = 'auberdine', ["Rut'theran Village"] = "rut'theran",
+}
+Transport.continents = { 1414, 1415 }
+local continentNodes = {}
+local function nodesOf(mapID)
+    if continentNodes[mapID] then return continentNodes[mapID] end
+    if not C_TaxiMap or not C_TaxiMap.GetTaxiNodesForMap then return {} end
+    local ok, rows = pcall(C_TaxiMap.GetTaxiNodesForMap, mapID)
+    if not ok or not ns.IsPublic(rows) or type(rows) ~= 'table' or #rows == 0 then return {} end
+    local list = {}
+    for index, row in ipairs(rows) do
+        if index > 4096 then break end
+        if ns.IsPublic(row) and type(row) == 'table' and ns.IsPublic(row.name) and type(row.name) == 'string'
+            and ns.IsPublic(row.position) and row.position and row.position.GetXY then
+            local x, y = row.position:GetXY()
+            if number(x) and number(y) then list[#list + 1] = { name = row.name:lower(), x = x, y = y } end
+        end
+    end
+    continentNodes[mapID] = list
+    return list
+end
+
+function Transport.Estimate(name)
+    local town = Transport.towns[name]
+    if not town then return end
+    for _, mapID in ipairs(Transport.continents) do
+        for _, node in ipairs(nodesOf(mapID)) do
+            if node.name:sub(1, #town) == town then return { map = mapID, x = node.x, y = node.y, estimated = true } end
+        end
+    end
+end
+
 function Transport.Dock(name)
     local saved = ns.db and type(ns.db.docks) == 'table' and ns.db.docks[name]
     if type(saved) == 'table' and number(saved.map) and number(saved.x) and number(saved.y) then return saved end
+    return Transport.Estimate(name)
 end
 
 -- Resolve a typed name (case-insensitive, unique prefix) to a dock name.
@@ -145,7 +184,7 @@ function Transport.Layout(mapID)
         local dock = Transport.Dock(name)
         if dock then
             local x, y = Transport.ToMap(dock.map, dock.x, dock.y, mapID)
-            if x then points[name] = { x = x, y = y, name = name, routes = {} } end
+            if x then points[name] = { x = x, y = y, name = name, routes = {}, estimated = dock.estimated } end
         end
     end
     for _, route in ipairs(Transport.routes) do
@@ -171,6 +210,7 @@ local function showTooltip(pin)
     local point = pin.point
     GameTooltip:SetOwner(pin, 'ANCHOR_RIGHT')
     GameTooltip:AddLine(point.name)
+    if point.estimated then GameTooltip:AddLine('Estimated position', .7, .7, .7) end
     for _, route in ipairs(point.routes) do
         local other = route[1] == point.name and route[2] or route[1]
         local oneWay = route[1] == point.name and ' to ' or ' from '
@@ -298,10 +338,10 @@ function Transport.Command(argument)
         local recorded = 0
         for _, name in ipairs(Transport.docks) do
             local here = Transport.Dock(name)
-            if here then recorded = recorded + 1 end
-            ns.Print((here and 'recorded  ' or 'missing   ') .. name)
+            if here and not here.estimated then recorded = recorded + 1 end
+            ns.Print((here and (here.estimated and 'estimated ' or 'recorded  ') or 'missing   ') .. name)
         end
-        ns.Print(recorded .. ' of ' .. #Transport.docks .. ' docks recorded. Stand at the dock or tower and type /tgf dock <name>.')
+        ns.Print(recorded .. ' of ' .. #Transport.docks .. ' docks recorded in game. Stand at the dock or tower and type /tgf dock <name>.')
         return
     end
     local name, problem = Transport.Match(forget or argument)

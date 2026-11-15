@@ -1,6 +1,11 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.58-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.59-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Estimated dock positions, 0.5.59-beta
+
+- A dock that has not been recorded with /tgf dock now gets an estimated position from the flight point of the same town (Menethil Harbor, Southshore, Theramore, Feathermoon, Orgrimmar, Undercity, Grom'gol, Ratchet and Booty Bay), which the client reports and which stands near the harbor or tower. Estimated docks are drawn on the continent and world maps, their tooltip says Estimated position, and /tgf dock lists them as estimated. A position recorded in game always wins. Forgotten Coast, Steamwheedle Port and Powderfuse Port have no flight point and stay unknown until recorded, so routes to them are not drawn.
+- Public sources do not publish dock coordinates, so none were typed in by hand.
 
 ## Darker blue for Alliance routes, 0.5.58-beta
 
