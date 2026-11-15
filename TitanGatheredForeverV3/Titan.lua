@@ -187,6 +187,10 @@ function Titan.Menu(owner)
             ns.settings.transportStyle = 'clear'
             ns.Transport.Update()
         end)
+        flights:CreateCheckbox('Route lines: solid instead of dashed', function() return ns.settings.transportSolid == true end, function()
+            ns.settings.transportSolid = ns.settings.transportSolid ~= true
+            ns.Transport.Update()
+        end)
         local auction = root:CreateButton('Auction prices')
         auction:CreateTitle(ns.AuctionScan.Status())
         auction:CreateButton('Scan now (the auction house must be open)', function() ns.AuctionScan.Run() end)

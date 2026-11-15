@@ -177,6 +177,15 @@ function Transport.Dashes(points, dash, gap)
     return result
 end
 
+-- The same curve as one continuous line: a piece per sample segment.
+function Transport.Solid(points)
+    local result = {}
+    for index = 1, #points - 1 do
+        result[index] = { points[index][1], points[index][2], points[index + 1][1], points[index + 1][2] }
+    end
+    return result
+end
+
 -- What to draw on a map: docks that fall on it and routes whose two ends both fall on it.
 function Transport.Layout(mapID)
     local points, lines = {}, {}
@@ -250,7 +259,8 @@ function R:Refresh(force)
         local color = Transport.colors[entry.route[3]]
         local curve = Transport.Curve(entry.a.x * width, entry.a.y * height, entry.b.x * width, entry.b.y * height,
             entry.route[1] .. '|' .. entry.route[2])
-        for _, d in ipairs(Transport.Dashes(curve, dash, gap)) do
+        local pieces = ns.settings.transportSolid == true and Transport.Solid(curve) or Transport.Dashes(curve, dash, gap)
+        for _, d in ipairs(pieces) do
             used = used + 1
             local line = self.lines[used]
             if not line then line = self.overlay:CreateLine(nil, 'ARTWORK'); self.lines[used] = line end

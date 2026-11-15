@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.59-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.60-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Solid route lines, 0.5.60-beta
+
+- The Flight points menu has a new switch, Route lines: solid instead of dashed. It draws each route as one continuous curved line. Dashed stays the default.
 
 ## Estimated dock positions, 0.5.59-beta
 

@@ -93,6 +93,13 @@ test('an unrecorded dock is estimated from the flight point of its town and a re
     eq(ns.Transport.Dock('Ratchet').estimated, nil); eq(ns.Transport.Dock('Ratchet').x, .6)
 end)
 
+test('a solid line has a piece per sample segment', function()
+    local ns = fresh()
+    local solid = ns.Transport.Solid({ { 0, 0 }, { 1, 1 }, { 2, 0 } })
+    eq(#solid, 2); eq(solid[2][1], 1); eq(solid[2][4], 0)
+    eq(#ns.Transport.Solid(ns.Transport.Curve(0, 0, 100, 0, 'A|B')), 48)
+end)
+
 test('the dock command lists, records and forgets', function()
     local ns, printed = fresh()
     C_Map.GetBestMapForUnit = function() return 5 end
