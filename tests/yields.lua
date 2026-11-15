@@ -40,8 +40,8 @@ test('rows list the most collected items with value, share and unpriced counts',
         actions = { { kind = 'Mining', completed = 100, attempts = 110 } } })
     local rows = ns.Yields.Rows(nil, 'Mining', 'quantity')
     eq(rows[1].title, true); eq(rows[1].text, 'Mining')
-    assert(rows[2].summary and rows[2].text:find('Mining: 100 completed, 105 items collected'), rows[2].text)
-    assert(rows[2].text:find('1 items without a price'), rows[2].text)
+    assert(rows[2].summary and rows[2].text:find('Completed: 100     Items collected: 105',1,true), rows[2].text)
+    assert(rows[2].text:find('(1 items without a price)',1,true), rows[2].text)
     eq(rows[4].itemID, 1); eq(rows[4].quantity, 70); eq(rows[4].value, 350); eq(rows[5].itemID, 2); eq(rows[6].itemID, 3)
     eq(rows[6].value, nil)
     assert(math.abs(rows[4].share - 70 / 105 * 100) < 1e-9)
@@ -83,13 +83,13 @@ test('a value per hour needs measured time and the items counted in the same per
     local ns = fresh({ vendor = prices.vendor, rates = rates, actions = { { kind = 'Mining', completed = 10, attempts = 10,
         timedBegan = 1000, active = 3600, timedItems = { [1] = 20, [2] = 1 } } } })
     local rows = ns.Yields.Rows(nil, 'Mining', 'quantity')
-    assert(rows[3].text:find('Active time 1 h 0 min'), rows[3].text)
-    assert(rows[3].text:find('about 200c and 21 items per hour'), rows[3].text)       -- 20 x 5 + 1 x 100
+    assert(rows[3].text:find('Active time: 1 h 0 min',1,true), rows[3].text)
+    assert(rows[3].text:find('Per hour: 200c and 21 items',1,true), rows[3].text)       -- 20 x 5 + 1 x 100
     ns = fresh({ vendor = prices.vendor, rates = rates, actions = { { kind = 'Mining', completed = 1, attempts = 1,
         timedBegan = 1000, active = 120, timedItems = { [1] = 2 } } } })
-    assert(ns.Yields.Rows(nil, 'Mining', 'quantity')[3].text:find('too little time'))
+    assert(ns.Yields.Rows(nil, 'Mining', 'quantity')[3].text:find('too little time',1,true))
     ns = fresh({ vendor = prices.vendor, rates = rates, actions = { { kind = 'Mining', completed = 1, attempts = 1 } } })
-    assert(ns.Yields.Rows(nil, 'Mining', 'quantity')[3].text:find('measured from this version on'))
+    assert(ns.Yields.Rows(nil, 'Mining', 'quantity')[3].text:find('measured from this version on',1,true))
 end)
 
 test('the action tracker measures active time and counts timed items', function()

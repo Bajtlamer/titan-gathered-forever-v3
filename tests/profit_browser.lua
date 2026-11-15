@@ -132,21 +132,21 @@ test('the footer asks for a scan when there are no prices and says which profess
     local footer = B.window.footer
     function footer:SetText(value) text = value end
     B.mine = true; B.Refresh()
-    assert(text:find('No auction prices yet: scan the auction house', 1, true))
-    assert(text:find('Not read yet for this character: Alchemy, First Aid. Open each profession window once.', 1, true))
-    assert(text:find('0 of 0 recipes could be priced, 0 of them earn a profit.', 1, true))
+    assert(strip(text):find('No auction prices yet: scan the auction house', 1, true))
+    assert(strip(text):find('Not read yet for this character: Alchemy, First Aid. Open each profession window once.', 1, true))
+    assert(strip(text):find('0 of 0 recipes could be priced, 0 of them earn a profit.', 1, true))
     ns.db.auction = { at = 1, items = {}, others = {} }
     ns.KnownRecipes.Record('C1', 'Alchemy', {}, 1, { 101 }); ns.KnownRecipes.Record('C1', 'FirstAid', {}, 1, {})
     B.Refresh()
-    assert(not text:find('No auction prices yet', 1, true)); assert(not text:find('Not read yet', 1, true))
-    assert(text:find('1 of 1 recipes could be priced, 1 of them earn a profit.', 1, true)); assert(text:find('* assumes one item per craft', 1, true))
+    assert(not strip(text):find('No auction prices yet', 1, true)); assert(not strip(text):find('Not read yet', 1, true))
+    assert(strip(text):find('1 of 1 recipes could be priced, 1 of them earn a profit.', 1, true)); assert(strip(text):find('* assumes one item per craft', 1, true))
     ns.db.recipeMakes[101] = { 1, 1 }; ns.db.recipeExtra = nil; B.Refresh()                  -- the number made is known: no star, no note
-    assert(not text:find('* assumes one item per craft', 1, true))
-    assert(text:find('The recipe table is a mirror of client tables', 1, true))
+    assert(not strip(text):find('* assumes one item per craft', 1, true))
+    assert(strip(text):find('The recipe table is a mirror of client tables', 1, true))
     ns.db.recipeMakes[101] = nil
     ns.db.recipeExtra = { [900] = { out = 5001, profession = 'Alchemy', reagents = { { 2, 1 } } } }
     ns.KnownRecipes.Record('C1', 'Alchemy', {}, 1, { 101, 900 }); B.Refresh()
-    assert(text:find('1 of these recipes are not in the recipe table; they were taken from your profession windows.', 1, true))
+    assert(strip(text):find('1 of these recipes are not in the recipe table; they were taken from your profession windows.', 1, true))
 end)
 
 test('a click opens the reagents of the recipe and hovering shows the product', function()

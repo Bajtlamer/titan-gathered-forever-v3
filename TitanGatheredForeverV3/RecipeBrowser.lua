@@ -13,7 +13,7 @@ function Browser.Cells(row)
     -- A recipe the player lacks the skill for is red, so the ones that could be learned now stand out.
     local function paint(value) return row.canLearn == false and ns.Style.Text(ns.Style.red, value) or value end
     return { paint(row.name), ns.NpcSources.Label(row.kind), paint(row.skill and tostring(row.skill) or 'Unknown'),
-        row.trainer and 'Trainer' or 'Vendor', where, row.price and ns.Economy.Coin(row.price) or 'Unknown' }
+        row.trainer and 'Trainer' or 'Vendor', where, row.price and ns.NpcSources.CoinIcons(row.price) or 'Unknown' }
 end
 
 -- The first visible row (zero based), kept between 0 and the last position that still fills the window.

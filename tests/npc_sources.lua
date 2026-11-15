@@ -392,7 +392,7 @@ test('merchants that sell a profession item are listed cheapest unit price first
     local vendors = ns.NpcSources.VendorsFor(2320)
     eq(#vendors, 3); eq(vendors[1].name, 'Cheap Cora'); eq(vendors[2].name, 'Dear Dan'); eq(vendors[3].name, 'Odd Ora')
     eq(vendors[1].zone, 'Zone 1430'); eq(vendors[1].mapID, 1430); eq(vendors[1].unit, 50)
-    eq(ns.NpcSources.UnitPriceText(vendors[1]), '50c each'); eq(ns.NpcSources.UnitPriceText(vendors[3]), 'special cost')
+    eq(ns.NpcSources.UnitPriceText(vendors[1]), '50' .. COPPER .. ' each'); eq(ns.NpcSources.UnitPriceText(vendors[3]), 'special cost')
     eq(#ns.NpcSources.VendorsFor(99), 1); eq(#ns.NpcSources.VendorsFor(12345), 0)
 end)
 

@@ -201,7 +201,7 @@ test('browser cells, hover tooltip and profession filter', function()
     local rows = ns.NpcSources.Unlearned('C1', false)
     local cells = ns.RecipeBrowser.Cells(rows[1])
     eq(cells[1], 'Lesser Healing Potion'); eq(cells[2], 'Alchemy'); eq(cells[3], '50'); eq(cells[4], 'Trainer')
-    eq(cells[5], '<green>Alchemy Trainer</> (+1)'); eq(cells[6], '5s')
+    eq(cells[5], '<green>Alchemy Trainer</> (+1)'); eq(cells[6], '5|TInterface\\MoneyFrame\\UI-SilverIcon:0:0:2:0|t')
     ns.RecipeBrowser.Show()
     ns.RecipeBrowser.Refresh()
     -- Hovering the NPC column of a row shows where the NPCs are; leaving hides the tooltip.
