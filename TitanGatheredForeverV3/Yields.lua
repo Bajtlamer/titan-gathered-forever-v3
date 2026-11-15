@@ -87,13 +87,14 @@ function Yields.Rows(character, filter, sort)
                     second = second .. coin(timedValue / active * 3600) .. val(string.format(' and %d items', math.floor(timedQuantity / active * 3600 + 0.5)))
                     if timedUnpriced > 0 then second = second .. lab(' (some items have no price)') end
                 else second = second .. val('too little time measured yet') end
-                if date then second = second .. '     ' .. lab('Measured since: ') .. val(date('%Y-%m-%d', action.timedBegan)) end
+                if date then second = second .. '     ' .. lab('Measured since: ') .. (ns.Style and ns.Style.Date(date('%Y-%m-%d', action.timedBegan)) or date('%Y-%m-%d', action.timedBegan)) end
             end
             if #list > 0 or (action.attempts or 0) > 0 then
                 if #rows > 0 then rows[#rows + 1] = { summary = true, spacer = true, kind = kind, text = '' } end
                 rows[#rows + 1] = { summary = true, title = true, kind = kind, text = label, gold = true }
                 rows[#rows + 1] = { summary = true, kind = kind, text = first }
                 rows[#rows + 1] = { summary = true, kind = kind, text = second }
+                rows[#rows + 1] = { summary = true, spacer = true, small = true, kind = kind, text = '' }
                 for index = 1, math.min(#list, Yields.LIMIT) do rows[#rows + 1] = list[index] end
                 if #list > Yields.LIMIT then
                     rows[#rows + 1] = { summary = true, kind = kind, text = string.format('%d more items not shown.', #list - Yields.LIMIT) }

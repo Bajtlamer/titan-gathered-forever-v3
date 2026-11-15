@@ -84,7 +84,7 @@ test('the list shows status, search and the profession filter', function()
     B.searchText = 'zone 1411'; B.Refresh(); eq(B.total, 1)  -- the zone is searchable too
     B.searchText = nil; B.kind = 'Alchemy'; B.Refresh(); eq(B.total, 2)
     B.kind = nil; B.status = 'visited'; B.Refresh(); eq(B.total, 0); eq(B.RangeText(0, 0), 'No trainers')
-    eq(B.Cells({ npcID = 9, name = 'X', kind = 'Mining', visited = true, lastSeen = nil })[5], '<green>Visited</>')
+    eq(B.Cells({ npcID = 9, name = 'X', kind = 'Mining', visited = true, lastSeen = nil })[5], '<gold>Visited</>')
     eq(B.Cells({ npcID = 9, name = 'X', kind = 'Mining' })[4], 'Unknown')
 end)
 

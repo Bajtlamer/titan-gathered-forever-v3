@@ -42,18 +42,19 @@ test('rows list the most collected items with value, share and unpriced counts',
     eq(rows[1].title, true); eq(rows[1].text, 'Mining')
     assert(rows[2].summary and rows[2].text:find('Completed: 100     Items collected: 105',1,true), rows[2].text)
     assert(rows[2].text:find('(1 items without a price)',1,true), rows[2].text)
-    eq(rows[4].itemID, 1); eq(rows[4].quantity, 70); eq(rows[4].value, 350); eq(rows[5].itemID, 2); eq(rows[6].itemID, 3)
-    eq(rows[6].value, nil)
-    assert(math.abs(rows[4].share - 70 / 105 * 100) < 1e-9)
-    rows = ns.Yields.Rows(nil, 'Mining', 'value'); eq(rows[4].itemID, 2)      -- 3000 beats 350, the unpriced one is last
-    eq(rows[6].itemID, 3)
+    eq(rows[4].spacer, true)                                    -- a small gap before the list of items
+    eq(rows[5].itemID, 1); eq(rows[5].quantity, 70); eq(rows[5].value, 350); eq(rows[6].itemID, 2); eq(rows[7].itemID, 3)
+    eq(rows[7].value, nil)
+    assert(math.abs(rows[5].share - 70 / 105 * 100) < 1e-9)
+    rows = ns.Yields.Rows(nil, 'Mining', 'value'); eq(rows[5].itemID, 2)      -- 3000 beats 350, the unpriced one is last
+    eq(rows[7].itemID, 3)
 end)
 
 test('a blank row separates one profession from the next', function()
     local ns = fresh({ vendor = prices.vendor, auction = prices.auction, rates = rates })
     local rows, spacers, titles = ns.Yields.Rows(nil, nil, 'quantity'), 0, 0
     for index, row in ipairs(rows) do
-        if row.spacer then spacers = spacers + 1; assert(rows[index + 1].title and index > 1) end
+        if row.spacer and not row.small then spacers = spacers + 1; assert(rows[index + 1].title and index > 1) end
         if row.title then titles = titles + 1 end
     end
     eq(titles, 2); eq(spacers, 1); eq(rows[1].title, true)

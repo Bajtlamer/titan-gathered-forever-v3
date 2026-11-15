@@ -1,6 +1,11 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.77-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.78-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Green dates and a gap before the item list, 0.5.78-beta
+
+- Every date and time of day is green (Style.Date), so it stands out from the gold labels and the white values: Measured since, Recording began, First recorded, the PvP and reagent coverage dates, Bank observed, Last seen on the map, Visited and Confirmed in game (the status words are gold now, only the date is green).
+- A small gap separates the two summary lines of a gathering profession from its list of items.
 
 ## Summary lines use the full width, 0.5.77-beta
 

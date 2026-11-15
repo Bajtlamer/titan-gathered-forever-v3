@@ -2,6 +2,8 @@
 return function(Style)
     Style.gold, Style.white = Style.gold or 'gold', Style.white or 'white'
     Style.Text = Style.Text or function(color, text) return '|c' .. color .. tostring(text) .. '|r' end
+    Style.green = Style.green or 'green'
+    Style.Date = function(text) return Style.Text(Style.green, text) end
     Style.Label = function(text) return Style.Text(Style.gold, text) end
     Style.Value = function(text) return Style.Text(Style.white, text) end
     Style.Range = function(first, last, total, what)

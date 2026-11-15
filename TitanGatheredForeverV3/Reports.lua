@@ -147,7 +147,7 @@ local function values(mode,row)
         return {ns.Style.ItemName(row.itemID),row.quantity,string.format('%.1f%%',row.share),
             row.unit and ns.Economy.Coin(row.unit)or'No price',row.value and ns.Economy.Coin(row.value)or'Unknown',row.source or''}
     elseif mode=='actions'then
-        local began=date and date('%Y-%m-%d %H:%M',row.began)or tostring(row.began)
+        local began=ns.Style.Date(date and date('%Y-%m-%d %H:%M',row.began)or tostring(row.began))
         return {labels[row.kind],row.attempts,row.completed,row.failed,row.interrupted,row.stopped,row.unresolved,began}
     elseif mode=='chances'then
         if row.sourceRate then
@@ -199,7 +199,7 @@ local function entriesFor(window,rows)
         local columns=values(viewMode(window),row)
         local tight=viewMode(window)=='yield'      -- the gathered lists are denser than the other reports
         local height=tight and 12 or 16
-        if tight and(row.title or row.spacer)then entries[#entries+1]={data=row,values=columns,height=row.title and 30 or 26};return end
+        if tight and(row.title or row.spacer)then entries[#entries+1]={data=row,values=columns,height=row.title and 30 or(row.small and 8 or 26)};return end
         if tight then window.measure.cells[1]:SetWidth(row.summary and 920 or layouts.yield[1][3])end
         for i,value in ipairs(columns)do
             local measure=window.measure.cells[i];measure:SetText(value)
@@ -285,7 +285,7 @@ function Reports.ProductionDetails(owner,row)
         if ns.CraftingView then root:CreateButton('Plan recipe reagents',function()ns.CraftingView.Show(row.recipeID,1)end)end
         root:CreateTitle(string.format('%d failed, %d interrupted, %d unresolved attempts',row.failed,row.interrupted,
             row.attempts-row.completed-row.failed-row.interrupted))
-        root:CreateTitle('First recorded: '..(date and date('%Y-%m-%d',row.began)or tostring(row.began)))
+        root:CreateTitle('First recorded: '..ns.Style.Date(date and date('%Y-%m-%d',row.began)or tostring(row.began)))
         ns.Style.MenuNote(root,'Observed output quantities; unmatched operations are excluded')
         local ids={};for id in pairs(row.outputs)do ids[#ids+1]=id end;table.sort(ids)
         for _,id in ipairs(ids)do
@@ -336,7 +336,7 @@ function Reports.Update(window)
             or(stats.currentRankID and('Rank '..stats.currentRankID))or'Not available'
         local highest=stats.highestRankName or(stats.highestRankID==0 and'No rank')
             or(stats.highestRankID and('Rank '..stats.highestRankID))or'Not available'
-        local coverage=stats.coverageBegan and(date and date('%Y-%m-%d',stats.coverageBegan)or tostring(stats.coverageBegan))or'No tracked data'
+        local coverage=stats.coverageBegan and ns.Style.Date(date and date('%Y-%m-%d',stats.coverageBegan)or tostring(stats.coverageBegan))or'No tracked data'
         rows={{label='Client lifetime honorable kills (current character)',value=stats.lifetimeHonorableKills or'Not available'},
             {label='Current PvP rank',value=rank},{label='Highest recorded rank',value=highest},
             {label='Addon tracked outdoor honorable kills',value=stats.worldKills or 0},
@@ -356,7 +356,7 @@ function Reports.Update(window)
     rows=Reports.Search(window.mode,rows,window.searchText)
     if window.mode=='chances' and window.grouped then rows=Reports.GroupByItem(rows)end
     if window.mode=='reagentUsage'then
-        local coverage=metadata.coverageBegan and(date and date('%Y-%m-%d',metadata.coverageBegan)or tostring(metadata.coverageBegan))or'unknown'
+        local coverage=metadata.coverageBegan and ns.Style.Date(date and date('%Y-%m-%d',metadata.coverageBegan)or tostring(metadata.coverageBegan))or'unknown'
         window.note:SetText(string.format('Estimated from fixed required reagents per completed craft. Coverage since %s. Percent is share of this reagent\'s tracked use. Unsupported recipes are excluded%s',
             coverage,metadata.unsupportedCasts>0 and string.format('; %d completed recipes had unsupported required reagents',metadata.unsupportedCasts)or''))
     end

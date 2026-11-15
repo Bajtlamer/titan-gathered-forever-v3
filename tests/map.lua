@@ -33,6 +33,7 @@ C_Item = { GetItemIconByID = function(id) return id + 1000 end }
 GameTooltip = { SetOwner = function() end, AddLine = function() end, Show = function() end, Hide = function() end }
 local ns = { settings = { gatheringMap = true }, IsPublic = function() return true end,
     Style = { Separator = function(tooltip) tooltip:AddLine(' ') end, ItemName = function(id) return 'Item ' .. id end } }
+dofile('tests/style_stub.lua')(ns.Style)
 assert(loadfile('TitanGatheredForeverV3/PinStyle.lua'))('TitanGatheredForeverV3', ns)
 assert(loadfile('TitanGatheredForeverV3/Map.lua'))('TitanGatheredForeverV3', ns)
 local canvas, world = frame(), frame()

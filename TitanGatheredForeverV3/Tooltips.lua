@@ -14,7 +14,7 @@ end
 function Tooltips.BankObservation(count)
     if not ns.settings.showBank then return nil end
     if count.bankState == 'cached' and count.bankObservedAt then
-        return string.format(ns.L.bankObserved, date('%Y-%m-%d %H:%M', count.bankObservedAt))
+        return string.format(ns.L.bankObserved, ns.Style.Date(date('%Y-%m-%d %H:%M', count.bankObservedAt)))
     end
 end
 

@@ -297,8 +297,8 @@ function Npc.FillTooltip(tooltip, node)
     tooltip:AddLine(Style.Text(Style.gray, role))
     small(tooltip)
     if record.confirmed then
-        local when = record.lastSeen and date and (' ' .. date('%Y-%m-%d', record.lastSeen)) or ''
-        tooltip:AddLine(Style.Text(Style.green, 'Confirmed in game' .. when))
+        local when = record.lastSeen and date and (' ' .. Style.Date(date('%Y-%m-%d', record.lastSeen))) or ''
+        tooltip:AddLine(Style.Text(Style.gold, 'Confirmed in game') .. when)
     else
         tooltip:AddLine(Style.Text(Style.gray, 'Not yet confirmed in game'))
     end

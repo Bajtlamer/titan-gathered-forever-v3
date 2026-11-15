@@ -278,7 +278,7 @@ test('confirmed data is green, extra costs are noted and an empty list says so',
         vendor = { { itemID = 100, kind = 'Alchemy', price = 500, skill = 225, extendedCost = true } } }
     local t = tip()
     ns.NpcSources.FillTooltip(t, { kind = 'RecipeVendor', npcID = 2 })
-    eq(t.lines[1], '<gold>Seen Vendor</>'); eq(t.lines[3], '<green>Confirmed in game</>')
+    eq(t.lines[1], '<gold>Seen Vendor</>'); eq(t.lines[3], '<gold>Confirmed in game</>')
     eq(t.doubles[1][2], '5' .. SILVER .. ' <gray>+ extra cost</>')
     ns.db.npcs[1] = { name = 'Empty Trainer', profession = 'Alchemy', mapID = 1429, x = 0.5, y = 0.6, lastSeen = 1, trainer = {} }
     t = tip()

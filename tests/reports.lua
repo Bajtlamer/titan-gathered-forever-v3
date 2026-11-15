@@ -87,7 +87,7 @@ test('global reagent report shows leading profession share and opens full breakd
  assert(w:IsShown()and not ns.Reports.windows.history:IsShown())
  eq(w.rows[1].cells[1].text,'Item 159');eq(w.rows[1].cells[2].text,'100')
  eq(w.rows[1].cells[3].text,'Tailoring');eq(w.rows[1].cells[4].text,'75.0%')
- assert(w.note.text:find('Coverage since 100',1,true));assert(w.note.text:find('2 completed recipes',1,true))
+ assert(w.note.text:find('Coverage since '..ns.Style.Date('100'),1,true));assert(w.note.text:find('2 completed recipes',1,true))
  pick(w.scope,'All characters');eq(selected,nil);eq(w.scope.text,'All characters')
  local previousMenu=MenuUtil;local titles={};MenuUtil={CreateContextMenu=function(_,fn)
   fn({}, {CreateTitle=function(_,value)titles[#titles+1]=value end,SetScrollMode=function()end})

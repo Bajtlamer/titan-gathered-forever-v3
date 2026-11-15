@@ -105,7 +105,7 @@ function Map:CreatePin()
             end
             GameTooltip:AddLine(string.format('Recorded near %.1f, %.1f',
                 (node.sourceX or node.x) * 100, (node.sourceY or node.y) * 100))
-            if node.lastSeen then GameTooltip:AddLine('Last seen: ' .. date('%Y-%m-%d %H:%M', node.lastSeen)) end
+            if node.lastSeen then GameTooltip:AddLine('Last seen: ' .. ns.Style.Date(date('%Y-%m-%d %H:%M', node.lastSeen))) end
         else
             GameTooltip:AddLine(ns.Style.ItemName(node.itemID))
             GameTooltip:AddLine(ns.PinStyle.Label(node.kind))

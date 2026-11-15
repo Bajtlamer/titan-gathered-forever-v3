@@ -13,8 +13,8 @@ function Browser.Cells(row)
     local Style = ns.Style
     local status = 'Not visited'
     if row.visited then
-        local when = row.lastSeen and date and (' ' .. date('%Y-%m-%d', row.lastSeen)) or ''
-        status = Style.Text(Style.green, 'Visited' .. when)
+        local when = row.lastSeen and date and (' ' .. Style.Date(date('%Y-%m-%d', row.lastSeen))) or ''
+        status = Style.Text(Style.gold, 'Visited') .. when
     end
     return { Style.Text(Style.green, row.name), ns.NpcSources.Label(row.kind), row.zone or 'Unknown',
         row.x and string.format('%.1f, %.1f', row.x, row.y) or 'Unknown', status }

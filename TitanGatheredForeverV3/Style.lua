@@ -9,6 +9,8 @@ end
 
 -- Informational text is small and gold (the font of a note already is); the data in it is white, so that a label and
 -- its value, or a sentence and its numbers, never run together. Label is for the words, Value for the data.
+-- A date or time of day is green, so it stands out from both the labels and the other values.
+function Style.Date(text) return Style.Text(Style.green, text) end
 function Style.Label(text) return Style.Text(Style.gold, text) end
 function Style.Value(text) return Style.Text(Style.white, text) end
 -- 'Showing 1-18 of 40' with the numbers as values.

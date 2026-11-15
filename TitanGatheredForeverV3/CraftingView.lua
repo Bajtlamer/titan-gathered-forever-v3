@@ -227,7 +227,7 @@ function View.Refresh()
         end
         if plan.learned == false then bits[#bits + 1] = 'Recipe not learned.' end
         if plan.bankObservedAt then
-            bits[#bits + 1] = 'Bank observed ' .. (date and date('%Y-%m-%d %H:%M', plan.bankObservedAt) or tostring(plan.bankObservedAt)) .. '.'
+            bits[#bits + 1] = 'Bank observed ' .. ns.Style.Date(date and date('%Y-%m-%d %H:%M', plan.bankObservedAt) or tostring(plan.bankObservedAt)) .. '.'
         end
         bits[#bits + 1] = 'Bank counts: Display menu > Show bank counts. Materials only: skill, tools and cooldowns are not checked; optional reagents are excluded.'
         if #plan.issues > 0 then bits[#bits + 1] = 'Rows below are partial.' end
