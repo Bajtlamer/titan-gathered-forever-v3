@@ -1,6 +1,11 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.50-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.51-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## The recipe table fills itself, 0.5.51-beta
+
+- Reading a profession (the existing read when its window opens) now also reads the schematic of every recipe in its list, 40 recipes per frame, once per recipe. Two things are kept: the number one craft makes (saved variables key recipeMakes, which removes the star from the profit list: no more assumed one item per craft), and, for a recipe that the recipe table lacks, its product and materials (key recipeExtra: product, profession, materials). The profit list shows such recipes too and its footer says how many came from your profession windows. A recipe that is in the table is never copied, and one that was read is skipped when the window opens again. A recipe with a reagent the planner cannot read (a choice of reagents, a currency) is not added.
+- This answers the incomplete recipe table (a mirror of client tables, complete = false): what your professions show is added over time.
 
 ## Profit list: rounding, number made and a clearer footer, 0.5.50-beta
 

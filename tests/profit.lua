@@ -91,6 +91,26 @@ test('products on a thin auction market are hidden when asked, and counted', fun
     eq(#rows, 1); eq(rows[1].product.best, 'vendor')                  -- the bandage sells to the vendor for 200
 end)
 
+test('recipes the profession windows showed and the book lacks are listed too, and the book wins for the same recipe', function()
+    local ns = fresh()
+    ns.db.recipeExtra = {
+        [900] = { out = 5001, profession = 'Alchemy', reagents = { { 2, 1 } } },     -- not in the book: product 5001 for 50 copper of materials
+        [101] = { out = 7777, profession = 'Alchemy', reagents = { { 1, 1 } } },     -- also in the book: ignored
+        [901] = { profession = 'Alchemy' },                                            -- damaged: ignored
+    }
+    local rows, info = ns.Profit.Rows('C1', {})
+    eq(#rows, 4); eq(info.looked, 4)
+    local added
+    for _, row in ipairs(rows) do if row.recipeID == 900 then added = row end end
+    assert(added); eq(added.fromWindow, true); eq(added.profit, 900); eq(added.name, 'Item5001')
+    eq(added.profession, 'Alchemy'); eq(added.kind, 'Alchemy')
+    for _, row in ipairs(rows) do if row.recipeID == 101 then eq(row.fromWindow, nil); eq(row.productID, 5001) end end
+    eq(#ns.Profit.Rows('C1', { kind = 'Alchemy' }), 3)
+    ns.KnownRecipes.Record('C1', 'Alchemy', {}, 1, { 900 })
+    local mine = ns.Profit.Rows('C1', { mine = true, kind = 'Alchemy' })
+    eq(#mine, 1); eq(mine[1].recipeID, 900)                                           -- learned by recipe ID
+end)
+
 test('without a recipe book or prices the list is empty or unpriced, never invented', function()
     local ns = fresh()
     ns.RecipeBook = nil

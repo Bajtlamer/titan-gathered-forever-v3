@@ -63,34 +63,40 @@ function Profit.Rows(character, options)
     local rows, unread, unreadSet, looked, thinHidden = {}, {}, {}, 0, 0
     if not data then return rows, { unread = unread, looked = 0, thinHidden = 0 } end
     local needle = options.search and options.search ~= '' and options.search:lower() or nil
-    for recipeID, recipe in pairs(data.recipes) do
-        local profession = data.professions[recipe[2]]
+    -- Recipes the profession windows showed and the book lacks are kept separately (Crafting.Harvest).
+    local function consider(recipeID, productID, profession, pairsList, fromWindow)
         local kind = Profit.Kind(profession)
-        if not options.kind or options.kind == kind then
-            looked = looked + 1
-            local name = Profit.Name(recipeID, recipe[1])
-            local include = true
-            local learned
-            if options.mine then
-                learned = Profit.Learned(character, kind, recipeID, name)
-                if learned == nil then unreadSet[kind] = true end
-                include = learned == true
-            end
-            if include and needle and not (name:lower():find(needle, 1, true) or profession:lower():find(needle, 1, true)) then
-                include = false
-            end
-            if include then
-                local reagents = {}
-                for index, reagent in ipairs(recipe[3]) do reagents[index] = { itemID = reagent[1], perOperation = reagent[2] } end
-                local low, high, assumed = Profit.Makes(recipeID)
-                local product = ns.Economy.Product({ outputItemID = recipe[1], quantityMin = low, quantityMax = high,
-                    rows = reagents, issues = {}, operations = 1 })
-                if Profit.Thin(product, options.minAuctions) then
-                    thinHidden = thinHidden + 1
-                else
-                    rows[#rows + 1] = { recipeID = recipeID, name = name, profession = profession, kind = kind, productID = recipe[1],
-                        product = product, profit = product and product.profit, assumed = assumed, learned = learned }
-                end
+        if options.kind and options.kind ~= kind then return end
+        looked = looked + 1
+        local name = Profit.Name(recipeID, productID)
+        local learned
+        if options.mine then
+            learned = Profit.Learned(character, kind, recipeID, name)
+            if learned == nil then unreadSet[kind] = true end
+            if learned ~= true then return end
+        end
+        if needle and not (name:lower():find(needle, 1, true) or profession:lower():find(needle, 1, true)) then return end
+        local reagents = {}
+        for index, reagent in ipairs(pairsList) do reagents[index] = { itemID = reagent[1], perOperation = reagent[2] } end
+        local low, high, assumed = Profit.Makes(recipeID)
+        local product = ns.Economy.Product({ outputItemID = productID, quantityMin = low, quantityMax = high,
+            rows = reagents, issues = {}, operations = 1 })
+        if Profit.Thin(product, options.minAuctions) then
+            thinHidden = thinHidden + 1
+        else
+            rows[#rows + 1] = { recipeID = recipeID, name = name, profession = profession, kind = kind, productID = productID,
+                product = product, profit = product and product.profit, assumed = assumed, learned = learned,
+                fromWindow = fromWindow or nil }
+        end
+    end
+    for recipeID, recipe in pairs(data.recipes) do
+        consider(recipeID, recipe[1], data.professions[recipe[2]], recipe[3], false)
+    end
+    local extra = ns.db and ns.db.recipeExtra
+    if type(extra) == 'table' then
+        for recipeID, recipe in pairs(extra) do
+            if not data.recipes[recipeID] and type(recipe) == 'table' and recipe.out and recipe.profession and recipe.reagents then
+                consider(recipeID, recipe.out, recipe.profession, recipe.reagents, true)
             end
         end
     end

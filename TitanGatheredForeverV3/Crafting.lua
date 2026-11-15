@@ -80,6 +80,47 @@ end
 function Crafting.Select(info,native)
     Crafting.selectedID=Crafting.Resolve(info,native)
 end
+-- The name of a profession kind as the recipe book writes it.
+local labels={FirstAid='First Aid'}
+local HARVEST_STEP=40
+
+-- Reads the schematic of every recipe of an open profession (the IDs come from its recipe list) in small steps: Read
+-- keeps the number a craft makes, and a recipe that the recipe book lacks is kept with its product and materials, so
+-- the recipe table fills itself from the windows of the professions. Recipes that were read before are skipped.
+function Crafting.Harvest(ids)
+    if not ns.db or type(ids)~='table'then return 0 end
+    local book=ns.RecipeBook and ns.RecipeBook.recipes or{}
+    local makes,extra=ns.db.recipeMakes,ns.db.recipeExtra
+    local queue={}
+    for _,id in ipairs(ids)do
+        if integer(id,2147483647)and not(type(makes)=='table'and makes[id]and(book[id]or(type(extra)=='table'and extra[id])))then
+            queue[#queue+1]=id
+        end
+    end
+    local index=1
+    local function step()
+        local last=math.min(#queue,index+HARVEST_STEP-1)
+        for position=index,last do
+            local id=queue[position]
+            local recipe=Crafting.Read(id)
+            if recipe and recipe.outputItemID and not book[id]and type(extra)=='table'then
+                local reagents,supported=Crafting.FixedReagents(recipe)
+                if supported then
+                    local list={}
+                    for item,quantity in pairs(reagents)do list[#list+1]={item,quantity}end
+                    table.sort(list,function(a,b)return a[1]<b[1]end)
+                    extra[id]={out=recipe.outputItemID,profession=labels[recipe.kind]or recipe.kind,reagents=list}
+                end
+            end
+        end
+        index=last+1
+        if index<=#queue then
+            if C_Timer and C_Timer.After then C_Timer.After(0,step)else step()end
+        end
+    end
+    if #queue>0 then step()end
+    return #queue
+end
 function Crafting.Initialize()
     if Crafting.registered or not EventRegistry or not EventRegistry.RegisterCallback then return end
     EventRegistry:RegisterCallback('ProfessionsRecipeListMixin.Event.OnRecipeSelected',function(_,info)Crafting.Select(info,true)end,Crafting)

@@ -542,3 +542,7 @@ Second live scan (realm CAMWOW EU5 Realm 4 PvP, at 1794701409): 287,853 auctions
 ## 0.5.50-beta, profit list review
 
 Live screenshot of the profit tab (Engineering, My recipes, 3+ auctions; 20 recipes, 2 hidden as thin markets): the arithmetic of the rows is consistent (Bronze Tube 5s after the fee against 4s 24c of materials, +76c; Crude Scope and Flying Tiger Goggles sell better to the vendor). Fixed: the per unit fee rounded to zero for 1 copper items, the number made was not visible in the row (Rough Dynamite profit +35c with 37c after the fee and 39c of materials), the footer said "have a profit" for every priced recipe.
+
+## 0.5.51-beta, bulk harvest of the recipe schematics
+
+Crafting.Harvest reads the schematic of every recipe listed by an open profession (called from KnownRecipes.Scan, 40 per frame, skipped when already read) and keeps recipeMakes (number made) and recipeExtra (recipes the book lacks: product, profession, materials, only when the planner can read all reagents). Profit.Rows lists the extras and the footer counts them. Pending live check: how long reading a large profession takes (the first read of Leatherworking or Tailoring), how many recipes come out as extras (the measure of how incomplete the table is), and that the stars disappear. The frame cost of 40 schematics per frame is not measured.

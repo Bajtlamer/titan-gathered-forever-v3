@@ -84,6 +84,8 @@ function K.Scan()
         K.Record(ns.characterID, kind, names, now, byIDs[kind])
         if ns.DebugLog then ns.DebugLog.Add('recipes', kind .. ' read, ' .. #names .. ' learned recipes') end
     end
+    -- The schematics of all the recipes of the profession: the number a craft makes, and recipes the book lacks.
+    if ns.Crafting and ns.Crafting.Harvest then ns.Crafting.Harvest(ids) end
     if ns.RecipeBrowser and ns.RecipeBrowser.Refresh then ns.RecipeBrowser.Refresh() end
     if ns.ProfitBrowser and ns.ProfitBrowser.Refresh then ns.ProfitBrowser.Refresh() end
 end

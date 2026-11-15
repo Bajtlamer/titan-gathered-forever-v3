@@ -101,6 +101,11 @@ local function footer(info, rows, scanned)
         end
     end
     notes[#notes + 1] = string.format('%d of %d recipes could be priced, %d of them earn a profit.', priced, #rows, earning)
+    local added = 0
+    for _, row in ipairs(rows) do if row.fromWindow then added = added + 1 end end
+    if added > 0 then
+        notes[#notes + 1] = string.format('%d of these recipes are not in the recipe table; they were taken from your profession windows.', added)
+    end
     if info.thinHidden and info.thinHidden > 0 then
         notes[#notes + 1] = string.format('%d recipes are hidden because their product has fewer than %d auctions (a thin market: one odd offer sets the price); choose All markets to see them.',
             info.thinHidden, Browser.THIN)
