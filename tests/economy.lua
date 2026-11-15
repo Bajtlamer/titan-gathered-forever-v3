@@ -22,7 +22,7 @@ test('the auction price is reduced by the fee, the vendor price is read from the
     local ns = fresh({ [10] = { min = 1000, n = 4 } }, nil, { [10] = 250, [11] = 0 })
     local auction = ns.Economy.Auction(10)
     eq(auction.min, 1000); eq(auction.net, 950); eq(auction.n, 4)
-    eq(ns.Economy.Auction(99), nil); eq(ns.Economy.Net(333), 316)
+    eq(ns.Economy.Auction(99), nil); assert(math.abs(ns.Economy.Net(333) - 316.35) < 1e-9)    -- the fee is not rounded away
     eq(ns.Economy.VendorSell(10), 250); eq(ns.Economy.VendorSell(11), nil)   -- zero means it cannot be sold
     eq(ns.Economy.VendorSell(12), nil)
     C_Item = nil; eq(ns.Economy.VendorSell(10), nil)
@@ -49,6 +49,16 @@ test('a product is sold where one unit yields more, and the profit is the value 
     ns = fresh({ [100] = { min = 3000 }, [1] = { min = 500 } }, nil, { [100] = 2900 })
     result = ns.Economy.Product(plan({ { itemID = 1, perOperation = 1 } }, 100, 1, 1))
     eq(result.best, 'vendor'); eq(result.unitValue, 2900); eq(result.profit, 2400)
+end)
+
+test('the fee of one cheap unit is a fraction of a copper and is not rounded to nothing', function()
+    local ns = fresh({ [100] = { min = 1, n = 50 }, [1] = { min = 100 } })
+    assert(math.abs(ns.Economy.Net(1) - 0.95) < 1e-9)
+    eq(ns.Economy.Coin(0.95), '1c'); eq(ns.Economy.Coin(0.4), '0c'); eq(ns.Economy.Coin(-3), '0c')   -- rounded for display only
+    local result = ns.Economy.Product(plan({ { itemID = 1, perOperation = 1 } }, 100, 200, 200))    -- a craft makes 200 shots
+    eq(result.value, 190); eq(result.profit, 90)                                                      -- 200 x 0.95 less 100
+    result = ns.Economy.Product(plan({ { itemID = 1, perOperation = 1 } }, 100, 1, 1))
+    eq(result.value, 1); eq(result.profit, -99)                                                        -- one shot still counts as 1 copper
 end)
 
 test('a craft that makes several items counts their average and a loss is negative', function()

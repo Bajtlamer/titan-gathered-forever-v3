@@ -538,3 +538,7 @@ Live: the button of 0.5.47 is visible. CraftingView.Toggle(recipeID, operations)
 ## 0.5.49-beta, thin markets
 
 Second live scan (realm CAMWOW EU5 Realm 4 PvP, at 1794701409): 287,853 auctions, 7.2 s of reading (about 9 microseconds per auction, a 6 ms budget per frame), the answer to the request after about 17 s, 6543 items priced (484 catalogue, 6059 others), the price block about 139 KB in the saved variables. 1050 of 1971 recipes have a priced product, 1045 of them have every material priced (auction only: 543 with a profit, 502 with a loss, before vendor prices); 18 of the best 40 profits rested on one or two auctions. Profit.Thin and the minAuctions option hide such rows (default 3), the profit list has the Auctions column and the Markets filter, and the reagent window marks a thin product price. Pending live check: the new column and filter in the tab, how many recipes remain with 3+ auctions, whether the vendor price column and Sells better to look right with real item data.
+
+## 0.5.50-beta, profit list review
+
+Live screenshot of the profit tab (Engineering, My recipes, 3+ auctions; 20 recipes, 2 hidden as thin markets): the arithmetic of the rows is consistent (Bronze Tube 5s after the fee against 4s 24c of materials, +76c; Crude Scope and Flying Tiger Goggles sell better to the vendor). Fixed: the per unit fee rounded to zero for 1 copper items, the number made was not visible in the row (Rough Dynamite profit +35c with 37c after the fee and 39c of materials), the footer said "have a profit" for every priced recipe.

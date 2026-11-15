@@ -8,13 +8,17 @@ ns.Economy = Economy
 -- Fee of the auction house on a sale. This is the usual Classic value and an assumption, not read from the client.
 Economy.CUT = 0.05
 
+-- Money for display. A price per unit can be a fraction of a copper (the fee of one cheap unit), so it is rounded here
+-- and nowhere else.
 local function coin(copper)
+    copper = math.max(0, math.floor(copper + 0.5))
     return ns.NpcSources and ns.NpcSources.Coin(copper) or (tostring(copper) .. 'c')
 end
 Economy.Coin = coin
 
--- What the auction house leaves after its fee.
-function Economy.Net(price) return math.floor(price * (1 - Economy.CUT)) end
+-- What the auction house leaves of one unit after its fee. Not rounded: the fee of a cheap unit is a fraction of a copper
+-- (95 percent of 1 copper is 0.95), and rounding it down would make cheap ammunition worth nothing.
+function Economy.Net(price) return price * (1 - Economy.CUT) end
 
 -- What a vendor pays for one item (copper), nil when unknown or not sellable.
 function Economy.VendorSell(itemID)
@@ -68,7 +72,7 @@ function Economy.Product(plan)
         if unit then result.materials = result.materials + unit * row.perOperation else result.unpriced = result.unpriced + 1 end
     end
     if result.unitValue then
-        result.value = math.floor(result.unitValue * quantity)
+        result.value = math.floor(result.unitValue * quantity + 0.5)
         if result.unpriced == 0 and not result.partial then result.profit = result.value - result.materials end
     end
     return result

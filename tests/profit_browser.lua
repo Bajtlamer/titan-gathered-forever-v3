@@ -72,6 +72,9 @@ test('rows show the materials, the auction after the fee, the vendor, where to s
     eq(cells[6], '200c'); eq(cells[7], 'Vendor'); eq(cells[8], '<gray>Unknown</>')
     ns.db.recipeMakes[101] = { 1, 1 }                                -- seen in the reagent window: no star any more
     rows = ns.Profit.Rows('C1', {}); eq(B.Cells(rows[1])[8], '<green>+700c</>')
+    ns.db.recipeMakes[101] = { 2, 4 }                                -- a craft makes three on average: the name says so
+    rows = ns.Profit.Rows('C1', {}); eq(B.Cells(rows[1])[1], '<green>Potion A</><gray> x3</>')
+    ns.db.recipeMakes[101] = { 1, 2 }; rows = ns.Profit.Rows('C1', {}); eq(B.Cells(rows[1])[1], '<green>Potion A</><gray> x1.5</>')
 end)
 
 test('a few auctions behind a price are marked, and thin markets are hidden unless all markets are asked for', function()
@@ -129,12 +132,12 @@ test('the footer asks for a scan when there are no prices and says which profess
     B.mine = true; B.Refresh()
     assert(text:find('No auction prices yet: scan the auction house', 1, true))
     assert(text:find('Not read yet for this character: Alchemy, First Aid. Open each profession window once.', 1, true))
-    assert(text:find('0 of 0 recipes have a profit.', 1, true))
+    assert(text:find('0 of 0 recipes could be priced, 0 of them earn a profit.', 1, true))
     ns.db.auction = { at = 1, items = {}, others = {} }
     ns.KnownRecipes.Record('C1', 'Alchemy', {}, 1, { 101 }); ns.KnownRecipes.Record('C1', 'FirstAid', {}, 1, {})
     B.Refresh()
     assert(not text:find('No auction prices yet', 1, true)); assert(not text:find('Not read yet', 1, true))
-    assert(text:find('1 of 1 recipes have a profit.', 1, true)); assert(text:find('* assumes one item per craft', 1, true))
+    assert(text:find('1 of 1 recipes could be priced, 1 of them earn a profit.', 1, true)); assert(text:find('* assumes one item per craft', 1, true))
 end)
 
 test('a click opens the reagents of the recipe and hovering shows the product', function()

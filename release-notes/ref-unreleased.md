@@ -1,6 +1,12 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.49-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.50-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Profit list: rounding, number made and a clearer footer, 0.5.50-beta
+
+- The fee of the auction house is no longer rounded to whole coppers per unit. 95 percent of one copper was rounded down to nothing, so cheap ammunition showed an auction price of 0c after the fee and a profit of +0c. The unit price after the fee is kept as it is and rounded only when it is shown, and the value of a craft is rounded to the nearest copper.
+- The name in the profit list shows how many one craft makes when it is not one ("Rough Dynamite x2"), because the profit is for the whole craft and the columns show prices per unit. A range shows its average ("x1.5").
+- The footer said "20 of 20 recipes have a profit" when only a few earned one. It now says how many could be priced and how many of those earn a profit.
 
 ## Thin markets in the profit list, 0.5.49-beta
 

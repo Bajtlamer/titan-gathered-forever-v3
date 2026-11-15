@@ -37,7 +37,13 @@ function Browser.Cells(row)
         local label = n >= 999 and '999+' or tostring(n)
         count = n < Browser.THIN and Style.Text(Style.orange, label) or label
     end
-    return { Style.Text(paint, row.name), ns.NpcSources.Label(row.kind), materials,
+    -- How many one craft makes, when it is not one: the profit is for the whole craft.
+    local name = Style.Text(paint, row.name)
+    if product and product.quantity ~= 1 then
+        name = name .. Style.Text(Style.gray, string.format(' x%s', product.quantity == math.floor(product.quantity)
+            and product.quantity or string.format('%.1f', product.quantity)))
+    end
+    return { name, ns.NpcSources.Label(row.kind), materials,
         product and product.auction and coin(product.auction.net) or unknown, count,
         product and product.vendor and coin(product.vendor) or unknown,
         product and product.best and (product.best == 'auction' and 'Auction' or 'Vendor') or unknown, profit }
@@ -87,9 +93,14 @@ local function footer(info, rows, scanned)
         for _, kind in ipairs(info.unread) do names[#names + 1] = ns.NpcSources.Label(kind) end
         notes[#notes + 1] = 'Not read yet for this character: ' .. table.concat(names, ', ') .. '. Open each profession window once.'
     end
-    local priced = 0
-    for _, row in ipairs(rows) do if row.profit ~= nil then priced = priced + 1 end end
-    notes[#notes + 1] = string.format('%d of %d recipes have a profit.', priced, #rows)
+    local priced, earning = 0, 0
+    for _, row in ipairs(rows) do
+        if row.profit ~= nil then
+            priced = priced + 1
+            if row.profit > 0 then earning = earning + 1 end
+        end
+    end
+    notes[#notes + 1] = string.format('%d of %d recipes could be priced, %d of them earn a profit.', priced, #rows, earning)
     if info.thinHidden and info.thinHidden > 0 then
         notes[#notes + 1] = string.format('%d recipes are hidden because their product has fewer than %d auctions (a thin market: one odd offer sets the price); choose All markets to see them.',
             info.thinHidden, Browser.THIN)
