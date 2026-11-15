@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.57-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.58-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Darker blue for Alliance routes, 0.5.58-beta
+
+- Alliance routes and dock markers use a darker blue for better contrast on the light parchment of the world map.
 
 ## Two line styles for sea routes, 0.5.57-beta
 

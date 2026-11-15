@@ -28,7 +28,7 @@ Transport.styles = {
     clear = { thickness = 1.6, alpha = 1, boost = 1.15 },
 }
 function Transport.Style(name) return Transport.styles[name] or Transport.styles.thin end
-Transport.colors = { Alliance = { .25, .55, 1 }, Horde = { 1, .25, .25 }, Neutral = { 1, .82, .2 } }
+Transport.colors = { Alliance = { .08, .27, .85 }, Horde = { 1, .25, .25 }, Neutral = { 1, .82, .2 } }
 
 local function number(value)
     return type(value) == 'number' and value == value and value > -math.huge and value < math.huge
