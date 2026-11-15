@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.61-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.62-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## One route line style, 0.5.62-beta
+
+- After trying the variants, the sea routes keep one style: thin dashed arcs. The line style choices (thin and clear, dashed, dotted and solid) are removed from the Flight points menu and from the saved settings; the menu keeps the Show boat and zeppelin routes switch.
 
 ## Dotted route lines, 0.5.61-beta
 
