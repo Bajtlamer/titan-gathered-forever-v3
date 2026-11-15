@@ -16,7 +16,10 @@ function ns.Settings.Initialize(saved)
     end
     if type(settings.flightPoints) ~= 'boolean' then settings.flightPoints = true end
     if type(settings.transportRoutes) ~= 'boolean' then settings.transportRoutes = true end
-    if type(settings.transportSolid) ~= 'boolean' then settings.transportSolid = false end
+    if settings.transportPattern ~= 'dashed' and settings.transportPattern ~= 'solid' and settings.transportPattern ~= 'dotted' then
+        settings.transportPattern = settings.transportSolid == true and 'solid' or 'dashed'
+    end
+    settings.transportSolid = nil
     if settings.transportStyle ~= 'thin' and settings.transportStyle ~= 'clear' then settings.transportStyle = 'thin' end
     settings.showTotal = nil
     if type(settings.itemTooltips) ~= 'boolean' then settings.itemTooltips = true end

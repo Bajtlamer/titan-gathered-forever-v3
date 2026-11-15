@@ -259,13 +259,17 @@ function R:Refresh(force)
         local color = Transport.colors[entry.route[3]]
         local curve = Transport.Curve(entry.a.x * width, entry.a.y * height, entry.b.x * width, entry.b.y * height,
             entry.route[1] .. '|' .. entry.route[2])
-        local pieces = ns.settings.transportSolid == true and Transport.Solid(curve) or Transport.Dashes(curve, dash, gap)
+        local pattern = ns.settings.transportPattern
+        local pieces
+        if pattern == 'solid' then pieces = Transport.Solid(curve)
+        elseif pattern == 'dotted' then pieces = Transport.Dashes(curve, 1.5 * ratio, 4.5 * ratio)
+        else pieces = Transport.Dashes(curve, dash, gap) end
         for _, d in ipairs(pieces) do
             used = used + 1
             local line = self.lines[used]
             if not line then line = self.overlay:CreateLine(nil, 'ARTWORK'); self.lines[used] = line end
             local style = Transport.Style(ns.settings.transportStyle)
-            line:SetThickness(math.max(1, style.thickness * ratio))
+            line:SetThickness(math.max(pattern == 'dotted' and 2 or 1, style.thickness * ratio))
             line:SetColorTexture(math.min(1, color[1] * style.boost), math.min(1, color[2] * style.boost),
                 math.min(1, color[3] * style.boost), style.alpha)
             line:SetStartPoint('TOPLEFT', self.overlay, d[1], -d[2])

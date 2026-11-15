@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.60-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.61-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Dotted route lines, 0.5.61-beta
+
+- Route lines have three patterns in the Flight points menu: dashed (default), dotted (small round-looking dots) and solid. They replace the single solid switch of 0.5.60-beta; the earlier choice is carried over.
 
 ## Solid route lines, 0.5.60-beta
 
