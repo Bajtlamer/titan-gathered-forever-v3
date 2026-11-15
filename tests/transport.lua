@@ -63,6 +63,13 @@ test('a route is an arc that bends the same way every time and ends at both dock
     eq(#ns.Transport.Curve(5, 5, 5, 5, 'A|B'), 1)
 end)
 
+test('the line style falls back to thin and clear is stronger', function()
+    local ns = fresh()
+    eq(ns.Transport.Style('x').thickness, 1)
+    assert(ns.Transport.Style('clear').thickness > ns.Transport.Style('thin').thickness)
+    eq(ns.Transport.Style('clear').alpha, 1)
+end)
+
 test('dashes follow the polyline with gaps and stay bounded', function()
     local ns = fresh()
     local d = ns.Transport.Dashes({ { 0, 0 }, { 100, 0 } }, 5, 5)
@@ -84,6 +91,13 @@ test('an unrecorded dock is estimated from the flight point of its town and a re
     assert(points['Booty Bay'] and points['Ratchet']); eq(#lines, 1); eq(points['Ratchet'].estimated, true)
     ns.Transport.Record('Ratchet', 3, .6, .3)
     eq(ns.Transport.Dock('Ratchet').estimated, nil); eq(ns.Transport.Dock('Ratchet').x, .6)
+end)
+
+test('a solid line has a piece per sample segment', function()
+    local ns = fresh()
+    local solid = ns.Transport.Solid({ { 0, 0 }, { 1, 1 }, { 2, 0 } })
+    eq(#solid, 2); eq(solid[2][1], 1); eq(solid[2][4], 0)
+    eq(#ns.Transport.Solid(ns.Transport.Curve(0, 0, 100, 0, 'A|B')), 48)
 end)
 
 test('the dock command lists, records and forgets', function()

@@ -23,6 +23,11 @@ Transport.routes = {
     { 'Ratchet', 'Booty Bay', 'Neutral', 'boat' },
     { 'Steamwheedle Port', 'Powderfuse Port', 'Neutral', 'boat' },
 }
+Transport.styles = {
+    thin = { thickness = 1, alpha = .85, boost = 1 },
+    clear = { thickness = 1.6, alpha = 1, boost = 1.15 },
+}
+function Transport.Style(name) return Transport.styles[name] or Transport.styles.thin end
 Transport.colors = { Alliance = { .08, .27, .85 }, Horde = { 1, .25, .25 }, Neutral = { 1, .82, .2 } }
 
 local function number(value)
@@ -172,6 +177,15 @@ function Transport.Dashes(points, dash, gap)
     return result
 end
 
+-- The same curve as one continuous line: a piece per sample segment.
+function Transport.Solid(points)
+    local result = {}
+    for index = 1, #points - 1 do
+        result[index] = { points[index][1], points[index][2], points[index + 1][1], points[index + 1][2] }
+    end
+    return result
+end
+
 -- What to draw on a map: docks that fall on it and routes whose two ends both fall on it.
 function Transport.Layout(mapID)
     local points, lines = {}, {}
@@ -245,13 +259,19 @@ function R:Refresh(force)
         local color = Transport.colors[entry.route[3]]
         local curve = Transport.Curve(entry.a.x * width, entry.a.y * height, entry.b.x * width, entry.b.y * height,
             entry.route[1] .. '|' .. entry.route[2])
-        local pieces = Transport.Dashes(curve, dash, gap)
+        local pattern = ns.settings.transportPattern
+        local pieces
+        if pattern == 'solid' then pieces = Transport.Solid(curve)
+        elseif pattern == 'dotted' then pieces = Transport.Dashes(curve, 1.5 * ratio, 4.5 * ratio)
+        else pieces = Transport.Dashes(curve, dash, gap) end
         for _, d in ipairs(pieces) do
             used = used + 1
             local line = self.lines[used]
             if not line then line = self.overlay:CreateLine(nil, 'ARTWORK'); self.lines[used] = line end
-            line:SetThickness(math.max(1, ratio))
-            line:SetColorTexture(color[1], color[2], color[3], .85)
+            local style = Transport.Style(ns.settings.transportStyle)
+            line:SetThickness(math.max(pattern == 'dotted' and 2 or 1, style.thickness * ratio))
+            line:SetColorTexture(math.min(1, color[1] * style.boost), math.min(1, color[2] * style.boost),
+                math.min(1, color[3] * style.boost), style.alpha)
             line:SetStartPoint('TOPLEFT', self.overlay, d[1], -d[2])
             line:SetEndPoint('TOPLEFT', self.overlay, d[3], -d[4])
             line:Show()

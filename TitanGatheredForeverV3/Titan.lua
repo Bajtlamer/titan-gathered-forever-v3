@@ -179,6 +179,20 @@ function Titan.Menu(owner)
             ns.settings.transportRoutes = ns.settings.transportRoutes == false
             ns.Transport.Update()
         end)
+        flights:CreateCheckbox('Route lines: thin', function() return ns.settings.transportStyle ~= 'clear' end, function()
+            ns.settings.transportStyle = 'thin'
+            ns.Transport.Update()
+        end)
+        flights:CreateCheckbox('Route lines: clear', function() return ns.settings.transportStyle == 'clear' end, function()
+            ns.settings.transportStyle = 'clear'
+            ns.Transport.Update()
+        end)
+        for _, pattern in ipairs({ 'dashed', 'dotted', 'solid' }) do
+            flights:CreateCheckbox('Route lines: ' .. pattern, function() return ns.settings.transportPattern == pattern end, function()
+                ns.settings.transportPattern = pattern
+                ns.Transport.Update()
+            end)
+        end
         local auction = root:CreateButton('Auction prices')
         auction:CreateTitle(ns.AuctionScan.Status())
         auction:CreateButton('Scan now (the auction house must be open)', function() ns.AuctionScan.Run() end)
