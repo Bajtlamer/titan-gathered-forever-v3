@@ -357,4 +357,24 @@ test('unknown chances have no expander and combined sources use summed trials',f
  ns.Reports.Show('chances');ns.Reports.Show('history');assert(w.expanded[769])
  ns.history,ns.production=previous,production;w.combined=nil;w.expanded={};ns.Reports.Update(w)
 end)
+test('data of a profession that is not installed or is switched off stays out of the reports',function()
+ local previousHistory,previousProduction,previousActions=ns.history,ns.production,ns.actions
+ ns.history=ns.History.New({})
+ ns.history:Observe('a','a',{id='m',kind='Mining',source='9',mapID=1,x=.4,y=.6,at=100,complete=true,items={[2770]=3}})
+ ns.history:Observe('a','a',{id='l',kind='Loot',source='8',mapID=1,x=.4,y=.6,at=100,complete=true,items={[769]=1}})
+ ns.production={Totals=function()return{}end,Rows=function()return{{kind='Mining',outputs={}},{kind='Cooking',outputs={}}}end}
+ ns.actions={Rows=function()return{{kind='Mining'},{kind='Herbs'}}end}
+ local function ids(rows)local r={};for _,row in ipairs(rows)do r[row.itemID or row.kind]=true end;return r end
+ ns.Catalog.Hidden=nil
+ assert(ids(ns.Reports.Rows('history','a'))[2770] and ids(ns.Reports.Rows('chances','a'))[2770])
+ ns.Catalog.Hidden=function(kind)return kind=='Mining'end
+ local history=ids(ns.Reports.Rows('history','a'));assert(history[769] and not history[2770])
+ local chances=ids(ns.Reports.Rows('chances','a'));assert(chances[769] and not chances[2770])
+ local production=ids(ns.Reports.Rows('production','a'));assert(production.Cooking and not production.Mining)
+ local actions=ids(ns.Reports.Rows('actions','a'));assert(actions.Herbs and not actions.Mining)
+ ns.Catalog.Modules=function()return{{id='Cooking',label='Cooking',items={[769]=true}},{id='Mining',label='Mining',items={[2770]=true}}}end
+ history=ids(ns.Reports.Rows('history','a'));assert(not history[2770],'a hidden profession item stays hidden even though its module lists it')
+ ns.Catalog.Modules=function()return{{id='Cooking',label='Cooking'}}end
+ ns.Catalog.Hidden=nil;ns.history,ns.production,ns.actions=previousHistory,previousProduction,previousActions
+end)
 print('PASS '..passed..' history/report window checks')

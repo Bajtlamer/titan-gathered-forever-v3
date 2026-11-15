@@ -103,6 +103,14 @@ function Catalog.Installed(kind)
     return not categories or categories[kind] ~= false
 end
 
+-- The professions of the game, installed or not. Data recorded for one of them that is not installed or is switched
+-- off stays in the saved variables but is left out of the reports.
+Catalog.professionKinds = { Alchemy = true, Blacksmithing = true, Cooking = true, Enchanting = true, Engineering = true,
+    FirstAid = true, Fishing = true, Herbs = true, Leatherworking = true, Mining = true, Skinning = true, Tailoring = true }
+function Catalog.Hidden(kind)
+    return Catalog.professionKinds[kind] == true and not Catalog.Installed(kind)
+end
+
 -- The modules of the installed professions, by label.
 function Catalog.InstalledKinds()
     local result = {}

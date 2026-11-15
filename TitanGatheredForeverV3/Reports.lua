@@ -21,18 +21,30 @@ function Reports.Matches(itemID,filter,kind)
     local m=ns.Catalog.modules[filter]
     return kind==filter or (m and m.items[itemID]~=nil)or false
 end
+local function hidden(kind)return ns.Catalog.Hidden~=nil and ns.Catalog.Hidden(kind)end
+-- Items that were obtained or crafted only through professions that are not installed or are switched off.
+local function hiddenItems(character)
+    local hide,keep={},{}
+    local function mark(kind,ids)for id in pairs(ids)do (hidden(kind)and hide or keep)[id]=true end end
+    for _,kind in ipairs({'Alchemy','Blacksmithing','Cooking','Enchanting','Engineering','FirstAid','Fishing','Herbs','Leatherworking','Mining','Skinning','Tailoring','Loot','Rare','PvP'})do
+        mark(kind,ns.history:ItemsFor(kind,character))
+    end
+    for _,module in ipairs(ns.Catalog.Modules())do if not hidden(module.id)and module.items then for id in pairs(module.items)do keep[id]=true end end end
+    if ns.production and ns.production.Rows then for _,recipe in ipairs(ns.production:Rows(character))do mark(recipe.kind,recipe.outputs or{})end end
+    return hide,keep
+end
 function Reports.Rows(mode,character,filter)
     local result={}
     if mode=='reagentUsage'then return ns.production:ReagentUsage(character)end
     if mode=='actions' then
         for _,row in ipairs(ns.actions:Rows(character)) do
-            if not filter or row.kind==filter then result[#result+1]=row end
+            if (not filter or row.kind==filter) and not hidden(row.kind) then result[#result+1]=row end
         end
         return result
     end
     if mode=='production' then
         for _,row in ipairs(ns.production:Rows(character))do
-            if not filter or row.kind==filter then result[#result+1]=row end
+            if (not filter or row.kind==filter) and not hidden(row.kind) then result[#result+1]=row end
         end
         return result
     end
@@ -60,7 +72,16 @@ function Reports.Rows(mode,character,filter)
         for _,row in ipairs(rows)do row.sources=rates[row.itemID]or{}end
     end
     local obtained=filter and ns.history:ItemsFor(filter,character)or{}
-    for _,row in ipairs(rows)do if Reports.Matches(row.itemID,filter,row.kind)or obtained[row.itemID]or craftedKinds[row.itemID]then result[#result+1]=row end end
+    local hide,keep
+    if not filter then hide,keep=hiddenItems(character)end
+    for _,row in ipairs(rows)do
+        local shown=Reports.Matches(row.itemID,filter,row.kind)or obtained[row.itemID]or craftedKinds[row.itemID]
+        if shown and not filter then
+            if mode=='chances'then shown=not hidden(row.kind)
+            else shown=not(hide[row.itemID]and not keep[row.itemID])end
+        end
+        if shown then result[#result+1]=row end
+    end
     return result
 end
 local function text(frame,font,x,y,width)
@@ -385,12 +406,12 @@ function Reports.Show(mode)
         w.filterButton=ns.Nav.Dropdown(w,175,-65,190,function()
             local list={{value=false,label='All professions'}}
             if mode=='actions' then
-                for _,id in ipairs({'Mining','Herbs','Skinning','Fishing','Enchanting'}) do list[#list+1]={value=id,label=labels[id]}end
+                for _,id in ipairs({'Mining','Herbs','Skinning','Fishing','Enchanting'}) do if not hidden(id)then list[#list+1]={value=id,label=labels[id]}end end
             elseif mode=='production'then
                 local kinds={};for kind in pairs(ns.Production.labels)do kinds[#kinds+1]=kind end;table.sort(kinds)
-                for _,id in ipairs(kinds)do list[#list+1]={value=id,label=ns.Production.labels[id]}end
+                for _,id in ipairs(kinds)do if not hidden(id)then list[#list+1]={value=id,label=ns.Production.labels[id]}end end
             else
-                for _,module in ipairs(ns.Catalog.Modules())do list[#list+1]={value=module.id,label=module.label}end
+                for _,module in ipairs(ns.Catalog.Modules())do if not hidden(module.id)then list[#list+1]={value=module.id,label=module.label}end end
             end
             return list
         end,function()return w.filter or false end,function(value)w.filter=value or nil;w.offset=0;Reports.Update(w)end)

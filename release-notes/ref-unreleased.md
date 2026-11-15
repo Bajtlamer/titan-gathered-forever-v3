@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.69-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.70-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Reports follow the installed professions, 0.5.70-beta
+
+- Lifetime materials, Observed chances and Crafting and cooking (and Profession actions) now leave out the data of a profession whose addon is not installed or that is switched off in the Titan menu, the same way the map, the unlearned recipes, the trainers and the crafting profit already did. Items obtained or crafted only through such a profession are hidden, items that other sources or installed professions also provide stay. The profession filters list only the installed professions. Nothing is deleted: switching the profession on shows its data again.
 
 ## Game icons for the docks, 0.5.69-beta
 
