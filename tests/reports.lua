@@ -160,7 +160,6 @@ test('the actions window can show what was gathered and what it is worth',functi
  pick(w.group,'Gathered, most valuable')
  eq(ns.Yields.last.sort,'value');eq(w.headers[1].text,'Item');eq(w.headers[5].text,'Total value');eq(w.headers[7].text,'')
  eq(w.rows[1].cells[1].text,'Mining');assert(w.rows[2].cells[1].text:find('Mining: 5 completed',1,true));eq(w.rows[2].cells[2].text,'')
- eq(w.rows[1].line.shown,false)
  eq(w.rows[4].cells[2].text,'10');eq(w.rows[4].cells[3].text,'83.3%');eq(w.rows[4].cells[4].text,'5c');eq(w.rows[4].cells[5].text,'50c');eq(w.rows[4].cells[6].text,'vendor')
  eq(w.rows[5].cells[4].text,'No price');eq(w.rows[5].cells[5].text,'Unknown')
  assert(w.note.text:find('valued at',1,true))

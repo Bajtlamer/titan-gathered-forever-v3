@@ -401,8 +401,11 @@ function Reports.Draw(window)
                 local title=entry.data.title==true
                 local first=view.cells[1]
                 if first.SetFontObject then first:SetFontObject(title and'GameFontNormalLarge'or'GameFontHighlightSmall')end
-                if view.line then if title and entry.data.kind~=window.entries[1].data.kind then view.line:Show()else view.line:Hide()end end
-            elseif view.line then view.line:Hide()end
+                first.tgfFont=true
+            elseif view.cells[1].tgfFont then      -- leaving the gathered view: back to the normal text
+                if view.cells[1].SetFontObject then view.cells[1]:SetFontObject('GameFontHighlightSmall')end
+                view.cells[1].tgfFont=nil
+            end
             view:Show();y=y+entry.height;shown=shown+1
         else
             full=true;view.data=nil;if view.expand then view.expand:Hide()end;view:Hide()
@@ -489,8 +492,6 @@ function Reports.Show(mode)
         for i=1,ROWS do
             local row=CreateFrame('Button',nil,w);row:SetSize(930,22)
             row.cells=cells(row,mode,'GameFontHighlightSmall',0)
-            row.line=row:CreateTexture(nil,'ARTWORK');row.line:SetColorTexture(.6,.5,.2,.8)
-            row.line:SetPoint('TOPLEFT',row,'TOPLEFT',0,2);row.line:SetPoint('TOPRIGHT',row,'TOPRIGHT',0,2);row.line:SetHeight(1);row.line:Hide()
             row.name=row.cells[1];row.detail=mode=='production'and row.cells[2]or nil
             if mode=='history' or mode=='chances' then
                 row.expand=button(row,'+',mode=='chances'and 175 or 360,0,20,function()

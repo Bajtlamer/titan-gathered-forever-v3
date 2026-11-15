@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.73-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.74-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## No separator line, 0.5.74-beta
+
+- The gold line above each profession title is removed (it looked odd). The large gold title stays, and the rows go back to the normal text when the view is switched away from the gathered lists.
 
 ## Profession sections, 0.5.73-beta
 
