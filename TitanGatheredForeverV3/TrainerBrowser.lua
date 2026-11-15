@@ -27,7 +27,7 @@ end
 
 function Browser.RangeText(offset, total)
     if total == 0 then return 'No trainers' end
-    return string.format('Showing %d-%d of %d', offset + 1, math.min(total, offset + ROWS), total)
+    return ns.Style.Range(offset + 1, math.min(total, offset + ROWS), total)
 end
 
 local function text(parent, font, x, y, width)
@@ -121,7 +121,7 @@ function Browser.Show()
         ns.Nav.Frame(w, 'trainers')
         w:SetScript('OnHide', function() GameTooltip:Hide() end)
         w.TitleText:SetText('TGF v3 Trainers')
-        local note = text(w, 'GameFontHighlightSmall', 15, -33, 930)
+        local note = text(w, 'GameFontNormalSmall', 15, -33, 930)
         note:SetText('Profession trainers from the Classic seed and from your visits. A trainer counts as visited once its window was opened and recorded. Positions of trainers not visited yet are converted from Classic data. Hover a row to see what the trainer teaches; click a row to open the map and mark the trainer.')
         w.filter = ns.Nav.Dropdown(w, 15, -65, 150, function() return statuses end,
             function() return Browser.status end, function(value)
@@ -134,7 +134,7 @@ function Browser.Show()
         end, function() return Browser.kind or false end, function(value)
             Browser.kind, Browser.offset = value or nil, 0; Browser.Refresh()
         end)
-        w.rangeText = text(w, 'GameFontHighlightSmall', 380, -70, 300)
+        w.rangeText = text(w, 'GameFontNormalSmall', 380, -70, 300)
         text(w, 'GameFontNormalSmall', 690, -70, 50):SetText('Search')
         local search = CreateFrame('EditBox', nil, w, 'InputBoxTemplate')
         w.search = search

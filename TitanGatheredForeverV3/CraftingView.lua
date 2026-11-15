@@ -96,7 +96,7 @@ function View.CountsLine(plan)
         .. (counts.unknown > 0 and ('   ' .. Style.Text(Style.gray, 'Unknown ' .. counts.unknown)) or '')
     local total, priced, missing = View.AuctionCost(plan)
     if total then
-        line = line .. '   ' .. Style.Text(Style.gray, 'Missing at auction: ') .. ns.NpcSources.Coin(total)
+        line = line .. '   ' .. Style.Label('Missing at auction: ') .. ns.Economy.Coin(total)
             .. (priced < missing and Style.Text(Style.gray, string.format(' (%d of %d priced)', priced, missing)) or '')
     end
     return line
@@ -106,7 +106,7 @@ end
 function View.AuctionText(itemID)
     local price = ns.AuctionScan and ns.AuctionScan.Price(itemID)
     if not price then return ns.Style.Text(ns.Style.gray, '-') end
-    return ns.NpcSources.Coin(price.min)
+    return ns.Economy.Coin(price.min)
 end
 
 -- The last column: what to do about this reagent. A merchant that was seen selling it is named when it is the
@@ -220,7 +220,7 @@ function View.Refresh()
         w.sorted = View.Sorted(plan.rows)
         w.summary:SetText(View.Headline(plan))
         w.counts:SetText(View.CountsLine(plan))
-        w.scope:SetText('Counting: ' .. plan.scope)
+        w.scope:SetText(ns.Style.Label('Counting: ') .. ns.Style.Value(plan.scope))
         local bits = {}
         if plan.craftable then
             bits[#bits + 1] = string.format('Material limit: %d crafts%s.', plan.craftable, plan.cached and ' (cached estimate)' or '')
@@ -295,12 +295,12 @@ function View.Show(recipeID, operations)
         button(w, '+', 178, -135, 26, function()
             setOperations(w, w.operations + (IsShiftKeyDown and IsShiftKeyDown() and 5 or 1))
         end)
-        w.scope = text(w, 'GameFontHighlightSmall', 225, -140, 220)
+        w.scope = text(w, 'GameFontNormalSmall', 225, -140, 220)
         button(w, 'Refresh', 460, -135, 90, function()
             if ns.ScheduleRefresh then ns.ScheduleRefresh() end
             View.Refresh()
         end)
-        w.note = text(w, 'GameFontHighlightSmall', 15, -165, ROW_WIDTH)
+        w.note = text(w, 'GameFontNormalSmall', 15, -165, ROW_WIDTH)
         local header = CreateFrame('Frame', nil, w)
         header:SetSize(ROW_WIDTH, 20); header:SetPoint('TOPLEFT', w, 'TOPLEFT', 15, -(TOP - 20))
         for _, column in ipairs(columns) do text(header, 'GameFontNormalSmall', column[2], 0, column[3]):SetText(column[1]) end
@@ -334,7 +334,7 @@ function View.Show(recipeID, operations)
             function(delta) scrollTo(w.offset - delta * WHEEL_STEP) end)
         w:EnableMouseWheel(true)
         w:SetScript('OnMouseWheel', function(_, delta) scrollTo(w.offset - delta * WHEEL_STEP) end)
-        w.pageText = text(w, 'GameFontHighlightSmall', 15, -(TOP + MIN_ROWS * ROW_HEIGHT + 10), ROW_WIDTH)
+        w.pageText = text(w, 'GameFontNormalSmall', 15, -(TOP + MIN_ROWS * ROW_HEIGHT + 10), ROW_WIDTH)
     end
     w.recipeID, w.operations, w.offset = recipeID, operations or 1, 0
     ns.Crafting.Select({ recipeID = recipeID })

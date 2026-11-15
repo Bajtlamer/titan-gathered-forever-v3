@@ -12,7 +12,9 @@ Economy.CUT = 0.05
 -- and nowhere else.
 local function coin(copper)
     copper = math.max(0, math.floor(copper + 0.5))
-    return ns.NpcSources and ns.NpcSources.Coin(copper) or (tostring(copper) .. 'c')
+    local api = ns.NpcSources
+    if api and api.CoinIcons then return api.CoinIcons(copper) end
+    return api and api.Coin(copper) or (tostring(copper) .. 'c')
 end
 Economy.Coin = coin
 

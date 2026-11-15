@@ -7,6 +7,16 @@ function Style.Text(color, text)
     return '|c' .. color .. tostring(text) .. '|r'
 end
 
+-- Informational text is small and gold (the font of a note already is); the data in it is white, so that a label and
+-- its value, or a sentence and its numbers, never run together. Label is for the words, Value for the data.
+function Style.Label(text) return Style.Text(Style.gold, text) end
+function Style.Value(text) return Style.Text(Style.white, text) end
+-- 'Showing 1-18 of 40' with the numbers as values.
+function Style.Range(first, last, total, what)
+    return Style.Label('Showing ') .. Style.Value(first .. '-' .. last) .. Style.Label(' of ') .. Style.Value(total)
+        .. (what and Style.Label(' ' .. what) or '')
+end
+
 -- Resize only addon-owned supporting text, preserving native tooltip fonts. The original font is restored
 -- when the tooltip is recycled.
 local function shrink(tooltip, line)

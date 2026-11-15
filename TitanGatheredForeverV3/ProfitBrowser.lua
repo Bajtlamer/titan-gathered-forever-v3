@@ -54,7 +54,7 @@ end
 
 function Browser.RangeText(offset, total)
     if total == 0 then return 'No recipes' end
-    return string.format('Showing %d-%d of %d', offset + 1, math.min(total, offset + ROWS), total)
+    return ns.Style.Range(offset + 1, math.min(total, offset + ROWS), total)
 end
 
 local function text(parent, font, x, y, width)
@@ -92,7 +92,7 @@ local function footer(info, rows, scanned)
     if Browser.mine and #info.unread > 0 then
         local names = {}
         for _, kind in ipairs(info.unread) do names[#names + 1] = ns.NpcSources.Label(kind) end
-        notes[#notes + 1] = 'Not read yet for this character: ' .. table.concat(names, ', ') .. '. Open each profession window once.'
+        notes[#notes + 1] = 'Not read yet for this character: ' .. ns.Style.Value(table.concat(names, ', ')) .. '. Open each profession window once.'
     end
     local priced, earning = 0, 0
     for _, row in ipairs(rows) do
@@ -101,15 +101,15 @@ local function footer(info, rows, scanned)
             if row.profit > 0 then earning = earning + 1 end
         end
     end
-    notes[#notes + 1] = string.format('%d of %d recipes could be priced, %d of them earn a profit.', priced, #rows, earning)
+    notes[#notes + 1] = ns.Style.Value(priced) .. ' of ' .. ns.Style.Value(#rows) .. ' recipes could be priced, ' .. ns.Style.Value(earning) .. ' of them earn a profit.'
     local added = 0
     for _, row in ipairs(rows) do if row.fromWindow then added = added + 1 end end
     if added > 0 then
-        notes[#notes + 1] = string.format('%d of these recipes are not in the recipe table; they were taken from your profession windows.', added)
+        notes[#notes + 1] = ns.Style.Value(added) .. ' of these recipes are not in the recipe table; they were taken from your profession windows.'
     end
     if info.thinHidden and info.thinHidden > 0 then
-        notes[#notes + 1] = string.format('%d recipes are hidden because their product has fewer than %d auctions (a thin market: one odd offer sets the price); choose All markets to see them.',
-            info.thinHidden, Browser.THIN)
+        notes[#notes + 1] = ns.Style.Value(info.thinHidden) .. ' recipes are hidden because their product has fewer than ' .. ns.Style.Value(Browser.THIN)
+            .. ' auctions (a thin market: one odd offer sets the price); choose All markets to see them.'
     end
     local assumed = false
     for _, row in ipairs(rows) do if row.profit ~= nil and row.assumed then assumed = true; break end end
@@ -169,7 +169,7 @@ function Browser.Show()
         ns.Nav.Frame(w, 'profit')
         w:SetScript('OnHide', function() GameTooltip:Hide() end)
         w.TitleText:SetText('TGF v3 Crafting profit')
-        local note = text(w, 'GameFontHighlightSmall', 15, -33, 930)
+        local note = text(w, 'GameFontNormalSmall', 15, -33, 930)
         note:SetText('What each recipe earns: the product sells to the vendor or on the auction house (lowest buyout after the fee), minus the materials at the cheapest known price. Green is a profit, red a loss, gray is unknown because a price is missing; an orange number of auctions is a thin market. Click a recipe for its reagents.')
         w.filter = ns.Nav.Dropdown(w, 15, -65, 150, function() return scopes end,
             function() return Browser.mine == true end, function(value)
@@ -186,7 +186,7 @@ function Browser.Show()
             function() return Browser.minAuctions or Browser.THIN end, function(value)
                 Browser.minAuctions, Browser.offset = value, 0; Browser.Refresh()
             end)
-        w.rangeText = text(w, 'GameFontHighlightSmall', 525, -70, 160)
+        w.rangeText = text(w, 'GameFontNormalSmall', 525, -70, 160)
         text(w, 'GameFontNormalSmall', 690, -70, 50):SetText('Search')
         local search = CreateFrame('EditBox', nil, w, 'InputBoxTemplate')
         w.search = search
@@ -226,7 +226,7 @@ function Browser.Show()
         w.slider = ns.Nav.Scrollbar(w, 15 + ROW_WIDTH + 8, -132, ROWS * ROW_HEIGHT, function(value)
             Browser.ScrollTo(value)
         end, function(delta) Browser.Scroll(-delta * WHEEL_STEP) end)
-        w.footer = text(w, 'GameFontHighlightSmall', 15, -492, 930)
+        w.footer = text(w, 'GameFontNormalSmall', 15, -492, 930)
     end
     ns.Nav.Activate('profit', w)
     w:Show()

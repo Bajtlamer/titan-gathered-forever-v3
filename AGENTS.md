@@ -34,6 +34,10 @@ README.md describes current behavior, plans/plan-live-verification-and-optimizat
 
 Run checks appropriate to changes and document live reproduction/results separately from automated validation. Before source publication, inspect staged files for private data and ignored artifacts. Use concise imperative commit subjects. PR descriptions should state behavior, affected modules, validation and remaining live/client limitations. Do not claim a source push publishes release assets or updates hosting.
 
+## Text and price style in every window
+
+Informational text (notes, summaries, footers, labels) is small and gold; product data is white or colored by meaning, so the two never run together. Prices always use the game money format with gold, silver and copper icons (ns.Economy.Coin, ns.NpcSources.CoinIcons), never plain "1g 2s" text. A label with a colon and its value, and the numbers inside a sentence, are told apart: Style.Label for the words, Style.Value for the data, Style.Range for "Showing a-b of n". Check every new string against this and sweep the neighbouring windows. Tests that compare such text use tests/style_stub.lua.
+
 ## Automatic Live Installation
 
 The user explicitly authorizes installing every completed addon update and new version into `/Applications/World of Warcraft/_forever_/Interface/AddOns` automatically. Do not leave tested runtime changes only in the source checkout or ask for this task authorization again.

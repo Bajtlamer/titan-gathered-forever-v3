@@ -70,22 +70,24 @@ function Yields.Rows(character, filter, sort)
             end)
             local action = actionRows[kind] or {}
             local label = ns.Actions and ns.Actions.labels[kind] or kind
-            local first = string.format('%s: %d completed, %d items collected, worth %s%s', label, action.completed or 0, quantity, coin(value),
-                unpriced > 0 and string.format(' (%d items without a price)', unpriced) or '')
-            local second
+            local function lab(text) return ns.Style and ns.Style.Label(text) or text end
+            local function val(text) return ns.Style and ns.Style.Value(text) or tostring(text) end
+            local first = lab('Completed: ') .. val(action.completed or 0) .. '     ' .. lab('Items collected: ') .. val(quantity)
+                .. '     ' .. lab('Worth: ') .. coin(value) .. (unpriced > 0 and lab(string.format(' (%d items without a price)', unpriced)) or '')
             local active = action.active or 0
+            local second
             if not action.timedBegan then
-                second = 'Time is measured from this version on. Keep gathering to see a value per hour.'
+                second = lab('Value per hour: ') .. val('measured from this version on, keep gathering')
             else
                 local timedValue, timedUnpriced = Yields.Worth(action.timedItems)
                 local timedQuantity = 0
                 for _, count in pairs(action.timedItems or {}) do timedQuantity = timedQuantity + count end
-                second = 'Active time ' .. Yields.Duration(active)
+                second = lab('Active time: ') .. val(Yields.Duration(active)) .. '     ' .. lab('Per hour: ')
                 if active >= Yields.MIN_ACTIVE then
-                    second = second .. string.format(', about %s and %d items per hour%s', coin(timedValue / active * 3600),
-                        math.floor(timedQuantity / active * 3600 + 0.5), timedUnpriced > 0 and ' (some items have no price)' or '')
-                else second = second .. ', too little time measured for a rate per hour' end
-                if date then second = second .. ', measured since ' .. date('%Y-%m-%d', action.timedBegan) end
+                    second = second .. coin(timedValue / active * 3600) .. val(string.format(' and %d items', math.floor(timedQuantity / active * 3600 + 0.5)))
+                    if timedUnpriced > 0 then second = second .. lab(' (some items have no price)') end
+                else second = second .. val('too little time measured yet') end
+                if date then second = second .. '     ' .. lab('Measured since: ') .. val(date('%Y-%m-%d', action.timedBegan)) end
             end
             if #list > 0 or (action.attempts or 0) > 0 then
                 if #rows > 0 then rows[#rows + 1] = { summary = true, spacer = true, kind = kind, text = '' } end

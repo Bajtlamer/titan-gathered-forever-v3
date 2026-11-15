@@ -400,7 +400,7 @@ function Reports.Draw(window)
             if viewMode(window)=='yield'then
                 local title=entry.data.title==true
                 local first=view.cells[1]
-                if first.SetFontObject then first:SetFontObject(title and'GameFontNormalLarge'or'GameFontHighlightSmall')end
+                if first.SetFontObject then first:SetFontObject(title and'GameFontNormalLarge'or(entry.data.summary and'GameFontNormalSmall'or'GameFontHighlightSmall'))end
                 first.tgfFont=true
             elseif view.cells[1].tgfFont then      -- leaving the gathered view: back to the normal text
                 if view.cells[1].SetFontObject then view.cells[1]:SetFontObject('GameFontHighlightSmall')end
@@ -412,7 +412,7 @@ function Reports.Draw(window)
         end
     end
     window.rangeText:SetText(#entries==0 and'No entries'
-        or string.format('Showing %d-%d of %d %s',window.offset+1,window.offset+shown,#entries,window.mode=='history'and'rows'or'entries'))
+        or ns.Style.Range(window.offset+1,window.offset+shown,#entries,window.mode=='history'and'rows'or'entries'))
     ns.Nav.SyncScrollbar(window.slider,window.offset,last)
 end
 function Reports.ScrollTo(window,offset)window.offset=offset;Reports.Draw(window)end
@@ -435,7 +435,7 @@ function Reports.Show(mode)
             or mode=='reagentUsage'and'TGF v3 Reagent usage estimates'
             or mode=='chances'and'TGF v3 Observed acquisition chances'
             or mode=='actions'and'TGF v3 Profession actions'or'TGF v3 Lifetime material history')
-        local note=text(w,'GameFontHighlightSmall',15,-33,930);w.note=note
+        local note=text(w,'GameFontNormalSmall',15,-33,930);w.note=note
         note:SetText(mode=='pvp'and'Client lifetime honorable kills and rank are current-character totals across PvP modes. Per-kill honor estimates come only from named honorable-kill events; other honor awards are excluded. Death tracking begins with this version; earlier deaths cannot be reconstructed.'
             or mode=='reagentUsage'and'Estimated reagent consumption by item and profession. Click a row for the profession breakdown.'
             or mode=='production'and'Completed % = completed casts / observed attempts, including unresolved attempts. Bonus/multicraft use readable-field counts. Click for output details.'
@@ -509,8 +509,8 @@ function Reports.Show(mode)
             end)
             row:SetScript('OnLeave',function()GameTooltip:Hide()end);w.rows[i]=row
         end
-        w.empty=text(w,'GameFontHighlight',15,-contentTop,930)
-        w.rangeText=text(w,'GameFontHighlightSmall',15,-525,930)
+        w.empty=text(w,'GameFontNormalSmall',15,-contentTop,930)
+        w.rangeText=text(w,'GameFontNormalSmall',15,-525,930)
         w.slider=ns.Nav.Scrollbar(w,15+930+8,-contentTop,contentBottom-contentTop,function(value)Reports.ScrollTo(w,value)end,
             function(delta)Reports.Scroll(w,-delta*3)end)
         w:EnableMouseWheel(true)

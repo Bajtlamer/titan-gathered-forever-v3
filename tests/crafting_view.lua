@@ -1,3 +1,6 @@
+local GOLD='|TInterface\\MoneyFrame\\UI-GoldIcon:0:0:2:0|t'
+local SILVER='|TInterface\\MoneyFrame\\UI-SilverIcon:0:0:2:0|t'
+local COPPER='|TInterface\\MoneyFrame\\UI-CopperIcon:0:0:2:0|t'
 local passed=0
 local function eq(a,b)assert(a==b,tostring(a)..' != '..tostring(b))end
 local function test(n,f)local ok,e=pcall(f);if not ok then error(n..': '..e)end;passed=passed+1 end
@@ -43,6 +46,7 @@ ns.Style.ItemName=function(id)return'Item '..id end
 ns.history=ns.History.New({})
 ns.history:Observe('a','A',{id='one',kind='Mining',source='123',mapID=4,at=100,complete=true,items={[1001]=1}})
 ns.gathering={saved={maps={[4]={{itemID=1001,kind='Mining',x=.5,y=.5}}}}}
+local function I(text)return(text:gsub('(%d+)([gsc])%f[%W]',function(n,u)return n..(u=='g'and GOLD or u=='s'and SILVER or COPPER)end))end
 local function plain(text)return(tostring(text):gsub('|c%x%x%x%x%x%x%x%x',''):gsub('|r',''))end
 test('reagents are sorted with the missing ones first and show need, bags, bank and where to get them',function()
  ns.CraftingView.Show(2536,3);local w=ns.CraftingView.window
@@ -115,11 +119,11 @@ test('a merchant seen selling a reagent is named in the last column and in the s
   goods={{itemID=1001,price=250,stack=5},{itemID=1002,price=100,extendedCost=true}}}}}
  ns.NpcSources.Invalidate()
  ns.CraftingView.Show(2536,3);local w=ns.CraftingView.window
- eq(plain(w.rows[1].where.text),'Buy 50c each: Vendor Vic, Zone 4')       -- 250 copper for a stack of 5
+ eq(plain(w.rows[1].where.text),'Buy 50'..COPPER..' each: Vendor Vic, Zone 4')       -- 250 copper for a stack of 5
  eq(plain(w.rows[2].where.text),'Buy special cost: Vendor Vic, Zone 4')   -- paid with something other than money
  local row=w.rows[1];row.scripts.OnClick(row)
  local combined=table.concat(menu.titles,' ');assert(combined:find('Sold by',1,true))
- local callback=menu.buttons['Vendor Vic: 50c each, Zone 4'];assert(callback)
+ local callback=menu.buttons['Vendor Vic: 50'..COPPER..' each, Zone 4'];assert(callback)
  local opened;OpenWorldMap=function(id)opened=id end;GetTime=function()return 100 end
  callback();eq(opened,4);eq(ns.NpcSources.IsHighlighted(50),true)
  ns.NpcSources.SetHighlight(nil);OpenWorldMap=nil;ns.db=nil
@@ -129,12 +133,12 @@ test('the auction column shows the scanned unit price and the line adds up what 
  assert(loadfile('TitanGatheredForeverV3/NpcSources.lua'))('TGF v3',ns)
  ns.db={auction={at=1,entries=9,items={[1001]={min=40,qty=5,n=1},[1002]={min=100,qty=9,n=3},[1003]={min=7,qty=1,n=1}}}}
  ns.CraftingView.Show(2536,3);local w=ns.CraftingView.window
- eq(plain(w.rows[1].auction.text),'40c');eq(plain(w.rows[2].auction.text),'1s')      -- 100 copper is 1 silver
- eq(plain(w.rows[3].auction.text),'7c');eq(plain(w.rows[4].auction.text),'-')        -- 1003 is ready but still priced; 1004 has no price
- assert(plain(w.counts.text):find('Missing at auction: 1s 80c',1,true))              -- 2 x 40 and 1 x 100
+ eq(plain(w.rows[1].auction.text),'40'..COPPER);eq(plain(w.rows[2].auction.text),'1'..SILVER)      -- 100 copper is 1 silver
+ eq(plain(w.rows[3].auction.text),'7'..COPPER);eq(plain(w.rows[4].auction.text),'-')        -- 1003 is ready but still priced; 1004 has no price
+ assert(plain(w.counts.text):find('Missing at auction: 1'..SILVER..' 80'..COPPER,1,true))              -- 2 x 40 and 1 x 100
  assert(not plain(w.counts.text):find('priced',1,true))
  ns.db.auction.items[1002]=nil;ns.CraftingView.Refresh()
- assert(plain(w.counts.text):find('Missing at auction: 80c (1 of 2 priced)',1,true))
+ assert(plain(w.counts.text):find('Missing at auction: 80'..COPPER..' (1 of 2 priced)',1,true))
  ns.db.auction.items[1001]=nil;ns.CraftingView.Refresh()
  assert(not plain(w.counts.text):find('auction',1,true))                               -- nothing priced: no cost line
  ns.db=nil;ns.CraftingView.Show(2536,3)
@@ -160,18 +164,18 @@ test('the product lines compare auction and vendor and show the profit of a craf
  ns.CraftingView.Show(2536,1);local w=ns.CraftingView.window
  local head,prices,profit=plain(w.product.text),plain(w.prices.text),plain(w.profit.text)
  assert(head:find('Makes Item 5001',1,true));assert(head:find('Sells better to the auction house (1.3x the other)',1,true))
- assert(prices:find('Auction 20s each (6 auctions, 19s after the 5% fee)',1,true));assert(prices:find('Vendor pays 15s',1,true))
- assert(profit:find('Materials 7s per craft',1,true));assert(profit:find('Profit per craft: +12s',1,true))
+ assert(prices:find(I('Auction 20s each (6 auctions, 19s after the 5% fee)'),1,true));assert(prices:find(I('Vendor pays 15s'),1,true))
+ assert(profit:find(I('Materials 7s per craft'),1,true));assert(profit:find(I('Profit per craft: +12s'),1,true))
  assert(not profit:find('x1 crafts',1,true))
  assert(w.profit.text:find(ns.Style.green,1,true))
- ns.CraftingView.Show(2536,3);assert(plain(w.profit.text):find('x3 crafts: +36s',1,true))     -- three crafts
+ ns.CraftingView.Show(2536,3);assert(plain(w.profit.text):find(I('x3 crafts: +36s'),1,true))     -- three crafts
  sell=2500;ns.CraftingView.Refresh()                                                     -- the vendor pays more than the auction leaves
- assert(plain(w.product.text):find('Sells better to the vendor',1,true));assert(plain(w.profit.text):find('Profit per craft: +18s',1,true))
+ assert(plain(w.product.text):find('Sells better to the vendor',1,true));assert(plain(w.profit.text):find(I('Profit per craft: +18s'),1,true))
  items[1007]=nil;ns.CraftingView.Refresh()                                                -- one reagent has no price
  assert(plain(w.profit.text):find('1 unpriced reagent: no profit shown',1,true));assert(not plain(w.profit.text):find('Profit per craft',1,true))
  for id=1001,1007 do items[id]={min=1000,qty=1,n=1}end                                    -- materials cost more than the product
  sell=nil;ns.CraftingView.Refresh()
- assert(plain(w.profit.text):find('Profit per craft: -51s',1,true));assert(w.profit.text:find(ns.Style.red,1,true))   -- 19s less 70s
+ assert(plain(w.profit.text):find(I('Profit per craft: -51s'),1,true));assert(w.profit.text:find(ns.Style.red,1,true))   -- 19s less 70s
  ns.db.auction.others={};ns.CraftingView.Refresh()                                       -- nothing is known about the product
  assert(plain(w.profit.text):find('Scan the auction house',1,true));eq(w.prices.text:find('Auction 2',1,true),nil)
  assert(plain(w.prices.text):find('No auction price',1,true));assert(plain(w.prices.text):find('Vendor price unknown',1,true))
@@ -184,10 +188,10 @@ test('a product price that rests on one auction is marked as a thin market',func
  local items={};for id=1001,1007 do items[id]={min=100,qty=1,n=1}end
  ns.db={auction={at=1,entries=9,items=items,others={[5001]=Pack(2000,1)}}}
  ns.CraftingView.Show(2536,1);local w=ns.CraftingView.window
- assert(plain(w.prices.text):find('Auction 20s each (1 auction, thin market, 19s after the 5% fee)',1,true))
+ assert(plain(w.prices.text):find(I('Auction 20s each (1 auction, thin market, 19s after the 5% fee)'),1,true))
  assert(w.prices.text:find(ns.Style.orange..'1 auction, thin market',1,true))               -- marked in orange
  ns.db.auction.others[5001]=Pack(2000,3);ns.CraftingView.Refresh()
- assert(plain(w.prices.text):find('Auction 20s each (3 auctions, 19s after the 5% fee)',1,true))
+ assert(plain(w.prices.text):find(I('Auction 20s each (3 auctions, 19s after the 5% fee)'),1,true))
  assert(not w.prices.text:find('thin market',1,true))                                       -- three auctions are enough
  C_TradeSkillUI.GetRecipeSchematic=base;ns.db=nil;ns.CraftingView.Show(2536,3)
 end)

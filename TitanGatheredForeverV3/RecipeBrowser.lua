@@ -13,7 +13,7 @@ function Browser.Cells(row)
     -- A recipe the player lacks the skill for is red, so the ones that could be learned now stand out.
     local function paint(value) return row.canLearn == false and ns.Style.Text(ns.Style.red, value) or value end
     return { paint(row.name), ns.NpcSources.Label(row.kind), paint(row.skill and tostring(row.skill) or 'Unknown'),
-        row.trainer and 'Trainer' or 'Vendor', where, row.price and ns.NpcSources.Coin(row.price) or 'Unknown' }
+        row.trainer and 'Trainer' or 'Vendor', where, row.price and ns.Economy.Coin(row.price) or 'Unknown' }
 end
 
 -- The first visible row (zero based), kept between 0 and the last position that still fills the window.
@@ -24,7 +24,7 @@ end
 
 function Browser.RangeText(offset, total)
     if total == 0 then return 'No recipes' end
-    return string.format('Showing %d-%d of %d', offset + 1, math.min(total, offset + ROWS), total)
+    return ns.Style.Range(offset + 1, math.min(total, offset + ROWS), total)
 end
 
 local function text(parent, font, x, y, width)
@@ -121,10 +121,10 @@ function Browser.Refresh()
     if #unread > 0 then
         local names = {}
         for _, kind in ipairs(unread) do names[#names + 1] = ns.NpcSources.Label(kind) end
-        notes[#notes + 1] = 'Recipes not yet read for this character: ' .. table.concat(names, ', ')
+        notes[#notes + 1] = 'Recipes not yet read for this character: ' .. ns.Style.Value(table.concat(names, ', '))
             .. '. Open each profession window once.'
     end
-    if pending > 0 then notes[#notes + 1] = pending .. ' vendor recipes are still loading.' end
+    if pending > 0 then notes[#notes + 1] = ns.Style.Value(pending) .. ' vendor recipes are still loading.' end
     w.footer:SetText(table.concat(notes, ' '))
 end
 
@@ -140,7 +140,7 @@ function Browser.Show()
         ns.Nav.Frame(w, 'recipes')
         w:SetScript('OnHide', function() GameTooltip:Hide() end)
         w.TitleText:SetText('TGF v3 Unlearned recipes')
-        local note = text(w, 'GameFontHighlightSmall', 15, -33, 930)
+        local note = text(w, 'GameFontNormalSmall', 15, -33, 930)
         note:SetText('Unlearned recipes with a known trainer or vendor source. Red recipes need more skill than you have yet. Seed data is Classic and not confirmed in game until you visit the NPC. Scroll with the mouse wheel; hover an NPC name to see where to find them; click a row to open the map.')
         w.filter = ns.Nav.Dropdown(w, 15, -65, 150, function()
             return { { value = false, label = 'All unlearned' }, { value = true, label = 'Vendor only' } }
@@ -152,7 +152,7 @@ function Browser.Show()
             for _, kind in ipairs(ns.NpcSources.InstalledKinds(ns.NpcSources.RecipeKinds)) do list[#list + 1] = { value = kind, label = ns.NpcSources.Label(kind) } end
             return list
         end, function() return Browser.kind or false end, function(value) Browser.SetKind(value or nil) end)
-        w.rangeText = text(w, 'GameFontHighlightSmall', 380, -70, 300)
+        w.rangeText = text(w, 'GameFontNormalSmall', 380, -70, 300)
         text(w, 'GameFontNormalSmall', 690, -70, 50):SetText('Search')
         local search = CreateFrame('EditBox', nil, w, 'InputBoxTemplate')
         w.search = search
@@ -198,7 +198,7 @@ function Browser.Show()
         w.slider = ns.Nav.Scrollbar(w, 15 + ROW_WIDTH + 8, -132, ROWS * ROW_HEIGHT, function(value)
             Browser.ScrollTo(value)
         end, function(delta) Browser.Scroll(-delta * WHEEL_STEP) end)
-        w.footer = text(w, 'GameFontHighlightSmall', 15, -520, 930)
+        w.footer = text(w, 'GameFontNormalSmall', 15, -520, 930)
     end
     ns.Nav.Activate('recipes', w)
     w:Show()

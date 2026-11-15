@@ -45,6 +45,7 @@ local function pick(control,label)
 end
 local ns={ItemName=function(id)return'Item '..id end,Style={ItemName=function(id)return'Item '..id end},Catalog={modules={Cooking={label='Cooking',items={[769]=true}}}}}
 ns.Style.MenuNote=function(root,value)return root:CreateTitle(value)end
+dofile('tests/style_stub.lua')(ns.Style)
 ns.Production={labels={Tailoring='Tailoring',FirstAid='First Aid'}}
 ns.Catalog.Modules=function()return{{id='Cooking',label='Cooking'}}end
 assert(loadfile('TitanGatheredForeverV3/History.lua'))('TGF v3',ns);assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TGF v3',ns);assert(loadfile('TitanGatheredForeverV3/Reports.lua'))('TGF v3',ns)
@@ -159,7 +160,7 @@ test('the actions window can show what was gathered and what it is worth',functi
  ns.Reports.Show('actions');local w=ns.Reports.windows.actions
  pick(w.group,'Gathered, most valuable')
  eq(ns.Yields.last.sort,'value');eq(w.headers[1].text,'Item');eq(w.headers[5].text,'Total value');eq(w.headers[7].text,'')
- eq(w.rows[1].cells[1].text,'Mining');assert(w.rows[2].cells[1].text:find('Mining: 5 completed',1,true));eq(w.rows[2].cells[2].text,'')
+ eq(w.rows[1].cells[1].text,ns.Style.Text(ns.Style.gold,'Mining'));assert(w.rows[2].cells[1].text:find('Mining: 5 completed',1,true));eq(w.rows[2].cells[2].text,'')
  eq(w.rows[4].cells[2].text,'10');eq(w.rows[4].cells[3].text,'83.3%');eq(w.rows[4].cells[4].text,'5c');eq(w.rows[4].cells[5].text,'50c');eq(w.rows[4].cells[6].text,'vendor')
  eq(w.rows[5].cells[4].text,'No price');eq(w.rows[5].cells[5].text,'Unknown')
  assert(w.note.text:find('valued at',1,true))
@@ -208,7 +209,7 @@ test('wrapped report rows scroll without overlap lost entries or resetting anoth
   sourceName=string.rep('Long creature name ',i==1 and 15 or 3),mapID=1}end
  ns.Reports.Rows=function(mode,...)if mode=='chances'then return rows end;return original(mode,...)end
  ns.Reports.Show('chances');local w=ns.Reports.windows.chances
- assert(w.rows[1].height>22);assert(w.rangeText.text:find('of 35',1,true))
+ assert(w.rows[1].height>22);assert(w.rangeText.text:find('35',1,true))
  local seen={};local last=0
  local offset=0
  repeat
@@ -241,7 +242,7 @@ test('search keeps matching names and clearing it restores the list',function()
  ns.Reports.Rows=function(mode,...)if mode=='chances'then return rows end;return original(mode,...)end
  ns.Reports.Show('chances');local w=ns.Reports.windows.chances
  w.search.scripts.OnTextChanged({GetText=function()return 'item 3'end},true)
- eq(w.rows[1].data.itemID,3);eq(w.rows[2]:IsShown(),false);assert(w.rangeText.text:find('of 1',1,true))
+ eq(w.rows[1].data.itemID,3);eq(w.rows[2]:IsShown(),false);assert(w.rangeText.text:find(ns.Style.Value(1),1,true))
  w.search.scripts.OnTextChanged({GetText=function()return 'nothing'end},true)
  eq(w.rows[1]:IsShown(),false);eq(w.empty.text,'Nothing matches this search.')
  w.search.scripts.OnTextChanged({GetText=function()return ''end},true)

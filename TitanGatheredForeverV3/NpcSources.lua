@@ -412,7 +412,7 @@ end
 function Npc.UnitPriceText(vendor)
     if vendor.extendedCost or not vendor.unit then return 'special cost' end
     local copper = math.max(1, math.floor(vendor.unit + 0.5))
-    return Npc.Coin(copper) .. ' each'
+    return Npc.CoinIcons(copper) .. ' each'
 end
 
 -- Where to find an NPC: zone name and coordinates in percent. Observed position first; a seed NPC is

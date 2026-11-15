@@ -59,6 +59,19 @@ test('a blank row separates one profession from the next', function()
     eq(titles, 2); eq(spacers, 1); eq(rows[1].title, true)
 end)
 
+test('the summary lines separate labels from values and show money with coin icons', function()
+    local ns = fresh({ vendor = prices.vendor, auction = prices.auction, rates = rates,
+        actions = { { kind = 'Mining', completed = 100, attempts = 110, timedBegan = 1000, active = 3600, timedItems = { [1] = 20 } } } })
+    ns.Style = { gold = 'GOLD', white = 'WHITE', Text = function(color, text) return '<' .. color .. '>' .. text .. '</>' end }
+    dofile('tests/style_stub.lua')(ns.Style)
+    ns.NpcSources.CoinIcons = function(copper) return copper .. '[coins]' end
+    local rows = ns.Yields.Rows(nil, 'Mining', 'quantity')
+    assert(rows[2].text:find('<GOLD>Completed: </><WHITE>100</>', 1, true), rows[2].text)
+    assert(rows[2].text:find('<GOLD>Worth: </>', 1, true) and rows[2].text:find('[coins]', 1, true), rows[2].text)
+    assert(rows[3].text:find('<GOLD>Active time: </><WHITE>1 h 0 min</>', 1, true), rows[3].text)
+    assert(rows[3].text:find('<GOLD>Per hour: </>100[coins]', 1, true), rows[3].text)
+end)
+
 test('professions that are hidden or filtered out have no rows', function()
     local ns = fresh({ vendor = prices.vendor, auction = prices.auction, rates = rates, hidden = { Mining = true } })
     for _, row in ipairs(ns.Yields.Rows(nil, nil, 'quantity')) do assert(row.kind ~= 'Mining') end

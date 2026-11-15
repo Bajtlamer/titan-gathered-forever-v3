@@ -4,10 +4,12 @@ local function eq(actual, expected) assert(actual == expected, 'expected ' .. to
 
 local function plain(text) return (tostring(text):gsub('|c%x%x%x%x%x%x%x%x', ''):gsub('|r', '')) end
 
+local function strip(text) return (tostring(text):gsub('<[^>]*>', '')) end
 local function newNs()
     local ns = { IsPublic = function() return true end, characterID = 'C1', db = { recipeMakes = {}, knownRecipes = {} },
         Style = { gold = 'gold', gray = 'gray', green = 'green', white = 'white', red = 'red', orange = 'orange',
             Text = function(color, text) return '<' .. color .. '>' .. text .. '</>' end } }
+    dofile('tests/style_stub.lua')(ns.Style)
     assert(loadfile('TitanGatheredForeverV3/Catalog.lua'))('TitanGatheredForeverV3', ns)
     ns.Catalog.RegisterModule({ id = 'Alchemy', label = 'Alchemy', items = {}, recipes = {}, book = {
         [101] = { 5001, { { 1, 2 }, { 2, 1 } } }, [102] = { 5002, { { 1, 1 } } } } })
@@ -117,7 +119,7 @@ test('the window lists recipes, filters, searches and scrolls', function()
     B.searchText = nil
     ns.KnownRecipes.Record('C1', 'Alchemy', {}, 1, { 101 })
     B.mine = true; B.Refresh(); eq(B.total, 1); eq(B.window.lines[1].row.recipeID, 101)
-    eq(B.RangeText(0, 0), 'No recipes'); eq(B.RangeText(16, 40), 'Showing 17-32 of 40'); eq(B.Clamp(99, 20), 4)
+    eq(B.RangeText(0, 0), 'No recipes'); eq(strip(B.RangeText(16, 40)), 'Showing 17-32 of 40'); eq(B.Clamp(99, 20), 4)
 end)
 
 test('the footer asks for a scan when there are no prices and says which professions were not read', function()

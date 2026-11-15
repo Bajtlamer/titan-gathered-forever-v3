@@ -1,6 +1,12 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.75-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.76-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## One text and price style, 0.5.76-beta
+
+- Informational text is small and gold in every window (notes, footers, empty messages, range lines, the Crafting window note and scope line, the export texts) and the data in it is white, so a label and its value are told apart: Completed: 100, Items collected: 105, Showing 1-18 of 40, Counting: bags, the profit footer counts and the browser footers.
+- Every price is in the game money format with gold, silver and copper icons: the gathered views and their summary lines, the profit and recipe windows, the reagent window, the vendor each line of the tooltips (the trainers and the recipe browser used plain 1g 2s text before). Style.Label, Style.Value and Style.Range are the helpers; tests/style_stub.lua gives the test stubs the same text.
+- The rule is written in AGENTS.md so new windows follow it from the start.
 
 ## Space between professions, 0.5.75-beta
 

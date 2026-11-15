@@ -5,6 +5,7 @@ local function eq(actual, expected) assert(actual == expected, 'expected ' .. to
 local itemNames = { [100] = 'Recipe: Lesser Healing Potion', [101] = 'Recipe: Elixir of Wisdom', [102] = 'Recipe: Tender Wolf Steak' }
 C_Item = { GetItemInfo = function(id) return itemNames[id] end }
 
+local function strip(text) return (tostring(text):gsub('<[^>]*>', '')) end
 local function newNs(seed)
     local ns = { IsPublic = function() return true end, characterID = 'C1', settings = {},
         db = { npcs = {}, knownRecipes = {} },
@@ -12,6 +13,7 @@ local function newNs(seed)
             Text = function(color, text) return '<' .. color .. '>' .. text .. '</>' end },
         ItemName = function(id) return itemNames[id] or ('Loading ' .. id) end }
     ns.NpcSeed = { npcs = seed }
+    dofile('tests/style_stub.lua')(ns.Style)
     assert(loadfile('TitanGatheredForeverV3/KnownRecipes.lua'))('TitanGatheredForeverV3', ns)
     assert(loadfile('TitanGatheredForeverV3/NpcSources.lua'))('TitanGatheredForeverV3', ns)
     return ns
@@ -229,8 +231,8 @@ test('the visible range reads naturally', function()
     assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TitanGatheredForeverV3', ns)
     assert(loadfile('TitanGatheredForeverV3/RecipeBrowser.lua'))('TitanGatheredForeverV3', ns)
     local B = ns.RecipeBrowser
-    eq(B.RangeText(0, 40), 'Showing 1-16 of 40'); eq(B.RangeText(24, 40), 'Showing 25-40 of 40')
-    eq(B.RangeText(0, 5), 'Showing 1-5 of 5'); eq(B.RangeText(0, 0), 'No recipes')
+    eq(strip(B.RangeText(0, 40)), 'Showing 1-16 of 40'); eq(strip(B.RangeText(24, 40)), 'Showing 25-40 of 40')
+    eq(strip(B.RangeText(0, 5)), 'Showing 1-5 of 5'); eq(B.RangeText(0, 0), 'No recipes')
     eq(B.Clamp(-4, 40), 0); eq(B.Clamp(99, 40), 24); eq(B.Clamp(7.6, 40), 8); eq(B.Clamp(5, 10), 0)
 end)
 

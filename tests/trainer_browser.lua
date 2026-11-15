@@ -2,6 +2,7 @@ local tests = {}
 local function test(name, fn) tests[#tests + 1] = { name, fn } end
 local function eq(actual, expected) assert(actual == expected, 'expected ' .. tostring(expected) .. ', got ' .. tostring(actual)) end
 
+local function strip(text) return (tostring(text):gsub('<[^>]*>', '')) end
 local function newNs()
     local ns = { IsPublic = function() return true end, characterID = 'C1', settings = {},
         db = { npcs = {}, knownRecipes = {} },
@@ -14,6 +15,7 @@ local function newNs()
         [3] = { n = 'Another Alchemist', m = 1, x = 12, y = 22, p = 'Alchemy', t = { { 3101, 'Lesser Healing Potion', 500, 50, 0 } } },
         [4] = { n = 'Recipe Vendor', m = 0, x = 11, y = 21, v = { { 100, 'Alchemy', 12000, 225 } } },
     } }
+    dofile('tests/style_stub.lua')(ns.Style)
     assert(loadfile('TitanGatheredForeverV3/KnownRecipes.lua'))('TitanGatheredForeverV3', ns)
     assert(loadfile('TitanGatheredForeverV3/NpcSources.lua'))('TitanGatheredForeverV3', ns)
     return ns
