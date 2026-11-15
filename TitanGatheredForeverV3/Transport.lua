@@ -91,17 +91,44 @@ function Transport.ToMap(mapID, x, y, target)
     return x, y
 end
 
--- Dashes along a segment in pixels. Returns a list of { x1, y1, x2, y2 }.
-function Transport.Dashes(x1, y1, x2, y2, dash, gap)
+-- A smooth arc between two points (a quadratic curve bent to one side), as a list of { x, y } samples. The side
+-- and the amount of bend depend on the two names only, so a route always bends the same way.
+function Transport.Curve(x1, y1, x2, y2, key, steps)
+    steps = steps or 48
     local dx, dy = x2 - x1, y2 - y1
     local length = math.sqrt(dx * dx + dy * dy)
+    local points = {}
+    if length <= 0 then return { { x1, y1 } } end
+    local hash = 0
+    for index = 1, #key do hash = (hash * 31 + key:byte(index)) % 9973 end
+    local bend = length * (.18 + (hash % 7) * .01) * ((hash % 2 == 0) and 1 or -1)
+    local cx, cy = (x1 + x2) / 2 - dy / length * bend, (y1 + y2) / 2 + dx / length * bend
+    for step = 0, steps do
+        local t = step / steps
+        local u = 1 - t
+        points[#points + 1] = { u * u * x1 + 2 * u * t * cx + t * t * x2, u * u * y1 + 2 * u * t * cy + t * t * y2 }
+    end
+    return points
+end
+
+-- Dashes along a polyline, measured in pixels along its length. Returns a list of { x1, y1, x2, y2 } pieces.
+function Transport.Dashes(points, dash, gap)
     local result = {}
-    if length <= 0 then return result end
-    local step, at = dash + gap, 0
-    while at < length and #result < 400 do
-        local to = math.min(at + dash, length)
-        result[#result + 1] = { x1 + dx * at / length, y1 + dy * at / length, x1 + dx * to / length, y1 + dy * to / length }
-        at = at + step
+    local drawing, left = true, dash
+    for index = 1, #points - 1 do
+        local x1, y1, x2, y2 = points[index][1], points[index][2], points[index + 1][1], points[index + 1][2]
+        local dx, dy = x2 - x1, y2 - y1
+        local length = math.sqrt(dx * dx + dy * dy)
+        local at = 0
+        while at < length and #result < 600 do
+            local take = math.min(left, length - at)
+            if drawing then
+                result[#result + 1] = { x1 + dx * at / length, y1 + dy * at / length,
+                    x1 + dx * (at + take) / length, y1 + dy * (at + take) / length }
+            end
+            at, left = at + take, left - take
+            if left <= 1e-9 then drawing = not drawing; left = drawing and dash or gap end
+        end
     end
     return result
 end
@@ -171,16 +198,19 @@ function R:Refresh(force)
     local points, lines = Transport.Layout(mapID)
     self.overlay:Show()
     local scale = canvas:GetEffectiveScale()
-    local dash, gap = 7 * (world:GetEffectiveScale() / scale), 6 * (world:GetEffectiveScale() / scale)
+    local ratio = world:GetEffectiveScale() / scale
+    local dash, gap = 5 * ratio, 5 * ratio
     local used = 0
     for _, entry in ipairs(lines) do
         local color = Transport.colors[entry.route[3]]
-        for _, d in ipairs(Transport.Dashes(entry.a.x * width, entry.a.y * height, entry.b.x * width, entry.b.y * height, dash, gap)) do
+        local curve = Transport.Curve(entry.a.x * width, entry.a.y * height, entry.b.x * width, entry.b.y * height,
+            entry.route[1] .. '|' .. entry.route[2])
+        for _, d in ipairs(Transport.Dashes(curve, dash, gap)) do
             used = used + 1
             local line = self.lines[used]
             if not line then line = self.overlay:CreateLine(nil, 'ARTWORK'); self.lines[used] = line end
-            line:SetThickness(2 * (world:GetEffectiveScale() / scale))
-            line:SetColorTexture(color[1], color[2], color[3], .9)
+            line:SetThickness(math.max(1, ratio))
+            line:SetColorTexture(color[1], color[2], color[3], .85)
             line:SetStartPoint('TOPLEFT', self.overlay, d[1], -d[2])
             line:SetEndPoint('TOPLEFT', self.overlay, d[3], -d[4])
             line:Show()
@@ -188,7 +218,7 @@ function R:Refresh(force)
     end
     for index = used + 1, #self.lines do self.lines[index]:Hide() end
     local count = 0
-    local size = 9 * (world:GetEffectiveScale() / scale)
+    local size = 6 * ratio
     for _, name in ipairs(Transport.docks) do
         local point = points[name]
         if point and #point.routes > 0 then
@@ -196,8 +226,22 @@ function R:Refresh(force)
             local pin = self.pins[count]
             if not pin then
                 pin = CreateFrame('Button', nil, self.overlay)
-                pin.texture = pin:CreateTexture(nil, 'OVERLAY')
-                pin.texture:SetAllPoints()
+                pin.ring = pin:CreateTexture(nil, 'OVERLAY', nil, 1)
+                pin.ring:SetAllPoints()
+                pin.ring:SetColorTexture(.05, .05, .08, .9)
+                pin.texture = pin:CreateTexture(nil, 'OVERLAY', nil, 2)
+                pin.texture:SetPoint('TOPLEFT', 1, -1)
+                pin.texture:SetPoint('BOTTOMRIGHT', -1, 1)
+                local ok = pcall(function()
+                    pin.ringMask = pin:CreateMaskTexture()
+                    pin.ringMask:SetAllPoints(pin.ring)
+                    pin.ringMask:SetAtlas('CircleMaskScalable')
+                    pin.ring:AddMaskTexture(pin.ringMask)
+                    pin.fillMask = pin:CreateMaskTexture()
+                    pin.fillMask:SetAllPoints(pin.texture)
+                    pin.fillMask:SetAtlas('CircleMaskScalable')
+                    pin.texture:AddMaskTexture(pin.fillMask)
+                end)
                 pin:SetScript('OnEnter', showTooltip)
                 pin:SetScript('OnLeave', function() GameTooltip:Hide() end)
                 self.pins[count] = pin

@@ -50,12 +50,24 @@ test('a route is a line only on a map that holds both docks, a dock is a point o
     eq(#points['Auberdine'].routes, 4)                      -- Stormwind, Menethil, Southshore and Rut'theran routes name it
 end)
 
-test('dashes cover the segment with gaps and stay bounded', function()
+test('a route is an arc that bends the same way every time and ends at both docks', function()
     local ns = fresh()
-    local d = ns.Transport.Dashes(0, 0, 100, 0, 7, 6)
-    eq(#d, 8); eq(d[1][1], 0); eq(d[1][3], 7); eq(d[2][1], 13)
-    eq(#ns.Transport.Dashes(0, 0, 0, 0, 7, 6), 0)
-    assert(#ns.Transport.Dashes(0, 0, 1e6, 0, 7, 6) <= 400)
+    local curve = ns.Transport.Curve(0, 0, 100, 0, 'A|B')
+    eq(#curve, 49); eq(curve[1][1], 0); assert(math.abs(curve[49][1] - 100) < 1e-9)
+    local top = 0
+    for _, point in ipairs(curve) do if math.abs(point[2]) > math.abs(top) then top = point[2] end end
+    assert(math.abs(top) > 5, 'the arc must not be straight')
+    eq(ns.Transport.Curve(0, 0, 100, 0, 'A|B')[25][2], curve[25][2])
+    eq(#ns.Transport.Curve(5, 5, 5, 5, 'A|B'), 1)
+end)
+
+test('dashes follow the polyline with gaps and stay bounded', function()
+    local ns = fresh()
+    local d = ns.Transport.Dashes({ { 0, 0 }, { 100, 0 } }, 5, 5)
+    eq(#d, 10); eq(d[1][1], 0); eq(d[1][3], 5); eq(d[2][1], 10)
+    local bent = ns.Transport.Dashes({ { 0, 0 }, { 3, 0 }, { 3, 8 } }, 5, 5)   -- a dash may turn a corner
+    eq(#bent, 3)
+    assert(#ns.Transport.Dashes({ { 0, 0 }, { 1e6, 0 } }, 5, 5) <= 600)
 end)
 
 test('the dock command lists, records and forgets', function()

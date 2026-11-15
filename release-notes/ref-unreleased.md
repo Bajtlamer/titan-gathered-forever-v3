@@ -1,6 +1,11 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.55-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.56-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Rounder sea routes, 0.5.56-beta
+
+- Routes are drawn as smooth arcs instead of straight lines: one pixel thin, finely dashed, each bending to a stable side by an amount that depends on the two docks, so they read as sea lanes and routes between the same docks do not overlap. This is an illustration only, not the real path of the ship.
+- The dock marker is smaller and round, with a thin dark ring. The switch Show boat and zeppelin routes stays in the Flight points menu.
 
 ## Boat and zeppelin routes, 0.5.55-beta
 
