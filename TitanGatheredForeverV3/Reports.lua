@@ -200,6 +200,7 @@ local function entriesFor(window,rows)
         local tight=viewMode(window)=='yield'      -- the gathered lists are denser than the other reports
         local height=tight and 12 or 16
         if tight and(row.title or row.spacer)then entries[#entries+1]={data=row,values=columns,height=row.title and 30 or 26};return end
+        if tight then window.measure.cells[1]:SetWidth(row.summary and 920 or layouts.yield[1][3])end
         for i,value in ipairs(columns)do
             local measure=window.measure.cells[i];measure:SetText(value)
             height=math.max(height,measure:GetStringHeight())
@@ -401,10 +402,12 @@ function Reports.Draw(window)
                 local title=entry.data.title==true
                 local first=view.cells[1]
                 if first.SetFontObject then first:SetFontObject(title and'GameFontNormalLarge'or(entry.data.summary and'GameFontNormalSmall'or'GameFontHighlightSmall'))end
+                first:SetWidth(entry.data.summary and 920 or layouts.yield[1][3])      -- a summary line runs across the columns
                 first.tgfFont=true
             elseif view.cells[1].tgfFont then      -- leaving the gathered view: back to the normal text
                 if view.cells[1].SetFontObject then view.cells[1]:SetFontObject('GameFontHighlightSmall')end
                 view.cells[1].tgfFont=nil
+                view.cells[1]:SetWidth(layouts[window.mode][1][3])
             end
             view:Show();y=y+entry.height;shown=shown+1
         else

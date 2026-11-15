@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.76-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.77-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Summary lines use the full width, 0.5.77-beta
+
+- The two summary lines of each gathering profession run across the whole width of the window instead of the first column, so the Measured since date no longer wraps to a new line.
 
 ## One text and price style, 0.5.76-beta
 
