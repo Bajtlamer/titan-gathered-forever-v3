@@ -345,6 +345,28 @@ local function start()
             if not id then ns.Print('Usage: /tgf recipe <recipeID> [operations], or select a recipe and use /tgf recipe.');return end
             ns.CraftingView.Show(tonumber(id),tonumber(target)or 1);return
         end
+        if command == 'transport' then
+            local mapID = WorldMapFrame and WorldMapFrame.GetMapID and WorldMapFrame:GetMapID()
+                or (C_Map and C_Map.GetBestMapForUnit and C_Map.GetBestMapForUnit('player'))
+            if not mapID then ns.Print('Open the world map first.'); return end
+            local count = 0
+            local api = C_AreaPoiInfo
+            ns.Print('Transport probe, map ' .. tostring(mapID) .. ', area points: ' .. ((api and api.GetAreaPOIForMap) and 'API present' or 'API missing'))
+            if api and api.GetAreaPOIForMap and api.GetAreaPOIInfo then
+                for _, id in ipairs(api.GetAreaPOIForMap(mapID) or {}) do
+                    local info = api.GetAreaPOIInfo(mapID, id)
+                    if info then
+                        count = count + 1
+                        local x, y
+                        if info.position and info.position.GetXY then x, y = info.position:GetXY() end
+                        ns.Print(string.format('poi %s | %s | atlas %s | %.3f %.3f', tostring(id), tostring(info.name),
+                            tostring(info.atlasName), x or -1, y or -1))
+                    end
+                end
+            end
+            ns.Print('Area points listed: ' .. count)
+            return
+        end
         if command == 'npc' then ns.NpcNearest(); return end
         if command == 'npc swap' then ns.NpcToggleAxes(); return end
         if command == 'recipes' then ns.RecipeBrowser.Show(); return end

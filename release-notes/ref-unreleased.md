@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.53-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.54-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Transport probe, 0.5.54-beta
+
+- New diagnostic command /tgf transport lists the area points the client reports on the open world map (name, atlas and position). It is the first step for drawing boat and zeppelin routes: dock positions are taken from what the client knows instead of being typed in by hand. Nothing is drawn yet.
 
 ## Modular data: only the installed professions, 0.5.53-beta
 
