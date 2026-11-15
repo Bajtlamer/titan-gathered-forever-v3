@@ -61,6 +61,13 @@ test('a route is an arc that bends the same way every time and ends at both dock
     eq(#ns.Transport.Curve(5, 5, 5, 5, 'A|B'), 1)
 end)
 
+test('the line style falls back to thin and clear is stronger', function()
+    local ns = fresh()
+    eq(ns.Transport.Style('x').thickness, 1)
+    assert(ns.Transport.Style('clear').thickness > ns.Transport.Style('thin').thickness)
+    eq(ns.Transport.Style('clear').alpha, 1)
+end)
+
 test('dashes follow the polyline with gaps and stay bounded', function()
     local ns = fresh()
     local d = ns.Transport.Dashes({ { 0, 0 }, { 100, 0 } }, 5, 5)

@@ -23,6 +23,11 @@ Transport.routes = {
     { 'Ratchet', 'Booty Bay', 'Neutral', 'boat' },
     { 'Steamwheedle Port', 'Powderfuse Port', 'Neutral', 'boat' },
 }
+Transport.styles = {
+    thin = { thickness = 1, alpha = .85, boost = 1 },
+    clear = { thickness = 1.6, alpha = 1, boost = 1.15 },
+}
+function Transport.Style(name) return Transport.styles[name] or Transport.styles.thin end
 Transport.colors = { Alliance = { .25, .55, 1 }, Horde = { 1, .25, .25 }, Neutral = { 1, .82, .2 } }
 
 local function number(value)
@@ -209,8 +214,10 @@ function R:Refresh(force)
             used = used + 1
             local line = self.lines[used]
             if not line then line = self.overlay:CreateLine(nil, 'ARTWORK'); self.lines[used] = line end
-            line:SetThickness(math.max(1, ratio))
-            line:SetColorTexture(color[1], color[2], color[3], .85)
+            local style = Transport.Style(ns.settings.transportStyle)
+            line:SetThickness(math.max(1, style.thickness * ratio))
+            line:SetColorTexture(math.min(1, color[1] * style.boost), math.min(1, color[2] * style.boost),
+                math.min(1, color[3] * style.boost), style.alpha)
             line:SetStartPoint('TOPLEFT', self.overlay, d[1], -d[2])
             line:SetEndPoint('TOPLEFT', self.overlay, d[3], -d[4])
             line:Show()

@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.56-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.57-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Two line styles for sea routes, 0.5.57-beta
+
+- The Flight points menu now offers Route lines: thin (one pixel, the default) and Route lines: clear (about 1.6 pixels, full opacity and a slightly brighter color), because the thin line is hard to see on the light parchment of the world map. The choice is saved in the settings.
 
 ## Rounder sea routes, 0.5.56-beta
 

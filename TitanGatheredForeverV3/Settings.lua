@@ -16,6 +16,7 @@ function ns.Settings.Initialize(saved)
     end
     if type(settings.flightPoints) ~= 'boolean' then settings.flightPoints = true end
     if type(settings.transportRoutes) ~= 'boolean' then settings.transportRoutes = true end
+    if settings.transportStyle ~= 'thin' and settings.transportStyle ~= 'clear' then settings.transportStyle = 'thin' end
     settings.showTotal = nil
     if type(settings.itemTooltips) ~= 'boolean' then settings.itemTooltips = true end
     if type(settings.categories) ~= 'table' then settings.categories = {} end
