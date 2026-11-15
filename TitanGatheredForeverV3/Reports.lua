@@ -207,7 +207,7 @@ local function entriesFor(window,rows)
         local columns=values(viewMode(window),row)
         local tight=viewMode(window)=='yield'      -- the gathered lists are denser than the other reports
         local height=tight and row.summary and 12 or 16
-        if tight and(row.title or row.spacer)then entries[#entries+1]={data=row,values=columns,height=row.title and 30 or(row.small and 8 or 26)};return end
+        if tight and(row.title or row.spacer)then entries[#entries+1]={data=row,values=columns,height=row.title and 30 or(row.small and 18 or 26)};return end
         if tight then window.measure.cells[1]:SetWidth(row.summary and 920 or layouts.yield[1][3])end
         for i,value in ipairs(columns)do
             local measure=window.measure.cells[i];measure:SetText(value)

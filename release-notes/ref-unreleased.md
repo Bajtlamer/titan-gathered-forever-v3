@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.80-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.81-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## More room before the gathered list, 0.5.81-beta
+
+- The gap between the profession title with its two summary lines and the list of items is 18 pixels (it was 8).
 
 ## Normal row spacing in the gathered list, 0.5.80-beta
 
