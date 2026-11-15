@@ -127,6 +127,7 @@ function Sources.Record(e)
         local name=UnitName and UnitName('player')or character
         local realm=GetRealmName and GetRealmName()or''
         ns.history:Observe(character,name..(realm~=''and' - '..realm or''),receipt)
+        if ns.actions and ns.actions.Yield and e.kind~='Loot' then ns.actions:Yield(e.kind,items) end
     end
     local inside, context = IsInInstance()
     local outdoor = ns.IsPublic(inside) and ns.IsPublic(context) and inside == false and context == 'none'

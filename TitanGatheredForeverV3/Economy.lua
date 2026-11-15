@@ -37,6 +37,14 @@ function Economy.Auction(itemID)
     return { min = price.min, n = price.n, qty = price.qty, net = Economy.Net(price.min) }
 end
 
+-- What one unit of an item sells for at best: { unit, source, auction, vendor } or nil when no price is known. The
+-- auction price is the lowest buyout of the last scan after the fee, the vendor price comes from the item info.
+function Economy.Sale(itemID)
+    local auction, vendor = Economy.Auction(itemID), Economy.VendorSell(itemID)
+    if auction and (not vendor or auction.net >= vendor) then return { unit = auction.net, source = 'auction', auction = auction, vendor = vendor } end
+    if vendor then return { unit = vendor, source = 'vendor', auction = auction, vendor = vendor } end
+end
+
 -- The cheapest known price for one unit of an item and where it is: 'auction' or 'vendor'. A merchant that was seen
 -- selling it counts when it is cheaper than the auction house, and when there is no auction price.
 function Economy.UnitCost(itemID)

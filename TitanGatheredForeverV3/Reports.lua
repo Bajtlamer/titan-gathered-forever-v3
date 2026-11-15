@@ -86,7 +86,7 @@ function Reports.Rows(mode,character,filter)
 end
 local function text(frame,font,x,y,width)
     local t=frame:CreateFontString(nil,'OVERLAY',font);t:SetPoint('TOPLEFT',frame,'TOPLEFT',x,y)
-    t:SetWidth(width);t:SetJustifyH('LEFT');return t
+    t:SetWidth(width);t:SetJustifyH('LEFT');t.tgfFrame,t.tgfY=frame,y;return t
 end
 local function button(frame,label,x,y,width,callback)
     local b=CreateFrame('Button',nil,frame,'UIPanelButtonTemplate');b:SetSize(width,22)
@@ -101,9 +101,33 @@ local layouts={
         {'Interrupted',375,85},{'Stopped',470,70},{'Unresolved',550,85},{'Recording began',645,285}},
     production={{'Recipe',0,190},{'Attempts',200,65},{'Completed',275,75},{'Completed %',360,85},
         {'Matched',455,65},{'Items',530,55},{'Bonus',595,155},{'Multicraft',760,170}},
+    yield={{'Item',0,420},{'Quantity',430,80},{'Share',520,70},{'Unit value',600,110},{'Total value',720,110},{'Best sale',840,90}},
     reagentUsage={{'Reagent',0,250},{'Estimated used',260,150},{'Leading profession',420,220},{'Share of tracked use',650,280}},
 }
+local ACTIONS_NOTE='Fishing completion means a catch window; other completion means spell success. Stopped means no confirmed result; gaps are not reconstructed.'
 local contentTop,contentBottom=132,510
+-- The Profession actions window has a second view that lists what was gathered and what it is worth.
+local function viewMode(window)
+    return window.mode=='actions' and window.view and window.view~='summary' and 'yield' or window.mode
+end
+-- Moves the header and the cells of a window to the columns of its current view.
+local function layoutCells(window)
+    local layout=layouts[viewMode(window)]
+    local function apply(list,header)
+        for i,cell in ipairs(list)do
+            local column=layout[i]
+            if column then
+                cell:SetPoint('TOPLEFT',cell.tgfFrame,'TOPLEFT',column[2],cell.tgfY);cell:SetWidth(column[3])
+                if header then cell:SetText(column[1])end
+                if cell.Show then cell:Show()end
+            else
+                cell:SetText('');if cell.Hide then cell:Hide()end
+            end
+        end
+    end
+    apply(window.headers,true);apply(window.measure.cells)
+    for _,row in ipairs(window.rows)do apply(row.cells)end
+end
 local function cells(frame,mode,font,y)
     local result={}
     for i,column in ipairs(layouts[mode])do result[i]=text(frame,font,column[2],y,column[3])end
@@ -118,6 +142,10 @@ local function values(mode,row)
         return {row.name,row.attempts,row.completed,
             row.attempts>0 and string.format('%.1f%%',row.completed/row.attempts*100)or'Unknown',
             row.matched,row.quantity,percent(row.bonusHits,row.bonusKnown),percent(row.multicraftHits,row.multicraftKnown)}
+    elseif mode=='yield'then
+        if row.summary then return {row.gold and ns.Style.Text and ns.Style.Text(ns.Style.gold,row.text)or row.text,'','','','',''}end
+        return {ns.Style.ItemName(row.itemID),row.quantity,string.format('%.1f%%',row.share),
+            row.unit and ns.Economy.Coin(row.unit)or'No price',row.value and ns.Economy.Coin(row.value)or'Unknown',row.source or''}
     elseif mode=='actions'then
         local began=date and date('%Y-%m-%d %H:%M',row.began)or tostring(row.began)
         return {labels[row.kind],row.attempts,row.completed,row.failed,row.interrupted,row.stopped,row.unresolved,began}
@@ -168,7 +196,7 @@ local function expandable(window)return window.mode=='history' or(window.mode=='
 local function entriesFor(window,rows)
     local entries={}
     local function add(row)
-        local columns=values(window.mode,row)
+        local columns=values(viewMode(window),row)
         local height=16
         for i,value in ipairs(columns)do
             local measure=window.measure.cells[i];measure:SetText(value)
@@ -319,6 +347,8 @@ function Reports.Update(window)
             {label='Addon tracked deaths, arenas',value=stats.deaths and stats.deaths.arena or 0},
             {label='Addon tracked deaths, total',value=stats.deaths and stats.deaths.total or 0},
             {label='Addon tracking coverage begins',value=coverage}}
+    elseif viewMode(window)=='yield' then
+        rows=ns.Yields and ns.Yields.Rows(character,window.filter,window.view)or{}
     else rows,metadata=Reports.Rows(window.mode,character,window.filter)end
     rows=Reports.Search(window.mode,rows,window.searchText)
     if window.mode=='chances' and window.grouped then rows=Reports.GroupByItem(rows)end
@@ -340,6 +370,7 @@ function Reports.Update(window)
     window.empty:SetText(#rows==0 and (window.searchText and window.searchText~=''and'Nothing matches this search.'
         or window.mode=='reagentUsage'and'No supported reagent use is recorded in this coverage period.'
         or window.mode=='production'and'No recipe operations recorded for this view. Earlier inventory cannot reconstruct production.'
+        or viewMode(window)=='yield' and 'Nothing gathered is recorded for this view. Earlier loot history cannot be split by profession.'
         or window.mode=='actions' and 'No actions recorded for this view. Earlier loot history cannot reconstruct actions.'
         or 'No recorded observations for this view yet. History starts with this version.')or'')
     Reports.Draw(window)
@@ -397,7 +428,7 @@ function Reports.Show(mode)
         note:SetText(mode=='pvp'and'Client lifetime honorable kills and rank are current-character totals across PvP modes. Per-kill honor estimates come only from named honorable-kill events; other honor awards are excluded. Death tracking begins with this version; earlier deaths cannot be reconstructed.'
             or mode=='reagentUsage'and'Estimated reagent consumption by item and profession. Click a row for the profession breakdown.'
             or mode=='production'and'Completed % = completed casts / observed attempts, including unresolved attempts. Bonus/multicraft use readable-field counts. Click for output details.'
-            or mode=='actions'and'Fishing completion means a catch window; other completion means spell success. Stopped means no confirmed result; gaps are not reconstructed.'
+            or mode=='actions'and ACTIONS_NOTE
             or mode=='chances'and'Observed outcomes / complete looted sources, grouped by source and zone. Not a probability at a map coordinate. Click for sources.'
             or'Lifetime obtained combines acquired and crafted quantities. Use + to expand individual sources. Chances use complete samples; Unknown means insufficient evidence. Click an item for source actions.')
         w.scope=ns.Nav.Dropdown(w,15,-65,150,function()
@@ -416,6 +447,17 @@ function Reports.Show(mode)
             return list
         end,function()return w.filter or false end,function(value)w.filter=value or nil;w.offset=0;Reports.Update(w)end)
         if mode=='reagentUsage'or mode=='pvp'then w.filterButton:Hide()end
+        if mode=='actions'then
+            w.view='summary'
+            w.group=ns.Nav.Dropdown(w,375,-65,170,function()
+                return{{value='summary',label='Actions summary'},{value='quantity',label='Gathered, most items'},{value='value',label='Gathered, most valuable'}}
+            end,function()return w.view end,function(value)
+                w.view=value;w.offset=0;layoutCells(w)
+                w.note:SetText(value=='summary'and ACTIONS_NOTE
+                    or'Items from complete loot windows of each gathering profession, valued at the better of the vendor price and the auction price after the fee. A rate per hour uses only the active time that is measured, with the items collected in that time. Click an item for its sources.')
+                Reports.Update(w)
+            end)
+        end
         if mode=='chances'then
             w.group=ns.Nav.Dropdown(w,375,-65,140,function()
                 return{{value=false,label='All sources'},{value=true,label='Grouped by item'}}

@@ -1,7 +1,7 @@
 ## Interface: 16001
 ## Title: Titan Gathered Forever v3
 ## Notes: Profession uses and material counts in bags and the personal bank. Forever only.
-## Version: 0.5.70-beta
+## Version: 0.5.71-beta
 ## Author: Titan Gathered Forever v3 contributors
 ## Dependencies: Titan
 ## SavedVariables: TitanGatheredForeverV3DB
@@ -42,6 +42,7 @@ ProfessionButton.lua
 Movable.lua
 AuctionScan.lua
 Economy.lua
+Yields.lua
 Profit.lua
 RecipeBrowser.lua
 TrainerBrowser.lua

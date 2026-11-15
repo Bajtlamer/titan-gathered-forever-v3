@@ -147,6 +147,26 @@ test('actions report shows coverage and counts without item interactions',functi
  pick(w.scope,'All characters');eq(cells[2].text,'2');eq(cells[4].text,'1')
  w.filter='Cooking';ns.Reports.Update(w);eq(w.rows[1]:IsShown(),false)
 end)
+test('the actions window can show what was gathered and what it is worth',function()
+ ns.Economy={Coin=function(copper)return copper..'c'end}
+ ns.Yields={Rows=function(character,filter,sort)
+  ns.Yields.last={filter=filter,sort=sort}
+  return{{summary=true,kind='Mining',text='Mining: 5 completed, 12 items collected, worth 90c',gold=true},
+   {summary=true,kind='Mining',text='Active time 10 min'},
+   {itemID=769,kind='Mining',quantity=10,share=83.3,unit=5,value=50,source='vendor'},
+   {itemID=770,kind='Mining',quantity=2,share=16.7,unit=nil,value=nil}}
+ end}
+ ns.Reports.Show('actions');local w=ns.Reports.windows.actions
+ pick(w.group,'Gathered, most valuable')
+ eq(ns.Yields.last.sort,'value');eq(w.headers[1].text,'Item');eq(w.headers[5].text,'Total value');eq(w.headers[7].text,'')
+ assert(w.rows[1].cells[1].text:find('Mining: 5 completed',1,true));eq(w.rows[1].cells[2].text,'')
+ eq(w.rows[3].cells[2].text,'10');eq(w.rows[3].cells[3].text,'83.3%');eq(w.rows[3].cells[4].text,'5c');eq(w.rows[3].cells[5].text,'50c');eq(w.rows[3].cells[6].text,'vendor')
+ eq(w.rows[4].cells[4].text,'No price');eq(w.rows[4].cells[5].text,'Unknown')
+ assert(w.note.text:find('valued at',1,true))
+ w.filter='Mining';ns.Reports.Update(w);eq(ns.Yields.last.filter,'Mining')
+ pick(w.group,'Actions summary');eq(w.headers[1].text,'Profession');eq(w.headers[8].text,'Recording began');assert(w.note.text:find('gaps',1,true))
+ w.filter=nil;ns.Economy,ns.Yields=nil,nil
+end)
 test('production report distinguishes completions matched results and explicit flag denominators',function()
  assert(loadfile('TitanGatheredForeverV3/Production.lua'))('TGF v3',ns)
  ns.production=ns.Production.New({}, {Character=function()return'a'end,Name=function()return'A'end,

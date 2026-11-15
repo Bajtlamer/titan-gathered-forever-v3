@@ -1,6 +1,13 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.70-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.71-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Gathering yield and value, 0.5.71-beta
+
+- The Profession actions window has a view box with three views: Actions summary (as before), Gathered, most items and Gathered, most valuable. The gathered views list for each installed gathering profession (Mining, Herbalism, Skinning, Fishing, Disenchanting) two summary lines and its 40 most collected items (the most caught fish for Fishing) with the quantity, the share, the unit value, the total value and where it sells best.
+- The value of an item is the better of the vendor price and the lowest auction buyout of the last scan after the fee; an item without a known price is shown as No price and counted in the summary, never guessed. The summary line gives the collected items, their worth and the number of unpriced items.
+- Value per hour: the addon now measures the active gathering time per profession (the gaps of at most 2 minutes between attempts) and counts the items obtained in that same time, so the rate (money and items per hour) divides two things measured over the same period. It needs at least 5 minutes of measured time and starts from this version on; older gathering has items but no time, so it is listed without a rate.
+- New file Yields.lua (full client restart needed), Economy.Sale for the best sale of one item, Actions.Yield and the per profession fields active, timedBegan and timedItems in the saved actions.
 
 ## Reports follow the installed professions, 0.5.70-beta
 
