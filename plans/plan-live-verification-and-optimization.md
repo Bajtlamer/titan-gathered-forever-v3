@@ -87,6 +87,18 @@ From plans/plan-next-development.md and the older plans: profession actions (eve
 
 Details in that repository's plans/plan-command-history.md. In short: arrow keys walk the history after a /reload; a mistyped command and a line followed by an error are not recorded; /reload, /logout and /quit are; conversation lines are recorded when enabled; favorites run from the window and from the menu; the history window and the minimap button keep their position; the Titan text shows the count after a reload.
 
+### 3.11 Boat and zeppelin routes (0.5.68-beta, in progress)
+
+State: Transport.lua draws thin dashed arcs between docks, with anchor markers (Artwork/RouteAnchor.tga), for every player. Menu: Boat and zeppelin routes (Show routes on the map; Line style with Thickness Thin or Clear and Pattern Dashed, Dotted or Solid). Dock positions come from /tgf dock <name> (recorded, always wins) or are estimated from the flight point of the same town (Menethil Harbor, Southshore, Theramore, Feathermoon, Orgrimmar, Undercity, Grom'gol, Ratchet, Booty Bay). Recorded so far: Stormwind Harbour, Auberdine, Rut'theran Village.
+
+Open steps, in order:
+
+1. Original game icon for the docks instead of the drawn anchor. The client lists atlases (C_Texture.GetAtlasElements) and /tgf atlas <word> saves the matches, up to 1500, to ns.db.atlasSearch (the Garrison Shipyard Ships_* atlases found by the word ship are not wanted). Run in game, then /reload: /tgf atlas transport, zeppelin, boat, harbor, dock, taxi, vehicle, poi-. Then read ns.db.atlasSearch in WTF/Account/MEDYN/SavedVariables/TitanGatheredForeverV3.lua, choose an atlas for ships and one for zeppelins, use it in Transport.lua through C_Texture.GetAtlasInfo with the anchor as the fallback, and remove /tgf atlas.
+2. Record the docks that have no estimate: /tgf dock Forgotten Coast, Steamwheedle Port, Powderfuse Port. Check the estimated docks by eye on the world map and re-record any that sit wrong (/tgf dock lists recorded, estimated and missing docks).
+3. Ship the recorded docks as built-in data: read ns.db.docks from the saved variables and add it as seed positions in Transport.lua (a recorded position still wins).
+4. Optional: a separate marker for zeppelin towers.
+5. Remove the diagnostics that served their purpose: /tgf transport (area point probe) and /tgf atlas.
+
 ## 4. Optimization and open work, in order
 
 1. Split the trainer and vendor seed over the profession addons (Data/NpcSeed.lua is 190 KB in the core and is only filtered when used). Needs the pinned classic-db dump (catalogue/npc-seed-source.json, not in the repository, not downloaded by builds): extend tools/generate_npc_seed.py to write one shard per profession, load shards through the module registration like the books, keep the header check. Vendors of several professions repeat their position in each shard.
