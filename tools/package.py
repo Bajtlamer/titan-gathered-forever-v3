@@ -33,7 +33,7 @@ def package(root, target, addons=None):
                    if line.strip() and not line.startswith('#')]
         entries.append(name + '.toc')
         if name == 'TitanGatheredForeverV3':
-            entries.extend(['Artwork/TitanOre.tga', 'Artwork/PinOutlineCircle.tga', 'Artwork/PinOutlineSquare.tga'])
+            entries.extend(['Artwork/TitanOre.tga', 'Artwork/PinOutlineCircle.tga', 'Artwork/PinOutlineSquare.tga', 'Artwork/RouteAnchor.tga'])
         for entry in entries:
             path = addon / entry
             if not path.resolve().is_relative_to(addon.resolve()) or not path.is_file():

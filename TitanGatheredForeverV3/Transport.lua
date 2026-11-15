@@ -205,6 +205,7 @@ function Transport.Layout(mapID)
     return points, lines
 end
 
+local ANCHOR = 'Interface\\AddOns\\TitanGatheredForeverV3\\Artwork\\RouteAnchor.tga'
 local R = {}
 R.__index = R
 
@@ -279,7 +280,7 @@ function R:Refresh(force)
     end
     for index = used + 1, #self.lines do self.lines[index]:Hide() end
     local count = 0
-    local size = 6 * ratio
+    local size = 14 * ratio
     for _, name in ipairs(Transport.docks) do
         local point = points[name]
         if point and #point.routes > 0 then
@@ -288,21 +289,13 @@ function R:Refresh(force)
             if not pin then
                 pin = CreateFrame('Button', nil, self.overlay)
                 pin.ring = pin:CreateTexture(nil, 'OVERLAY', nil, 1)
-                pin.ring:SetAllPoints()
-                pin.ring:SetColorTexture(.05, .05, .08, .9)
+                pin.ring:SetPoint('TOPLEFT', -1, 1)
+                pin.ring:SetPoint('BOTTOMRIGHT', 1, -1)
+                pin.ring:SetTexture(ANCHOR)
+                pin.ring:SetVertexColor(.03, .03, .06, .95)
                 pin.texture = pin:CreateTexture(nil, 'OVERLAY', nil, 2)
-                pin.texture:SetPoint('TOPLEFT', 1, -1)
-                pin.texture:SetPoint('BOTTOMRIGHT', -1, 1)
-                local ok = pcall(function()
-                    pin.ringMask = pin:CreateMaskTexture()
-                    pin.ringMask:SetAllPoints(pin.ring)
-                    pin.ringMask:SetAtlas('CircleMaskScalable')
-                    pin.ring:AddMaskTexture(pin.ringMask)
-                    pin.fillMask = pin:CreateMaskTexture()
-                    pin.fillMask:SetAllPoints(pin.texture)
-                    pin.fillMask:SetAtlas('CircleMaskScalable')
-                    pin.texture:AddMaskTexture(pin.fillMask)
-                end)
+                pin.texture:SetAllPoints()
+                pin.texture:SetTexture(ANCHOR)
                 pin:SetScript('OnEnter', showTooltip)
                 pin:SetScript('OnLeave', function() GameTooltip:Hide() end)
                 self.pins[count] = pin
@@ -310,7 +303,7 @@ function R:Refresh(force)
             local color = pointColor(point)
             pin.point = point
             pin:SetSize(size, size)
-            pin.texture:SetColorTexture(color[1], color[2], color[3], 1)
+            pin.texture:SetVertexColor(color[1], color[2], color[3], 1)
             pin:ClearAllPoints()
             pin:SetPoint('CENTER', self.overlay, 'TOPLEFT', point.x * width, -point.y * height)
             pin:Show()
