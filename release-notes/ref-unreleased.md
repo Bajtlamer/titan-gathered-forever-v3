@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.66-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.67-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Atlas search, 0.5.67-beta
+
+- New diagnostic command /tgf atlas <word> lists the Blizzard icon atlas names that contain a word (for example ship or zeppelin), so the dock marker can use an original game icon whose name is confirmed in the client. Nothing else changed.
 
 ## Anchor dock markers, 0.5.66-beta
 
