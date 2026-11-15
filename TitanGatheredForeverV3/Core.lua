@@ -351,14 +351,16 @@ local function start()
             local word = (command:match('^atlas%s+(.-)%s*$') or ''):lower()
             if word == '' then ns.Print('Usage: /tgf atlas <part of a name>, for example /tgf atlas ship.'); return end
             if not (C_Texture and C_Texture.GetAtlasElements) then ns.Print('The client cannot list atlases.'); return end
-            local count, shown = 0, 0
+            local count, names = 0, {}
             for _, name in ipairs(C_Texture.GetAtlasElements()) do
                 if name:lower():find(word, 1, true) then
                     count = count + 1
-                    if shown < 40 then shown = shown + 1; ns.Print(name) end
+                    if count <= 1500 then names[count] = name end
                 end
             end
-            ns.Print(count .. ' atlas names contain "' .. word .. '"' .. (count > shown and (', first ' .. shown .. ' shown. Use a longer word.') or '.'))
+            if type(ns.db.atlasSearch) ~= 'table' then ns.db.atlasSearch = {} end
+            ns.db.atlasSearch[word] = names
+            ns.Print(count .. ' atlas names contain "' .. word .. '". They are saved and appear in the saved variables file after /reload.')
             return
         end
         if command == 'transport' then

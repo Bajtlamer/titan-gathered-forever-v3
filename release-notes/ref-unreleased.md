@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.67-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.68-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Atlas search saved to a file, 0.5.68-beta
+
+- /tgf atlas <word> now saves every matching atlas name (up to 1500 per word) in the saved variables instead of printing the first 40 in chat, so the list can be read from the file after /reload.
 
 ## Atlas search, 0.5.67-beta
 
