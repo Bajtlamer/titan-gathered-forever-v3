@@ -49,6 +49,16 @@ test('rows list the most collected items with value, share and unpriced counts',
     eq(rows[6].itemID, 3)
 end)
 
+test('a blank row separates one profession from the next', function()
+    local ns = fresh({ vendor = prices.vendor, auction = prices.auction, rates = rates })
+    local rows, spacers, titles = ns.Yields.Rows(nil, nil, 'quantity'), 0, 0
+    for index, row in ipairs(rows) do
+        if row.spacer then spacers = spacers + 1; assert(rows[index + 1].title and index > 1) end
+        if row.title then titles = titles + 1 end
+    end
+    eq(titles, 2); eq(spacers, 1); eq(rows[1].title, true)
+end)
+
 test('professions that are hidden or filtered out have no rows', function()
     local ns = fresh({ vendor = prices.vendor, auction = prices.auction, rates = rates, hidden = { Mining = true } })
     for _, row in ipairs(ns.Yields.Rows(nil, nil, 'quantity')) do assert(row.kind ~= 'Mining') end
