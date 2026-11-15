@@ -46,14 +46,22 @@ function Profit.Makes(recipeID)
     return 1, 1, true
 end
 
+-- A product whose price comes from the auction house and rests on fewer than minAuctions auctions is a thin market: one
+-- odd offer sets the lowest buyout. Where the vendor pays more than the auction leaves, the auction does not matter.
+function Profit.Thin(product, minAuctions)
+    if not product or not minAuctions or minAuctions <= 1 then return false end
+    return product.best == 'auction' and product.auction ~= nil and (product.auction.n or 0) < minAuctions
+end
+
 -- Rows for the profit list. options: mine (only recipes the character has learned), kind (one profession),
--- search (text in the name or the profession). Returns the rows, best first, and a table with the professions that
--- were never read for the character (their recipes cannot be told apart) and the number of recipes looked at.
+-- search (text in the name or the profession), minAuctions (hide the thin markets). Returns the rows, best first, and
+-- a table with the professions that were never read for the character (their recipes cannot be told apart), the number
+-- of recipes looked at and the number of rows hidden as thin markets.
 function Profit.Rows(character, options)
     options = options or {}
     local data = book()
-    local rows, unread, unreadSet, looked = {}, {}, {}, 0
-    if not data then return rows, { unread = unread, looked = 0 } end
+    local rows, unread, unreadSet, looked, thinHidden = {}, {}, {}, 0, 0
+    if not data then return rows, { unread = unread, looked = 0, thinHidden = 0 } end
     local needle = options.search and options.search ~= '' and options.search:lower() or nil
     for recipeID, recipe in pairs(data.recipes) do
         local profession = data.professions[recipe[2]]
@@ -77,8 +85,12 @@ function Profit.Rows(character, options)
                 local low, high, assumed = Profit.Makes(recipeID)
                 local product = ns.Economy.Product({ outputItemID = recipe[1], quantityMin = low, quantityMax = high,
                     rows = reagents, issues = {}, operations = 1 })
-                rows[#rows + 1] = { recipeID = recipeID, name = name, profession = profession, kind = kind, productID = recipe[1],
-                    product = product, profit = product and product.profit, assumed = assumed, learned = learned }
+                if Profit.Thin(product, options.minAuctions) then
+                    thinHidden = thinHidden + 1
+                else
+                    rows[#rows + 1] = { recipeID = recipeID, name = name, profession = profession, kind = kind, productID = recipe[1],
+                        product = product, profit = product and product.profit, assumed = assumed, learned = learned }
+                end
             end
         end
     end
@@ -91,5 +103,5 @@ function Profit.Rows(character, options)
     end)
     for kind in pairs(unreadSet) do unread[#unread + 1] = kind end
     table.sort(unread)
-    return rows, { unread = unread, looked = looked }
+    return rows, { unread = unread, looked = looked, thinHidden = thinHidden }
 end

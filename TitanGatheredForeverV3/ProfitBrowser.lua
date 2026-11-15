@@ -5,10 +5,13 @@ local Browser = { offset = 0, total = 0 }
 ns.ProfitBrowser = Browser
 
 local ROWS, ROW_HEIGHT, WHEEL_STEP = 16, 22, 3
-local columns = { { 'Recipe', 0, 230 }, { 'Profession', 240, 105 }, { 'Materials', 355, 90 }, { 'Auction after fee', 455, 105 },
-    { 'Vendor pays', 570, 95 }, { 'Sells better to', 675, 90 }, { 'Profit per craft', 775, 130 } }
+local columns = { { 'Recipe', 0, 210 }, { 'Profession', 215, 95 }, { 'Materials', 315, 85 }, { 'Auction after fee', 405, 100 },
+    { 'Auctions', 510, 65 }, { 'Vendor pays', 580, 90 }, { 'Sells better to', 675, 85 }, { 'Profit per craft', 765, 145 } }
 local ROW_WIDTH = 910
 local scopes = { { value = true, label = 'My recipes' }, { value = false, label = 'All recipes' } }
+-- A price that rests on fewer auctions than this is a thin market.
+Browser.THIN = 3
+local markets = { { value = 3, label = '3+ auctions' }, { value = 0, label = 'All markets' } }
 local kinds = { 'Alchemy', 'Blacksmithing', 'Cooking', 'Enchanting', 'Engineering', 'FirstAid', 'Leatherworking',
     'Mining', 'Tailoring' }
 
@@ -27,8 +30,15 @@ function Browser.Cells(row)
     if row.profit ~= nil then
         profit = Style.Text(paint, (row.profit >= 0 and '+' or '-') .. coin(math.abs(row.profit))) .. (row.assumed and '*' or '')
     end
+    -- The number of auctions behind the price: a few are marked, because one odd offer sets the lowest buyout.
+    local count = unknown
+    if product and product.auction then
+        local n = product.auction.n or 0
+        local label = n >= 999 and '999+' or tostring(n)
+        count = n < Browser.THIN and Style.Text(Style.orange, label) or label
+    end
     return { Style.Text(paint, row.name), ns.NpcSources.Label(row.kind), materials,
-        product and product.auction and coin(product.auction.net) or unknown,
+        product and product.auction and coin(product.auction.net) or unknown, count,
         product and product.vendor and coin(product.vendor) or unknown,
         product and product.best and (product.best == 'auction' and 'Auction' or 'Vendor') or unknown, profit }
 end
@@ -80,6 +90,10 @@ local function footer(info, rows, scanned)
     local priced = 0
     for _, row in ipairs(rows) do if row.profit ~= nil then priced = priced + 1 end end
     notes[#notes + 1] = string.format('%d of %d recipes have a profit.', priced, #rows)
+    if info.thinHidden and info.thinHidden > 0 then
+        notes[#notes + 1] = string.format('%d recipes are hidden because their product has fewer than %d auctions (a thin market: one odd offer sets the price); choose All markets to see them.',
+            info.thinHidden, Browser.THIN)
+    end
     notes[#notes + 1] = '* assumes one item per craft until the recipe was opened in the reagent window. The recipe table is a mirror of client tables and is not complete; materials are priced at the auction house or at a merchant you saw.'
     return table.concat(notes, ' ')
 end
@@ -89,11 +103,12 @@ function Browser.Refresh()
     local w = Browser.window
     if not w or not w:IsShown() then return end
     if Browser.mine == nil then Browser.mine = hasRead() end
+    if Browser.minAuctions == nil then Browser.minAuctions = Browser.THIN end
     Browser.rows, Browser.info = ns.Profit.Rows(ns.characterID, { mine = Browser.mine, kind = Browser.kind,
-        search = Browser.searchText })
+        search = Browser.searchText, minAuctions = Browser.minAuctions })
     Browser.total = #Browser.rows
     Browser.offset = Browser.Clamp(Browser.offset, Browser.total)
-    w.filter.Sync(); w.kindButton.Sync()
+    w.filter.Sync(); w.kindButton.Sync(); w.marketButton.Sync()
     w.footer:SetText(footer(Browser.info, Browser.rows, ns.db and ns.db.auction ~= nil))
     Browser.Draw()
 end
@@ -133,7 +148,7 @@ function Browser.Show()
         w:SetScript('OnHide', function() GameTooltip:Hide() end)
         w.TitleText:SetText('TGF v3 Crafting profit')
         local note = text(w, 'GameFontHighlightSmall', 15, -33, 930)
-        note:SetText('What each recipe earns: the product sells to the vendor or on the auction house (lowest buyout after the fee), minus the materials at the cheapest known price. Green is a profit, red a loss, gray is unknown because a price is missing. Click a recipe for its reagents.')
+        note:SetText('What each recipe earns: the product sells to the vendor or on the auction house (lowest buyout after the fee), minus the materials at the cheapest known price. Green is a profit, red a loss, gray is unknown because a price is missing; an orange number of auctions is a thin market. Click a recipe for its reagents.')
         w.filter = ns.Nav.Dropdown(w, 15, -65, 150, function() return scopes end,
             function() return Browser.mine == true end, function(value)
                 Browser.mine, Browser.offset = value, 0; Browser.Refresh()
@@ -145,7 +160,11 @@ function Browser.Show()
         end, function() return Browser.kind or false end, function(value)
             Browser.kind, Browser.offset = value or nil, 0; Browser.Refresh()
         end)
-        w.rangeText = text(w, 'GameFontHighlightSmall', 380, -70, 300)
+        w.marketButton = ns.Nav.Dropdown(w, 375, -65, 140, function() return markets end,
+            function() return Browser.minAuctions or Browser.THIN end, function(value)
+                Browser.minAuctions, Browser.offset = value, 0; Browser.Refresh()
+            end)
+        w.rangeText = text(w, 'GameFontHighlightSmall', 525, -70, 160)
         text(w, 'GameFontNormalSmall', 690, -70, 50):SetText('Search')
         local search = CreateFrame('EditBox', nil, w, 'InputBoxTemplate')
         w.search = search

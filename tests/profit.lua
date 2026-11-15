@@ -72,6 +72,25 @@ test('only the recipes of the character: by recipe ID first, then by name, and u
     eq(ns.Profit.Learned('C1', 'Alchemy', 101, 'Potion A'), false); eq(ns.Profit.Learned('C1', 'FirstAid', 103, 'Bandage'), nil)
 end)
 
+test('products on a thin auction market are hidden when asked, and counted', function()
+    local ns = fresh()
+    ns.AuctionScan.Price = function(id)
+        local prices = { [1] = { 100, 9 }, [2] = { 50, 9 }, [5001] = { 1000, 1 }, [5002] = { 80, 2 } }
+        local p = prices[id]
+        return p and { min = p[1], n = p[2] } or nil
+    end
+    local rows, info = ns.Profit.Rows('C1', {})
+    eq(#rows, 3); eq(info.thinHidden, 0)                              -- no limit: everything
+    rows, info = ns.Profit.Rows('C1', { minAuctions = 3 })
+    eq(#rows, 1); eq(rows[1].recipeID, 103); eq(info.thinHidden, 2)  -- both potions rest on one or two auctions
+    rows, info = ns.Profit.Rows('C1', { minAuctions = 2 })
+    eq(#rows, 2); eq(info.thinHidden, 1)                              -- two auctions pass a limit of two
+    -- a product the vendor pays more for is not a thin market: the auction does not decide
+    ns.AuctionScan.Price = function(id) return ({ [1] = { 100, 9 }, [5003] = { 100, 1 } })[id] and { min = ({ [1] = 100, [5003] = 100 })[id], n = ({ [1] = 9, [5003] = 1 })[id] } or nil end
+    rows = ns.Profit.Rows('C1', { minAuctions = 3, kind = 'FirstAid' })
+    eq(#rows, 1); eq(rows[1].product.best, 'vendor')                  -- the bandage sells to the vendor for 200
+end)
+
 test('without a recipe book or prices the list is empty or unpriced, never invented', function()
     local ns = fresh()
     ns.RecipeBook = nil

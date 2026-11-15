@@ -1,6 +1,13 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.48-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.49-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Thin markets in the profit list, 0.5.49-beta
+
+- The second real scan priced 1050 of the 1971 recipes (1045 of them completely) and showed the weakness of the lowest buyout: 18 of the 40 best profits rested on one or two auctions, and the best one was a single auction against materials of nearly the same size. One odd offer sets the lowest buyout.
+- The profit list has a new column Auctions with the number of auctions behind the price of the product (an orange number below three), and a Markets filter next to the profession filter: 3+ auctions (the default) hides the recipes whose product sells on the auction house on fewer than three auctions, All markets shows them. The footer says how many are hidden. A product that sells better to a vendor than to the auction house is never hidden, because the auction does not decide its profit. The materials are not checked for thin markets.
+- The product line of the reagent window marks a price that rests on fewer than three auctions in orange ("1 auction, thin market").
+- The scan itself: 287,853 auctions were read in 7.2 seconds (the first scan needed 18.8) and 6543 items were priced, 484 of the catalogue and 6059 others; the saved price block is about 139 KB.
 
 ## The Reagents button closes the window again, 0.5.48-beta
 

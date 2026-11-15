@@ -160,8 +160,12 @@ function View.ProductLines(plan)
     local parts = {}
     if product.auction then
         local n = product.auction.n or 0
-        parts[#parts + 1] = string.format('Auction %s each (%d %s, %s after the %d%% fee)', Coin(product.auction.min), n,
-            n == 1 and 'auction' or 'auctions', Coin(product.auction.net), math.floor(ns.Economy.CUT * 100 + 0.5))
+        local count = string.format('%d %s', n, n == 1 and 'auction' or 'auctions')
+        if ns.Profit.Thin(product, ns.ProfitBrowser and ns.ProfitBrowser.THIN or 3) then
+            count = Style.Text(Style.orange, count .. ', thin market')   -- one odd offer sets the lowest buyout
+        end
+        parts[#parts + 1] = string.format('Auction %s each (%s, %s after the %d%% fee)', Coin(product.auction.min), count,
+            Coin(product.auction.net), math.floor(ns.Economy.CUT * 100 + 0.5))
     else
         parts[#parts + 1] = Style.Text(Style.gray, 'No auction price')
     end

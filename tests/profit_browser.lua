@@ -6,7 +6,7 @@ local function plain(text) return (tostring(text):gsub('|c%x%x%x%x%x%x%x%x', '')
 
 local function newNs()
     local ns = { IsPublic = function() return true end, characterID = 'C1', db = { recipeMakes = {}, knownRecipes = {} },
-        Style = { gold = 'gold', gray = 'gray', green = 'green', white = 'white', red = 'red',
+        Style = { gold = 'gold', gray = 'gray', green = 'green', white = 'white', red = 'red', orange = 'orange',
             Text = function(color, text) return '<' .. color .. '>' .. text .. '</>' end } }
     ns.RecipeBook = { complete = false, professions = { 'Alchemy', 'First Aid' }, recipes = {
         [101] = { 5001, 1, { { 1, 2 }, { 2, 1 } } },
@@ -64,14 +64,41 @@ test('rows show the materials, the auction after the fee, the vendor, where to s
     local rows = ns.Profit.Rows('C1', {})
     local cells = B.Cells(rows[1])                                   -- Potion A: profit 700, one per craft assumed
     eq(cells[1], '<green>Potion A</>'); eq(cells[2], 'Alchemy'); eq(cells[3], '250c'); eq(cells[4], '950c')
-    eq(cells[5], '<gray>-</>'); eq(cells[6], 'Auction'); eq(cells[7], '<green>+700c</>*')
+    eq(cells[5], '3'); eq(cells[6], '<gray>-</>'); eq(cells[7], 'Auction'); eq(cells[8], '<green>+700c</>*')
     cells = B.Cells(rows[2])                                         -- Potion B: a loss
-    eq(cells[1], '<red>Potion B</>'); eq(cells[7], '<red>-24c</>*')
+    eq(cells[1], '<red>Potion B</>'); eq(cells[8], '<red>-24c</>*')
     cells = B.Cells(rows[3])                                         -- Bandage: a material has no price
-    eq(cells[1], '<gray>Bandage</>'); eq(cells[3], '<gray>-</>'); eq(cells[5], '200c'); eq(cells[6], 'Vendor')
-    eq(cells[7], '<gray>Unknown</>')
+    eq(cells[1], '<gray>Bandage</>'); eq(cells[3], '<gray>-</>'); eq(cells[4], '<gray>-</>'); eq(cells[5], '<gray>-</>')
+    eq(cells[6], '200c'); eq(cells[7], 'Vendor'); eq(cells[8], '<gray>Unknown</>')
     ns.db.recipeMakes[101] = { 1, 1 }                                -- seen in the reagent window: no star any more
-    rows = ns.Profit.Rows('C1', {}); eq(B.Cells(rows[1])[7], '<green>+700c</>')
+    rows = ns.Profit.Rows('C1', {}); eq(B.Cells(rows[1])[8], '<green>+700c</>')
+end)
+
+test('a few auctions behind a price are marked, and thin markets are hidden unless all markets are asked for', function()
+    local ns = newNs()
+    installFrames()
+    ns.AuctionScan.Price = function(id)
+        local prices = { [1] = { 100, 9 }, [2] = { 50, 9 }, [5001] = { 1000, 1 }, [5002] = { 80, 999 } }
+        local p = prices[id]
+        return p and { min = p[1], n = p[2] } or nil
+    end
+    local B = ns.ProfitBrowser
+    local rows = ns.Profit.Rows('C1', {})
+    eq(#rows, 3)
+    eq(B.Cells(rows[1])[5], '<orange>1</>')                          -- one auction: thin
+    local other
+    for _, row in ipairs(rows) do if row.recipeID == 102 then other = row end end
+    eq(B.Cells(other)[5], '999+')                                    -- capped number of auctions
+    B.mine = false
+    B.Show()
+    eq(B.minAuctions, 3); eq(B.total, 2)                              -- the one-auction product is hidden by default
+    eq(B.info.thinHidden, 1)
+    B.minAuctions = 0; B.Refresh(); eq(B.total, 3); eq(B.info.thinHidden, 0)
+    eq(ns.Profit.Thin({ best = 'vendor', auction = { n = 1 } }, 3), false)   -- the vendor pays more: the auction does not matter
+    eq(ns.Profit.Thin({ best = 'auction', auction = { n = 2 } }, 3), true)
+    eq(ns.Profit.Thin({ best = 'auction', auction = { n = 3 } }, 3), false)
+    eq(ns.Profit.Thin({ best = 'auction', auction = { n = 1 } }, 0), false)  -- all markets
+    eq(ns.Profit.Thin(nil, 3), false)
 end)
 
 test('the window lists recipes, filters, searches and scrolls', function()

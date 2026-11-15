@@ -38,7 +38,7 @@ C_TradeSkillUI={GetRecipeInfo=function(id)if id==2536 then return{recipeID=id,na
  GetProfessionInfoByRecipeID=function()return{professionID=185}end,
  GetRecipeSchematic=function(id)return{recipeID=id,recipeType=1,isRecraft=false,reagentSlotSchematics=slots}end}
 ns.inventory={Get=function(_,id)return{bags=id-1000,bagsState='current',bank=10,bankState='cached',bankObservedAt=100}end}
-for _,file in ipairs({'Style.lua','History.lua','Crafting.lua','Navigation.lua','Reports.lua','CraftingView.lua','AuctionScan.lua','Economy.lua'})do assert(loadfile('TitanGatheredForeverV3/'..file))('TGF v3',ns)end
+for _,file in ipairs({'Style.lua','History.lua','Crafting.lua','Navigation.lua','Reports.lua','CraftingView.lua','AuctionScan.lua','Economy.lua','Profit.lua'})do assert(loadfile('TitanGatheredForeverV3/'..file))('TGF v3',ns)end
 ns.Style.ItemName=function(id)return'Item '..id end
 ns.history=ns.History.New({})
 ns.history:Observe('a','A',{id='one',kind='Mining',source='123',mapID=4,at=100,complete=true,items={[1001]=1}})
@@ -176,6 +176,20 @@ test('the product lines compare auction and vendor and show the profit of a craf
  assert(plain(w.profit.text):find('Scan the auction house',1,true));eq(w.prices.text:find('Auction 2',1,true),nil)
  assert(plain(w.prices.text):find('No auction price',1,true));assert(plain(w.prices.text):find('Vendor price unknown',1,true))
  C_TradeSkillUI.GetRecipeSchematic=base;C_Item=nil;ns.db=nil;ns.CraftingView.Show(2536,3)
+end)
+test('a product price that rests on one auction is marked as a thin market',function()
+ local Pack=ns.AuctionScan.Pack
+ local base=C_TradeSkillUI.GetRecipeSchematic
+ C_TradeSkillUI.GetRecipeSchematic=function(id,recraft)local t=base(id,recraft);t.outputItemID=5001;t.quantityMin=1;t.quantityMax=1;return t end
+ local items={};for id=1001,1007 do items[id]={min=100,qty=1,n=1}end
+ ns.db={auction={at=1,entries=9,items=items,others={[5001]=Pack(2000,1)}}}
+ ns.CraftingView.Show(2536,1);local w=ns.CraftingView.window
+ assert(plain(w.prices.text):find('Auction 20s each (1 auction, thin market, 19s after the 5% fee)',1,true))
+ assert(w.prices.text:find(ns.Style.orange..'1 auction, thin market',1,true))               -- marked in orange
+ ns.db.auction.others[5001]=Pack(2000,3);ns.CraftingView.Refresh()
+ assert(plain(w.prices.text):find('Auction 20s each (3 auctions, 19s after the 5% fee)',1,true))
+ assert(not w.prices.text:find('thin market',1,true))                                       -- three auctions are enough
+ C_TradeSkillUI.GetRecipeSchematic=base;ns.db=nil;ns.CraftingView.Show(2536,3)
 end)
 test('the window is as tall as its list and keeps room for at least four rows',function()
  local w=ns.CraftingView.window

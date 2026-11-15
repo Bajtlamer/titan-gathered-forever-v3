@@ -534,3 +534,7 @@ Live professionLog on 0.5.46: stage attached with page = true, close = true, max
 ## 0.5.48-beta, the Reagents button toggles
 
 Live: the button of 0.5.47 is visible. CraftingView.Toggle(recipeID, operations) closes the window when it shows that recipe and otherwise shows it; the header button uses it. Pending live check: click, click again, and a click with another recipe selected.
+
+## 0.5.49-beta, thin markets
+
+Second live scan (realm CAMWOW EU5 Realm 4 PvP, at 1794701409): 287,853 auctions, 7.2 s of reading (about 9 microseconds per auction, a 6 ms budget per frame), the answer to the request after about 17 s, 6543 items priced (484 catalogue, 6059 others), the price block about 139 KB in the saved variables. 1050 of 1971 recipes have a priced product, 1045 of them have every material priced (auction only: 543 with a profit, 502 with a loss, before vendor prices); 18 of the best 40 profits rested on one or two auctions. Profit.Thin and the minAuctions option hide such rows (default 3), the profit list has the Auctions column and the Markets filter, and the reagent window marks a thin product price. Pending live check: the new column and filter in the tab, how many recipes remain with 3+ auctions, whether the vendor price column and Sells better to look right with real item data.
