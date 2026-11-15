@@ -175,6 +175,10 @@ function Titan.Menu(owner)
             ns.settings.flightPoints = not ns.settings.flightPoints
             ns.FlightPaths.Update()
         end)
+        flights:CreateCheckbox('Show boat and zeppelin routes', function() return ns.settings.transportRoutes ~= false end, function()
+            ns.settings.transportRoutes = ns.settings.transportRoutes == false
+            ns.Transport.Update()
+        end)
         local auction = root:CreateButton('Auction prices')
         auction:CreateTitle(ns.AuctionScan.Status())
         auction:CreateButton('Scan now (the auction house must be open)', function() ns.AuctionScan.Run() end)

@@ -15,6 +15,7 @@ function ns.Settings.Initialize(saved)
         settings.minimapButtonAngle = 205
     end
     if type(settings.flightPoints) ~= 'boolean' then settings.flightPoints = true end
+    if type(settings.transportRoutes) ~= 'boolean' then settings.transportRoutes = true end
     settings.showTotal = nil
     if type(settings.itemTooltips) ~= 'boolean' then settings.itemTooltips = true end
     if type(settings.categories) ~= 'table' then settings.categories = {} end

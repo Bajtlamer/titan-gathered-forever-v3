@@ -280,6 +280,7 @@ local function start()
     ns.npcObserver = ns.NpcObserver.New(ns.NpcObserver.DefaultAPI())
     ns.UpdateGathering()
     ns.FlightPaths.Attach()
+    ns.Transport.Attach()
     ns.Tooltips.Initialize()
     ns.Crafting.Initialize()
     ns.ProfessionButton.Initialize()
@@ -345,6 +346,7 @@ local function start()
             if not id then ns.Print('Usage: /tgf recipe <recipeID> [operations], or select a recipe and use /tgf recipe.');return end
             ns.CraftingView.Show(tonumber(id),tonumber(target)or 1);return
         end
+        if command == 'dock' or command:match('^dock%s') then ns.Transport.Command(command:match('^dock%s+(.*)$')); return end
         if command == 'transport' then
             local mapID = WorldMapFrame and WorldMapFrame.GetMapID and WorldMapFrame:GetMapID()
                 or (C_Map and C_Map.GetBestMapForUnit and C_Map.GetBestMapForUnit('player'))
@@ -384,7 +386,7 @@ end
 frame:SetScript('OnEvent', function(_, event, ...)
     if event == 'ADDON_LOADED' then
         if (...) == addonName then frame:RegisterEvent('PLAYER_LOGIN')
-        else ns.Map.Attach(); ns.Minimap.Attach(); ns.FlightPaths.Attach() end
+        else ns.Map.Attach(); ns.Minimap.Attach(); ns.FlightPaths.Attach(); ns.Transport.Attach() end
         return
     end
     if event == 'PLAYER_LOGIN' then start(); return end

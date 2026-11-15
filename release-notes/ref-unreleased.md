@@ -1,6 +1,13 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.54-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.55-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Boat and zeppelin routes, 0.5.55-beta
+
+- The world map shows dashed colored lines for the boat and zeppelin routes of WoW Forever (blue Alliance, red Horde, gold neutral), for every player, plus a small marker at each dock with a tooltip that lists its routes. A line is drawn on a map that holds both ends of a route (the continent maps and the world map), a marker on every map that holds the dock.
+- The client does not report dock positions (the area point query returned nothing in Teldrassil), so each dock is recorded in game: stand at the dock or tower and type /tgf dock <name> (a unique start of the name is enough; /tgf dock lists the 15 docks and which are recorded; /tgf dock forget <name> removes one). Nothing is drawn for a dock that is not recorded.
+- Routes (from the Method.gg travel guide): Stormwind Harbour, Auberdine, Menethil Harbor, Southshore, Theramore Isle, Rut'theran Village, Feathermoon Stronghold and Forgotten Coast by boat for the Alliance (the Auberdine, Menethil, Southshore loop is one way in the game, drawn as plain lines), Orgrimmar, Undercity and Grom'gol by zeppelin for the Horde, Ratchet and Booty Bay, Steamwheedle Port and Powderfuse Port by neutral boat. Skyborne routes and the Deeprun Tram are not drawn.
+- Menu Flight points has a new Show boat and zeppelin routes switch. New file, so a full game restart is needed.
 
 ## Transport probe, 0.5.54-beta
 
