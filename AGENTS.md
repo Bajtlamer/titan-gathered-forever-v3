@@ -28,6 +28,8 @@ Preserve existing settings, acquired/produced statistics, per-character coverage
 
 ## Documentation, commits and review
 
+Commit messages and pull request descriptions carry no attribution to an AI tool: no Co-Authored-By trailer and no "Generated with" line. The owner does not want an assistant listed as a contributor. Check a message before committing.
+
 README.md describes current behavior, plans/plan-live-verification-and-optimization.md is the continuation plan (live checks and the optimization backlog; plans/plan-next-development.md keeps the older milestone status), ref-wow-forever-progress.md records current status/history, and release-notes/ref-unreleased.md records changes since published versioned notes. Historical plans preserve original execution evidence; clearly mark superseded designs.
 
 Run checks appropriate to changes and document live reproduction/results separately from automated validation. Before source publication, inspect staged files for private data and ignored artifacts. Use concise imperative commit subjects. PR descriptions should state behavior, affected modules, validation and remaining live/client limitations. Do not claim a source push publishes release assets or updates hosting.
