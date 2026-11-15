@@ -36,7 +36,7 @@ Run checks appropriate to changes and document live reproduction/results separat
 
 ## Text and price style in every window
 
-Informational text (notes, summaries, footers, labels) is small and gold; product data is white or colored by meaning, so the two never run together. Prices always use the game money format with gold, silver and copper icons (ns.Economy.Coin, ns.NpcSources.CoinIcons), never plain "1g 2s" text. A label with a colon and its value, and the numbers inside a sentence, are told apart: Style.Label for the words, Style.Value for the data, Style.Range for "Showing a-b of n". Check every new string against this and sweep the neighbouring windows. Tests that compare such text use tests/style_stub.lua.
+Informational text (notes, summaries, footers, labels) is small and gold; product data is white or colored by meaning, so the two never run together. Prices always use the game money format with gold, silver and copper icons (ns.Economy.Coin, ns.NpcSources.CoinIcons), never plain "1g 2s" text. A label with a colon and its value, and the numbers inside a sentence, are told apart: Style.Label for the words, Style.Value for the data, Style.Range for "Showing a-b of n", and Style.Date (green) for every date or time of day. Check every new string against this and sweep the neighbouring windows. Tests that compare such text use tests/style_stub.lua.
 
 ## Automatic Live Installation
 
