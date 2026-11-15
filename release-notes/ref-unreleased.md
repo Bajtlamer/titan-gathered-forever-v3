@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.51-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.52-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Footer note only when needed, 0.5.52-beta
+
+- The footer of the profit list explained the star ("assumes one item per craft") even when no row had one. The note is shown only when a priced row still has an assumed number made. Live check of 0.5.51: after the professions were read, the stars were gone and the names showed the number made (x200, x2, x3); the arithmetic of every row checked out, and no recipe had to be added from the profession windows for Engineering.
 
 ## The recipe table fills itself, 0.5.51-beta
 

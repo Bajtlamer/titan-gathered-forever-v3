@@ -110,7 +110,12 @@ local function footer(info, rows, scanned)
         notes[#notes + 1] = string.format('%d recipes are hidden because their product has fewer than %d auctions (a thin market: one odd offer sets the price); choose All markets to see them.',
             info.thinHidden, Browser.THIN)
     end
-    notes[#notes + 1] = '* assumes one item per craft until the recipe was opened in the reagent window. The recipe table is a mirror of client tables and is not complete; materials are priced at the auction house or at a merchant you saw.'
+    local assumed = false
+    for _, row in ipairs(rows) do if row.profit ~= nil and row.assumed then assumed = true; break end end
+    if assumed then
+        notes[#notes + 1] = '* assumes one item per craft until the profession was read or the recipe was opened in the reagent window.'
+    end
+    notes[#notes + 1] = 'The recipe table is a mirror of client tables and is not complete; materials are priced at the auction house or at a merchant you saw.'
     return table.concat(notes, ' ')
 end
 

@@ -546,3 +546,7 @@ Live screenshot of the profit tab (Engineering, My recipes, 3+ auctions; 20 reci
 ## 0.5.51-beta, bulk harvest of the recipe schematics
 
 Crafting.Harvest reads the schematic of every recipe listed by an open profession (called from KnownRecipes.Scan, 40 per frame, skipped when already read) and keeps recipeMakes (number made) and recipeExtra (recipes the book lacks: product, profession, materials, only when the planner can read all reagents). Profit.Rows lists the extras and the footer counts them. Pending live check: how long reading a large profession takes (the first read of Leatherworking or Tailoring), how many recipes come out as extras (the measure of how incomplete the table is), and that the stars disappear. The frame cost of 40 schematics per frame is not measured.
+
+## 0.5.52-beta, live check of the harvest
+
+Screenshot after reading the professions (Engineering, My recipes, 3+ auctions; 20 recipes): the stars are gone, the names show the number made (Crafted Heavy Shot x200, Crafted Light Shot x200, Rough Dynamite x2, Coarse Dynamite x2, Large Copper Bomb x3, Rough Copper Bomb x2), and every profit recomputed by hand matches (for example Large Copper Bomb x3: 3 x 1s 75c from the vendor less 6s 81c of materials is -1s 56c). The footer had no line about recipes added from the profession windows, so the recipe table was complete for the recipes of this character in Engineering. Footer note about the star is now conditional.
