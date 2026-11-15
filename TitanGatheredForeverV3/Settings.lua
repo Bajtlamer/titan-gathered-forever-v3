@@ -20,6 +20,7 @@ function ns.Settings.Initialize(saved)
         settings.transportPattern = settings.transportSolid == true and 'solid' or 'dashed'
     end
     settings.transportSolid = nil
+    if settings.transportIcon ~= 'anchor' then settings.transportIcon = 'game' end
     if settings.transportStyle ~= 'thin' and settings.transportStyle ~= 'clear' then settings.transportStyle = 'thin' end
     settings.showTotal = nil
     if type(settings.itemTooltips) ~= 'boolean' then settings.itemTooltips = true end

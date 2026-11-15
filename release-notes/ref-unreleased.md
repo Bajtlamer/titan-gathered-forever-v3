@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-12. These changes describe the 0.5.68-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-12. These changes describe the 0.5.69-beta source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Game icons for the docks, 0.5.69-beta
+
+- Docks use original game icons found with the atlas search: Islands-AllianceBoat for boats and Vehicle-Air-Horde for zeppelin towers, each only when the client has the atlas, drawn over a dark silhouette for contrast. Neutral boat docks and any dock without a usable atlas keep the tinted anchor. The Dock icon submenu under Boat and zeppelin routes switches between Game icons (default) and Anchor. No new file, a /reload is enough.
 
 ## Atlas search saved to a file, 0.5.68-beta
 

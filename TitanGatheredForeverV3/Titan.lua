@@ -180,6 +180,15 @@ function Titan.Menu(owner)
             ns.settings.transportRoutes = ns.settings.transportRoutes == false
             ns.Transport.Update()
         end)
+        local icons = routes:CreateButton('Dock icon')
+        icons:CreateCheckbox('Game icons (boat, airship)', function() return ns.settings.transportIcon ~= 'anchor' end, function()
+            ns.settings.transportIcon = 'game'
+            ns.Transport.Update()
+        end)
+        icons:CreateCheckbox('Anchor', function() return ns.settings.transportIcon == 'anchor' end, function()
+            ns.settings.transportIcon = 'anchor'
+            ns.Transport.Update()
+        end)
         local lines = routes:CreateButton('Line style')
         lines:CreateTitle('Thickness')
         lines:CreateCheckbox('Thin', function() return ns.settings.transportStyle ~= 'clear' end, function()

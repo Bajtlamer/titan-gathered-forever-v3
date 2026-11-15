@@ -205,6 +205,21 @@ function Transport.Layout(mapID)
     return points, lines
 end
 
+-- Original game icons, found with /tgf atlas in the client. A dock uses the first one the client has, else the anchor.
+Transport.icons = {
+    zeppelin = { 'Vehicle-Air-Horde' },
+    boat = { 'Islands-AllianceBoat', 'FlightMaster_Ferry-TaxiNode_Alliance' },
+}
+local function gameIcon(point)
+    local kind = point.routes[1] and point.routes[1][4]
+    for _, route in ipairs(point.routes) do if route[4] == 'zeppelin' then kind = 'zeppelin' end end
+    if point.routes[1] and point.routes[1][3] == 'Neutral' and kind == 'boat' then return end   -- no neutral boat icon
+    for _, atlas in ipairs(Transport.icons[kind] or {}) do
+        if C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(atlas) then return atlas end
+    end
+end
+Transport.GameIcon = gameIcon
+
 local ANCHOR = 'Interface\\AddOns\\TitanGatheredForeverV3\\Artwork\\RouteAnchor.tga'
 local R = {}
 R.__index = R
@@ -302,8 +317,16 @@ function R:Refresh(force)
             end
             local color = pointColor(point)
             pin.point = point
-            pin:SetSize(size, size)
-            pin.texture:SetVertexColor(color[1], color[2], color[3], 1)
+            local atlas = ns.settings.transportIcon ~= 'anchor' and gameIcon(point) or nil
+            if atlas then
+                pin:SetSize(size * 1.3, size * 1.3)
+                pin.texture:SetAtlas(atlas); pin.texture:SetVertexColor(1, 1, 1, 1)
+                pin.ring:SetAtlas(atlas); pin.ring:SetVertexColor(.03, .03, .06, .95)
+            else
+                pin:SetSize(size, size)
+                pin.texture:SetTexture(ANCHOR); pin.texture:SetVertexColor(color[1], color[2], color[3], 1)
+                pin.ring:SetTexture(ANCHOR); pin.ring:SetVertexColor(.03, .03, .06, .95)
+            end
             pin:ClearAllPoints()
             pin:SetPoint('CENTER', self.overlay, 'TOPLEFT', point.x * width, -point.y * height)
             pin:Show()
