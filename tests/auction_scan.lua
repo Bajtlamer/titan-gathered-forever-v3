@@ -21,7 +21,8 @@ local function fixture(auctions, withClock)
         Replicate = function() f.requests = f.requests + 1 end,
         Count = function() return #f.auctions end,
         Item = function(index) local a = f.auctions[index]; return a[1], a[2], a[3] end,
-        Wanted = function(id) return ns.Catalog.Get(id) ~= nil end,
+        Reagent = function(id) return ns.Catalog.Get(id) ~= nil end,
+        Keep = function(id) return ns.Catalog.Get(id) ~= nil or (f.products or {})[id] == true end,
         Save = function(result) f.saved = result end,
         Say = function(message) f.said[#f.said + 1] = message end,
         Changed = function() f.changed = f.changed + 1 end,
@@ -35,15 +36,17 @@ local function fixture(auctions, withClock)
 end
 
 test('a scan keeps the lowest buyout per unit of the profession items, with quantity and auction count', function()
-    local f = fixture({ { 2589, 20, 1000 }, { 2589, 5, 200 }, { 2592, 1, 300 }, { 9999, 1, 50 }, { 2589, 10, 0 } })
+    local f = fixture({ { 2589, 20, 1000 }, { 2589, 5, 200 }, { 2592, 1, 300 }, { 9999, 1, 50 }, { 2589, 10, 0 }, { 8888, 1, 10 } })
+    f.products = { [9999] = true }                                         -- 9999 is the product of an installed recipe
     eq(f.scan:Request(), true); eq(f.requests, 1)
     f.scan:Updated(); f.run()
     local items = f.saved.items
     eq(items[2589].min, 40); eq(items[2589].qty, 25); eq(items[2589].n, 2)   -- 200 for 5 is 40 each; the bid-only one is ignored
     eq(items[2592].min, 300); eq(items[9999], nil)                         -- a record with quantity only for profession items
-    eq(f.saved.others[9999], 50001)                                        -- the other items are packed: 50 copper, 1 auction
-    eq(f.saved.distinct, 3); eq(f.saved.entries, 5); eq(f.saved.at, 1000)
-    assert(f.said[#f.said]:find('3 items priced (2 of the professions)', 1, true)); eq(f.scan.scanning, false)
+    eq(f.saved.others[9999], 50001)                                        -- a product is packed: 50 copper, 1 auction
+    eq(f.saved.others[8888], nil); eq(items[8888], nil)                    -- an item nobody asked for is not kept at all
+    eq(f.saved.distinct, 3); eq(f.saved.entries, 6); eq(f.saved.at, 1000)
+    assert(f.said[#f.said]:find('3 items priced (2 reagents)', 1, true)); eq(f.scan.scanning, false)
 end)
 
 test('a big list is read in steps and each step leaves the game a moment', function()
@@ -170,7 +173,7 @@ test('items outside the catalogue are packed into one number and found again wit
     local b, at = S.Price(4000); eq(b.min, 3200); eq(b.n, 12); eq(b.packed, true); eq(b.qty, nil); eq(at, 500)
     eq(S.Price(5), nil)
     time = function() return 500 end
-    assert(S.Status():find('3 items priced (1 of the professions)', 1, true)); time = nil
+    assert(S.Status():find('3 items priced (1 reagents)', 1, true)); time = nil
 end)
 
 test('a request needs an open auction house, respects the cooldown and cannot overlap', function()
@@ -223,7 +226,7 @@ test('prices are looked up for this realm and described with their age', functio
     eq(ns.AuctionScan.Age(30), 'just now'); eq(ns.AuctionScan.Age(600), '10 min ago'); eq(ns.AuctionScan.Age(7200), '2 h ago')
     eq(ns.AuctionScan.Age(200000), '2 d ago')
     time = function() return 1600 end
-    assert(ns.AuctionScan.Status():find('Scanned 10 min ago: 1 items priced (1 of the professions) from 50 auctions', 1, true))
+    assert(ns.AuctionScan.Status():find('Scanned 10 min ago: 1 items priced (1 reagents) from 50 auctions', 1, true))
     ns.AuctionScan.Clear(); eq(ns.db.auction, nil); assert(ns.AuctionScan.Status():find('No auction prices', 1, true))
     time = nil
 end)
@@ -241,7 +244,9 @@ test('the client list is read at the documented positions and hidden values are 
     local api = ns.AuctionScan.DefaultAPI()
     local id, count, buyout = api.Item(1); eq(id, 2589); eq(count, 5); eq(buyout, 250)
     local id2, count2 = api.Item(2); eq(id2, 2589); eq(count2, nil)
-    eq(api.Count(), 2); eq(api.Wanted(2589), true); eq(api.Wanted(5), false)
+    eq(api.Count(), 2); eq(api.Reagent(2589), true); eq(api.Reagent(5), false)
+    ns.Catalog.IsProduct = function(id) return id == 700 end
+    eq(api.Keep(2589), true); eq(api.Keep(700), true); eq(api.Keep(5), false)       -- reagents and products are of interest
     C_AuctionHouse = nil
 end)
 

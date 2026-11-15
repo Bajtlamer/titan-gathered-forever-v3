@@ -12,8 +12,6 @@ local scopes = { { value = true, label = 'My recipes' }, { value = false, label 
 -- A price that rests on fewer auctions than this is a thin market.
 Browser.THIN = 3
 local markets = { { value = 3, label = '3+ auctions' }, { value = 0, label = 'All markets' } }
-local kinds = { 'Alchemy', 'Blacksmithing', 'Cooking', 'Enchanting', 'Engineering', 'FirstAid', 'Leatherworking',
-    'Mining', 'Tailoring' }
 
 local function coin(copper) return ns.Economy.Coin(copper) end
 
@@ -87,6 +85,9 @@ end
 
 local function footer(info, rows, scanned)
     local notes = {}
+    if #ns.Profit.Kinds() == 0 then
+        notes[#notes + 1] = 'No profession addon with recipes is installed (or all are switched off): there is nothing to list.'
+    end
     if not scanned then notes[#notes + 1] = 'No auction prices yet: scan the auction house (button below its window).' end
     if Browser.mine and #info.unread > 0 then
         local names = {}
@@ -176,7 +177,7 @@ function Browser.Show()
             end)
         w.kindButton = ns.Nav.Dropdown(w, 175, -65, 190, function()
             local list = { { value = false, label = 'All professions' } }
-            for _, kind in ipairs(kinds) do list[#list + 1] = { value = kind, label = ns.NpcSources.Label(kind) } end
+            for _, kind in ipairs(ns.Profit.Kinds()) do list[#list + 1] = { value = kind, label = ns.NpcSources.Label(kind) } end
             return list
         end, function() return Browser.kind or false end, function(value)
             Browser.kind, Browser.offset = value or nil, 0; Browser.Refresh()

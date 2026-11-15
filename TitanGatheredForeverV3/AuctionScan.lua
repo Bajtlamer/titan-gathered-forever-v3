@@ -1,11 +1,12 @@
 local _, ns = ...
 -- Prices from the auction house. One full scan (C_AuctionHouse.ReplicateItems, answered with
--- REPLICATE_ITEM_LIST_UPDATE) is read in small steps and reduced to one lowest buyout per unit and item. The items of
--- the profession catalogue (the reagents) keep the quantity on offer and the number of auctions as well; every
--- other item, which includes the products of recipes, is stored in one number (lowest buyout and number of
--- auctions) to keep the saved data small. Only buyout prices count, because a bid-only auction has no price that
--- can be paid at once. The client allows a full scan about every 15 minutes, and a
--- request goes through the throttled message system of the auction house, whose events are shown and logged.
+-- REPLICATE_ITEM_LIST_UPDATE) is read in small steps and reduced to one lowest buyout per unit and item, for the items
+-- of interest only: the reagents of the installed profession addons (they keep the quantity on offer and the number of
+-- auctions as well) and the products of their recipes (stored in one number: lowest buyout and number of auctions).
+-- The whole list has to be read, but nothing else is kept, so a player with one profession addon keeps the prices of
+-- that profession only. Only buyout prices count, because a bid-only auction has no price that can be paid at once.
+-- The client allows a full scan about every 15 minutes, and a request goes through the throttled message system of
+-- the auction house, whose events are shown and logged.
 local Scan = {}
 Scan.__index = Scan
 ns.AuctionScan = Scan
@@ -141,7 +142,7 @@ function Scan:Updated()
             local chunkEnd = math.min(total, last + (deadline and Scan.CHUNK or Scan.STEP))
             for position = last + 1, chunkEnd do
                 local itemID, count, buyout = self.api.Item(position)
-                if itemID and count and buyout and count > 0 and buyout > 0 then
+                if itemID and count and buyout and count > 0 and buyout > 0 and self.api.Keep(itemID) then
                     local unit = math.max(1, math.floor(buyout / count + 0.5))
                     local entry = items[itemID]
                     if not entry then entry = { min = unit, qty = 0, n = 0 }; items[itemID] = entry end
@@ -166,7 +167,7 @@ function Scan:Updated()
         local kept, others, found, distinct = {}, {}, 0, 0
         for itemID, entry in pairs(items) do
             distinct = distinct + 1
-            if self.api.Wanted(itemID) then
+            if self.api.Reagent(itemID) then
                 kept[itemID] = entry
                 found = found + 1
             else
@@ -177,7 +178,7 @@ function Scan:Updated()
         self.scanning, self.reading = false, false
         self:Progress(nil)
         self:Log('done', { entries = total, items = found, distinct = distinct, seconds = self.api.Clock() - started })
-        self.api.Say(string.format('Auction scan done: %d auctions, %d items priced (%d of the professions).',
+        self.api.Say(string.format('Auction scan done: %d auctions, %d items priced (%d reagents).',
             total, distinct, found))
         self.api.Changed()
     end
@@ -222,7 +223,7 @@ function Scan.Status()
     end
     local count = 0
     for _ in pairs(saved.items or {}) do count = count + 1 end
-    return string.format('Scanned %s: %d items priced (%d of the professions) from %d auctions.',
+    return string.format('Scanned %s: %d items priced (%d reagents) from %d auctions.',
         Scan.Age(math.max(0, (time and time() or saved.at) - saved.at)), saved.distinct or count, count, saved.entries or 0)
 end
 
@@ -258,7 +259,9 @@ function Scan.DefaultAPI()
         local function number(value) return ns.IsPublic(value) and type(value) == 'number' and value or nil end
         return number(result[18]), number(result[4]), number(result[11])
     end
-    api.Wanted = function(itemID) return ns.Catalog and ns.Catalog.Get(itemID) ~= nil end
+    -- Items of interest: the reagents of the installed profession addons, and the products of their recipes.
+    api.Reagent = function(itemID) return ns.Catalog ~= nil and ns.Catalog.Get(itemID) ~= nil end
+    api.Keep = function(itemID) return api.Reagent(itemID) or (ns.Catalog ~= nil and ns.Catalog.IsProduct(itemID)) end
     api.Save = function(result)
         if not ns.db then return end
         ns.db.auction = { realm = GetRealmName and GetRealmName() or nil, at = result.at, entries = result.entries,

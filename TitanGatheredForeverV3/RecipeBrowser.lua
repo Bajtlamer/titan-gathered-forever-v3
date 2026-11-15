@@ -149,7 +149,7 @@ function Browser.Show()
         end)
         w.kindButton = ns.Nav.Dropdown(w, 175, -65, 190, function()
             local list = { { value = false, label = 'All professions' } }
-            for _, kind in ipairs(ns.NpcSources.RecipeKinds) do list[#list + 1] = { value = kind, label = ns.NpcSources.Label(kind) } end
+            for _, kind in ipairs(ns.NpcSources.InstalledKinds(ns.NpcSources.RecipeKinds)) do list[#list + 1] = { value = kind, label = ns.NpcSources.Label(kind) } end
             return list
         end, function() return Browser.kind or false end, function(value) Browser.SetKind(value or nil) end)
         w.rangeText = text(w, 'GameFontHighlightSmall', 380, -70, 300)

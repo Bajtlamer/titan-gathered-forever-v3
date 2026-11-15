@@ -8,11 +8,11 @@ local function newNs()
     local ns = { IsPublic = function() return true end, characterID = 'C1', db = { recipeMakes = {}, knownRecipes = {} },
         Style = { gold = 'gold', gray = 'gray', green = 'green', white = 'white', red = 'red', orange = 'orange',
             Text = function(color, text) return '<' .. color .. '>' .. text .. '</>' end } }
-    ns.RecipeBook = { complete = false, professions = { 'Alchemy', 'First Aid' }, recipes = {
-        [101] = { 5001, 1, { { 1, 2 }, { 2, 1 } } },
-        [102] = { 5002, 1, { { 1, 1 } } },
-        [103] = { 5003, 2, { { 3, 1 } } },
-    } }
+    assert(loadfile('TitanGatheredForeverV3/Catalog.lua'))('TitanGatheredForeverV3', ns)
+    ns.Catalog.RegisterModule({ id = 'Alchemy', label = 'Alchemy', items = {}, recipes = {}, book = {
+        [101] = { 5001, { { 1, 2 }, { 2, 1 } } }, [102] = { 5002, { { 1, 1 } } } } })
+    ns.Catalog.RegisterModule({ id = 'FirstAid', label = 'First Aid', items = {}, recipes = {}, book = {
+        [103] = { 5003, { { 3, 1 } } } } })
     ns.AuctionScan = { Price = function(id)
         local prices = { [1] = 100, [2] = 50, [5001] = 1000, [5002] = 80 }
         return prices[id] and { min = prices[id], n = 3 } or nil

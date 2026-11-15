@@ -1,16 +1,12 @@
 local _, ns = ...
--- The profit of every recipe of the recipe book (Data/RecipeBook.lua, a mirror of client tables that is not complete):
--- what the materials cost at the cheapest known price, what the product sells for (vendor against the auction house
--- after its fee), and the difference. The number a craft makes is one until the recipe was opened in the reagent
--- window, which keeps the real number. An unknown price never gives a profit.
+-- The profit of every recipe of the recipe books of the installed profession addons (a mirror of client tables that is
+-- not complete, completed from the profession windows): what the materials cost at the cheapest known price, what the
+-- product sells for (vendor against the auction house after its fee), and the difference. The number a craft makes is
+-- one until the profession was read or the recipe opened in the reagent window. An unknown price never gives a profit.
+-- A profession whose addon is not installed has no recipes here.
 local Profit = {}
 ns.Profit = Profit
 
--- The kinds the learned recipes are stored under (the recipe book names the profession in words).
-local kinds = { ['First Aid'] = 'FirstAid' }
-function Profit.Kind(profession) return kinds[profession] or profession end
-
-local function book() return ns.RecipeBook end
 
 -- The name of a recipe: the spell name of the client when it has it, else the product, else the number.
 function Profit.Name(recipeID, productID)
@@ -46,6 +42,17 @@ function Profit.Makes(recipeID)
     return 1, 1, true
 end
 
+-- The professions that have recipes here, that is those of the installed profession addons (module ids, sorted).
+function Profit.Kinds()
+    local set, result = {}, {}
+    if not ns.Catalog then return result end
+    for _, recipe in pairs(ns.Catalog.Book()) do set[recipe[2]] = true end
+    for _, recipe in pairs(ns.Catalog.ExtraRecipes()) do set[recipe[2]] = true end
+    for kind in pairs(set) do result[#result + 1] = kind end
+    table.sort(result)
+    return result
+end
+
 -- A product whose price comes from the auction house and rests on fewer than minAuctions auctions is a thin market: one
 -- odd offer sets the lowest buyout. Where the vendor pays more than the auction leaves, the auction does not matter.
 function Profit.Thin(product, minAuctions)
@@ -59,13 +66,12 @@ end
 -- of recipes looked at and the number of rows hidden as thin markets.
 function Profit.Rows(character, options)
     options = options or {}
-    local data = book()
     local rows, unread, unreadSet, looked, thinHidden = {}, {}, {}, 0, 0
-    if not data then return rows, { unread = unread, looked = 0, thinHidden = 0 } end
+    if not ns.Catalog then return rows, { unread = unread, looked = 0, thinHidden = 0 } end
     local needle = options.search and options.search ~= '' and options.search:lower() or nil
-    -- Recipes the profession windows showed and the book lacks are kept separately (Crafting.Harvest).
-    local function consider(recipeID, productID, profession, pairsList, fromWindow)
-        local kind = Profit.Kind(profession)
+    -- recipe: { product, kind, { { item, quantity }, ... }, label }; the kind is the module id of the profession.
+    local function consider(recipeID, recipe, fromWindow)
+        local productID, kind, pairsList, profession = recipe[1], recipe[2], recipe[3], recipe[4]
         if options.kind and options.kind ~= kind then return end
         looked = looked + 1
         local name = Profit.Name(recipeID, productID)
@@ -89,17 +95,8 @@ function Profit.Rows(character, options)
                 fromWindow = fromWindow or nil }
         end
     end
-    for recipeID, recipe in pairs(data.recipes) do
-        consider(recipeID, recipe[1], data.professions[recipe[2]], recipe[3], false)
-    end
-    local extra = ns.db and ns.db.recipeExtra
-    if type(extra) == 'table' then
-        for recipeID, recipe in pairs(extra) do
-            if not data.recipes[recipeID] and type(recipe) == 'table' and recipe.out and recipe.profession and recipe.reagents then
-                consider(recipeID, recipe.out, recipe.profession, recipe.reagents, true)
-            end
-        end
-    end
+    for recipeID, recipe in pairs(ns.Catalog.Book()) do consider(recipeID, recipe, false) end
+    for recipeID, recipe in pairs(ns.Catalog.ExtraRecipes()) do consider(recipeID, recipe, true) end
     -- Rows with a profit come first, the best at the top; the rest follow by name.
     table.sort(rows, function(a, b)
         if (a.profit ~= nil) ~= (b.profit ~= nil) then return a.profit ~= nil end

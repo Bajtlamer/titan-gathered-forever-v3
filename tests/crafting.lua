@@ -138,7 +138,7 @@ test('harvesting reads a profession in steps, keeps the number made and records 
  local base=C_TradeSkillUI.GetRecipeSchematic
  C_TradeSkillUI.GetRecipeSchematic=function(id,recraft)local t=base(id,recraft);t.outputItemID=9000+id;t.quantityMin=1;t.quantityMax=2;return t end
  ns.db={recipeMakes={},recipeExtra={}}
- ns.RecipeBook={recipes={[2536]={9536,1,{{2672,2}}}}}
+ ns.Catalog.Book=function()return{[2536]={9536,'Cooking',{{2672,2}},'Cooking'}}end
  local timers={}
  C_Timer={After=function(_,fn)timers[#timers+1]=fn end}
  local ids={2536,3000};for i=1,60 do ids[#ids+1]=4000+i end
@@ -147,7 +147,7 @@ test('harvesting reads a profession in steps, keeps the number made and records 
  eq(ns.db.recipeMakes[2536][2],2);assert(ns.db.recipeMakes[3000]);assert(ns.db.recipeMakes[4038]);eq(ns.db.recipeMakes[4039],nil)
  eq(ns.db.recipeExtra[2536],nil)                                        -- a recipe of the book is not copied
  local extra=ns.db.recipeExtra[3000]
- eq(extra.out,12000);eq(extra.profession,'Cooking');eq(extra.reagents[1][1],2672);eq(extra.reagents[1][2],2)
+ eq(extra.out,12000);eq(extra.profession,'Cooking');eq(extra.kind,'Cooking');eq(extra.reagents[1][1],2672);eq(extra.reagents[1][2],2)
  table.remove(timers,1)()
  assert(ns.db.recipeMakes[4060]);eq(#timers,0);assert(ns.db.recipeExtra[4060])
  eq(ns.Crafting.Harvest(ids),0)                                         -- read before: nothing to do
@@ -156,7 +156,7 @@ test('harvesting reads a profession in steps, keeps the number made and records 
  eq(ns.Crafting.Harvest({6000,6001,6002}),3);assert(ns.db.recipeExtra[6002])   -- without timers everything is read at once
  eq(ns.Crafting.Harvest(nil),0);eq(ns.Crafting.Harvest({'x',-1,0}),0)
  ns.db=nil;eq(ns.Crafting.Harvest({1}),0)
- C_TradeSkillUI.GetRecipeSchematic=base;ns.RecipeBook=nil
+ C_TradeSkillUI.GetRecipeSchematic=base;ns.Catalog.Book=nil
 end)
 test('disabled and missing modules cannot supply a recipe estimate',function()
  liveAPI();ns.settings.categories.Cooking=false;eq(ns.Crafting.Read(2536),nil)

@@ -200,7 +200,7 @@ function Titan.Menu(owner)
         end)
         local npcProfessions = npcs:CreateButton('Profession filter')
         npcProfessions:SetScrollMode(300)
-        for _, kind in ipairs(ns.NpcSources.Kinds) do
+        for _, kind in ipairs(ns.NpcSources.InstalledKinds(ns.NpcSources.Kinds)) do
             local id = kind
             npcProfessions:CreateCheckbox(ns.NpcSources.Label(id) .. ' pins', function() return ns.settings.mapNpcProfessions[id] ~= false end, function()
                 ns.settings.mapNpcProfessions[id] = ns.settings.mapNpcProfessions[id] == false; redrawNpcs()

@@ -89,7 +89,7 @@ local HARVEST_STEP=40
 -- the recipe table fills itself from the windows of the professions. Recipes that were read before are skipped.
 function Crafting.Harvest(ids)
     if not ns.db or type(ids)~='table'then return 0 end
-    local book=ns.RecipeBook and ns.RecipeBook.recipes or{}
+    local book=ns.Catalog and ns.Catalog.Book()or{}
     local makes,extra=ns.db.recipeMakes,ns.db.recipeExtra
     local queue={}
     for _,id in ipairs(ids)do
@@ -109,7 +109,8 @@ function Crafting.Harvest(ids)
                     local list={}
                     for item,quantity in pairs(reagents)do list[#list+1]={item,quantity}end
                     table.sort(list,function(a,b)return a[1]<b[1]end)
-                    extra[id]={out=recipe.outputItemID,profession=labels[recipe.kind]or recipe.kind,reagents=list}
+                    extra[id]={out=recipe.outputItemID,kind=recipe.kind,profession=labels[recipe.kind]or recipe.kind,reagents=list}
+                    ns.Catalog.productCache=nil   -- the product joins the items of interest of the next auction scan
                 end
             end
         end

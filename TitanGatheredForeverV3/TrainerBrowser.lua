@@ -129,7 +129,7 @@ function Browser.Show()
             end)
         w.kindButton = ns.Nav.Dropdown(w, 175, -65, 190, function()
             local list = { { value = false, label = 'All professions' } }
-            for _, kind in ipairs(ns.NpcSources.Kinds) do list[#list + 1] = { value = kind, label = ns.NpcSources.Label(kind) } end
+            for _, kind in ipairs(ns.NpcSources.InstalledKinds(ns.NpcSources.Kinds)) do list[#list + 1] = { value = kind, label = ns.NpcSources.Label(kind) } end
             return list
         end, function() return Browser.kind or false end, function(value)
             Browser.kind, Browser.offset = value or nil, 0; Browser.Refresh()

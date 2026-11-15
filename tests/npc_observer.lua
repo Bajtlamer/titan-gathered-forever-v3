@@ -123,6 +123,19 @@ test('recipes and goods of one merchant are kept together and later updates keep
     eq(#ns.db.npcs[3167].goods, 2); eq(#ns.db.npcs[3167].vendor, 1)
 end)
 
+test('the trainer of a profession whose addon is not installed is not recorded', function()
+    local installed = { Alchemy = true }
+    local ns, observer = fresh({
+        Installed = function(kind) return installed[kind] == true end,
+        TrainerServices = function() return { { name = 'A', cost = 1, skillName = 'Cooking', skillRank = 1 } } end })
+    observer:TrainerShown()
+    eq(next(ns.db.npcs), nil)
+    local last = ns.db.npcLog[#ns.db.npcLog]
+    eq(last.result, 'not-installed'); eq(last.profession, 'Cooking')
+    installed.Cooking = true; observer:TrainerShown()                       -- installed later: recorded
+    eq(ns.db.npcs[3167].profession, 'Cooking')
+end)
+
 test('every trainer attempt is logged with the reason it did or did not record', function()
     local services = {}
     local npc = nil

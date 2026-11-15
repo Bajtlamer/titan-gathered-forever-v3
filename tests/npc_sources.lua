@@ -416,6 +416,32 @@ test('a merchant with goods only shows on the map only while it is marked, and t
     assert(not combined:find('No recipes recorded yet', 1, true))
 end)
 
+test('only the professions of installed addons have pins, trainers and unlearned recipes', function()
+    local ns = fresh()
+    ns.KnownRecipes = nil
+    assert(loadfile('TitanGatheredForeverV3/KnownRecipes.lua'))('TitanGatheredForeverV3', ns)
+    ns.KnownRecipes.Record('C1', 'Alchemy', {}, 1); ns.KnownRecipes.Record('C1', 'Cooking', {}, 1)
+    ns.NpcSources.Invalidate()
+    local installedKinds = { Alchemy = true }
+    ns.Catalog = { Installed = function(kind) return installedKinds[kind] == true end }
+    local function ids(nodes) local list = {} for _, node in ipairs(nodes) do list[#list + 1] = node.kind .. node.npcID end return table.concat(list, ',') end
+    eq(ids(ns.NpcSources.Nodes(1429)), 'Trainer1,RecipeVendor2')
+    local vendor
+    for _, node in ipairs(ns.NpcSources.Nodes(1429)) do if node.kind == 'RecipeVendor' then vendor = node end end
+    eq(vendor.professions.Alchemy, true); eq(vendor.professions.Cooking, nil)          -- the Cooking recipes are not carried
+    local rows = ns.NpcSources.Unlearned('C1', false)
+    for _, row in ipairs(rows) do eq(row.kind, 'Alchemy') end
+    eq(#ns.NpcSources.Trainers('all'), 1)
+    local list = ns.NpcSources.InstalledKinds(ns.NpcSources.RecipeKinds); eq(#list, 1); eq(list[1], 'Alchemy')
+    installedKinds = {}                                                                -- no profession addon at all
+    ns.NpcSources.Invalidate()
+    eq(#ns.NpcSources.Nodes(1429), 0); eq(#ns.NpcSources.Unlearned('C1', false), 0); eq(#ns.NpcSources.Trainers('all'), 0)
+    eq(#ns.NpcSources.InstalledKinds(), 0)
+    ns.Catalog = nil                                                                   -- without a catalogue everything counts
+    ns.NpcSources.Invalidate()
+    assert(#ns.NpcSources.Nodes(1429) > 0)
+end)
+
 for _, entry in ipairs(tests) do
     local ok, err = pcall(entry[2])
     if not ok then io.stderr:write('FAIL ' .. entry[1] .. ': ' .. tostring(err) .. '\n'); os.exit(1) end

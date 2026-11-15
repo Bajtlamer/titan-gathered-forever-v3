@@ -5,11 +5,13 @@ local function eq(actual, expected) assert(actual == expected, 'expected ' .. to
 -- Three recipes: A makes a profit, B makes a loss, C has a material without any price.
 local function fresh()
     local ns = { IsPublic = function() return true end, db = { recipeMakes = {}, knownRecipes = {} }, characterID = 'C1' }
-    ns.RecipeBook = { complete = false, professions = { 'Alchemy', 'First Aid' }, recipes = {
-        [101] = { 5001, 1, { { 1, 2 }, { 2, 1 } } },        -- Alchemy, product 5001, 2 x item 1 and 1 x item 2
-        [102] = { 5002, 1, { { 1, 1 } } },
-        [103] = { 5003, 2, { { 3, 1 } } },                    -- First Aid, material 3 has no price
-    } }
+    assert(loadfile('TitanGatheredForeverV3/Catalog.lua'))('TitanGatheredForeverV3', ns)
+    -- The books of two installed profession addons.
+    ns.Catalog.RegisterModule({ id = 'Alchemy', label = 'Alchemy', items = {}, recipes = {}, book = {
+        [101] = { 5001, { { 1, 2 }, { 2, 1 } } },        -- product 5001, 2 x item 1 and 1 x item 2
+        [102] = { 5002, { { 1, 1 } } } } })
+    ns.Catalog.RegisterModule({ id = 'FirstAid', label = 'First Aid', items = {}, recipes = {}, book = {
+        [103] = { 5003, { { 3, 1 } } } } })                -- material 3 has no price
     ns.AuctionScan = { Price = function(id)
         local prices = { [1] = 100, [2] = 50, [5001] = 1000, [5002] = 80 }
         return prices[id] and { min = prices[id], n = 3 } or nil
@@ -111,10 +113,22 @@ test('recipes the profession windows showed and the book lacks are listed too, a
     eq(#mine, 1); eq(mine[1].recipeID, 900)                                           -- learned by recipe ID
 end)
 
+test('the professions with recipes are those of the installed addons, and the extras count', function()
+    local ns = fresh()
+    local kinds = ns.Profit.Kinds(); eq(#kinds, 2); eq(kinds[1], 'Alchemy'); eq(kinds[2], 'FirstAid')
+    ns.db.recipeExtra = { [900] = { out = 5001, profession = 'Mining', reagents = { { 2, 1 } } } }
+    ns.Catalog.productCache = nil
+    eq(#ns.Profit.Kinds(), 2)                                          -- Mining is not installed: its recipe is not carried
+    ns.Catalog.RegisterModule({ id = 'Mining', label = 'Mining', items = {}, recipes = {} })
+    kinds = ns.Profit.Kinds(); eq(#kinds, 3); eq(kinds[3], 'Mining')
+    ns.Catalog.modules = {}; ns.Catalog.bookCache = nil
+    eq(#ns.Profit.Kinds(), 0)
+end)
+
 test('without a recipe book or prices the list is empty or unpriced, never invented', function()
     local ns = fresh()
-    ns.RecipeBook = nil
-    local rows, info = ns.Profit.Rows('C1', {}); eq(#rows, 0); eq(info.looked, 0)
+    ns.Catalog.modules = {}; ns.Catalog.bookCache = nil
+    local rows, info = ns.Profit.Rows('C1', {}); eq(#rows, 0); eq(info.looked, 0)      -- no profession addon installed
     ns = fresh(); ns.AuctionScan.Price = function() return nil end
     rows = ns.Profit.Rows('C1', {})
     for _, row in ipairs(rows) do eq(row.profit, nil) end

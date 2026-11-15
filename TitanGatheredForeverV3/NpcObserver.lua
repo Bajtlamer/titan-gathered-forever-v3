@@ -152,6 +152,11 @@ function Obs:ReadTrainerNow(event)
         self:Log(event, 'no-profession', { npc = npc.id, services = #services, first = services[1].name })
         return
     end
+    -- Only the professions of installed addons are kept: the trainer of another profession is not recorded.
+    if self.api.Installed and not self.api.Installed(profession) then
+        self:Log(event, 'not-installed', { npc = npc.id, profession = profession, services = #services })
+        return
+    end
     local rows = {}
     for _, service in ipairs(services) do
         if service.kind == profession then
@@ -217,6 +222,7 @@ end
 function Obs.DefaultAPI()
     local api = {}
     api.Enabled = function() return ns.settings and ns.settings.recordNpcs ~= false end
+    api.Installed = function(kind) return not ns.Catalog or not ns.Catalog.Installed or ns.Catalog.Installed(kind) end
     api.Now = function() return time() end
     api.Changed = function()
         if ns.RecipeBrowser and ns.RecipeBrowser.Refresh then ns.RecipeBrowser.Refresh() end
@@ -403,7 +409,7 @@ function Obs.DefaultAPI()
                 local _, _, _, _, _, class, subclass = call(C_Item.GetItemInfoInstant, itemID)
                 classID, subclassID = class, subclass
             end
-            if itemID and classID == 9 and kindBySubclass[subclassID] then
+            if itemID and classID == 9 and kindBySubclass[subclassID] and api.Installed(kindBySubclass[subclassID]) then
                 local modern = C_MerchantFrame and C_MerchantFrame.GetItemInfo
                     and call(C_MerchantFrame.GetItemInfo, index)
                 local price, extended = Obs.MerchantInfo(modern)

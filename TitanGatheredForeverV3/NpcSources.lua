@@ -17,6 +17,21 @@ local function seedNpcs() return (ns.NpcSeed and ns.NpcSeed.npcs) or {} end
 local function observed() return (ns.db and ns.db.npcs) or {} end
 
 function Npc.Label(kind) return labels[kind] or kind end
+
+-- Whether the addon of a profession is installed and switched on: pins, lists and prices work with those professions
+-- only. Without a catalogue (tests) every profession counts.
+local function installed(kind)
+    if not ns.Catalog or not ns.Catalog.Installed then return true end
+    return ns.Catalog.Installed(kind)
+end
+Npc.Installed = installed
+
+-- The kinds of a list that belong to installed professions.
+function Npc.InstalledKinds(list)
+    local result = {}
+    for _, kind in ipairs(list or Npc.Kinds) do if installed(kind) then result[#result + 1] = kind end end
+    return result
+end
 function Npc.Invalidate() cache = {} end
 
 -- NPCs the player asked to find (from the unlearned recipes window). They are shown whatever the map
@@ -164,15 +179,19 @@ function Npc.Nodes(mapID)
         local x, y = place(id, mapID)
         if x then
             local record = Npc.Record(id)
-            if record.profession then
+            if record.profession and installed(record.profession) then
                 nodes[#nodes + 1] = { kind = 'Trainer', npcID = id, mapID = mapID, x = x, y = y,
                     profession = record.profession }
             end
             if record.vendor or record.goods then
                 local kinds = {}
-                for _, row in ipairs(record.vendor or {}) do kinds[row.kind] = true end
-                nodes[#nodes + 1] = { kind = 'RecipeVendor', npcID = id, mapID = mapID, x = x, y = y,
-                    professions = kinds }
+                for _, row in ipairs(record.vendor or {}) do if installed(row.kind) then kinds[row.kind] = true end end
+                -- A merchant of recipes of professions that are not installed is left out; goods are of installed
+                -- professions by their nature (the catalogue holds them).
+                if next(kinds) or record.goods then
+                    nodes[#nodes + 1] = { kind = 'RecipeVendor', npcID = id, mapID = mapID, x = x, y = y,
+                        professions = kinds }
+                end
             end
         end
     end
@@ -428,7 +447,7 @@ function Npc.Trainers(status, kind)
     for _, id in ipairs(ids) do
         local record = Npc.Record(id)
         local saw = observed()[id]
-        if record and record.profession and (not kind or record.profession == kind) then
+        if record and record.profession and installed(record.profession) and (not kind or record.profession == kind) then
             local visited = saw ~= nil and saw.trainer ~= nil
             if status == 'all' or (status == 'visited') == visited then
                 local where = Npc.Location(id)
@@ -502,7 +521,7 @@ function Npc.Unlearned(character, vendorOnly, kindFilter)
     local playerLevel = UnitLevel and UnitLevel('player')
     if type(playerLevel) ~= 'number' then playerLevel = nil end
     local function add(npcID, npcName, kind, display, skill, price, role, rank)
-        if not recipeKinds[kind] or (kindFilter and kind ~= kindFilter) then return end
+        if not recipeKinds[kind] or (kindFilter and kind ~= kindFilter) or not installed(kind) then return end
         if not rank then
             local known = K and K.IsKnown(character, kind, display)
             if known == nil then unreadSet[kind] = true; return end
