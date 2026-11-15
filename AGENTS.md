@@ -6,8 +6,8 @@ Titan Gathered Forever v3 targets WoW Forever 1.60.1, interface 16001, with Tita
 
 - TitanGatheredForeverV3/ contains the shared runtime, English localization, generated metadata and required artwork. Its .toc loads Lua in the declared order.
 - Twelve profession addons and a separate Auction Items addon publish compact catalogue records. Preserve their exact folder/manifest names and dependencies on Titan and the shared core.
-- catalogue/, tools/, tests/, release-notes/ and prefixed Markdown documents live at repository root. Runtime folders contain only manifest-loaded code and allowlisted artwork. Keep private archives, generated distributions, SavedVariables and temporary files out of Git.
-- Follow the user's document prefixes: plan-, ref-, book-, Codex-, budget-, bom- and tmp-. Temporary tmp-* files must be ignored and deleted after use. Avoid emoji, decorative glyphs and em dashes.
+- catalogue/, tools/, tests/, release-notes/ and the ref- and book- Markdown documents live at repository root; every plan- document lives in plans/. Runtime folders contain only manifest-loaded code and allowlisted artwork. Keep private archives, generated distributions, SavedVariables and temporary files out of Git.
+- Follow the user's document prefixes: plan-, ref-, book-, Codex-, budget-, bom- and tmp-. Every plan-* document lives in plans/ and nowhere else (not in the repository root); ref-, book- and release notes stay where they are. Temporary tmp-* files must be ignored and deleted after use. Avoid emoji, decorative glyphs and em dashes.
 
 ## Development and verification
 
@@ -28,7 +28,7 @@ Preserve existing settings, acquired/produced statistics, per-character coverage
 
 ## Documentation, commits and review
 
-README.md describes current behavior, plan-next-development.md is the continuation roadmap, ref-wow-forever-progress.md records current status/history, and release-notes/ref-unreleased.md records changes since published versioned notes. Historical plans preserve original execution evidence; clearly mark superseded designs.
+README.md describes current behavior, plans/plan-live-verification-and-optimization.md is the continuation plan (live checks and the optimization backlog; plans/plan-next-development.md keeps the older milestone status), ref-wow-forever-progress.md records current status/history, and release-notes/ref-unreleased.md records changes since published versioned notes. Historical plans preserve original execution evidence; clearly mark superseded designs.
 
 Run checks appropriate to changes and document live reproduction/results separately from automated validation. Before source publication, inspect staged files for private data and ignored artifacts. Use concise imperative commit subjects. PR descriptions should state behavior, affected modules, validation and remaining live/client limitations. Do not claim a source push publishes release assets or updates hosting.
 

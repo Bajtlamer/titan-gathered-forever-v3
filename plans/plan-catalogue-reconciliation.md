@@ -2,7 +2,7 @@
 
 ## Current status, 2026-11-08
 
-Evidence-backed pass complete and installed, but Milestone 6 remains open. Separate 70862-labelled client tables match all 1,971 base facts; mirror extraction build is still unknown. Retain completeness=false, 456 unresolved legacy IDs and 11 producer review candidates. See [the roadmap](plan-next-development.md), [progress](ref-wow-forever-progress.md) and [unreleased changes](release-notes/ref-unreleased.md). Original step counts and no-install/no-commit statements below refer to their original execution, not the current installed/source-push status.
+Evidence-backed pass complete and installed, but Milestone 6 remains open. Separate 70862-labelled client tables match all 1,971 base facts; mirror extraction build is still unknown. Retain completeness=false, 456 unresolved legacy IDs and 11 producer review candidates. See [the roadmap](plan-next-development.md), [progress](../ref-wow-forever-progress.md) and [unreleased changes](../release-notes/ref-unreleased.md). Original step counts and no-install/no-commit statements below refer to their original execution, not the current installed/source-push status.
 
 ## Objective and verified findings
 

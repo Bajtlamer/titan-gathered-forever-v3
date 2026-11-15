@@ -1,5 +1,7 @@
 # Titan Gathered Forever v3: Next Development Plan
 
+> Superseded for the current state: the continuation plan with the live checks still to do and the optimization backlog is [plan-live-verification-and-optimization.md](plan-live-verification-and-optimization.md) (2026-11-15, version 0.5.53-beta). The baseline and milestone status below describe the project as of 2026-11-09 and are kept as history.
+
 Updated 2026-11-09. This is the current continuation roadmap. Focused plans preserve the initial designs, execution evidence and later corrections; historical instructions do not override this roadmap or AGENTS.md.
 
 ## Current baseline
@@ -8,7 +10,7 @@ Updated 2026-11-09. This is the current continuation roadmap. Focused plans pres
 - Development candidate: 0.5.0-beta (beta since 2026-11-12; earlier 0.4.x versions were alpha), WoW Forever 1.60.1, interface 16001. Latest captured installation build: 70862. The live API/build compatibility gate remains explicit.
 - Fourteen runtime addon folders: shared core, twelve professions and Auction Items. The current runtime package has 57 files. Development tools, tests, catalogue evidence and documentation stay outside these folders.
 - The current interface candidate passes 408 automated checks and Lua 5.1 compilation. Its candidate is installed and all 57 runtime files were byte-verified; broader live acceptance remains pending.
-- Changelog: [unreleased development updates](release-notes/ref-unreleased.md). Current implementation and installation history: [progress](ref-wow-forever-progress.md).
+- Changelog: [unreleased development updates](../release-notes/ref-unreleased.md). Current implementation and installation history: [progress](../ref-wow-forever-progress.md).
 
 ## Standing constraints
 
@@ -104,7 +106,7 @@ Migration keeps a material hidden if any legacy profession filter explicitly hid
 
 ### PvP Board and outdoor PvP spots, implementation complete, live acceptance pending
 
-The PvP Board separates client lifetime honorable kills and rank from addon-observed honorable kills and per-kill estimated honor by outdoor, Battleground and arena context. Other honor awards are excluded from these estimates. PvP death counts begin with this feature and require a lethal player or player-controlled source in the death recap. World-map and minimap spots are recorded only for an outdoor honor-confirmed player kill; eligible assist credit is sufficient. Tracked estimates are never added to native totals. See [design](docs/superpowers/specs/2026-11-08-pvp-board-and-world-spots-design.md), [implementation plan](plan-pvp-board-and-world-spots.md) and the validation checklist.
+The PvP Board separates client lifetime honorable kills and rank from addon-observed honorable kills and per-kill estimated honor by outdoor, Battleground and arena context. Other honor awards are excluded from these estimates. PvP death counts begin with this feature and require a lethal player or player-controlled source in the death recap. World-map and minimap spots are recorded only for an outdoor honor-confirmed player kill; eligible assist credit is sufficient. Tracked estimates are never added to native totals. See [design](../docs/superpowers/specs/2026-11-08-pvp-board-and-world-spots-design.md), [implementation plan](plan-pvp-board-and-world-spots.md) and the validation checklist.
 
 - [x] Add per-character tracking, context-aware honor events, PvP node persistence, map controls, markers and a separate board.
 - [x] Add focused model, integration, map, minimap and report regressions; run the full check suite and review whitespace.

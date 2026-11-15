@@ -2,7 +2,7 @@
 
 ## Current status, 2026-11-08
 
-Implemented, tested and installed. Live queued-craft/result attribution and recraft acceptance remain pending; matched observations do not imply complete production coverage. See [the roadmap](plan-next-development.md), [progress](ref-wow-forever-progress.md) and [unreleased changes](release-notes/ref-unreleased.md). Original step counts and no-install/no-commit statements below refer to their original execution, not the current installed/source-push status.
+Implemented, tested and installed. Live queued-craft/result attribution and recraft acceptance remain pending; matched observations do not imply complete production coverage. See [the roadmap](plan-next-development.md), [progress](../ref-wow-forever-progress.md) and [unreleased changes](../release-notes/ref-unreleased.md). Original step counts and no-install/no-commit statements below refer to their original execution, not the current installed/source-push status.
 
 ## Objective
 

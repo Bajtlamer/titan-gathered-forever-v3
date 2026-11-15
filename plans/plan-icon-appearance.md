@@ -2,7 +2,7 @@
 
 ## Current status, 2026-11-08
 
-Implemented and installed; the user confirms the window works. All three appearance groups are independent, and the optional outline is now gold. The reported artwork clipping/offset remains unresolved across modes. Current full verification is 360 checks plus shipped Lua compilation. See [the roadmap](plan-next-development.md), [progress](ref-wow-forever-progress.md) and [unreleased changes](release-notes/ref-unreleased.md). Original step counts and no-install/no-commit statements below refer to their original execution, not the current installed/source-push status.
+Implemented and installed; the user confirms the window works. All three appearance groups are independent, and the optional outline is now gold. The reported artwork clipping/offset remains unresolved across modes. Current full verification is 360 checks plus shipped Lua compilation. See [the roadmap](plan-next-development.md), [progress](../ref-wow-forever-progress.md) and [unreleased changes](../release-notes/ref-unreleased.md). Original step counts and no-install/no-commit statements below refer to their original execution, not the current installed/source-push status.
 
 > Use superpowers:executing-plans inline with test-driven development and one final independent review.
 

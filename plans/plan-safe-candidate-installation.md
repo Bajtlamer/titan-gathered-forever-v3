@@ -2,7 +2,7 @@
 
 ## Current status, 2026-11-08
 
-Implementation complete and used for repeated live installations. Automatic installation is now authorized by AGENTS.md. The original no-install/no-commit constraints below describe the initial task only. See [the roadmap](plan-next-development.md), [progress](ref-wow-forever-progress.md) and [unreleased changes](release-notes/ref-unreleased.md). Original step counts and no-install/no-commit statements below refer to their original execution, not the current installed/source-push status.
+Implementation complete and used for repeated live installations. Automatic installation is now authorized by AGENTS.md. The original no-install/no-commit constraints below describe the initial task only. See [the roadmap](plan-next-development.md), [progress](../ref-wow-forever-progress.md) and [unreleased changes](../release-notes/ref-unreleased.md). Original step counts and no-install/no-commit statements below refer to their original execution, not the current installed/source-push status.
 
 ## Objective and scope
 

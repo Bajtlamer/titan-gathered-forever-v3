@@ -40,7 +40,7 @@ Open issues and next work:
 - Reported partial artwork clipping/offset, especially Linen Cloth, remains unresolved across shapes/sizes. Further testing and a current screenshot are needed; no speculative offset fix has been applied.
 - Broader recipe and material coverage, support for complex reagent choices and richer analysis of source conditions. Catalogue completeness remains false, with 456 legacy IDs unresolved and 11 producer associations awaiting review.
 
-The prioritized continuation roadmap is stored in [plan-next-development.md](plan-next-development.md).
+The continuation plan (every live check still to do and the optimization backlog) is [plans/plan-live-verification-and-optimization.md](plans/plan-live-verification-and-optimization.md); the older milestone roadmap is [plans/plan-next-development.md](plans/plan-next-development.md). All plans live in the [plans](plans) folder.
 
 The catalogue currently contains 532 supported item IDs and 1,973 recipe relationships. Fishing now includes 23 materials, adding seven direct-reference omissions, including Alchemy fish. Live availability and completeness remain under verification.
 
@@ -179,7 +179,7 @@ The project's standing instruction is to install each completed, verified runtim
 
 Python 3.10 or newer and LuaJIT with Lua 5.1 semantics are required. No Git initialization is required to run these local tools. The generator reconstructs profession addon folders from `catalogue/`. Runtime Lua lives in `TitanGatheredForeverV3/`, including its `Data/` and `Localization/` folders. Tests and tools live in root `tests/` and `tools/`. Avoid editing unrelated addons.
 
-See [AGENTS.md](AGENTS.md) for current repository conventions and automatic local-installation instructions, [the runtime reference](ref-wow-forever-runtime.md) for implementation evidence, and [the roadmap](plan-next-development.md) for outstanding work.
+See [AGENTS.md](AGENTS.md) for current repository conventions and automatic local-installation instructions, [the runtime reference](ref-wow-forever-runtime.md) for implementation evidence, and [the roadmap](plans/plan-next-development.md) for outstanding work.
 
 ## Releases and website downloads
 

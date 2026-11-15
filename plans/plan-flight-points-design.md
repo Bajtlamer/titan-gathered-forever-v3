@@ -2,7 +2,7 @@
 
 ## Current status, 2026-11-08
 
-Implemented and installed. The mandatory discovery-color borders in the initial design were superseded by native artwork plus tooltip status; the icon window now offers an optional gold outline and configurable size/shape. See [the roadmap](plan-next-development.md), [progress](ref-wow-forever-progress.md) and [unreleased changes](release-notes/ref-unreleased.md). Original step counts and no-install/no-commit statements below refer to their original execution, not the current installed/source-push status.
+Implemented and installed. The mandatory discovery-color borders in the initial design were superseded by native artwork plus tooltip status; the icon window now offers an optional gold outline and configurable size/shape. See [the roadmap](plan-next-development.md), [progress](../ref-wow-forever-progress.md) and [unreleased changes](../release-notes/ref-unreleased.md). Original step counts and no-install/no-commit statements below refer to their original execution, not the current installed/source-push status.
 
 ## Intent and scope
 

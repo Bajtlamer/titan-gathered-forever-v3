@@ -387,4 +387,4 @@ The current candidate is installed in the local Forever client. All 57 runtime f
 - The mirror extraction build remains unknown. The independent build-labelled base-fact crosscheck does not prove server availability or complete coverage.
 - Export transport verification does not certify all statistical semantics. Unsupported complex required reagent choices withhold full crafting estimates.
 
-See [the roadmap](../plan-next-development.md), [progress](../ref-wow-forever-progress.md) and [live validation checklist](../book-wow-forever-validation.md).
+See [the roadmap](../plans/plan-next-development.md), [progress](../ref-wow-forever-progress.md) and [live validation checklist](../book-wow-forever-validation.md).

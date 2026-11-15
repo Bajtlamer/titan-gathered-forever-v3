@@ -1,6 +1,6 @@
 # WoW Forever Development Progress
 
-Updated 2026-11-10. Current roadmap: [plan-next-development.md](plan-next-development.md). Change summary: [unreleased development updates](release-notes/ref-unreleased.md). Detailed entries below are historical snapshots, including superseded designs and earlier test counts.
+Updated 2026-11-10. Current roadmap: [plans/plan-next-development.md](plans/plan-next-development.md). Change summary: [unreleased development updates](release-notes/ref-unreleased.md). Detailed entries below are historical snapshots, including superseded designs and earlier test counts.
 
 ## Current state
 
@@ -276,7 +276,7 @@ History recording, rare acquisition, each profession and ordinary loot can be co
 
 Item tooltips, including recipe-material item tooltips, retain bags/bank/total and recipe-use information and add current-character lifetime quantities, up to three observed source rates, or existing map coordinates when no complete samples exist. Rates show outcomes/sample counts; quantities and current inventory remain separate.
 
-Independent review found and resolved statistical and attribution defects with regressions. Final automated checker passes 167 checks. Live acceptance still covers native windows, recipe hover contexts, fishing/disenchant timing, money-slot events and input identity. The new history cannot reconstruct earlier lifetime totals or server drop tables. See `plan-wow-forever-history-and-sources.md` for rules and limitations.
+Independent review found and resolved statistical and attribution defects with regressions. Final automated checker passes 167 checks. Live acceptance still covers native windows, recipe hover contexts, fishing/disenchant timing, money-slot events and input identity. The new history cannot reconstruct earlier lifetime totals or server drop tables. See `plans/plan-wow-forever-history-and-sources.md` for rules and limitations.
 
 
 ### Public repository and release preparation
@@ -306,11 +306,11 @@ Root commands and GitHub workflow paths were updated. A strict manifest-based re
 
 ### Trainer and recipe vendor design, 2026-11-12
 
-Design recorded in plan-npc-sources.md. The classic-db 1.12.1 dump was downloaded to a scratch directory, pinned by commit and SHA-256, and a throwaway parse found 284 profession trainers and 230 recipe vendors with spawns. GPL-3.0 `LICENSE` and `NOTICE` were added. No runtime code, manifest or version changed, so nothing was installed.
+Design recorded in plans/plan-npc-sources.md. The classic-db 1.12.1 dump was downloaded to a scratch directory, pinned by commit and SHA-256, and a throwaway parse found 284 profession trainers and 230 recipe vendors with spawns. GPL-3.0 `LICENSE` and `NOTICE` were added. No runtime code, manifest or version changed, so nothing was installed.
 
 ### Trainer and recipe vendor feature, 0.4.12-alpha, 2026-11-12
 
-Implemented per plan-npc-sources-implementation.md: pinned seed generator and generated Data/NpcSeed.lua (190 KB, 458 NPCs: 247 trainers and 211 recipe vendors on continents only), NpcSources, NpcObserver, KnownRecipes and RecipeBrowser modules, world map and minimap pins, menu toggles with a profession filter, /tgf npc, /tgf recipes, and LICENSE/NOTICE packaging. All 86 Python tests and every Lua suite pass, including 14 NpcSources, 8 NpcObserver, 4 KnownRecipes and 4 RecipeBrowser checks, and all shipped Lua files compile with Lua 5.1 semantics. tools/check.py now closes stdin for its subprocesses after a LuaJIT compile step hung on an open pipe.
+Implemented per plans/plan-npc-sources-implementation.md: pinned seed generator and generated Data/NpcSeed.lua (190 KB, 458 NPCs: 247 trainers and 211 recipe vendors on continents only), NpcSources, NpcObserver, KnownRecipes and RecipeBrowser modules, world map and minimap pins, menu toggles with a profession filter, /tgf npc, /tgf recipes, and LICENSE/NOTICE packaging. All 86 Python tests and every Lua suite pass, including 14 NpcSources, 8 NpcObserver, 4 KnownRecipes and 4 RecipeBrowser checks, and all shipped Lua files compile with Lua 5.1 semantics. tools/check.py now closes stdin for its subprocesses after a LuaJIT compile step hung on an open pipe.
 
 The candidate was installed with tools/install.py. All 64 installed files match the source candidate and all 14 manifests read 0.4.12-alpha. Previous folders: Interface/.tgf-v3-backups/candidate-zhwty_pc. New files and manifest entries require a full client restart.
 
@@ -554,3 +554,7 @@ Screenshot after reading the professions (Engineering, My recipes, 3+ auctions; 
 ## 0.5.53-beta, modular data
 
 User reminder: the system is modular, every player installs the profession addons they want. The recipe table moved from the core (RecipeBook.lua) into the Data.lua of each profession addon (key book), the core reads it through Catalog.Book() and friends (installed and switched-on professions only), the auction scan keeps only reagents and recipe products of installed professions, NpcObserver does not record trainers or recipe merchants of professions that are not installed, and pins, lists and filters use installed professions only. Not modular: Data/NpcSeed.lua (190 KB) stays in the core until the pinned classic-db dump is available to regenerate it in shards. Pending live check: the profit list with only some profession addons installed (the others moved away), that nothing errors without a profession addon, and the size of the saved auction block after a scan.
+
+## 2026-11-15, plans in one folder and the continuation plan
+
+All plan documents (including the former docs/superpowers/plans file, now plans/plan-crafting-reagent-usage-implementation.md) moved to plans/; references and relative links were updated and checked. plans/plan-live-verification-and-optimization.md is the single continuation plan: how to start a clean session, every live check still to do for the work of 0.5.19 to 0.5.53, the optimization backlog in order, release readiness and the pitfalls found. The Titan Command History repository got the same layout (plans/plan-command-history.md with its status, live checks and ideas). No runtime file changed, so the version stays 0.5.53-beta.
