@@ -34,6 +34,14 @@ function ns.Settings.Initialize(saved)
     if type(settings.recordNpcs) ~= 'boolean' then settings.recordNpcs = true end
     if type(settings.auctionAutoScan) ~= 'boolean' then settings.auctionAutoScan = false end
     if type(settings.auctionTooltips) ~= 'boolean' then settings.auctionTooltips = true end
+    if type(settings.auctionUndercutEnabled) ~= 'boolean' then settings.auctionUndercutEnabled = true end
+    do
+        local preset, percent = settings.auctionUndercutPreset, settings.auctionUndercutPercent
+        local valid = preset == 'custom' or preset == 2 or preset == 5 or preset == 10 or preset == 15
+        if not valid or type(percent) ~= 'number' or percent < 0.1 or percent > 90 then
+            settings.auctionUndercutPreset, settings.auctionUndercutPercent = 5, 5
+        end
+    end
     if type(settings.moveBlizzard) ~= 'boolean' then settings.moveBlizzard = true end
     if type(settings.npcAxisSwap) ~= 'boolean' then settings.npcAxisSwap = false end
     if type(settings.mapNpcProfessions) ~= 'table' then settings.mapNpcProfessions = {} end

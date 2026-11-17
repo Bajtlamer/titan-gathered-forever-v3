@@ -287,6 +287,7 @@ local function start()
     ns.ProfessionButton.Initialize()
     ns.Movable.Initialize()
     ns.AuctionScan.Initialize()
+    ns.AuctionUndercut.Initialize()
     ns.Titan.Initialize()
     ns.MinimapButton.Attach()
     for _, event in ipairs({ 'BAG_UPDATE_DELAYED', 'BANKFRAME_OPENED', 'BANKFRAME_CLOSED',

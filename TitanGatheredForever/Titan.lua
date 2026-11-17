@@ -215,6 +215,9 @@ function Titan.Menu(owner)
         auction:CreateCheckbox('Show auction prices in item tooltips', function() return ns.settings.auctionTooltips ~= false end, function()
             ns.settings.auctionTooltips = ns.settings.auctionTooltips == false
         end)
+        auction:CreateCheckbox('Fill Buyout in the Sell tab (lowest price minus a percentage)', function() return ns.settings.auctionUndercutEnabled ~= false end, function()
+            ns.settings.auctionUndercutEnabled = ns.settings.auctionUndercutEnabled == false
+        end)
         auction:CreateButton('Clear scanned prices', function()
             ns.AuctionScan.Clear(); if ns.CraftingView then ns.CraftingView.Refresh() end
         end)

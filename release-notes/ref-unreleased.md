@@ -1,6 +1,59 @@
 # Unreleased development updates
 
-Updated 2026-11-16. These changes describe the 0.5.84 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-16. These changes describe the 0.5.97 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Undercut debugging trace removed, 0.5.97
+
+- The step trace (auctionUndercutTrace) that found the failures of the first live tests is removed; the fills stay in auctionUndercutLog. Live checked on the commodity form (Clam Meat): fill, combo box, custom value, recalculation after a change and the vendor price floor. The form of single items (Buyout Mode, SecondaryPriceInput) is not yet checked live.
+
+## Undercut sets the vendor price when the percentage is too high, 0.5.96
+
+- A percentage that would put the Buyout below what a vendor pays (for example 80 percent of 25 copper) left the old price in place, which looked like a value that was not recalculated. The Buyout is now set to the vendor price, a red line above the strip says so (with the price in coins), and the line is cleared at the next fill. The chat gets the same message.
+
+## Undercut strip moved up and left, 0.5.95
+
+- The strip is in the row above the Buyout Mode check box and starts further left, so the label, the combo box and the custom value field all fit in the left panel.
+
+## Undercut follows the percentage, 0.5.94
+
+- Changing the percentage in the combo box, or confirming another custom value, prices the selected item again from the last search answer, also over a price typed before. No new search is sent.
+
+## Undercut vendor price fix, 0.5.93
+
+- The vendor price check called the global GetItemInfo, which this client does not have (Lua error at the first answer), so no price was filled. It now uses Economy.VendorSell (C_Item.GetItemInfo), and an error while reading the vendor price can no longer stop the fill.
+
+## Undercut trace of the answer, 0.5.92
+
+- The answer of the client now arrives (52 auctions) but no price was filled. The trace keeps the lowest price, the vendor price and the field names of the first result to find the step that stops the fill.
+
+## Undercut waits for the answer of the client, 0.5.91
+
+- The trace showed that the client reported its message queue as not ready right after an item was chosen, so the fill gave up while the client's own search answered a moment later. A busy queue no longer cancels the fill: no search of our own is sent and the client's answer is used. The price is checked 0.4 s after the fill and put back if the client wrote its own default price over it (the log keeps the value read back and a reapplied flag).
+
+## Undercut trace, 0.5.90
+
+- The first live test did not fill the price and the log stayed empty. The steps of the fill (item selected, search sent, answer received, reason for skipping) are now kept in the saved variables (auctionUndercutTrace, last 40) to find the cause.
+
+## Undercut strip in a fixed row, 0.5.89
+
+- The Create Auction button moves between the Sell forms, so the strip overlapped it. The strip is now in the bottom row of the left panel, right of the Buyout Mode check box, with the shorter label Undercut.
+
+## Undercut strip clear of Buyout Mode, 0.5.88
+
+- The strip overlapped the Buyout Mode check box of the single-item Sell form. It is now higher, in the free place between the Create Auction button and that check box.
+
+## Undercut strip moved into the Sell form, 0.5.87
+
+- The strip with the percentage combo box was below the window of the auction house, where the Buy, Sell and Auctions tabs covered it. It is now in the free place of the left panel under the Create Auction button and is shown only while a Sell form is shown.
+
+## Automatic Buyout undercut in the Sell tab, 0.5.86
+
+- New core file AuctionUndercut.lua (needs a full client restart). Choosing an item in the Sell tab starts a live search; the Buyout is filled with the lowest foreign buyout minus a percentage. A combo box under the auction house window offers 2, 5, 10 and 15 percent and Custom with a text field (0.1 to 90). Own auctions are ignored, the price never goes below the vendor price, and a typed price is left alone. A Titan menu check box switches it off. Fills are logged in auctionUndercutLog.
+- Not yet confirmed in the game: which input holds the Buyout in the form of single items (the log records the input used), and the placement of the strip. Live results go to ref-wow-forever-progress.md.
+
+## Auction Sell tab probe, 0.5.85
+
+- The names of the Sell frames were read from the client with a probe (auctionProbe, now removed): CommoditiesSellFrame and ItemSellFrame with SetItem and PriceInput, and the C_AuctionHouse search functions all exist.
 
 ## Matching folders and project artwork, 0.5.84
 
