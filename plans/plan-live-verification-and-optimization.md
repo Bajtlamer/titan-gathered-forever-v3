@@ -66,6 +66,16 @@ Do these in the game after a full restart (new files exist in 0.5.36, 0.5.37, 0.
 - [ ] Item tooltips of reagents and products show Auction, Worth, Vendor pays and the age of the scan; no price line for other items; Titan menu > Auction prices > Show auction prices in item tooltips switches it off.
 - [ ] The cooldown message appears when a scan is asked for within 15 minutes; the automatic scan on opening (off by default) works and respects 30 minutes.
 
+### 3.5a Buyout undercut in the Sell tab (0.5.97)
+
+- [x] Commodity form (Clam Meat, item 5503), checked live 2026-11-17 from the saved variables: choosing the item fills the Unit Price with the lowest foreign unit price minus the percentage (25 copper at 2, 5, 10 and 15 percent gave 24, 23, 22 and 21; 28 copper at 5 percent gave 26); the combo box and the custom field work, a changed percentage prices the item again, and the value read back 0.4 s later equals the fill, so the client does not overwrite it.
+- [x] A percentage below the vendor price (80 percent of 28 copper, vendor 16) sets the vendor price, 16 copper, with the red line above the strip.
+- [x] The strip sits in the row above the Buyout Mode check box and does not cover other controls (confirmed by the user).
+- [ ] Form of single items (a weapon, armor or other non-stackable item): which input holds the Buyout when Buyout Mode is checked or not (the code uses SecondaryPriceInput when it is shown, otherwise PriceInput; auctionUndercutLog records the input and its label), whether ITEM_SEARCH_RESULTS_UPDATED delivers the results (buyoutAmount, containsOwnerItem) and whether the fill survives the 0.4 s check.
+- [ ] An item with only the player's own auctions, and an item with no auction at all: nothing is set and the chat says so.
+- [ ] The Titan menu check box (Auction prices > Fill Buyout in the Sell tab) stops the fill; the setting stays after /reload.
+- What went wrong on the way, to avoid repeating it: the client had no global GetItemInfo (use C_Item through ns.Economy.VendorSell); IsThrottledMessageSystemReady was false right after an item was chosen, so the add-on waits for the answer of the client's own search; SetOnValueChangedCallback would replace the callback of the client (HookScript on the money boxes is used); the Create Auction button moves between the two Sell forms, so the strip is anchored to the window, not to a form.
+
 ### 3.6 Crafting profit and the recipe harvest
 
 - [ ] Open every profession window once: no frame stall (40 recipes per frame, 0.5.51) even for Leatherworking and Tailoring; note the delay if any.

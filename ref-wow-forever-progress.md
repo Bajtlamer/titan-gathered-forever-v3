@@ -580,3 +580,13 @@ User reminder: the system is modular, every player installs the profession addon
 ## 2026-11-15, plans in one folder and the continuation plan
 
 All plan documents (including the former docs/superpowers/plans file, now plans/plan-crafting-reagent-usage-implementation.md) moved to plans/; references and relative links were updated and checked. plans/plan-live-verification-and-optimization.md is the single continuation plan: how to start a clean session, every live check still to do for the work of 0.5.19 to 0.5.53, the optimization backlog in order, release readiness and the pitfalls found. The Titan Command History repository got the same layout (plans/plan-command-history.md with its status, live checks and ideas). No runtime file changed, so the version stays 0.5.53-beta.
+
+## 2026-11-17, automatic Buyout undercut in the Sell tab (0.5.85 to 0.5.97)
+
+Added the core file AuctionUndercut.lua: choosing an item in the Sell tab of the auction house fills the Buyout with the lowest foreign buyout minus a percentage from a combo box (2, 5, 10, 15 percent or Custom, 0.1 to 90). Design: plans/plan-auction-undercut.md; the implementation plan plans/plan-auction-undercut-implementation.md is marked as the first design. Commit 2ac31e4.
+
+Automated validation: tests/auction_undercut.lua (12 checks: percent parsing, price rounding, own auctions, stale answers, manual edit, busy queue, vendor floor, error in the vendor lookup, recalculation, client layer with fake frames) and tools/check.py.
+
+Live result, kept apart from the automated checks. Names of the Sell frames were read from the client with a probe in 0.5.85 (CommoditiesSellFrame and ItemSellFrame with SetItem, PriceInput, QuantityInput, SecondaryPriceInput and BuyoutModeCheckButton in the item form; all C_AuctionHouse search functions present). The first fills failed for three reasons that the step trace of 0.5.90 to 0.5.92 and a Lua error report showed: the message queue reported not ready right after the item was chosen (0.5.91), the global GetItemInfo does not exist in this client (0.5.93), and a percentage that went below the vendor price left the old price in place (0.5.96, now the vendor price with a red line). With 0.5.96 the user confirmed on the commodity form (Clam Meat) that the fill, the combo box, the custom value and the recalculation work; the saved auctionUndercutLog shows fills of 21 to 26 copper from lowest prices of 25 to 28 copper and the read-back after 0.4 s equal to the fill. The trace was removed in 0.5.97.
+
+Not yet checked live: the form of single items (input used for the Buyout, ITEM_SEARCH_RESULTS_UPDATED), items with no foreign auction, and the Titan menu switch. They are listed in section 3.5a of plans/plan-live-verification-and-optimization.md.
