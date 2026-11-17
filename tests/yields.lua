@@ -12,9 +12,9 @@ local function fresh(options)
         local price = options.vendor and options.vendor[id]
         return 'Name', 'link', 1, 1, 1, 'type', 'sub', 1, '', 1, price
     end }
-    assert(loadfile('TitanGatheredForeverV3/Economy.lua'))('TitanGatheredForeverV3', ns)
-    assert(loadfile('TitanGatheredForeverV3/Actions.lua'))('TitanGatheredForeverV3', ns)
-    assert(loadfile('TitanGatheredForeverV3/Yields.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/Economy.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever/Actions.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever/Yields.lua'))('TitanGatheredForever', ns)
     ns.history = { Rates = function() return options.rates or {} end }
     ns.actions = { Rows = function() return options.actions or {} end }
     return ns

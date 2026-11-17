@@ -6,7 +6,7 @@ local function load()
     local ns = { IsPublic = function() return true end, db = {}, printed = {}, settings = {},
         Catalog = { Get = function(id) return (id == 2589 or id == 2592 or id == 4306) and {} or nil end } }
     ns.Print = function(message) ns.printed[#ns.printed + 1] = message end
-    assert(loadfile('TitanGatheredForeverV3/AuctionScan.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/AuctionScan.lua'))('TitanGatheredForever', ns)
     return ns
 end
 

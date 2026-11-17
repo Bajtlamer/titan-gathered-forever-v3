@@ -10,7 +10,7 @@ local function newNs()
         Style = { gold = 'gold', gray = 'gray', green = 'green', white = 'white', red = 'red', orange = 'orange',
             Text = function(color, text) return '<' .. color .. '>' .. text .. '</>' end } }
     dofile('tests/style_stub.lua')(ns.Style)
-    assert(loadfile('TitanGatheredForeverV3/Catalog.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/Catalog.lua'))('TitanGatheredForever', ns)
     ns.Catalog.RegisterModule({ id = 'Alchemy', label = 'Alchemy', items = {}, recipes = {}, book = {
         [101] = { 5001, { { 1, 2 }, { 2, 1 } } }, [102] = { 5002, { { 1, 1 } } } } })
     ns.Catalog.RegisterModule({ id = 'FirstAid', label = 'First Aid', items = {}, recipes = {}, book = {
@@ -23,11 +23,11 @@ local function newNs()
         Coin = function(copper) return copper .. 'c' end }
     C_Item = { GetItemInfo = function(id) if id == 5003 then return 'Bandage', nil, 1, 1, 1, 't', 's', 1, '', 1, 200 end return 'Item' .. id end }
     C_Spell = { GetSpellInfo = function(id) return ({ [101] = { name = 'Potion A' }, [102] = { name = 'Potion B' } })[id] end }
-    assert(loadfile('TitanGatheredForeverV3/KnownRecipes.lua'))('TitanGatheredForeverV3', ns)
-    assert(loadfile('TitanGatheredForeverV3/Economy.lua'))('TitanGatheredForeverV3', ns)
-    assert(loadfile('TitanGatheredForeverV3/Profit.lua'))('TitanGatheredForeverV3', ns)
-    assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TitanGatheredForeverV3', ns)
-    assert(loadfile('TitanGatheredForeverV3/ProfitBrowser.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/KnownRecipes.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever/Economy.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever/Profit.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever/Navigation.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever/ProfitBrowser.lua'))('TitanGatheredForever', ns)
     return ns
 end
 

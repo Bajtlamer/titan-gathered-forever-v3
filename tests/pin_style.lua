@@ -1,6 +1,6 @@
 local ns = {}
  C_Item={GetItemIconByID=function(id)return id and id+1000 end}
-assert(loadfile('TitanGatheredForeverV3/PinStyle.lua'))('TitanGatheredForeverV3', ns)
+assert(loadfile('TitanGatheredForever/PinStyle.lua'))('TitanGatheredForever', ns)
 local function pin()
     local p = { width = 14, height = 14, regions = {}, hooks = {} }
     function p:GetWidth() return self.width end
@@ -83,8 +83,8 @@ assert(#h.regions==regions,'Highlighting again must reuse the rings')
 ns.PinStyle.Highlight(h,false)
 for _,ring in ipairs(h.tgfRings)do assert(ring.shown==false,'Rings are hidden when the highlight ends') end
 assert(h.level==11 and h.scripts.OnUpdate==nil and not h.tgfRingOn,'The pin returns to its normal level without a pulse')
-assert(ns.PinStyle.Label('Skinning')=='TGF v3 Skinning area')
-assert(ns.PinStyle.Label('PvP')=='TGF v3 PvP kill spot')
+assert(ns.PinStyle.Label('Skinning')=='Titan Gathered Forever Skinning area')
+assert(ns.PinStyle.Label('PvP')=='Titan Gathered Forever PvP kill spot')
 assert(ns.PinStyle.Icon(nil,'PvP')=='Interface\\Icons\\INV_Sword_04')
 print('PASS 9 image alpha, transparent border and pooled pin checks')
 
@@ -93,7 +93,7 @@ print('PASS 9 image alpha, transparent border and pooled pin checks')
 ns.characterID='miner'
 ns.Style={ItemName=function(id)return 'Item '..id end}
 ns.Reports={Source=function(row)return 'Vein '..row.source end}
-assert(loadfile('TitanGatheredForeverV3/History.lua'))('TitanGatheredForeverV3',ns)
+assert(loadfile('TitanGatheredForever/History.lua'))('TitanGatheredForever',ns)
 ns.history=ns.History.New({})
 local function observe(id,items,source,map,complete,character,context)
     ns.history:Observe(character or 'miner','Miner',{id=id,kind='Mining',source=source or 'copper',

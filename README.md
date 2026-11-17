@@ -1,21 +1,21 @@
-# Titan Gathered Forever v3
+# Titan Gathered Forever
 
-TGF v3 helps World of Warcraft Forever crafters understand their materials: what an item is used for, how much they have, where it comes from, and what their own observations say about obtaining it.
+Titan Gathered Forever helps World of Warcraft Forever crafters understand their materials: what an item is used for, how much they have, where it comes from, and what their own observations say about obtaining it.
 
 The long-term goal is a useful lifetime record for every item supported by the profession catalogues. This includes looting, mining, herbalism, skinning, fishing, disenchanting, crafting and cooking. Statistics should help players plan professions, compare sources, share results and perform later analysis.
 
 Website: [titan-gathered.com](https://www.titan-gathered.com/).
 
-## Current beta
+## Current version
 
-The current development candidate is version `0.5.53-beta` and targets **WoW Forever 1.60.1, interface 16001**, with Titan Panel installed separately. It is installed in the local test client. The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); they do not represent a new tagged release. Other WoW editions are outside this project's scope.
+The current stable candidate is version `0.5.84` and targets **WoW Forever 1.60.1, interface 16001**, with Titan Panel installed separately. The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); they do not represent a new tagged release. Other WoW editions are outside this project's scope.
 
 Validation: all Python and Lua suites pass, plus Lua 5.1 compilation of every shipped Lua file. The user confirms the icon configurator works; the full [live acceptance checklist](book-wow-forever-validation.md) remains open.
 
 Implemented:
 
 - Profession-use information and current Bags and Bank counts in item tooltips, including recipe-material item tooltips. Total appears only when both locations contain the item. Supporting explanations use smaller text.
-- Titan summaries show bag/bank counts without a redundant total, joined with `/` (for example, `3/7`). Zero values and their separators are omitted when Display > Show items with zero counts is off. The panel caption is `TG3 Forever - v0.4.11`; the manifest version is 0.4.11-alpha.
+- Titan summaries show bag/bank counts without a redundant total, joined with `/` (for example, `3/7`). Zero values and their separators are omitted when Display > Show items with zero counts is off. The panel caption is `Titan Gathered Forever - v0.5.84`.
 - Titan uses gold for headings and profession menu labels. Learned profession names and ranks use colors based on current rank / current maximum: below 25% red, 25% to below 50% brown, 50% to below 75% yellow, and 75% or higher green. Material names retain item rarity colors.
 - World ore-vein tooltips use native object IDs matched to previously recorded mining sources. With History in item tooltips enabled, they show the current character's complete mining loot sample count and each observed drop's percentage, hits/samples and sampled quantity for that source, zone and instance context. Identified veins without matching samples show Unknown; unrecognized object IDs are left alone. These are personal observations, not server drop tables or counts of fully depleted veins.
 - Mining map and minimap hovers list observed ore, stone and gem drops with complete loot sample counts, hit/sample percentages and quantities, grouped by source and zone. Saved spot observations are distinct from completed casts and fully depleted veins; missing rate evidence displays Unknown.
@@ -32,6 +32,8 @@ Implemented:
 - faction-aware world-map flight points, including undiscovered routes. Markers retain native artwork and use green for confirmed flight-master visits, amber for client-reported undiscovered nodes and gray for unconfirmed discovery. Only opening the taxi map at the current master confirms that node for the current character; previously visited nodes require a new observed visit. Map-wide false discovery flags do not confirm discovery. The Flight points menu contains its visibility switch.
 - Small icon appearance window: Titan menu > Icon appearance. Configure world-map materials, minimap materials and flight points independently: 12–40 px, circular crop or full image, and an optional thin gold outline. Preview before Apply; Cancel discards edits.
 - Independent profession addons, optional Auction Items and a shared core.
+- Original coordinated artwork for the core, all twelve professions and Auction Items. Each addon has its own packaged AddOns-list icon; the core also uses its new emblem on Titan Panel and the minimap. Large PNG logos and 400px avatars for CurseForge are in [artwork/v1](artwork/v1), grouped by addon. Each other project keeps its own designs in its own root artwork/ directory. Actual client rendering requires a full restart and live confirmation.
+- The five projects together have eighteen emblems. Titan Command History, Titan Approx DPS, Target Ranger and WoW Forever Scout each keep their artwork in their own development root. [The inventory](artwork/index.json) records the stable versions and included addons; the artwork prompts are in [prompts.json](artwork/v1/prompts.json).
 
 Open issues and next work:
 
@@ -75,10 +77,10 @@ Extract ZIPs into the Forever client's `Interface/AddOns/` directory. The result
 ```text
 AddOns/
   Titan/                       # Titan Panel, installed separately
-  TitanGatheredForeverV3/               # TGF v3 shared core
-  TitanGatheredForeverV3_Mining/        # Optional
-  TitanGatheredForeverV3_Herbs/         # Optional Herbalism module
-  TitanGatheredForeverV3_Skinning/      # Optional
+  TitanGatheredForever/               # TGF v3 shared core
+  TitanGatheredForever_Mining/        # Optional
+  TitanGatheredForever_Herbalism/         # Optional Herbalism module
+  TitanGatheredForever_Skinning/      # Optional
 ```
 
 Available modules: Alchemy, Blacksmithing, Cooking, Enchanting, Engineering, First Aid, Fishing, Herbalism, Leatherworking, Mining, Skinning and Tailoring. Auction Items is an additional optional module. Disabled modules do not load their catalogue tables.
@@ -97,7 +99,7 @@ Runtime ZIPs contain runtime files only. If you installed from ZIPs, first downl
 ```sh
 python3 tools/migrate_savedvariables.py \
   "/path/to/WTF/Account/ACCOUNT/SavedVariables/TitanGathered2.lua" \
-  "/path/to/WTF/Account/ACCOUNT/SavedVariables/TitanGatheredForeverV3.lua"
+  "/path/to/WTF/Account/ACCOUNT/SavedVariables/TitanGatheredForever.lua"
 ```
 
 The tool changes the old `TitanGathered2ForeverDB` assignment to `TitanGatheredForeverV3DB`, preserving the table contents and original file. It refuses to overwrite existing new data. Repeat for each account whose data you want to retain. This is data migration, not compatibility with another WoW edition.
@@ -168,8 +170,8 @@ The repository root contains the shared core and thirteen separate optional addo
 `python3 tools/audit_catalog.py` reports evidence gaps without writes or downloads. Use `--check` for the generated report, `--mirror-file` for pinned mirror verification and `--client-tables` for offline build-labelled CSV verification. Audit/generation share input validation and protect report output from source-file aliases. Unresolved IDs and inherited associations remain; completeness is false.
 
 ```sh
-git clone https://github.com/Bajtlamer/titan-gathered-forever-v3.git
-cd titan-gathered-forever-v3
+git clone https://github.com/Bajtlamer/titan-gathered-forever-v3.git titan-gathered-forever
+cd titan-gathered-forever
 python3 tools/generate_catalog.py
 python3 tools/check.py
 python3 tools/package.py
@@ -177,7 +179,7 @@ python3 tools/package.py
 
 The project's standing instruction is to install each completed, verified runtime update automatically into the local Forever client with tools/install.py, retaining backups and verifying installed bytes. This does not publish GitHub releases or change hosting.
 
-Python 3.10 or newer and LuaJIT with Lua 5.1 semantics are required. No Git initialization is required to run these local tools. The generator reconstructs profession addon folders from `catalogue/`. Runtime Lua lives in `TitanGatheredForeverV3/`, including its `Data/` and `Localization/` folders. Tests and tools live in root `tests/` and `tools/`. Avoid editing unrelated addons.
+Python 3.10 or newer and LuaJIT with Lua 5.1 semantics are required. No Git initialization is required to run these local tools. The generator reconstructs profession addon folders from `catalogue/`. Runtime Lua lives in `TitanGatheredForever/`, including its `Data/` and `Localization/` folders. Tests and tools live in root `tests/` and `tools/`. Avoid editing unrelated addons.
 
 See [AGENTS.md](AGENTS.md) for current repository conventions and automatic local-installation instructions, [the runtime reference](ref-wow-forever-runtime.md) for implementation evidence, and [the roadmap](plans/plan-next-development.md) for outstanding work.
 
@@ -203,3 +205,13 @@ Recipe evidence includes the documented [DwarfExplorersBible client-table mirror
 ## License and notices
 
 The repository is licensed under GPL-3.0, see [LICENSE](LICENSE). The planned trainer and recipe vendor seed is derived from CMaNGOS classic-db data under the same license and with its non-commercial fair-use basis, see [NOTICE](NOTICE). World of Warcraft is a trademark of Blizzard Entertainment, and this project is not affiliated with it.
+
+## Development folders and artwork
+
+Development folder: titan-gathered-forever. Runtime addon folders are separate from artwork/. The versioned artwork/v1/ directory contains the original master PNG, logo-1024.png, avatar-400.png for CurseForge, icon-64.png and Icon.tga for each addon. artwork/index.json lists the available versions. Add future designs as a new version directory; keep previous artwork. Marketing PNGs and source masters are excluded from runtime ZIPs.
+
+The installer migrates the previous TitanGatheredForeverV3 folders, account and character SavedVariables filenames and AddOns.txt enablement while WoW is closed. Original saved files are retained. It refuses conflicting saved files and rolls back installation and client-state changes together on failure. The saved table name remains TitanGatheredForeverV3DB, and the previous exported namespace remains available as an alias. A full client restart is required.
+
+## CurseForge project text
+
+Ready-to-copy summaries, descriptions and local artwork references are listed in [curseforge/ref-index.md](curseforge/ref-index.md).

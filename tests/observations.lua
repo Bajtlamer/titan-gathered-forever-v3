@@ -1,7 +1,7 @@
 local passed=0
 local function eq(a,b) assert(a==b,tostring(a)..' != '..tostring(b)) end
 local function test(n,f) local ok,e=pcall(f);if not ok then error(n..': '..e) end;passed=passed+1 end
-local ns={};assert(loadfile('TitanGatheredForeverV3/History.lua'))('TGF v3',ns);assert(loadfile('TitanGatheredForeverV3/Observations.lua'))('TGF v3',ns)
+local ns={};assert(loadfile('TitanGatheredForever/History.lua'))('Titan Gathered Forever',ns);assert(loadfile('TitanGatheredForever/Observations.lua'))('Titan Gathered Forever',ns)
 local function fixture()
  local h=ns.History.New({});local s={now=1,allowed=true,maps={},slots={}}
  local api={Now=function()return s.now end,Timestamp=function()return 100 end,CanRecord=function()return s.allowed end,

@@ -10,6 +10,19 @@ spec = importlib.util.spec_from_file_location('tgf_packager', Path(__file__).wit
 packager = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(packager)
 
+state_spec = importlib.util.spec_from_file_location('addon_install_state', Path(__file__).with_name('install_state.py'))
+state_tools = importlib.util.module_from_spec(state_spec)
+state_spec.loader.exec_module(state_tools)
+
+def legacy_names(names):
+    result = {}
+    for name in names:
+        old = name.replace('TitanGatheredForever', 'TitanGatheredForeverV3', 1)
+        old = old.replace('_Herbalism', '_Herbs').replace('_AuctionItems', '_Auction')
+        result[old] = name
+    return result
+
+
 
 def validate(root, destination):
     root = Path(root).resolve()
@@ -23,8 +36,8 @@ def validate(root, destination):
     if destination.is_relative_to(root) or root.is_relative_to(destination):
         raise ValueError('Source and AddOns destination must not overlap')
     names = packager.addon_names(root)
-    for name in names:
-        if Path(name).name != name or not name.startswith('TitanGatheredForeverV3'):
+    for name in names + list(legacy_names(names)):
+        if Path(name).name != name or not name.startswith('TitanGatheredForever'):
             raise ValueError(f'Invalid addon folder: {name}')
         target = destination / name
         if target.is_symlink() or (target.exists() and not target.is_dir()):
@@ -38,13 +51,18 @@ def validate(root, destination):
 def install(root, destination, apply=False):
     """Return the preview, or install with retained backups and failure rollback."""
     root, destination, names = validate(root, destination)
-    result = {'destination': destination, 'addons': names, 'backup': None}
+    if apply and any((destination / name).exists() for name in legacy_names(names)):
+        state_tools.ensure_game_closed(destination.parent.parent)
+    state = state_tools.StateMigration(destination, legacy_names(names))
+    result = {'destination': destination, 'addons': names, 'backup': None, 'state_files': len(state.changes)}
     if not apply:
         # Validate all package inputs even in preview, without writing to the client.
         with tempfile.TemporaryDirectory(prefix='tgf-preview-') as directory:
             packager.package(root, Path(directory) / 'candidate.zip')
         return result
 
+    if state.changes or any((destination / name).exists() for name in legacy_names(names)):
+        state_tools.ensure_game_closed(destination.parent.parent)
     lock = destination.parent / '.tgf-v3-install-lock'
     try:
         lock.mkdir()
@@ -65,15 +83,18 @@ def install(root, destination, apply=False):
             result['backup'] = backup
             moved, placed = [], []
             try:
-                for name in names:
+                for name in names + list(legacy_names(names)):
                     target = destination / name
                     if target.exists():
                         target.rename(backup / name)
                         moved.append(name)
-                    (candidate / name).rename(target)
+                for name in names:
+                    (candidate / name).rename(destination / name)
                     placed.append(name)
+                state.apply(backup)
             except BaseException:
                 try:
+                    state.rollback()
                     for name in reversed(placed):
                         (destination / name).rename(candidate / name)
                     for name in reversed(moved):
@@ -103,6 +124,8 @@ def main():
     for name in result['addons']:
         operation = 'replace' if (result['destination'] / name).exists() else 'add'
         print(f'  {name}' if args.apply else f'  {operation}: {name}')
+    if result['state_files']:
+        print(f"Saved-file/enablement migrations: {result['state_files']} (originals retained)")
     if result['backup']:
         print(f'Previous addon folders: {result["backup"]}')
     else:

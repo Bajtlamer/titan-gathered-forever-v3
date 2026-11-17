@@ -1,5 +1,5 @@
 local ns={}
-assert(loadfile('TitanGatheredForeverV3/Production.lua'))('TGF v3',ns)
+assert(loadfile('TitanGatheredForever/Production.lua'))('Titan Gathered Forever',ns)
 local passed=0
 local function eq(a,b)assert(a==b,tostring(a)..' != '..tostring(b))end
 local function test(n,f)local ok,e=pcall(f);if not ok then error(n..': '..e)end;passed=passed+1 end

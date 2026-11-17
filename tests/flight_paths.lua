@@ -60,10 +60,10 @@ GameTooltip={lines={}, SetOwner=function(self,p) self.owner=p;self.lines={} end,
     Show=function(self)self.shown=true end, Hide=function(self)self.shown=false;self.owner=nil end}
 local secret={}
 local ns={db={flightVisits={a={[1]=true,[4]=true}}},settings={flightPoints=true,gatheringMap=false},IsPublic=function(v)return v~=secret end}
-assert(loadfile('TitanGatheredForeverV3/PinStyle.lua'))('TitanGatheredForeverV3',ns)
-local source=loadfile('TitanGatheredForeverV3/FlightPaths.lua')
+assert(loadfile('TitanGatheredForever/PinStyle.lua'))('TitanGatheredForever',ns)
+local source=loadfile('TitanGatheredForever/FlightPaths.lua')
 assert(source, 'Faction-aware flight points are not implemented')
-source('TitanGatheredForeverV3',ns)
+source('TitanGatheredForever',ns)
 local function node(id,side,undiscovered,x,y)
     return {nodeID=id,faction=side,isUndiscovered=undiscovered,name='Flight '..id,atlasName='FlightPath',
         position={GetXY=function()return x or .4,y or .6 end}}

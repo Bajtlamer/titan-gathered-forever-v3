@@ -43,7 +43,7 @@ Increment and synchronize the patch prerelease version for every completed runti
 ## Prepare a version
 
 1. Work from the repository root. Keep runtime changes limited to the TGF v3 addon folders.
-2. Update `VERSION` in `tools/generate_catalog.py` and the version in `TitanGatheredForeverV3/TitanGatheredForeverV3.toc` together. Run `python3 tools/generate_catalog.py` to update profession manifests and generated data.
+2. Update `VERSION` in `tools/generate_catalog.py` and the version in `TitanGatheredForever/TitanGatheredForever.toc` together. Run `python3 tools/generate_catalog.py` to update profession manifests and generated data.
 3. Add `release-notes/ref-<version>.md`. Describe implemented changes, meaningful validation and known limitations. Update README when scope or supported behavior changes.
 4. Run `python3 tools/check.py` and the relevant in-game checks in `book-wow-forever-validation.md`.
 5. Run `python3 tools/package.py`. It builds the collection, individual addon downloads and a clean `dist/releases/<version>/` upload directory. Rebuilding replaces that generated version directory.
@@ -52,8 +52,8 @@ Increment and synchronize the patch prerelease version for every completed runti
 
 The upload directory contains exactly fifteen ZIPs and two metadata files:
 
-- Full collection: `TitanGatheredForeverV3-<version>.zip`.
-- Core only: `TitanGatheredForeverV3-<version>-core.zip`.
+- Full collection: `TitanGatheredForever-<version>.zip`.
+- Core only: `TitanGatheredForever-<version>-core.zip`.
 - Twelve profession ZIPs and one optional Auction Items ZIP.
 - `downloads.json`: schema version, release version, client/interface, labels, filenames, dependencies, byte sizes and SHA-256 hashes.
 - `SHA256SUMS`: checksums for ZIPs and the download index.

@@ -14,8 +14,8 @@ local function newNs(seed)
         ItemName = function(id) return itemNames[id] or ('Loading ' .. id) end }
     ns.NpcSeed = { npcs = seed }
     dofile('tests/style_stub.lua')(ns.Style)
-    assert(loadfile('TitanGatheredForeverV3/KnownRecipes.lua'))('TitanGatheredForeverV3', ns)
-    assert(loadfile('TitanGatheredForeverV3/NpcSources.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/KnownRecipes.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever/NpcSources.lua'))('TitanGatheredForever', ns)
     return ns
 end
 
@@ -122,8 +122,8 @@ end)
 test('recipes the player cannot learn yet are red in the list', function()
     local ns = fresh()
     installFrames()
-    assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TitanGatheredForeverV3', ns)
-    assert(loadfile('TitanGatheredForeverV3/RecipeBrowser.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/Navigation.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever/RecipeBrowser.lua'))('TitanGatheredForever', ns)
     local row = { name = 'Lesser Healing Potion', kind = 'Alchemy', skill = 50, trainer = true, price = 500,
         sources = { { npcID = 1, name = 'Alchemy Trainer', role = 'Trainer', price = 500 } } }
     local cells = ns.RecipeBrowser.Cells(row)
@@ -150,8 +150,8 @@ test('clicking a row opens the map at the first source and marks every source', 
     ns.Map = { Update = function() updates = updates + 1 end }
     ns.Minimap = { Update = function() updates = updates + 1 end }
     installFrames()
-    assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TitanGatheredForeverV3', ns)
-    assert(loadfile('TitanGatheredForeverV3/RecipeBrowser.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/Navigation.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever/RecipeBrowser.lua'))('TitanGatheredForever', ns)
     local B = ns.RecipeBrowser
     B.Show()
     local line = B.window.lines[1]                      -- Lesser Healing Potion: trainer 1 and vendor 2
@@ -178,8 +178,8 @@ end)
 test('the toolbar button toggles the window', function()
     local ns = fresh()
     installFrames()
-    assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TitanGatheredForeverV3', ns)
-    assert(loadfile('TitanGatheredForeverV3/RecipeBrowser.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/Navigation.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever/RecipeBrowser.lua'))('TitanGatheredForever', ns)
     local B = ns.RecipeBrowser
     B.Toggle()                                   -- not created yet: opens
     local w = B.window
@@ -196,8 +196,8 @@ test('browser cells, hover tooltip and profession filter', function()
     local ns = fresh()
     ns.KnownRecipes.Record('C1', 'Alchemy', { 'Elixir of Minor Defense' }, 10)
     local all, shown = installFrames()
-    assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TitanGatheredForeverV3', ns)
-    assert(loadfile('TitanGatheredForeverV3/RecipeBrowser.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/Navigation.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever/RecipeBrowser.lua'))('TitanGatheredForever', ns)
     local rows = ns.NpcSources.Unlearned('C1', false)
     local cells = ns.RecipeBrowser.Cells(rows[1])
     eq(cells[1], 'Lesser Healing Potion'); eq(cells[2], 'Alchemy'); eq(cells[3], '50'); eq(cells[4], 'Trainer')
@@ -228,8 +228,8 @@ end)
 test('the visible range reads naturally', function()
     local ns = fresh()
     installFrames()
-    assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TitanGatheredForeverV3', ns)
-    assert(loadfile('TitanGatheredForeverV3/RecipeBrowser.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/Navigation.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever/RecipeBrowser.lua'))('TitanGatheredForever', ns)
     local B = ns.RecipeBrowser
     eq(strip(B.RangeText(0, 40)), 'Showing 1-16 of 40'); eq(strip(B.RangeText(24, 40)), 'Showing 25-40 of 40')
     eq(strip(B.RangeText(0, 5)), 'Showing 1-5 of 5'); eq(B.RangeText(0, 0), 'No recipes')
@@ -240,11 +240,11 @@ test('the list scrolls with the mouse wheel and a scroll bar instead of paging',
     local ns = big()
     ns.KnownRecipes.Record('C1', 'Alchemy', {}, 10)
     local all = installFrames()
-    assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/Navigation.lua'))('TitanGatheredForever', ns)
     local sets = {}
     local realDropdown = ns.Nav.Dropdown
     ns.Nav.Dropdown = function(parent, x, y, width, options, get, set) sets[#sets + 1] = { options = options, get = get, set = set }; return realDropdown(parent, x, y, width, options, get, set) end
-    assert(loadfile('TitanGatheredForeverV3/RecipeBrowser.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/RecipeBrowser.lua'))('TitanGatheredForever', ns)
     local B = ns.RecipeBrowser
     B.Show()
     local w = B.window

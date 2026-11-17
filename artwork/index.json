@@ -1,0 +1,29 @@
+{
+  "current": "v1",
+  "versions": [
+    "v1"
+  ],
+  "addons": [
+    "TitanGatheredForever_Alchemy",
+    "TitanGatheredForever_Herbalism",
+    "TitanGatheredForever_Leatherworking",
+    "TitanGatheredForever_Tailoring",
+    "TitanGatheredForever_Blacksmithing",
+    "TitanGatheredForever_Enchanting",
+    "TitanGatheredForever_FirstAid",
+    "TitanGatheredForever_AuctionItems",
+    "TitanGatheredForever_Fishing",
+    "TitanGatheredForever_Cooking",
+    "TitanGatheredForever",
+    "TitanGatheredForever_Engineering",
+    "TitanGatheredForever_Mining",
+    "TitanGatheredForever_Skinning"
+  ],
+  "formats": [
+    "master.png",
+    "logo-1024.png",
+    "avatar-400.png",
+    "icon-64.png",
+    "Icon.tga"
+  ]
+}

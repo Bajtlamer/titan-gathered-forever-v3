@@ -36,9 +36,9 @@ C_Item={GetItemIconByID=function(id)return id end}
 local refreshes={world=0,minimap=0,flight=0}
 local ns={settings={},Map={Update=function()refreshes.world=refreshes.world+1 end},
  Minimap={Update=function()refreshes.minimap=refreshes.minimap+1 end},FlightPaths={Update=function()refreshes.flight=refreshes.flight+1 end}}
-assert(loadfile('TitanGatheredForeverV3/PinStyle.lua'))('TGF',ns)
-assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TGF',ns)
-local load=loadfile('TitanGatheredForeverV3/IconConfig.lua');assert(load,'Icon appearance window is not implemented');load('TGF',ns)
+assert(loadfile('TitanGatheredForever/PinStyle.lua'))('TGF',ns)
+assert(loadfile('TitanGatheredForever/Navigation.lua'))('TGF',ns)
+local load=loadfile('TitanGatheredForever/IconConfig.lua');assert(load,'Icon appearance window is not implemented');load('TGF',ns)
 local function click(button)button.scripts.OnClick(button)end
 
 test('opening window previews current settings without changing maps or saved values',function()

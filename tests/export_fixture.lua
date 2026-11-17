@@ -1,6 +1,6 @@
 local ns={}
 for _,file in ipairs({'History.lua','Actions.lua','Production.lua','Export.lua'})do
- assert(loadfile('TitanGatheredForeverV3/'..file))('TGF v3',ns)
+ assert(loadfile('TitanGatheredForever/'..file))('Titan Gathered Forever',ns)
 end
 local saved={history={},actions={},production={}}
 local state={character='Player-private-A',clock=100}

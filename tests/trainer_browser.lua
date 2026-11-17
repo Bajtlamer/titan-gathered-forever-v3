@@ -16,8 +16,8 @@ local function newNs()
         [4] = { n = 'Recipe Vendor', m = 0, x = 11, y = 21, v = { { 100, 'Alchemy', 12000, 225 } } },
     } }
     dofile('tests/style_stub.lua')(ns.Style)
-    assert(loadfile('TitanGatheredForeverV3/KnownRecipes.lua'))('TitanGatheredForeverV3', ns)
-    assert(loadfile('TitanGatheredForeverV3/NpcSources.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/KnownRecipes.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever/NpcSources.lua'))('TitanGatheredForever', ns)
     return ns
 end
 
@@ -73,8 +73,8 @@ end)
 test('the list shows status, search and the profession filter', function()
     local ns = newNs()
     installFrames()
-    assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TitanGatheredForeverV3', ns)
-    assert(loadfile('TitanGatheredForeverV3/TrainerBrowser.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/Navigation.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever/TrainerBrowser.lua'))('TitanGatheredForever', ns)
     local B = ns.TrainerBrowser
     B.Show()
     eq(B.total, 3)
@@ -95,8 +95,8 @@ test('clicking a row opens the map at the trainer and marks it', function()
     local opened, updates = {}, 0
     OpenWorldMap = function(id) opened[#opened + 1] = id end
     ns.Map = { Update = function() updates = updates + 1 end }
-    assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TitanGatheredForeverV3', ns)
-    assert(loadfile('TitanGatheredForeverV3/TrainerBrowser.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/Navigation.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever/TrainerBrowser.lua'))('TitanGatheredForever', ns)
     local B = ns.TrainerBrowser
     B.Show()
     local line = B.window.lines[2]                        -- Alchemy Trainer (the first row is Another Alchemist)

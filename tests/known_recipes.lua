@@ -5,7 +5,7 @@ local function eq(actual, expected) assert(actual == expected, 'expected ' .. to
 local function fresh()
     local ns = { IsPublic = function() return true end, characterID = 'C1', db = { knownRecipes = {} },
         settings = {} }
-    assert(loadfile('TitanGatheredForeverV3/KnownRecipes.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/KnownRecipes.lua'))('TitanGatheredForever', ns)
     return ns
 end
 

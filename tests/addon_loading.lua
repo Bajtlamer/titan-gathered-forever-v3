@@ -1,7 +1,7 @@
 local ns = {}
-assert(loadfile('TitanGatheredForeverV3/Data/Metadata.lua'))('TitanGatheredForeverV3', ns)
-assert(loadfile('TitanGatheredForeverV3/Catalog.lua'))('TitanGatheredForeverV3', ns)
-TitanGatheredForeverV3 = ns
+assert(loadfile('TitanGatheredForever/Data/Metadata.lua'))('TitanGatheredForever', ns)
+assert(loadfile('TitanGatheredForever/Catalog.lua'))('TitanGatheredForever', ns)
+TitanGatheredForever = ns
 ns.settings = { categories = {} }
 ns.Catalog.Rebuild(ns.settings)
 assert(next(ns.Items) == nil and next(ns.Recipes) == nil, 'Core loaded a profession database')
@@ -10,13 +10,13 @@ assert(#ns.Catalog.Modules() == 0, 'Core invented loaded profession modules')
 local function loadAddon(folder)
     local manifest = assert(io.open(folder .. '/' .. folder .. '.toc', 'r'))
     local text = manifest:read('*a'); manifest:close()
-    assert(text:find('## Dependencies: Titan, TitanGatheredForeverV3', 1, true))
+    assert(text:find('## Dependencies: Titan, TitanGatheredForever', 1, true))
     for file in text:gmatch('[^\r\n]+') do
         if file:match('%.lua$') then assert(loadfile(folder .. '/' .. file))(folder, {}) end
     end
 end
 
-loadAddon('TitanGatheredForeverV3_Mining')
+loadAddon('TitanGatheredForever_Mining')
 assert(ns.Catalog.Get(2770), 'Mining omitted Copper Ore')
 assert(ns.Catalog.Get(249391), 'Mining omitted Forever Pyrite')
 assert(not ns.Catalog.Get(765), 'Disabled Herbalism/Alchemy data was loaded')
@@ -25,21 +25,21 @@ assert(#ns.Catalog.Modules() == 1)
 assert(#ns.Catalog.List() < ns.DataMetadata.itemCount)
 assert(ns.Catalog.List() == ns.Catalog.List(), 'Item list is rebuilt on each lookup')
 
-loadAddon('TitanGatheredForeverV3_Herbs')
+loadAddon('TitanGatheredForever_Herbalism')
 assert(ns.Catalog.Get(765), 'Herbalism did not register Silverleaf')
 assert(ns.Catalog.Get(249399), 'Herbalism omitted Frilled Lichen')
 assert(not ns.Catalog.Get(264019), 'Auction data loaded without Auction addon')
 
-loadAddon('TitanGatheredForeverV3_Fishing')
+loadAddon('TitanGatheredForever_Fishing')
 assert(not ns.Catalog.modules.Alchemy and not ns.Catalog.modules.Cooking, 'Fishing pulled in consuming profession addons')
 for _, id in ipairs({6358,6359,6522,13422,13755,13888,13893}) do
     assert(ns.Catalog.Get(id), 'Fishing omitted evidenced material ' .. id)
 end
 assert(ns.Catalog.Get(6358).recipeCounts.Alchemy > 0, 'Fishing lost Alchemy use context')
 
-for _, folder in ipairs({ 'Alchemy', 'Auction', 'Blacksmithing', 'Cooking', 'Enchanting', 'Engineering',
+for _, folder in ipairs({ 'Alchemy', 'AuctionItems', 'Blacksmithing', 'Cooking', 'Enchanting', 'Engineering',
                           'FirstAid', 'Leatherworking', 'Skinning', 'Tailoring' }) do
-    loadAddon('TitanGatheredForeverV3_' .. folder)
+    loadAddon('TitanGatheredForever_' .. folder)
 end
 assert(#ns.Catalog.Modules() == 13)
 assert(#ns.Catalog.List() == ns.DataMetadata.itemCount, 'Loaded modules do not cover the generated catalogue')

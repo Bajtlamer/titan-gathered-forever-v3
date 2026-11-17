@@ -245,7 +245,7 @@ class AuditCliTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             generator.generate(self.root)
         self.assertEqual(source.read_bytes(), original)
-        self.assertFalse((self.root / 'TitanGatheredForeverV3').exists())
+        self.assertFalse((self.root / 'TitanGatheredForever').exists())
 
 
 if __name__ == '__main__':

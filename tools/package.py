@@ -12,13 +12,13 @@ from pathlib import Path
 
 
 def addon_names(root):
-    return ['TitanGatheredForeverV3'] + [row['folder'] for row in json.loads((root / 'catalogue/modules.json').read_text())]
+    return ['TitanGatheredForever'] + [row['folder'] for row in json.loads((root / 'catalogue/modules.json').read_text())]
 
 
 def default_target(root, version, addon=None):
     if addon:
         return root / f'dist/modules/{addon}-{version}.zip'
-    return root / f'dist/TitanGatheredForeverV3-{version}.zip'
+    return root / f'dist/TitanGatheredForever-{version}.zip'
 
 
 def package(root, target, addons=None):
@@ -32,19 +32,20 @@ def package(root, target, addons=None):
         entries = [line.strip() for line in manifest.read_text().splitlines()
                    if line.strip() and not line.startswith('#')]
         entries.append(name + '.toc')
-        if name == 'TitanGatheredForeverV3':
+        entries.append('Artwork/AddonIcon.tga')
+        if name == 'TitanGatheredForever':
             entries.extend(['Artwork/TitanOre.tga', 'Artwork/PinOutlineCircle.tga', 'Artwork/PinOutlineSquare.tga', 'Artwork/RouteAnchor.tga'])
         for entry in entries:
             path = addon / entry
             if not path.resolve().is_relative_to(addon.resolve()) or not path.is_file():
                 raise ValueError(f'Invalid addon file: {entry}')
             paths.append((path, path.relative_to(root).as_posix()))
-        if name == 'TitanGatheredForeverV3':
+        if name == 'TitanGatheredForever':
             for notice in ('LICENSE', 'NOTICE'):
                 source = root / notice
                 if not source.is_file():
                     raise ValueError(f'Missing {notice} at the repository root')
-                paths.append((source, f'TitanGatheredForeverV3/{notice}'))
+                paths.append((source, f'TitanGatheredForever/{notice}'))
     target.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(target, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
         for path, arcname in sorted(set(paths), key=lambda pair: pair[1]):
@@ -69,13 +70,13 @@ def stage_release(root, version, output=None):
     target.parent.mkdir(parents=True, exist_ok=True)
     modules = json.loads((root / 'catalogue/modules.json').read_text())
     records = [{'id': 'collection', 'label': 'Complete collection', 'type': 'collection',
-                'file': f'TitanGatheredForeverV3-{version}.zip', 'requires': ['Titan']},
-               {'id': 'TitanGatheredForeverV3', 'label': 'Shared core', 'type': 'core',
-                'file': f'TitanGatheredForeverV3-{version}-core.zip', 'requires': ['Titan']}]
+                'file': f'TitanGatheredForever-{version}.zip', 'requires': ['Titan']},
+               {'id': 'TitanGatheredForever', 'label': 'Shared core', 'type': 'core',
+                'file': f'TitanGatheredForever-{version}-core.zip', 'requires': ['Titan']}]
     records.extend({'id': row['folder'], 'label': row['label'],
                     'type': 'profession' if row['kind'] == 'profession' else 'additional',
                     'file': f'{row["folder"]}-{version}.zip',
-                    'requires': ['Titan', 'TitanGatheredForeverV3']} for row in modules)
+                    'requires': ['Titan', 'TitanGatheredForever']} for row in modules)
     with tempfile.TemporaryDirectory(prefix='.release-', dir=target.parent) as directory:
         staged = Path(directory) / 'upload'
         staged.mkdir()
@@ -106,7 +107,7 @@ if __name__ == '__main__':
     generator = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(generator)
     generator.generate(root, check=True)
-    toc = (root / 'TitanGatheredForeverV3/TitanGatheredForeverV3.toc').read_text()
+    toc = (root / 'TitanGatheredForever/TitanGatheredForever.toc').read_text()
     version = re.search(r'^## Version: ([a-zA-Z0-9.-]+)$', toc, re.M).group(1)
     target = args.output or default_target(root, version, args.addon)
     print(package(root, target, addons=[args.addon] if args.addon else None))

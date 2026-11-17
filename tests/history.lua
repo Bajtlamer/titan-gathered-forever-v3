@@ -1,7 +1,7 @@
 local passed = 0
 local function eq(a,b) assert(a == b, tostring(a) .. ' != ' .. tostring(b)) end
 local function test(name, fn) local ok, e = pcall(fn); if not ok then error(name .. ': ' .. e) end; passed = passed + 1 end
-local ns = {}; assert(loadfile('TitanGatheredForeverV3/History.lua'))('TitanGatheredForeverV3', ns)
+local ns = {}; assert(loadfile('TitanGatheredForever/History.lua'))('TitanGatheredForever', ns)
 local function event(id, items, complete)
  return { id=id, kind='Mining', source='1731', mapID=1, x=.4, y=.6, at=100, items=items or {}, complete=complete ~= false }
 end

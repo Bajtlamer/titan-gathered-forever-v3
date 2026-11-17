@@ -1,6 +1,6 @@
 local ns={}
 COMBATLOG_HONORGAIN='%s dies, honorable kill Rank: %s (Estimated Honor Points: %d)'
-assert(loadfile('TitanGatheredForeverV3/PvP.lua'))('TGF v3',ns)
+assert(loadfile('TitanGatheredForever/PvP.lua'))('Titan Gathered Forever',ns)
 local PvP=ns.PvP
 local passed=0
 local function eq(a,b)assert(a==b,tostring(a)..' != '..tostring(b))end
@@ -85,7 +85,7 @@ test('native lifetime kills and current rank are exposed when client APIs provid
   LifetimeStats=function()return'27','bad'end,CurrentRank=function()return{},'Knight'end}):Snapshot('c')
  eq(malformed.lifetimeHonorableKills,nil);eq(malformed.highestRankID,nil);eq(malformed.currentRankID,nil)
 end)
-assert(loadfile('TitanGatheredForeverV3/Gathering.lua'))('TGF v3',ns)
+assert(loadfile('TitanGatheredForever/Gathering.lua'))('Titan Gathered Forever',ns)
 test('PvP map nodes merge nearby events, preserve estimate totals and clear by type',function()
  local gathering=ns.Gathering.New({Timestamp=function()return 100 end}, {maps={}},function()return{}end,function()return true end)
  gathering:RecordPvP({mapID=141,x=.4,y=.6},42)

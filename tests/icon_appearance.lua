@@ -2,7 +2,7 @@ local passed=0
 local function eq(a,b)assert(a==b,tostring(a)..' != '..tostring(b))end
 local function test(name,fn)local ok,err=pcall(fn);assert(ok,name..': '..tostring(err));passed=passed+1 end
 local ns={settings={}}
-assert(loadfile('TitanGatheredForeverV3/PinStyle.lua'))('TGF',ns)
+assert(loadfile('TitanGatheredForever/PinStyle.lua'))('TGF',ns)
 assert(ns.PinStyle.Get,'Icon appearance settings are not implemented')
 local function frame()
  local f={width=18,height=18,scale=1,regions={},shown=true}

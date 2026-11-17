@@ -3,7 +3,7 @@ local function test(name, fn) tests[#tests + 1] = { name, fn } end
 local function equal(actual, expected)
     assert(actual == expected, 'expected ' .. tostring(expected) .. ', got ' .. tostring(actual))
 end
-local function loadModule(file, ns) assert(loadfile('TitanGatheredForeverV3/' .. file))('TitanGatheredForeverV3', ns) end
+local function loadModule(file, ns) assert(loadfile('TitanGatheredForever/' .. file))('TitanGatheredForever', ns) end
 
 test('catalogue matches numeric identity and ignores names', function()
     local ns = {}

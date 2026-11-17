@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate TitanGatheredForeverV3/Data/NpcSeed.lua from a pinned CMaNGOS classic-db dump.
+"""Generate TitanGatheredForever/Data/NpcSeed.lua from a pinned CMaNGOS classic-db dump.
 
 The dump is never committed. catalogue/npc-seed-source.json pins its commit and SHA-256.
 Usage: generate_npc_seed.py --dump ClassicDB.sql.gz [--check]
@@ -16,7 +16,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PROVENANCE = ROOT / 'catalogue/npc-seed-source.json'
-OUTPUT = ROOT / 'TitanGatheredForeverV3/Data/NpcSeed.lua'
+OUTPUT = ROOT / 'TitanGatheredForever/Data/NpcSeed.lua'
 CONTINENTS = {0, 1}
 SKILL_KINDS = {171: 'Alchemy', 164: 'Blacksmithing', 333: 'Enchanting', 202: 'Engineering', 182: 'Herbs',
                165: 'Leatherworking', 186: 'Mining', 393: 'Skinning', 197: 'Tailoring', 185: 'Cooking',

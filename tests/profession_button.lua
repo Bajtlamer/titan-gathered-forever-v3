@@ -34,7 +34,7 @@ local function fresh()
     C_Timer = { After = function() end }
     GameTooltip = { SetOwner = function() end, AddLine = function() end, Show = function() end, Hide = function() end }
     Menu = nil
-    assert(loadfile('TitanGatheredForeverV3/ProfessionButton.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/ProfessionButton.lua'))('TitanGatheredForever', ns)
     return ns
 end
 local function professionFrame(crafts, maximize, withPage)

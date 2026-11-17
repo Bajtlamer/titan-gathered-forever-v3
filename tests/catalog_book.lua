@@ -4,7 +4,7 @@ local function eq(actual, expected) assert(actual == expected, 'expected ' .. to
 
 local function fresh(settings)
     local ns = { IsPublic = function() return true end, db = { recipeExtra = {} }, settings = settings or { categories = {} } }
-    assert(loadfile('TitanGatheredForeverV3/Catalog.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/Catalog.lua'))('TitanGatheredForever', ns)
     return ns
 end
 local function module(ns, id, label, book, items)

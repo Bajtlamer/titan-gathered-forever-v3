@@ -14,6 +14,7 @@ commands = [
     [sys.executable, '-m', 'unittest', 'discover', '-s', 'tests', '-p', 'test_*.py'],
     [sys.executable, 'tools/generate_catalog.py', '--check'],
     [sys.executable, 'tools/generate_npc_seed.py', '--check'],
+    [sys.executable, 'tools/generate_brand_icons.py', '--check'],
     [runtime, 'tests/run.lua'],
     [runtime, 'tests/integration.lua'],
     [runtime, 'tests/addon_loading.lua'],
@@ -55,7 +56,7 @@ commands = [
 ]
 for command in commands:
     subprocess.run(command, cwd=root, check=True, stdin=subprocess.DEVNULL)
-addons = ['TitanGatheredForeverV3'] + [row['folder'] for row in json.loads((root / 'catalogue/modules.json').read_text())]
+addons = ['TitanGatheredForever'] + [row['folder'] for row in json.loads((root / 'catalogue/modules.json').read_text())]
 for addon in addons:
     toc = root / addon / (addon + '.toc')
     for line in toc.read_text().splitlines():

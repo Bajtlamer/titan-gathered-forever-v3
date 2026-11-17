@@ -2,7 +2,7 @@ local ns = { IsPublic = function() return true end, ItemName = function(id) retu
 ITEM_QUALITY_COLORS = { [0] = { hex = 'ff9d9d9d' }, [2] = { hex = 'ff1eff00' },
                         [3] = { hex = 'ff0070dd' }, [4] = { hex = 'ffa335ee' } }
 C_Item = { GetItemInfo = function(id) return 'Item ' .. id, nil, id end }
-assert(loadfile('TitanGatheredForeverV3/Style.lua'))('TitanGatheredForeverV3', ns)
+assert(loadfile('TitanGatheredForever/Style.lua'))('TitanGatheredForever', ns)
 assert(ns.Style.ItemName(0) == '|cff9d9d9dItem 0|r', 'Poor-quality gray was lost')
 assert(ns.Style.ItemName(2) == '|cff1eff00Item 2|r', 'Uncommon rarity color missing')
 assert(ns.Style.ItemName(3) == '|cff0070ddItem 3|r', 'Rare rarity color missing')
@@ -45,7 +45,7 @@ local learned = {
     [164] = { skillID = 164, name = 'Unlearned Smithing', rank = 0, maxRank = 0 },
 }
 C_SkillInfo = { GetSkillLineInfoByID = function(id) return learned[id] end }
-assert(loadfile('TitanGatheredForeverV3/Professions.lua'))('TitanGatheredForeverV3', ns)
+assert(loadfile('TitanGatheredForever/Professions.lua'))('TitanGatheredForever', ns)
 local rows = ns.Professions.Rows()
 assert(#rows == 2, 'Must show learned skills only, independent of installed data addons')
 assert(rows[1].name == 'Localized Mining' and rows[1].rank == 75 and rows[1].maxRank == 150)

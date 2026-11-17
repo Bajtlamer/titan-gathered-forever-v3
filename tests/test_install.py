@@ -28,14 +28,68 @@ class InstallTests(unittest.TestCase):
         spec.loader.exec_module(self.installer)
 
     def existing(self):
-        for name in ('TitanGatheredForeverV3', 'TitanGatheredForeverV3_Herbs',
+        for name in ('TitanGatheredForever', 'TitanGatheredForever_Herbalism',
                      'Titan', 'TitanGathered2', 'AnotherAddon'):
             folder = self.destination / name
             folder.mkdir()
             (folder / 'old.txt').write_text(name)
         saved = self.base / 'WTF/Account/test/SavedVariables'
         saved.mkdir(parents=True)
-        (saved / 'TitanGatheredForeverV3.lua').write_text('saved data')
+        (saved / 'TitanGatheredForever.lua').write_text('saved data')
+
+    def test_legacy_folders_saved_files_and_disabled_state_migrate_together(self):
+        legacy = self.destination / 'TitanGatheredForeverV3'
+        legacy.mkdir()
+        (legacy / 'previous.lua').write_bytes(b'previous runtime')
+        (self.destination / 'TitanGatheredForeverV3_Herbs').mkdir()
+        (self.destination / 'TitanGatheredForeverV3_Auction').mkdir()
+        saved = self.base / 'WTF/Account/TEST/SavedVariables'
+        saved.mkdir(parents=True)
+        payload = b'TitanGatheredForeverV3DB = { lifetime = 12345 }\n'
+        (saved / 'TitanGatheredForeverV3.lua').write_bytes(payload)
+        enablement = saved.parent / 'Realm/Character/AddOns.txt'
+        enablement.parent.mkdir(parents=True)
+        enablement.write_bytes(b'TitanGatheredForeverV3: disabled\nTitanGatheredForeverV3_Herbs: enabled\nOther: enabled\n')
+        before = snapshot(self.base)
+        self.installer.install(ROOT, self.destination)
+        self.assertEqual(snapshot(self.base), before)
+        result = self.installer.install(ROOT, self.destination, apply=True)
+        self.assertFalse(legacy.exists())
+        self.assertFalse((self.destination / 'TitanGatheredForeverV3_Herbs').exists())
+        self.assertFalse((self.destination / 'TitanGatheredForeverV3_Auction').exists())
+        self.assertTrue((self.destination / 'TitanGatheredForever_Herbalism/Data.lua').is_file())
+        self.assertTrue((self.destination / 'TitanGatheredForever_AuctionItems/Data.lua').is_file())
+        self.assertTrue((self.destination / 'TitanGatheredForever/Core.lua').is_file())
+        self.assertEqual((saved / 'TitanGatheredForever.lua').read_bytes(), payload)
+        self.assertEqual((saved / 'TitanGatheredForeverV3.lua').read_bytes(), payload)
+        self.assertEqual(enablement.read_bytes(), b'TitanGatheredForever: disabled\nTitanGatheredForever_Herbalism: enabled\nOther: enabled\n')
+        self.assertEqual((result['backup'] / 'TitanGatheredForeverV3/previous.lua').read_bytes(), b'previous runtime')
+        # Future installs must not replace newer new-name state from the retained old file.
+        (saved / 'TitanGatheredForever.lua').write_bytes(b'newer saved state')
+        self.installer.install(ROOT, self.destination, apply=True)
+        self.assertEqual((saved / 'TitanGatheredForever.lua').read_bytes(), b'newer saved state')
+
+    def test_failure_while_migrating_enablement_rolls_back_runtime_and_copied_saved_files(self):
+        legacy = self.destination / 'TitanGatheredForeverV3'
+        legacy.mkdir()
+        (legacy / 'previous.lua').write_bytes(b'previous runtime')
+        saved = self.base / 'WTF/Account/TEST/SavedVariables'
+        saved.mkdir(parents=True)
+        (saved / 'TitanGatheredForeverV3.lua').write_bytes(b'original saved state')
+        enablement = saved.parent / 'AddOns.txt'
+        enablement.write_bytes(b'TitanGatheredForeverV3: disabled\n')
+        before = snapshot(self.destination)
+        write = self.installer.state_tools.StateMigration.write
+        def fail_enablement(path, payload, mode, exclusive=False):
+            if path.name == 'AddOns.txt':
+                raise OSError('injected state write failure')
+            return write(path, payload, mode, exclusive)
+        with patch.object(self.installer.state_tools.StateMigration, 'write', side_effect=fail_enablement):
+            with self.assertRaisesRegex(OSError, 'state write failure'):
+                self.installer.install(ROOT, self.destination, apply=True)
+        self.assertEqual(snapshot(self.destination), before)
+        self.assertFalse((saved / 'TitanGatheredForever.lua').exists())
+        self.assertEqual(enablement.read_bytes(), b'TitanGatheredForeverV3: disabled\n')
 
     def test_preview_leaves_entire_client_unchanged(self):
         self.existing()
@@ -51,17 +105,17 @@ class InstallTests(unittest.TestCase):
         result = self.installer.install(ROOT, self.destination, apply=True)
         backup = result['backup']
         self.assertFalse(backup.is_relative_to(self.destination))
-        self.assertEqual((backup / 'TitanGatheredForeverV3/old.txt').read_text(), 'TitanGatheredForeverV3')
-        self.assertEqual((backup / 'TitanGatheredForeverV3_Herbs/old.txt').read_text(), 'TitanGatheredForeverV3_Herbs')
+        self.assertEqual((backup / 'TitanGatheredForever/old.txt').read_text(), 'TitanGatheredForever')
+        self.assertEqual((backup / 'TitanGatheredForever_Herbalism/old.txt').read_text(), 'TitanGatheredForever_Herbalism')
         self.assertEqual(len(list(backup.iterdir())), 2)
-        self.assertFalse((self.destination / 'TitanGatheredForeverV3/old.txt').exists())
-        self.assertTrue((self.destination / 'TitanGatheredForeverV3/Core.lua').is_file())
-        self.assertTrue((self.destination / 'TitanGatheredForeverV3/Artwork/TitanOre.tga').is_file())
-        self.assertFalse((self.destination / 'TitanGatheredForeverV3/tools').exists())
+        self.assertFalse((self.destination / 'TitanGatheredForever/old.txt').exists())
+        self.assertTrue((self.destination / 'TitanGatheredForever/Core.lua').is_file())
+        self.assertTrue((self.destination / 'TitanGatheredForever/Artwork/TitanOre.tga').is_file())
+        self.assertFalse((self.destination / 'TitanGatheredForever/tools').exists())
         self.assertEqual((self.destination / 'Titan/old.txt').read_text(), 'Titan')
         self.assertEqual((self.destination / 'TitanGathered2/old.txt').read_text(), 'TitanGathered2')
         self.assertEqual((self.destination / 'AnotherAddon/old.txt').read_text(), 'AnotherAddon')
-        self.assertEqual((self.base / 'WTF/Account/test/SavedVariables/TitanGatheredForeverV3.lua').read_text(), 'saved data')
+        self.assertEqual((self.base / 'WTF/Account/test/SavedVariables/TitanGatheredForever.lua').read_text(), 'saved data')
 
     def test_repeat_install_retains_distinct_backups(self):
         first = self.installer.install(ROOT, self.destination, apply=True)
@@ -76,7 +130,7 @@ class InstallTests(unittest.TestCase):
 
     def test_invalid_destination_rejected_without_changes(self):
         for destination in (self.base, self.base / 'missing/Interface/AddOns', ROOT,
-                            self.destination / 'TitanGatheredForeverV3'):
+                            self.destination / 'TitanGatheredForever'):
             with self.subTest(destination=destination):
                 before = snapshot(self.base)
                 with self.assertRaises(ValueError):
@@ -86,7 +140,7 @@ class InstallTests(unittest.TestCase):
     def test_symlink_and_file_targets_rejected_without_changes(self):
         outside = self.base / 'outside'
         outside.mkdir()
-        link = self.destination / 'TitanGatheredForeverV3'
+        link = self.destination / 'TitanGatheredForever'
         link.symlink_to(outside, target_is_directory=True)
         with self.assertRaises(ValueError):
             self.installer.install(ROOT, self.destination, apply=True)
@@ -126,7 +180,7 @@ class InstallTests(unittest.TestCase):
         rename = Path.rename
 
         def fail_new_herbs(path, target):
-            if path.name == 'TitanGatheredForeverV3_Herbs' and path.parent.name == 'candidate':
+            if path.name == 'TitanGatheredForever_Herbalism' and path.parent.name == 'candidate':
                 raise OSError('injected installation failure')
             return rename(path, target)
 
@@ -158,7 +212,7 @@ class InstallTests(unittest.TestCase):
         rename = Path.rename
 
         def fail_install_and_recovery(path, target):
-            if (path.name == 'TitanGatheredForeverV3_Herbs' and path.parent.name == 'candidate'
+            if (path.name == 'TitanGatheredForever_Herbalism' and path.parent.name == 'candidate'
                     or path.parent == self.destination.resolve()):
                 # Allow old-folder backup moves, but fail a candidate rollback move.
                 if Path(target).parent.name == 'candidate' or path.parent.name == 'candidate':
@@ -171,7 +225,7 @@ class InstallTests(unittest.TestCase):
         backups = list((self.destination.parent / '.tgf-v3-backups').iterdir())
         self.assertEqual(len(backups), 1)
         self.assertIn(str(backups[0]), str(failure.exception))
-        self.assertEqual((backups[0] / 'TitanGatheredForeverV3/old.txt').read_text(), 'TitanGatheredForeverV3')
+        self.assertEqual((backups[0] / 'TitanGatheredForever/old.txt').read_text(), 'TitanGatheredForever')
         self.assertEqual((self.destination / 'Titan/old.txt').read_text(), 'Titan')
 
     def test_cli_requires_destination_and_previews_by_default(self):
@@ -181,12 +235,12 @@ class InstallTests(unittest.TestCase):
                                  capture_output=True, text=True)
         self.assertEqual(preview.returncode, 0, preview.stderr)
         self.assertIn('Preview', preview.stdout)
-        self.assertIn('TitanGatheredForeverV3_Herbs', preview.stdout)
+        self.assertIn('TitanGatheredForever_Herbalism', preview.stdout)
         self.assertEqual(list(self.destination.iterdir()), [])
         applied = subprocess.run([sys.executable, str(SCRIPT), '--addons-dir', str(self.destination), '--apply'],
                                  capture_output=True, text=True)
         self.assertEqual(applied.returncode, 0, applied.stderr)
-        self.assertTrue((self.destination / 'TitanGatheredForeverV3/Core.lua').exists())
+        self.assertTrue((self.destination / 'TitanGatheredForever/Core.lua').exists())
 
 
 if __name__ == '__main__':

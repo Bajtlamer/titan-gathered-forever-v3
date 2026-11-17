@@ -52,7 +52,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--check', action='store_true')
     args = parser.parse_args()
-    root = Path(__file__).resolve().parents[1] / 'TitanGatheredForeverV3/Artwork'
+    root = Path(__file__).resolve().parents[1] / 'TitanGatheredForever/Artwork'
     assets = [(root / ('PinOutline' + shape + '.tga'), outline(shape)) for shape in ('Circle', 'Square')]
     assets.append((root / 'RouteAnchor.tga', anchor()))
     for path, content in assets:

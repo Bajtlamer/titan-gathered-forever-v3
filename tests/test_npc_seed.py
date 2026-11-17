@@ -138,7 +138,7 @@ class RenderTests(unittest.TestCase):
 class RealSeedTests(unittest.TestCase):
     def test_seed_header_matches_pinned_provenance(self):
         source = json.loads((ROOT / 'catalogue/npc-seed-source.json').read_text())
-        seed = ROOT / 'TitanGatheredForeverV3/Data/NpcSeed.lua'
+        seed = ROOT / 'TitanGatheredForever/Data/NpcSeed.lua'
         self.assertTrue(seed.is_file(), 'Run tools/generate_npc_seed.py --dump <dump> (Task 2)')
         header = '\n'.join(seed.read_text().splitlines()[:4])
         self.assertIn(source['commit'], header)

@@ -15,7 +15,7 @@ local function frame(template)
 end
 local function load()
     local ns = {}
-    assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/Navigation.lua'))('TitanGatheredForever', ns)
     return ns
 end
 local state = { choice = false }

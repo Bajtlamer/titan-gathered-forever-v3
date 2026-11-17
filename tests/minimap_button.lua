@@ -50,7 +50,7 @@ local function env(settings)
         calls = { browser = 0 } }
     ns.Nav = { Toggle = function() ns.calls.browser = ns.calls.browser + 1 end }
     ns.Titan = { Menu = function(owner) ns.calls.menuOwner = owner end }
-    assert(loadfile('TitanGatheredForeverV3/MinimapButton.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/MinimapButton.lua'))('TitanGatheredForever', ns)
     return ns, lines
 end
 
@@ -93,7 +93,7 @@ test('the tooltip explains the clicks', function()
     local button = ns.MinimapButton.button
     button.scripts.OnEnter(button)
     eq(lines.owner, button); eq(lines.shown, true)
-    eq(lines[1], '<gold>Titan Gathered Forever v3</>')
+    eq(lines[1], '<gold>Titan Gathered Forever</>')
     local text = table.concat(lines, '|')
     assert(text:find('Left click', 1, true) and text:find('recipes and statistics', 1, true))
     assert(text:find('Right click', 1, true) and text:find('Drag', 1, true))
@@ -136,7 +136,7 @@ end)
 
 test('settings defaults keep explicit choices and repair invalid angles', function()
     local ns = {}
-    assert(loadfile('TitanGatheredForeverV3/Settings.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/Settings.lua'))('TitanGatheredForever', ns)
     local _, settings = ns.Settings.Initialize({ schema = 1 })
     eq(settings.showMinimapButton, true); eq(settings.minimapButtonAngle, 205)
     _, settings = ns.Settings.Initialize({ schema = 1, settings = { showMinimapButton = false, minimapButtonAngle = 33 } })

@@ -48,7 +48,7 @@ ns.Style.MenuNote=function(root,value)return root:CreateTitle(value)end
 dofile('tests/style_stub.lua')(ns.Style)
 ns.Production={labels={Tailoring='Tailoring',FirstAid='First Aid'}}
 ns.Catalog.Modules=function()return{{id='Cooking',label='Cooking'}}end
-assert(loadfile('TitanGatheredForeverV3/History.lua'))('TGF v3',ns);assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TGF v3',ns);assert(loadfile('TitanGatheredForeverV3/Reports.lua'))('TGF v3',ns)
+assert(loadfile('TitanGatheredForever/History.lua'))('Titan Gathered Forever',ns);assert(loadfile('TitanGatheredForever/Navigation.lua'))('Titan Gathered Forever',ns);assert(loadfile('TitanGatheredForever/Reports.lua'))('Titan Gathered Forever',ns)
 ns.history=ns.History.New({})
 local function seed(char,id,item,qty)
  ns.history:Observe(char,char,{id=id,kind='Loot',source='123',mapID=1,x=.4,y=.6,at=100,complete=true,items={[item]=qty}})
@@ -132,7 +132,7 @@ test('history profession filters include observed uncatalogued outputs',function
  local rows=ns.Reports.Rows('history','a','Fishing');eq(#rows,1);eq(rows[1].itemID,6291)
 end)
 test('actions report shows coverage and counts without item interactions',function()
- assert(loadfile('TitanGatheredForeverV3/Actions.lua'))('TGF v3',ns)
+ assert(loadfile('TitanGatheredForever/Actions.lua'))('Titan Gathered Forever',ns)
  local character='a'
  ns.actions=ns.Actions.New({}, {Character=function()return character end,Name=function()return character end,
   Timestamp=function()return 100 end,Now=function()return 100 end,Enabled=function()return true end})
@@ -173,7 +173,7 @@ test('the actions window can show what was gathered and what it is worth',functi
  w.filter=nil;ns.Economy,ns.Yields=nil,nil
 end)
 test('production report distinguishes completions matched results and explicit flag denominators',function()
- assert(loadfile('TitanGatheredForeverV3/Production.lua'))('TGF v3',ns)
+ assert(loadfile('TitanGatheredForever/Production.lua'))('Titan Gathered Forever',ns)
  ns.production=ns.Production.New({}, {Character=function()return'a'end,Name=function()return'A'end,
   Timestamp=function()return 100 end,Now=function()return 100 end,Enabled=function()return true end,Public=function()return true end,
   Recipe=function(id)return{recipeID=id,name='Cook '..id,kind='Cooking',outputItemID=2680,outputIDs={[2680]=true}}end})
@@ -289,7 +289,7 @@ test('PvP Board keeps client totals separate from addon tracked outdoor estimate
    deaths={world=1,battleground=2,arena=1,total=4}}
  end}
  ns.Reports.Show('pvp');local w=ns.Reports.windows.pvp
- assert(w and w:IsShown()and w.TitleText.text=='TGF v3 PvP Board')
+ assert(w and w:IsShown()and w.TitleText.text=='Titan Gathered Forever PvP Board')
  eq(w.rows[1].cells[1].text,'Client lifetime honorable kills (current character)');eq(w.rows[1].cells[2].text,'27')
  eq(w.rows[2].cells[2].text,'Knight');eq(w.rows[4].cells[2].text,'3');eq(w.rows[5].cells[2].text,'60')
  eq(w.rows[6].cells[2].text,'4');eq(w.rows[8].cells[2].text,'2');eq(w.rows[13].cells[2].text,'4')

@@ -2,10 +2,10 @@
 
 ## Structure and runtime
 
-Titan Gathered Forever v3 targets WoW Forever 1.60.1, interface 16001, with Titan Panel installed separately. Do not change client APIs or manifest versions without matching evidence and live validation.
+Titan Gathered Forever targets WoW Forever 1.60.1, interface 16001, with Titan Panel installed separately. Do not change client APIs or manifest versions without matching evidence and live validation.
 
-- TitanGatheredForeverV3/ contains the shared runtime, English localization, generated metadata and required artwork. Its .toc loads Lua in the declared order.
-- Twelve profession addons and a separate Auction Items addon publish compact catalogue records. Preserve their exact folder/manifest names and dependencies on Titan and the shared core.
+- TitanGatheredForever/ contains the shared runtime, English localization, generated metadata and required artwork. Its .toc loads Lua in the declared order.
+- Twelve profession addons and a separate Auction Items addon publish compact catalogue records. Use their matching TitanGatheredForever_* folder/manifest names and dependencies on Titan and the shared core.
 - catalogue/, tools/, tests/, release-notes/ and the ref- and book- Markdown documents live at repository root; every plan- document lives in plans/. Runtime folders contain only manifest-loaded code and allowlisted artwork. Keep private archives, generated distributions, SavedVariables and temporary files out of Git.
 - Follow the user's document prefixes: plan-, ref-, book-, Codex-, budget-, bom- and tmp-. Every plan-* document lives in plans/ and nowhere else (not in the repository root); ref-, book- and release notes stay where they are. Temporary tmp-* files must be ignored and deleted after use. Avoid emoji, decorative glyphs and em dashes.
 
@@ -22,7 +22,7 @@ There is no dependency installation/build step for runtime Lua. Use Python 3.10 
 
 ## Code and data conventions
 
-Follow nearby Lua formatting without unrelated reformatting. Keep exported TitanGatheredForeverV3 names and XML/manifest compatibility where relevant. Prefer local helpers. Do not put full recipe source records or development databases into runtime memory.
+Follow nearby Lua formatting without unrelated reformatting. Keep exported TitanGatheredForever names and the legacy TitanGatheredForeverV3 alias and XML/manifest compatibility where relevant. Prefer local helpers. Do not put full recipe source records or development databases into runtime memory.
 
 Preserve existing settings, acquired/produced statistics, per-character coverage and map observations. Keep attempts, completed casts, matched output operations, obtained quantities and complete-source denominators distinct. Unknown evidence must remain unknown. No instance map spots or invented ore/source identities. Catalogue completeness remains false until the documented evidence gates are actually satisfied.
 
@@ -53,4 +53,4 @@ The matching editor rule is `.cursor/rules/automatic-live-install.mdc`.
 
 ## Version every completed update
 
-The user requires a version increment for every completed addon update or improvement. Increment the patch version while retaining the current beta suffix until a different release stage is requested. The project left alpha at 0.5.0-beta; earlier 0.4.x-alpha versions are historical. Synchronize the shared core manifest, generator VERSION and all generated profession manifests before checks, installation and packaging. A source-only edit/test iteration or documentation evidence commit is not a separate deployed update. Website versions are independent and increment for each completed website update. Do not silently overwrite an existing versioned download set with different runtime bytes.
+The user requires a version increment for every completed addon update or improvement. Increment the patch version for each completed update. On 2026-11-16 the user requested stable versions for all projects: use versions without alpha/beta suffixes. The official public product name is Titan Gathered Forever; the user subsequently requested matching folder names too. Runtime folders/manifests now use TitanGatheredForever (and profession suffixes); retain the TitanGatheredForeverV3 namespace alias and TitanGatheredForeverV3DB key for compatibility. The project left alpha at 0.5.0-beta; earlier 0.4.x-alpha versions are historical. Synchronize the shared core manifest, generator VERSION and all generated profession manifests before checks, installation and packaging. A source-only edit/test iteration or documentation evidence commit is not a separate deployed update. Website versions are independent and increment for each completed website update. Do not silently overwrite an existing versioned download set with different runtime bytes.

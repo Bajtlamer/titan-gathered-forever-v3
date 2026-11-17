@@ -21,4 +21,4 @@ class PinOutlineTests(unittest.TestCase):
             self.assertEqual(alpha(32, 32), 0, 'Outline center must be fully transparent')
             self.assertEqual(alpha(0, 0), 0)
             self.assertGreater(alpha(32, 2), 0)
-            self.assertEqual(raw, (ROOT / 'TitanGatheredForeverV3/Artwork' / ('PinOutline' + shape + '.tga')).read_bytes())
+            self.assertEqual(raw, (ROOT / 'TitanGatheredForever/Artwork' / ('PinOutline' + shape + '.tga')).read_bytes())

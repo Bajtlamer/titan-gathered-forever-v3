@@ -1,0 +1,76 @@
+{
+  "tool": "built-in image_gen",
+  "edition": 1,
+  "assets": [
+    {
+      "id": "Alchemy",
+      "folder": "TitanGatheredForever_Alchemy",
+      "prompt": "Use case: logo-brand. Create ONE square final original fantasy game addon avatar for Titan Gathered Forever v3 Alchemy. Subject: a single round glass potion flask filled with glowing violet elixir, cork stopper and antique gold neck, a small green herb sprig. Consistent family design: tactile hand-painted classic fantasy inventory artwork, dark midnight blue background, antique gold square bevel frame with restrained clipped corners inset 5 percent, strong simple central silhouette filling 75 percent. Bold polished highlights, readable at 64x64. Square 1024x1024. No letters, text, numerals, wordmarks, watermark or existing game/company logos. Single emblem, no collage. Match the established gold-frame navy-background pickaxe-and-compass avatar in this conversation in finish and framing."
+    },
+    {
+      "id": "Herbs",
+      "folder": "TitanGatheredForever_Herbalism",
+      "prompt": "Use case: logo-brand. ONE square original fantasy game addon avatar for Titan Gathered Forever v3 Herbs. Subject: a lush bundle of three emerald green herb leaves with one small violet flower, bound with a simple gold cord. Family design: tactile hand-painted classic fantasy inventory artwork, dark midnight blue background, antique gold square bevel frame with restrained clipped corners inset 5 percent, strong simple central silhouette filling 75 percent. Bold polished highlights, readable at 64x64. Square 1024x1024. No letters, text, numerals, wordmarks, watermark or existing game/company logos. Single emblem, no collage. Match the gold-frame navy-background addon avatars in this conversation in finish and framing."
+    },
+    {
+      "id": "Leatherworking",
+      "folder": "TitanGatheredForever_Leatherworking",
+      "prompt": "Use case: logo-brand. ONE square original fantasy game addon avatar for Titan Gathered Forever v3 Leatherworking. Subject: a thick stitched chestnut leather bracer with brass rivets and a large curved silver leather stitching awl. Family design: tactile hand-painted classic fantasy inventory artwork, dark midnight blue background, antique gold square bevel frame with restrained clipped corners inset 5 percent, strong simple central silhouette filling 75 percent. Bold polished highlights, readable at 64x64. Square 1024x1024. No letters, text, numerals, wordmarks, watermark or existing game/company logos. Single emblem, no collage. Match the gold-frame navy-background addon avatars in this conversation in finish and framing."
+    },
+    {
+      "id": "Tailoring",
+      "folder": "TitanGatheredForever_Tailoring",
+      "prompt": "Use case: logo-brand. ONE square original fantasy game addon avatar for Titan Gathered Forever v3 Tailoring. Subject: a rich royal blue rolled cloth with a large silver sewing needle and a spool of golden thread. Family design: tactile hand-painted classic fantasy inventory artwork, dark midnight blue background, antique gold square bevel frame with restrained clipped corners inset 5 percent, strong simple central silhouette filling 75 percent. Bold polished highlights, readable at 64x64. Square 1024x1024. No letters, text, numerals, wordmarks, watermark or existing game/company logos. Single emblem, no collage. Match the gold-frame navy-background addon avatars in this conversation in finish and framing."
+    },
+    {
+      "id": "Blacksmithing",
+      "folder": "TitanGatheredForever_Blacksmithing",
+      "prompt": "Use case: logo-brand. Create ONE square final original fantasy game addon avatar for Titan Gathered Forever v3 Blacksmithing. Subject: a mighty steel smith hammer poised diagonally above a dark iron anvil with a small orange-hot ingot. Consistent family design: tactile hand-painted classic fantasy inventory artwork, dark midnight blue background, antique gold square bevel frame with restrained clipped corners inset 5 percent, strong simple central silhouette filling 75 percent. Bold polished highlights, readable at 64x64. Square 1024x1024. No letters, text, numerals, wordmarks, watermark or existing game/company logos. Single emblem, no collage. Match the established gold-frame navy-background pickaxe-and-compass avatar in this conversation in finish and framing."
+    },
+    {
+      "id": "Enchanting",
+      "folder": "TitanGatheredForever_Enchanting",
+      "prompt": "Use case: logo-brand. ONE square original fantasy game addon avatar for Titan Gathered Forever v3 Enchanting. Subject: an elegant silver enchanting wand diagonally crossing one large faceted violet crystal, a restrained arcane violet glow. Family design: tactile hand-painted classic fantasy inventory artwork, dark midnight blue background, antique gold square bevel frame with restrained clipped corners inset 5 percent, strong simple central silhouette filling 75 percent. Bold polished highlights, readable at 64x64. Square 1024x1024. No letters, text, numerals, wordmarks, watermark or existing game/company logos. Single emblem, no collage. Match the gold-frame navy-background addon avatars in this conversation in finish and framing."
+    },
+    {
+      "id": "FirstAid",
+      "folder": "TitanGatheredForever_FirstAid",
+      "prompt": "Use case: logo-brand. ONE square original fantasy game addon avatar for Titan Gathered Forever v3 FirstAid. Subject: a clean ivory rolled linen bandage with a loose strip and a small silver medical scissors, soft warm light, no cross symbol. Family design: tactile hand-painted classic fantasy inventory artwork, dark midnight blue background, antique gold square bevel frame with restrained clipped corners inset 5 percent, strong simple central silhouette filling 75 percent. Bold polished highlights, readable at 64x64. Square 1024x1024. No letters, text, numerals, wordmarks, watermark or existing game/company logos. Single emblem, no collage. Match the gold-frame navy-background addon avatars in this conversation in finish and framing."
+    },
+    {
+      "id": "Auction",
+      "folder": "TitanGatheredForever_AuctionItems",
+      "prompt": "Use case: logo-brand. Create ONE square final original fantasy game addon avatar for Titan Gathered Forever v3 Auction. Subject: a sturdy wooden auction gavel over three large stacked gold coins and a deep crimson cloth pouch. Consistent family design: tactile hand-painted classic fantasy inventory artwork, dark midnight blue background, antique gold square bevel frame with restrained clipped corners inset 5 percent, strong simple central silhouette filling 75 percent. Bold polished highlights, readable at 64x64. Square 1024x1024. No letters, text, numerals, wordmarks, watermark or existing game/company logos. Single emblem, no collage. Match the established gold-frame navy-background pickaxe-and-compass avatar in this conversation in finish and framing."
+    },
+    {
+      "id": "Fishing",
+      "folder": "TitanGatheredForever_Fishing",
+      "prompt": "Use case: logo-brand. ONE square original fantasy game addon avatar for Titan Gathered Forever v3 Fishing. Subject: one beautiful silvery blue fish curved beside a large curved steel fishing hook and a short cork bobber. Family design: tactile hand-painted classic fantasy inventory artwork, dark midnight blue background, antique gold square bevel frame with restrained clipped corners inset 5 percent, strong simple central silhouette filling 75 percent. Bold polished highlights, readable at 64x64. Square 1024x1024. No letters, text, numerals, wordmarks, watermark or existing game/company logos. Single emblem, no collage. Match the gold-frame navy-background addon avatars in this conversation in finish and framing."
+    },
+    {
+      "id": "Cooking",
+      "folder": "TitanGatheredForever_Cooking",
+      "prompt": "Use case: logo-brand. ONE square original fantasy game addon avatar for Titan Gathered Forever v3 Cooking. Subject: a copper cooking pot with a wooden stirring spoon and a single golden roasted drumstick, warm amber glow. Family design: tactile hand-painted classic fantasy inventory artwork, dark midnight blue background, antique gold square bevel frame with restrained clipped corners inset 5 percent, strong simple central silhouette filling 75 percent. Bold polished highlights, readable at 64x64. Square 1024x1024. No letters, text, numerals, wordmarks, watermark or existing game/company logos. Single emblem, no collage. Match the gold-frame navy-background addon avatars in this conversation in finish and framing."
+    },
+    {
+      "id": "core",
+      "folder": "TitanGatheredForever",
+      "prompt": "Use case: logo-brand. Create ONE final square painted fantasy game addon avatar for Titan Gathered Forever v3, the shared core of a gathering and crafting addon family. Subject: a mighty forged steel pickaxe crossed with a gold-rimmed survey compass, one luminous turquoise mineral at their junction. Strong simple silhouette, tactile hand-painted classic fantasy inventory artwork, professionally polished, bold highlights, dark midnight blue background, antique gold square bevel frame with restrained clipped corners. Frame inset 5 percent, subject fills central 75 percent, no object touching edges. Must read clearly at 64x64. Square 1024x1024 artwork. No letters, text, numerals, wordmarks, watermark, existing game or company logos. This is an original emblem, not a scene or collage. Need saveable final image for project files."
+    },
+    {
+      "id": "Engineering",
+      "folder": "TitanGatheredForever_Engineering",
+      "prompt": "Use case: logo-brand. ONE square original fantasy game addon avatar for Titan Gathered Forever v3 Engineering. Subject: a large brass cogwheel behind a compact silver wrench and one turquoise glass engineer goggle lens. Family design: tactile hand-painted classic fantasy inventory artwork, dark midnight blue background, antique gold square bevel frame with restrained clipped corners inset 5 percent, strong simple central silhouette filling 75 percent. Bold polished highlights, readable at 64x64. Square 1024x1024. No letters, text, numerals, wordmarks, watermark or existing game/company logos. Single emblem, no collage. Match the gold-frame navy-background addon avatars in this conversation in finish and framing."
+    },
+    {
+      "id": "Mining",
+      "folder": "TitanGatheredForever_Mining",
+      "prompt": "Use case: logo-brand. ONE square original fantasy game addon avatar for Titan Gathered Forever v3 Mining. Subject: a powerful single steel pickaxe planted diagonally into a chunk of dark ore bearing bright blue crystals. Family design: tactile hand-painted classic fantasy inventory artwork, dark midnight blue background, antique gold square bevel frame with restrained clipped corners inset 5 percent, strong simple central silhouette filling 75 percent. Bold polished highlights, readable at 64x64. Square 1024x1024. No letters, text, numerals, wordmarks, watermark or existing game/company logos. Single emblem, no collage. Match the gold-frame navy-background addon avatars in this conversation in finish and framing."
+    },
+    {
+      "id": "Skinning",
+      "folder": "TitanGatheredForever_Skinning",
+      "prompt": "Use case: logo-brand. ONE square original fantasy game addon avatar for Titan Gathered Forever v3 Skinning. Subject: one broad curved steel skinning knife with wooden handle lying diagonally across a folded tawny animal hide. Family design: tactile hand-painted classic fantasy inventory artwork, dark midnight blue background, antique gold square bevel frame with restrained clipped corners inset 5 percent, strong simple central silhouette filling 75 percent. Bold polished highlights, readable at 64x64. Square 1024x1024. No letters, text, numerals, wordmarks, watermark or existing game/company logos. Single emblem, no collage. Match the gold-frame navy-background addon avatars in this conversation in finish and framing."
+    }
+  ]
+}

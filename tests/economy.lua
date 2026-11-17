@@ -11,7 +11,7 @@ local function fresh(prices, vendors, sell)
         local price = sell and sell[id]
         return 'Name', 'link', 1, 1, 1, 'type', 'sub', 1, '', 1, price
     end }
-    assert(loadfile('TitanGatheredForeverV3/Economy.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/Economy.lua'))('TitanGatheredForever', ns)
     return ns
 end
 local function plan(rows, output, low, high, issues)

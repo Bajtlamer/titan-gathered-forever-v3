@@ -66,7 +66,7 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(set(modules['FirstAid']['items']), {2589})
         self.assertNotIn(765, modules['FirstAid']['items'])
         self.assertEqual(set(modules['Alchemy']['items']), {765})
-        self.assertEqual(modules['FirstAid']['folder'], 'TitanGatheredForeverV3_FirstAid')
+        self.assertEqual(modules['FirstAid']['folder'], 'TitanGatheredForever_FirstAid')
 
     def test_gathering_module_membership_is_separate_from_consumer_profession(self):
         self.data['recipes'].append({'spellID': 3, 'outputItemID': 10, 'profession': 'Alchemy',

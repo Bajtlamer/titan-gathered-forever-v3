@@ -34,8 +34,8 @@ GameTooltip = { SetOwner = function() end, AddLine = function() end, Show = func
 local ns = { settings = { gatheringMap = true }, IsPublic = function() return true end,
     Style = { Separator = function(tooltip) tooltip:AddLine(' ') end, ItemName = function(id) return 'Item ' .. id end } }
 dofile('tests/style_stub.lua')(ns.Style)
-assert(loadfile('TitanGatheredForeverV3/PinStyle.lua'))('TitanGatheredForeverV3', ns)
-assert(loadfile('TitanGatheredForeverV3/Map.lua'))('TitanGatheredForeverV3', ns)
+assert(loadfile('TitanGatheredForever/PinStyle.lua'))('TitanGatheredForever', ns)
+assert(loadfile('TitanGatheredForever/Map.lua'))('TitanGatheredForever', ns)
 local canvas, world = frame(), frame()
 world:Show()
 world.mapID = 1
@@ -63,7 +63,7 @@ canvas.width = 1000
 assert(canvas.hooks.OnSizeChanged, 'Canvas readiness has no refresh callback')
 canvas.hooks.OnSizeChanged()
 assert(delayed.pins[1].shown and delayed.pins[1].x == 400)
-assert(loadfile('TitanGatheredForeverV3/Gathering.lua'))('TitanGatheredForeverV3', ns)
+assert(loadfile('TitanGatheredForever/Gathering.lua'))('TitanGatheredForever', ns)
 local sourceReady = false
 ns.gathering = ns.Gathering.New({
     CanRecord = function() return true end,
@@ -117,7 +117,7 @@ ns.Map.instance:Refresh(true)
 assert(skins[1].x == 500 and skins[2].x == 500, 'Repeated observations spread icons into a row')
 assert(ns.gathering.saved.maps[2][1].x == ns.gathering.saved.maps[2][2].x, 'Display separation moved saved observations')
 assert(map.clearButton and map.clearButton.parent == world)
-assert(map.clearButton.text == 'TGF v3 spots')
+assert(map.clearButton.text == 'Map spots')
 local opened
 ns.Titan = { ClearSpotsMenu = function(owner, target) opened = {owner, target} end }
 map.clearButton.scripts.OnClick(map.clearButton)

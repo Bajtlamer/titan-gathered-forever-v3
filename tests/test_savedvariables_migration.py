@@ -16,7 +16,7 @@ class SavedVariableMigrationTests(unittest.TestCase):
     def test_preserves_saved_data_and_original_file(self):
         with tempfile.TemporaryDirectory() as directory:
             source = Path(directory) / 'TitanGathered2.lua'
-            target = Path(directory) / 'TitanGatheredForeverV3.lua'
+            target = Path(directory) / 'TitanGatheredForever.lua'
             payload = b'\r\nTitanGathered2ForeverDB = {\r\n ["history"] = { ["count"] = 7 },\r\n}\r\n'
             source.write_bytes(payload)
             self.migration().migrate(source, target)

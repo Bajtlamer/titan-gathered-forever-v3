@@ -155,7 +155,7 @@ local function fixture(interface, saved, noBroker, noModules)
     for _, path in ipairs({ 'Localization/enUS.lua', 'Style.lua', 'Data/Metadata.lua', 'Data/NpcSeed.lua', 'Catalog.lua',
                             'Settings.lua', 'DebugLog.lua', 'Professions.lua', 'KnownRecipes.lua', 'Inventory.lua', 'Gathering.lua', 'History.lua', 'Actions.lua', 'PvP.lua', 'Production.lua', 'Crafting.lua', 'Export.lua', 'Observations.lua', 'Sources.lua', 'NpcSources.lua', 'NpcObserver.lua', 'PinStyle.lua', 'IconConfig.lua', 'FlightPaths.lua', 'Transport.lua', 'Map.lua', 'Minimap.lua',
                             'Tooltips.lua', 'Reports.lua', 'CraftingView.lua', 'ProfessionButton.lua', 'Movable.lua', 'AuctionScan.lua', 'Economy.lua', 'Yields.lua', 'RecipeBrowser.lua', 'MinimapButton.lua', 'Titan.lua', 'Core.lua' }) do
-        assert(loadfile('TitanGatheredForeverV3/' .. path))('TitanGatheredForeverV3', ns)
+        assert(loadfile('TitanGatheredForever/' .. path))('TitanGatheredForever', ns)
     end
     -- Keep integration scenarios small; the generated data is validated separately.
     local function module(id, label, items, recipes, kind)
@@ -189,7 +189,7 @@ local function fixture(interface, saved, noBroker, noModules)
         for _, f in ipairs(self.frames) do if f.events[event] then f:Fire('OnEvent', event, ...) end end
     end
     function state:Start()
-        self:Event('ADDON_LOADED', 'TitanGatheredForeverV3')
+        self:Event('ADDON_LOADED', 'TitanGatheredForever')
         self:Event('PLAYER_LOGIN')
         self:Flush()
     end
@@ -198,10 +198,10 @@ end
 
 test('initializes a Forever-only broker after player identity is ready', function()
     local s, ns = fixture(); s:Start()
-    eq(s.brokerName, 'TitanGatheredForeverV3')
+    eq(s.brokerName, 'TitanGatheredForever')
     eq(ns.inventory:Get(2589).bags, 3)
     eq(ns.inventory:Get(2589).bankState, 'unknown')
-    eq(s.broker.label, 'TG3 Forever');eq(s.broker.text, '- v0.1.0')
+    eq(s.broker.label, 'Titan Gathered Forever');eq(s.broker.text, '- v0.1.0')
 end)
 
 test('honor-confirmed outdoor PvP creates a spot while BG awards only update PvP summary data',function()
@@ -425,7 +425,7 @@ test('menu offers every chat function that needs no parameter', function()
     assert(axes, 'menu lacks the axis swap checkbox')
     local before = #s.messages
     buttons['Show status report']()
-    assert(#s.messages > before and contains(s.messages, 'Titan Gathered Forever v3'), 'status report not printed')
+    assert(#s.messages > before and contains(s.messages, 'Titan Gathered Forever'), 'status report not printed')
     ns.Titan.page = 1
     buttons['Next summary page'](); eq(ns.Titan.page, 2)
     buttons['Previous summary page'](); eq(ns.Titan.page, 1)
@@ -476,7 +476,7 @@ end)
 
 test('core-only startup shows the version and explains how to enable profession addons', function()
     local s, ns = fixture(nil, nil, nil, true); s:Start()
-    eq(s.broker.label, 'TG3 Forever');eq(s.broker.text, '- v0.1.0')
+    eq(s.broker.label, 'Titan Gathered Forever');eq(s.broker.text, '- v0.1.0')
     eq(next(ns.Items), nil)
     eq(next(ns.Recipes), nil)
     s.broker.OnClick({}, 'RightButton')
@@ -509,7 +509,7 @@ test('empty scanned bags and bank display zero, including the summary', function
     assert(not contains(tip.lines, 'Total:'))
     s.broker.OnEnter({})
     assert(contains(ns.Titan.tooltip.lines, '0/0'))
-    eq(s.broker.label, 'TG3 Forever');eq(s.broker.text, '- v0.1.0')
+    eq(s.broker.label, 'Titan Gathered Forever');eq(s.broker.text, '- v0.1.0')
 end)
 
 test('bags-only configuration hides bank, sum, timestamps and bank-only rows', function()

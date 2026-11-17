@@ -30,7 +30,7 @@ jobs:
           python3 - <<'PY'
           import os, re
           from pathlib import Path
-          version = re.search(r'^## Version: ([a-zA-Z0-9.-]+)$', Path('TitanGatheredForeverV3/TitanGatheredForeverV3.toc').read_text(), re.M).group(1)
+          version = re.search(r'^## Version: ([a-zA-Z0-9.-]+)$', Path('TitanGatheredForever/TitanGatheredForever.toc').read_text(), re.M).group(1)
           if os.environ.get('GITHUB_REF_TYPE') == 'tag':
               assert os.environ['GITHUB_REF_NAME'] == 'v' + version, 'Tag must match the addon version'
           assert Path(f'release-notes/ref-{version}.md').is_file(), 'Release notes are required'

@@ -27,7 +27,7 @@ def migrate(source, target):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('source', type=Path, help='Previous account SavedVariables .lua file; close WoW first')
-    parser.add_argument('target', type=Path, help='New TitanGatheredForeverV3.lua file in the same SavedVariables directory')
+    parser.add_argument('target', type=Path, help='New TitanGatheredForever.lua file in the same SavedVariables directory')
     args = parser.parse_args()
     try:
         print(migrate(args.source, args.target))

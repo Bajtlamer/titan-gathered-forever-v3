@@ -32,8 +32,8 @@ local function pick(control,label)
  MenuUtil={CreateContextMenu=function(owner,fn)fn(owner,{CreateButton=function(_,l,cb)actions[l]=cb end})end}
  control.scripts.OnClick(control);MenuUtil=previous;actions[label]()
 end
-assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TGF v3',ns)
-assert(loadfile('TitanGatheredForeverV3/ExportView.lua'))('TGF v3',ns)
+assert(loadfile('TitanGatheredForever/Navigation.lua'))('Titan Gathered Forever',ns)
+assert(loadfile('TitanGatheredForever/ExportView.lua'))('Titan Gathered Forever',ns)
 test('opening exports current character with identity off and no collector mutation',function()
  ns.ExportView.Show();local w=ns.ExportView.window
  assert(w:IsShown());eq(w.scopeMode,'character');eq(w.includeIdentity,false)

@@ -23,8 +23,8 @@ local function fresh()
     UIParent = {}
     C_Timer = { After = function(_, fn) fn() end }
     _G.ProfessionsFrame, _G.AuctionHouseFrame = nil, nil
-    assert(loadfile('TitanGatheredForeverV3/Navigation.lua'))('TitanGatheredForeverV3', ns)
-    assert(loadfile('TitanGatheredForeverV3/Movable.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/Navigation.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever/Movable.lua'))('TitanGatheredForever', ns)
     return ns
 end
 

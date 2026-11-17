@@ -41,7 +41,7 @@ C_TradeSkillUI={GetRecipeInfo=function(id)if id==2536 then return{recipeID=id,na
  GetProfessionInfoByRecipeID=function()return{professionID=185}end,
  GetRecipeSchematic=function(id)return{recipeID=id,recipeType=1,isRecraft=false,reagentSlotSchematics=slots}end}
 ns.inventory={Get=function(_,id)return{bags=id-1000,bagsState='current',bank=10,bankState='cached',bankObservedAt=100}end}
-for _,file in ipairs({'Style.lua','History.lua','Crafting.lua','Navigation.lua','Reports.lua','CraftingView.lua','AuctionScan.lua','Economy.lua','Profit.lua'})do assert(loadfile('TitanGatheredForeverV3/'..file))('TGF v3',ns)end
+for _,file in ipairs({'Style.lua','History.lua','Crafting.lua','Navigation.lua','Reports.lua','CraftingView.lua','AuctionScan.lua','Economy.lua','Profit.lua'})do assert(loadfile('TitanGatheredForever/'..file))('Titan Gathered Forever',ns)end
 ns.Style.ItemName=function(id)return'Item '..id end
 ns.history=ns.History.New({})
 ns.history:Observe('a','A',{id='one',kind='Mining',source='123',mapID=4,at=100,complete=true,items={[1001]=1}})
@@ -114,7 +114,7 @@ test('with the bank counted, reagents that are only in the bank turn yellow and 
  ns.settings.showBank=false
 end)
 test('a merchant seen selling a reagent is named in the last column and in the source menu',function()
- assert(loadfile('TitanGatheredForeverV3/NpcSources.lua'))('TGF v3',ns)
+ assert(loadfile('TitanGatheredForever/NpcSources.lua'))('Titan Gathered Forever',ns)
  ns.db={npcs={[50]={name='Vendor Vic',mapID=4,x=.5,y=.5,lastSeen=1,
   goods={{itemID=1001,price=250,stack=5},{itemID=1002,price=100,extendedCost=true}}}}}
  ns.NpcSources.Invalidate()
@@ -130,7 +130,7 @@ test('a merchant seen selling a reagent is named in the last column and in the s
  ns.CraftingView.Show(2536,3)
 end)
 test('the auction column shows the scanned unit price and the line adds up what the missing reagents would cost',function()
- assert(loadfile('TitanGatheredForeverV3/NpcSources.lua'))('TGF v3',ns)
+ assert(loadfile('TitanGatheredForever/NpcSources.lua'))('Titan Gathered Forever',ns)
  ns.db={auction={at=1,entries=9,items={[1001]={min=40,qty=5,n=1},[1002]={min=100,qty=9,n=3},[1003]={min=7,qty=1,n=1}}}}
  ns.CraftingView.Show(2536,3);local w=ns.CraftingView.window
  eq(plain(w.rows[1].auction.text),'40'..COPPER);eq(plain(w.rows[2].auction.text),'1'..SILVER)      -- 100 copper is 1 silver
@@ -211,7 +211,7 @@ test('toggling closes the window of the same recipe, and switches a window that 
  ns.CraftingView.Show(2536,3)
 end)
 test('map history label cannot imply a probability at one pin',function()
- assert(loadfile('TitanGatheredForeverV3/PinStyle.lua'))('TGF v3',ns)
+ assert(loadfile('TitanGatheredForever/PinStyle.lua'))('Titan Gathered Forever',ns)
  local _,note=ns.PinStyle.HistoryLines({itemID=1001,mapID=4,kind='Mining'})
  assert(note and note:find('not a chance at this coordinate',1,true))
 end)

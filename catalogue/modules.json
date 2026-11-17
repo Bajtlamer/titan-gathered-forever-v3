@@ -3,7 +3,7 @@
     "id": "Alchemy",
     "label": "Alchemy",
     "kind": "profession",
-    "folder": "TitanGatheredForeverV3_Alchemy",
+    "folder": "TitanGatheredForever_Alchemy",
     "itemCount": 85,
     "recipeCount": 129,
     "bookCount": 181
@@ -12,7 +12,7 @@
     "id": "Auction",
     "label": "Auction items",
     "kind": "auction",
-    "folder": "TitanGatheredForeverV3_Auction",
+    "folder": "TitanGatheredForever_AuctionItems",
     "itemCount": 1,
     "recipeCount": 0,
     "bookCount": 0
@@ -21,7 +21,7 @@
     "id": "Blacksmithing",
     "label": "Blacksmithing",
     "kind": "profession",
-    "folder": "TitanGatheredForeverV3_Blacksmithing",
+    "folder": "TitanGatheredForever_Blacksmithing",
     "itemCount": 121,
     "recipeCount": 175,
     "bookCount": 419
@@ -30,7 +30,7 @@
     "id": "Cooking",
     "label": "Cooking",
     "kind": "profession",
-    "folder": "TitanGatheredForeverV3_Cooking",
+    "folder": "TitanGatheredForever_Cooking",
     "itemCount": 112,
     "recipeCount": 145,
     "bookCount": 130
@@ -39,7 +39,7 @@
     "id": "Enchanting",
     "label": "Enchanting",
     "kind": "profession",
-    "folder": "TitanGatheredForeverV3_Enchanting",
+    "folder": "TitanGatheredForever_Enchanting",
     "itemCount": 65,
     "recipeCount": 85,
     "bookCount": 60
@@ -48,7 +48,7 @@
     "id": "Engineering",
     "label": "Engineering",
     "kind": "profession",
-    "folder": "TitanGatheredForeverV3_Engineering",
+    "folder": "TitanGatheredForever_Engineering",
     "itemCount": 173,
     "recipeCount": 243,
     "bookCount": 245
@@ -57,7 +57,7 @@
     "id": "FirstAid",
     "label": "First Aid",
     "kind": "profession",
-    "folder": "TitanGatheredForeverV3_FirstAid",
+    "folder": "TitanGatheredForever_FirstAid",
     "itemCount": 42,
     "recipeCount": 68,
     "bookCount": 32
@@ -66,7 +66,7 @@
     "id": "Fishing",
     "label": "Fishing",
     "kind": "profession",
-    "folder": "TitanGatheredForeverV3_Fishing",
+    "folder": "TitanGatheredForever_Fishing",
     "itemCount": 23,
     "recipeCount": 26,
     "bookCount": 0
@@ -75,7 +75,7 @@
     "id": "Herbs",
     "label": "Herbalism",
     "kind": "profession",
-    "folder": "TitanGatheredForeverV3_Herbs",
+    "folder": "TitanGatheredForever_Herbalism",
     "itemCount": 32,
     "recipeCount": 50,
     "bookCount": 0
@@ -84,7 +84,7 @@
     "id": "Leatherworking",
     "label": "Leatherworking",
     "kind": "profession",
-    "folder": "TitanGatheredForeverV3_Leatherworking",
+    "folder": "TitanGatheredForever_Leatherworking",
     "itemCount": 160,
     "recipeCount": 232,
     "bookCount": 482
@@ -93,7 +93,7 @@
     "id": "Mining",
     "label": "Mining",
     "kind": "profession",
-    "folder": "TitanGatheredForeverV3_Mining",
+    "folder": "TitanGatheredForever_Mining",
     "itemCount": 62,
     "recipeCount": 94,
     "bookCount": 17
@@ -102,7 +102,7 @@
     "id": "Skinning",
     "label": "Skinning",
     "kind": "profession",
-    "folder": "TitanGatheredForeverV3_Skinning",
+    "folder": "TitanGatheredForever_Skinning",
     "itemCount": 32,
     "recipeCount": 54,
     "bookCount": 0
@@ -111,7 +111,7 @@
     "id": "Tailoring",
     "label": "Tailoring",
     "kind": "profession",
-    "folder": "TitanGatheredForeverV3_Tailoring",
+    "folder": "TitanGatheredForever_Tailoring",
     "itemCount": 117,
     "recipeCount": 184,
     "bookCount": 405

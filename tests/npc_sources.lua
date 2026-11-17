@@ -30,7 +30,7 @@ local function fresh()
         [2] = { n = 'Recipe Vendor', m = 0, x = 11, y = 21,
             v = { { 100, 'Alchemy', 12000, 225 }, { 101, 'Cooking', 0, 0 } } },
     } }
-    assert(loadfile('TitanGatheredForeverV3/NpcSources.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/NpcSources.lua'))('TitanGatheredForever', ns)
     return ns
 end
 
@@ -373,7 +373,7 @@ end)
 
 test('settings defaults preserve explicit choices', function()
     local ns = {}
-    assert(loadfile('TitanGatheredForeverV3/Settings.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/Settings.lua'))('TitanGatheredForever', ns)
     local saved, settings = ns.Settings.Initialize({ schema = 1, settings = { mapTrainers = false } })
     eq(settings.mapTrainers, false); eq(settings.mapRecipeVendors, true); eq(settings.recordNpcs, true)
     eq(settings.npcAxisSwap, false); eq(type(settings.mapNpcProfessions), 'table')
@@ -419,7 +419,7 @@ end)
 test('only the professions of installed addons have pins, trainers and unlearned recipes', function()
     local ns = fresh()
     ns.KnownRecipes = nil
-    assert(loadfile('TitanGatheredForeverV3/KnownRecipes.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/KnownRecipes.lua'))('TitanGatheredForever', ns)
     ns.KnownRecipes.Record('C1', 'Alchemy', {}, 1); ns.KnownRecipes.Record('C1', 'Cooking', {}, 1)
     ns.NpcSources.Invalidate()
     local installedKinds = { Alchemy = true }

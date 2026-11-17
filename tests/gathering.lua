@@ -7,7 +7,7 @@ end
 local function eq(a, b) assert(a == b, tostring(a) .. ' != ' .. tostring(b)) end
 local function fixture(saved)
     local ns = {}
-    assert(loadfile('TitanGatheredForeverV3/Gathering.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/Gathering.lua'))('TitanGatheredForever', ns)
     local state = { now = 100, position = { mapID = 1, x = 0.4, y = 0.6 }, enabled = true,
                     slots = { { slot = 1, itemID = 2770, sources = { 'GameObject-0-1-2-3-1731-9' } } } }
     local api = { Now = function() return state.now end,

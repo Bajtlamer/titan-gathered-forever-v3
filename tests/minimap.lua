@@ -41,8 +41,8 @@ local ns = { settings = { gatheringMap = true, mapMinimap = true }, IsPublic = f
     Style = { Separator = function(tooltip) tooltip:AddLine(' ') end, ItemName = function(id) return 'Item ' .. id end } }
 local nodes = { { mapID = 1412, itemID = 765, kind = 'Herbs', x = 0.55, y = 0.5, count = 1 } }
 ns.gathering = { List = function(_, mapID) return mapID == 1412 and nodes or {} end }
-assert(loadfile('TitanGatheredForeverV3/PinStyle.lua'))('TitanGatheredForeverV3', ns)
-assert(loadfile('TitanGatheredForeverV3/Minimap.lua'))('TitanGatheredForeverV3', ns)
+assert(loadfile('TitanGatheredForever/PinStyle.lua'))('TitanGatheredForever', ns)
+assert(loadfile('TitanGatheredForever/Minimap.lua'))('TitanGatheredForever', ns)
 ns.Minimap.Attach()
 local map = assert(ns.Minimap.instance)
 local function near(a, b) assert(math.abs(a - b) < 0.001, tostring(a) .. ' != ' .. tostring(b)) end

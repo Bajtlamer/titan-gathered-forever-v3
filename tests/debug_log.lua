@@ -9,7 +9,7 @@ GetTime = function() return 5.25 end
 local function fresh(debug)
     local ns = { IsPublic = function(value) return value ~= 'SECRET' end,
         settings = { debugMode = debug ~= false }, db = { debugLog = {} } }
-    assert(loadfile('TitanGatheredForeverV3/DebugLog.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/DebugLog.lua'))('TitanGatheredForever', ns)
     return ns
 end
 

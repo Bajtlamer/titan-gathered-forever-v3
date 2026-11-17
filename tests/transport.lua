@@ -14,7 +14,7 @@ local function fresh(nodes)
     }
     C_TaxiMap = nodes and { GetTaxiNodesForMap = function(id) return nodes[id] or {} end } or nil
     ns.IsPublic = function() return true end
-    assert(loadfile('TitanGatheredForeverV3/Transport.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/Transport.lua'))('TitanGatheredForever', ns)
     return ns, printed
 end
 

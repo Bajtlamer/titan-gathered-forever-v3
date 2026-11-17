@@ -7,7 +7,7 @@ local function fresh(api)
         printed = {} }
     ns.Print = function(message) ns.printed[#ns.printed + 1] = message end
     ns.NpcSources = { Invalidate = function() ns.invalidated = (ns.invalidated or 0) + 1 end }
-    assert(loadfile('TitanGatheredForeverV3/NpcObserver.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/NpcObserver.lua'))('TitanGatheredForever', ns)
     local base = { Enabled = function() return ns.settings.recordNpcs end, Now = function() return 1234 end,
         Npc = function() return { id = 3167, name = 'Trainer Bob', mapID = 1429, x = 0.4, y = 0.5 } end,
         TrainerServices = function() return {} end, MerchantRecipes = function() return {} end }

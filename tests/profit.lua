@@ -5,7 +5,7 @@ local function eq(actual, expected) assert(actual == expected, 'expected ' .. to
 -- Three recipes: A makes a profit, B makes a loss, C has a material without any price.
 local function fresh()
     local ns = { IsPublic = function() return true end, db = { recipeMakes = {}, knownRecipes = {} }, characterID = 'C1' }
-    assert(loadfile('TitanGatheredForeverV3/Catalog.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/Catalog.lua'))('TitanGatheredForever', ns)
     -- The books of two installed profession addons.
     ns.Catalog.RegisterModule({ id = 'Alchemy', label = 'Alchemy', items = {}, recipes = {}, book = {
         [101] = { 5001, { { 1, 2 }, { 2, 1 } } },        -- product 5001, 2 x item 1 and 1 x item 2
@@ -20,9 +20,9 @@ local function fresh()
     C_Item = { GetItemInfo = function(id) if id == 5003 then return 'Bandage', nil, 1, 1, 1, 't', 's', 1, '', 1, 200 end return 'Item' .. id end }
     C_Spell = { GetSpellInfo = function(id) return ({ [101] = { name = 'Potion A' }, [102] = { name = 'Potion B' } })[id] end,
         RequestLoadSpellData = function() end }
-    assert(loadfile('TitanGatheredForeverV3/KnownRecipes.lua'))('TitanGatheredForeverV3', ns)
-    assert(loadfile('TitanGatheredForeverV3/Economy.lua'))('TitanGatheredForeverV3', ns)
-    assert(loadfile('TitanGatheredForeverV3/Profit.lua'))('TitanGatheredForeverV3', ns)
+    assert(loadfile('TitanGatheredForever/KnownRecipes.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever/Economy.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever/Profit.lua'))('TitanGatheredForever', ns)
     return ns
 end
 
