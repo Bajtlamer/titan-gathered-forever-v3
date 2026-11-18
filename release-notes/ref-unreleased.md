@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-16. These changes describe the 0.5.105 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-16. These changes describe the 0.5.106 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Commodity block as marked by the user, 0.5.106
+
+- On the commodity form the strip moved 32 pixels left and the posting lines 36 pixels right and about 10 pixels lower, with a little more room between the lines, matching a screenshot on which the user marked the wanted position. The form of single items is unchanged.
 
 ## Commodity block 8 pixels higher, 0.5.105
 

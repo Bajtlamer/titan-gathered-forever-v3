@@ -224,10 +224,10 @@ function Undercut.Place(sell)
     if Undercut.placedBelow == below then return end
     Undercut.placedBelow = below
     info:ClearAllPoints(); warning:ClearAllPoints(); strip:ClearAllPoints()
-    -- On the commodity form the whole block sits 8 pixels higher: the lines below the strip then keep away from the edge of the panel.
-    strip:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 110, below and 86 or 78)
+    -- Commodity form, positions the user marked on a screenshot (0.5.106): the strip further left, the lines indented and lower.
+    strip:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', below and 78 or 110, below and 85 or 78)
     if below then
-        info:SetPoint('TOPLEFT', frame, 'BOTTOMLEFT', 44, 84)
+        info:SetPoint('TOPLEFT', frame, 'BOTTOMLEFT', 80, 74)
         warning:SetPoint('TOPLEFT', info, 'BOTTOMLEFT', 0, -2)
     else
         info:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 44, 114)
@@ -281,7 +281,7 @@ function Undercut.Attach()
     local info = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
     info:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 44, 114)
     info:SetJustifyH('LEFT')
-    if info.SetSpacing then info:SetSpacing(2) end
+    if info.SetSpacing then info:SetSpacing(3) end
     Undercut.info = info
     local warning = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
     warning:SetPoint('BOTTOMLEFT', info, 'TOPLEFT', 0, 2)
