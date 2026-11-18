@@ -257,7 +257,7 @@ function Undercut.Attach()
     }
     -- Two lines above the strip, from the left edge of the panel; the red warning sits above them.
     local info = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
-    info:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 44, 104)
+    info:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 44, 114)
     info:SetJustifyH('LEFT')
     if info.SetSpacing then info:SetSpacing(2) end
     Undercut.info = info

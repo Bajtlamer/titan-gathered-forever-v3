@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-16. These changes describe the 0.5.101 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-16. These changes describe the 0.5.102 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Posting lines moved up, 0.5.102
+
+- The two posting lines sit 10 pixels higher above the undercut strip, as the user asked after seeing them live (no overlap with the Create Auction button on the single-item form).
 
 ## Posting profit lines and a floor after the fee, 0.5.101
 
