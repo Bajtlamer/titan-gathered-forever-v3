@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-16. These changes describe the 0.5.102 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-16. These changes describe the 0.5.103 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Posting lines follow the form, 0.5.103
+
+- On the commodity form the Create Auction button sits just above the undercut strip, so the posting lines and the red warning overlapped it (screenshot of Linen Cloth). There the two lines now go below the strip, where this form has free room, and the red warning sits directly above the strip; on the form of single items nothing changes.
 
 ## Posting lines moved up, 0.5.102
 

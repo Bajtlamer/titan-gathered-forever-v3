@@ -176,6 +176,7 @@ local function client()
         function self:SetPoint() end
         function self:SetText(t) self.text = t end
         function self:SetJustifyH() end
+        function self:ClearAllPoints() self.points = 0 end
         function self:GetText() return self.text or '' end
         function self:SetAutoFocus() end
         function self:SetMaxLetters() end
@@ -268,6 +269,7 @@ test('the client layer attaches once, searches on selection and fills the price'
     -- Selecting an item in the commodities form sends one search; the answer fills the price input.
     local sell = _G.AuctionHouseFrame.CommoditiesSellFrame
     sell:SetItem({ id = 2589 })
+    eq(U.placedBelow, true)        -- the lines go below the strip on the commodity form
     eq(#g.searches, 1); eq(g.searches[1].itemID, 2589)
     U.frame.scripts.OnEvent(U.frame, 'COMMODITY_SEARCH_RESULTS_UPDATED', 2589)
     eq(sell.PriceInput.amount, 4500)
@@ -304,6 +306,7 @@ test('the client layer attaches once, searches on selection and fills the price'
     local single = _G.AuctionHouseFrame.ItemSellFrame
     single.BuyoutModeCheckButton = {}
     single:SetItem({ id = 5 })
+    eq(U.placedBelow, false)       -- and above it on the form of single items
     U.frame.scripts.OnEvent(U.frame, 'ITEM_SEARCH_RESULTS_UPDATED', { itemID = 5 })
     eq(single.SecondaryPriceInput.amount, 18000)
     -- Answers for another item are ignored.

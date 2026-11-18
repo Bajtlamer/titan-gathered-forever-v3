@@ -214,10 +214,30 @@ function Undercut.InfoText(post)
     return sold, unsold
 end
 
+-- Where the lines go. The Create Auction button sits high on the single-item form (free room above the strip) and low on
+-- the commodity form (no room above, but no Buyout Mode check box below): the lines follow the form.
+function Undercut.Place(sell)
+    local info, warning, strip = Undercut.info, Undercut.warning, Undercut.strip
+    local frame = _G.AuctionHouseFrame
+    if not info or not warning or not strip or not frame then return end
+    local below = sell == frame.CommoditiesSellFrame
+    if Undercut.placedBelow == below then return end
+    Undercut.placedBelow = below
+    info:ClearAllPoints(); warning:ClearAllPoints()
+    if below then
+        info:SetPoint('TOPLEFT', frame, 'BOTTOMLEFT', 44, 76)
+        warning:SetPoint('BOTTOMLEFT', strip, 'TOPLEFT', 0, 2)
+    else
+        info:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 44, 114)
+        warning:SetPoint('BOTTOMLEFT', info, 'TOPLEFT', 0, 2)
+    end
+end
+
 -- Reads the form as it stands and shows the lines; an empty form or a price of zero shows nothing.
 function Undercut.Refresh(sell)
     local info = Undercut.info
     if not info or not sell then return end
+    Undercut.Place(sell)
     local input = Undercut.BuyoutInput(sell)
     local price = input and input.GetAmount and select(2, pcall(input.GetAmount, input))
     local quantity = read(sell, 'GetQuantity')
@@ -311,6 +331,7 @@ function Undercut.Attach()
         end
         hooksecurefunc(sell, 'SetItem', function(self, itemLocation)
             Undercut.sellFrame = self
+            Undercut.Place(self)
             local key = keyOf(self, itemLocation)
             if key then Undercut.instance:Select(key) else Undercut.instance.key = nil end
             if Undercut.info then Undercut.info:SetText('') end
