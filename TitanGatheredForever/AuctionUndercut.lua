@@ -223,9 +223,11 @@ function Undercut.Place(sell)
     local below = sell == frame.CommoditiesSellFrame
     if Undercut.placedBelow == below then return end
     Undercut.placedBelow = below
-    info:ClearAllPoints(); warning:ClearAllPoints()
+    info:ClearAllPoints(); warning:ClearAllPoints(); strip:ClearAllPoints()
+    -- On the commodity form the whole block sits 8 pixels higher: the lines below the strip then keep away from the edge of the panel.
+    strip:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 110, below and 86 or 78)
     if below then
-        info:SetPoint('TOPLEFT', frame, 'BOTTOMLEFT', 44, 76)
+        info:SetPoint('TOPLEFT', frame, 'BOTTOMLEFT', 44, 84)
         warning:SetPoint('TOPLEFT', info, 'BOTTOMLEFT', 0, -2)
     else
         info:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 44, 114)

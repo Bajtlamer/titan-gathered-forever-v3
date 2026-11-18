@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-16. These changes describe the 0.5.104 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-16. These changes describe the 0.5.105 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Commodity block 8 pixels higher, 0.5.105
+
+- On the commodity form the strip, the posting lines and the warning sit 8 pixels higher, away from the bottom edge of the panel (the red line almost touched it). The form of single items is unchanged.
 
 ## Warning moved under the posting lines, 0.5.104
 
