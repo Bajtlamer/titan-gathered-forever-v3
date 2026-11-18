@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-16. These changes describe the 0.5.107 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-16. These changes describe the 0.5.108 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Warning about the old folders, 0.5.108
+
+- The folders were renamed in 0.5.84 (TitanGatheredForeverV3 to TitanGatheredForever, and the modules). A player who unpacks a new download over an old installation has both sets: they share the saved table name TitanGatheredForeverV3DB and the exported namespace, and the new version does not read the old saved file. At login the core now checks whether any of the fourteen old folders is loaded and, if so, prints two chat lines: which folders, and to delete them and copy TitanGatheredForeverV3.lua to TitanGatheredForever.lua to keep the statistics. Nothing is printed when no old folder is loaded. The check cannot stop the start (pcall). The old folders cannot be removed by the add-on itself.
 
 ## Profit against the cost of the item, 0.5.107
 

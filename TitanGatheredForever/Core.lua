@@ -398,6 +398,7 @@ local function start()
         ns.ShowStatus(command == 'status')
     end
     SLASH_TITANGATHEREDFOREVERV31 = '/tgf'
+    pcall(ns.Legacy.Check)          -- a warning about old folders must never stop the start
     ns.ScheduleRefresh()
 end
 

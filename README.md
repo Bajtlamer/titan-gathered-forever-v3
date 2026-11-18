@@ -8,14 +8,14 @@ Website: [titan-gathered.com](https://www.titan-gathered.com/).
 
 ## Current version
 
-The current stable candidate is version `0.5.107` and targets **WoW Forever 1.60.1, interface 16001**, with Titan Panel installed separately. The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); they do not represent a new tagged release. Other WoW editions are outside this project's scope.
+The current stable candidate is version `0.5.108` and targets **WoW Forever 1.60.1, interface 16001**, with Titan Panel installed separately. The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); they do not represent a new tagged release. Other WoW editions are outside this project's scope.
 
 Validation: all Python and Lua suites pass, plus Lua 5.1 compilation of every shipped Lua file. The user confirms the icon configurator works; the full [live acceptance checklist](book-wow-forever-validation.md) remains open.
 
 Implemented:
 
 - Profession-use information and current Bags and Bank counts in item tooltips, including recipe-material item tooltips. Total appears only when both locations contain the item. Supporting explanations use smaller text.
-- Titan summaries show bag/bank counts without a redundant total, joined with `/` (for example, `3/7`). Zero values and their separators are omitted when Display > Show items with zero counts is off. The panel caption is `Titan Gathered Forever - v0.5.107`.
+- Titan summaries show bag/bank counts without a redundant total, joined with `/` (for example, `3/7`). Zero values and their separators are omitted when Display > Show items with zero counts is off. The panel caption is `Titan Gathered Forever - v0.5.108`.
 - Titan uses gold for headings and profession menu labels. Learned profession names and ranks use colors based on current rank / current maximum: below 25% red, 25% to below 50% brown, 50% to below 75% yellow, and 75% or higher green. Material names retain item rarity colors.
 - World ore-vein tooltips use native object IDs matched to previously recorded mining sources. With History in item tooltips enabled, they show the current character's complete mining loot sample count and each observed drop's percentage, hits/samples and sampled quantity for that source, zone and instance context. Identified veins without matching samples show Unknown; unrecognized object IDs are left alone. These are personal observations, not server drop tables or counts of fully depleted veins.
 - Mining map and minimap hovers list observed ore, stone and gem drops with complete loot sample counts, hit/sample percentages and quantities, grouped by source and zone. Saved spot observations are distinct from completed casts and fully depleted veins; missing rate evidence displays Unknown.
@@ -212,7 +212,7 @@ The repository is licensed under GPL-3.0, see [LICENSE](LICENSE). The planned tr
 
 Development folder: titan-gathered-forever. Runtime addon folders are separate from artwork/. The versioned artwork/v1/ directory contains the original master PNG, logo-1024.png, avatar-400.png for CurseForge, icon-64.png and Icon.tga for each addon. artwork/index.json lists the available versions. Add future designs as a new version directory; keep previous artwork. Marketing PNGs and source masters are excluded from runtime ZIPs.
 
-The installer migrates the previous TitanGatheredForeverV3 folders, account and character SavedVariables filenames and AddOns.txt enablement while WoW is closed. Original saved files are retained. It refuses conflicting saved files and rolls back installation and client-state changes together on failure. The saved table name remains TitanGatheredForeverV3DB, and the previous exported namespace remains available as an alias. A full client restart is required.
+The installer migrates the previous TitanGatheredForeverV3 folders, account and character SavedVariables filenames and AddOns.txt enablement while WoW is closed. Original saved files are retained. It refuses conflicting saved files and rolls back installation and client-state changes together on failure. The saved table name remains TitanGatheredForeverV3DB, and the previous exported namespace remains available as an alias. A full client restart is required. If the old TitanGatheredForeverV3 folders are still installed next to the new ones (for example after unpacking a new download over an old installation), the core says so in the chat at login, names the folders and tells where the old saved file has to be copied; the old folders have to be removed by hand, because both versions use the same saved table name.
 
 ## CurseForge project text
 
