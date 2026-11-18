@@ -166,6 +166,13 @@ local function client()
         local s = { PriceInput = frame(), SecondaryPriceInput = frame() }
         s.PriceInput.MoneyInputFrame = money(); s.SecondaryPriceInput.MoneyInputFrame = money()
         function s:SetItem() end
+        s.deposit, s.quantity = 30, 4
+        function s:GetDepositAmount() return self.deposit end
+        function s:GetDuration() return 3 end
+        function s:GetQuantity() return self.quantity end
+        function s:GetPrice() return 4500 end
+        function s:GetTotalPrice() return 18000 end
+        function s:UpdateDeposit() end
         function s:HookScript(name, fn) self.hooked = self.hooked or {}; self.hooked[name] = fn end
         s.shown = true
         function s:IsShown() return self.shown end
@@ -240,6 +247,17 @@ test('the client layer attaches once, searches on selection and fills the price'
     -- Changing the percentage in the combo box prices the selected item again.
     g.dropdowns[1].set(15); eq(sell.PriceInput.amount, 4250)
     g.dropdowns[1].set(10); eq(sell.PriceInput.amount, 4500)
+    -- The deposit the client asks is logged on every update of its form, once per different reading.
+    sell:SetItem({ id = 2589 })
+    sell:UpdateDeposit(); sell:UpdateDeposit()
+    local deposits = ns.db.auctionDepositLog
+    eq(#deposits, 1); eq(deposits[1].deposit, 30); eq(deposits[1].quantity, 4); eq(deposits[1].duration, 3)
+    eq(deposits[1].itemID, 2589); eq(deposits[1].form, 'commodity'); eq(deposits[1].vendor, 100); eq(deposits[1].total, 18000)
+    sell.quantity = 8; sell.deposit = 60; sell:UpdateDeposit()
+    eq(#deposits, 2); eq(deposits[2].deposit, 60); eq(deposits[2].quantity, 8)
+    sell.deposit = nil; sell:UpdateDeposit(); eq(#deposits, 2)               -- an unknown deposit is not logged
+    for i = 1, 40 do sell.deposit = 100 + i; sell:UpdateDeposit() end
+    eq(#deposits, 30)
     -- A typed price stops the fill for the next answer of the same selection; the fill itself does not count as typing.
     local logged = #ns.db.auctionUndercutLog
     sell:SetItem({ id = 2592 })

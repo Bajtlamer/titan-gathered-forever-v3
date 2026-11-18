@@ -1,6 +1,11 @@
 # Unreleased development updates
 
-Updated 2026-11-16. These changes describe the 0.5.97 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-16. These changes describe the 0.5.98 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Posting cost: calculation and deposit evidence, 0.5.98
+
+- Economy.Posting works out what one auction brings: the sale after the fee, what an unsold auction costs (the deposit, the item stays with the player), the gain against a vendor and the share of auctions that must sell for posting to pay. Economy.MinPrice gives the lowest price per unit that still beats a vendor after the fee. Nothing is shown in the Sell tab yet.
+- The deposit that the client asks is read from the Sell forms (GetDepositAmount) on every update and logged in auctionDepositLog (last 30 readings: deposit, duration, quantity, prices, vendor price). It tells whether the deposit is for one unit or for the whole auction and how it follows the duration; the display and the fix of the vendor floor of the undercut (the fee is not yet counted there) follow once these readings are checked live.
 
 ## Undercut debugging trace removed, 0.5.97
 

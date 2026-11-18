@@ -116,6 +116,7 @@ function Undercut.DefaultAPI()
                 if not current or current.key ~= key or current.edited or not input.GetAmount then return end
                 local ok, amount = pcall(input.GetAmount, input)
                 entry.readback = ok and amount or nil
+                Undercut.LogDeposit(Undercut.sellFrame)
                 if ok and amount ~= copper then entry.reapplied = true; put() end
             end)
         end
@@ -145,6 +146,35 @@ function Undercut.BuyoutInput(sell)
     local second = sell.SecondaryPriceInput
     if second and second.SetAmount and sell.BuyoutModeCheckButton and second.IsShown and second:IsShown() then return second end
     return sell.PriceInput
+end
+
+-- Evidence for the posting cost (plans/plan-auction-undercut.md): what the client asks as deposit for the form as it
+-- stands now, with the quantity, duration and prices it belongs to. The last 30 different readings are kept in
+-- ns.db.auctionDepositLog, to learn from the saved variables whether the deposit is for one unit or for the whole
+-- auction, how it follows the duration and what the vendor price has to do with it. Nothing is shown from it yet.
+local function read(sell, name)
+    if type(sell[name]) ~= 'function' then return nil end
+    local ok, value = pcall(sell[name], sell)
+    if ok then return value end
+    return nil
+end
+
+function Undercut.LogDeposit(sell)
+    local log = ns.db and ns.db.auctionDepositLog
+    if not log or not sell then return end
+    local deposit = read(sell, 'GetDepositAmount')
+    if type(deposit) ~= 'number' then return end
+    local key = Undercut.instance and Undercut.instance.key
+    local itemID = key and key.itemKey and key.itemKey.itemID
+    local vendor = itemID and ns.Economy and ns.Economy.VendorSell(itemID) or nil
+    local entry = { at = time(), form = (key and key.commodity) and 'commodity' or 'item', itemID = itemID,
+        deposit = deposit, duration = read(sell, 'GetDuration'), quantity = read(sell, 'GetQuantity'),
+        price = read(sell, 'GetPrice'), total = read(sell, 'GetTotalPrice'), vendor = vendor }
+    local last = log[#log]
+    if last and last.itemID == entry.itemID and last.deposit == deposit and last.duration == entry.duration
+        and last.quantity == entry.quantity and last.price == entry.price then return end
+    log[#log + 1] = entry
+    while #log > 30 do table.remove(log, 1) end
 end
 
 local function keyOf(sell, itemLocation)
@@ -225,6 +255,10 @@ function Undercut.Attach()
             local key = keyOf(self, itemLocation)
             if key then Undercut.instance:Select(key) else Undercut.instance.key = nil end
         end)
+        -- The client works out its deposit again whenever the quantity, duration or price changes: read it then.
+        if type(sell.UpdateDeposit) == 'function' then
+            hooksecurefunc(sell, 'UpdateDeposit', function(self) Undercut.LogDeposit(self) end)
+        end
         -- A typed price (userInput) stops the fill. HookScript keeps the handlers of the client, whose own value callback
         -- of the price inputs (deposit, post button) must not be replaced.
         for _, name in ipairs({ 'PriceInput', 'SecondaryPriceInput' }) do
@@ -246,6 +280,7 @@ function Undercut.Initialize()
     if Undercut.frame then return end
     Undercut.instance = Undercut.New(Undercut.DefaultAPI())
     if ns.db and type(ns.db.auctionUndercutLog) ~= 'table' then ns.db.auctionUndercutLog = {} end
+    if ns.db and type(ns.db.auctionDepositLog) ~= 'table' then ns.db.auctionDepositLog = {} end
     local frame = CreateFrame('Frame')
     Undercut.frame = frame
     frame:SetScript('OnEvent', function(_, event, arg)

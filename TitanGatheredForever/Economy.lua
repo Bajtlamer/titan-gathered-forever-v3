@@ -22,6 +22,40 @@ Economy.Coin = coin
 -- (95 percent of 1 copper is 0.95), and rounding it down would make cheap ammunition worth nothing.
 function Economy.Net(price) return price * (1 - Economy.CUT) end
 
+-- The fee of the auction house on a sale of total copper, rounded to whole copper.
+function Economy.Fee(total) return math.floor(total * Economy.CUT + 0.5) end
+
+-- What one auction brings, in copper. price is per unit, deposit is what the client asks for posting (nil when
+-- unknown), vendor is what a vendor pays per unit (nil when unknown). The deposit is returned when the auction sells
+-- and lost when it expires: that is an assumption of the classic auction house, to be confirmed in the client.
+--   net      what is left of the sale after the fee
+--   loss     what an unsold auction costs (the deposit); the item stays with the player
+--   gain     the net against selling the same units to a vendor (nil without a vendor price)
+--   needed   the share of auctions (0 to 1) that must sell for posting to pay: deposit / (gain + deposit);
+--            nil when the gain or the deposit is unknown, and 'never' when a sale gains nothing over a vendor
+function Economy.Posting(price, quantity, deposit, vendor)
+    if type(price) ~= 'number' or price <= 0 then return nil end
+    quantity = (type(quantity) == 'number' and quantity >= 1) and quantity or 1
+    local total = price * quantity
+    local result = { total = total, fee = Economy.Fee(total), quantity = quantity, deposit = deposit, vendor = vendor }
+    result.net = total - result.fee
+    result.loss = deposit
+    if vendor and vendor > 0 then result.gain = result.net - vendor * quantity end
+    if result.gain and deposit then
+        if result.gain <= 0 then result.needed = 'never'
+        else result.needed = deposit / (result.gain + deposit) end
+    end
+    return result
+end
+
+-- The lowest price per unit at which a sale, after the fee, brings at least what a vendor pays; nil without a vendor price.
+function Economy.MinPrice(vendor)
+    if type(vendor) ~= 'number' or vendor <= 0 then return nil end
+    local price = math.max(1, math.ceil(vendor / (1 - Economy.CUT)) - 2)
+    while price - Economy.Fee(price) < vendor do price = price + 1 end
+    return price
+end
+
 -- What a vendor pays for one item (copper), nil when unknown or not sellable.
 function Economy.VendorSell(itemID)
     if not (C_Item and C_Item.GetItemInfo) then return nil end

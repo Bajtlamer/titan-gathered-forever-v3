@@ -78,6 +78,29 @@ test('unknown prices stay unknown and never give an invented profit', function()
     eq(ns.Economy.Product(plan({}, nil, nil, nil)), nil); eq(ns.Economy.Product(nil), nil)
 end)
 
+test('a posting: net after the fee, the loss of an unsold auction and the share that must sell', function()
+    local E = fresh().Economy
+    local p = E.Posting(1000, 5, 120, 100)                -- 5 units at 1000, deposit 120, vendor pays 100 each
+    eq(p.total, 5000); eq(p.fee, 250); eq(p.net, 4750); eq(p.loss, 120); eq(p.gain, 4250)
+    assert(math.abs(p.needed - 120 / (4250 + 120)) < 1e-9)
+    p = E.Posting(100, 1, 40, 100)                        -- the sale after the fee is below the vendor price
+    eq(p.net, 95); eq(p.gain, -5); eq(p.needed, 'never')
+    p = E.Posting(1000, 1, nil, 100); eq(p.gain, 850); eq(p.needed, nil); eq(p.loss, nil)   -- unknown deposit stays unknown
+    p = E.Posting(1000, 1, 50, nil); eq(p.gain, nil); eq(p.needed, nil); eq(p.net, 950)     -- unknown vendor price stays unknown
+    eq(E.Posting(0, 1, 5, 5), nil); eq(E.Posting(nil, 1, 5, 5), nil)
+    eq(E.Posting(10, 0, 1, 1).quantity, 1)                -- a missing quantity counts as one unit
+end)
+
+test('the lowest price that beats a vendor after the fee', function()
+    local E = fresh().Economy
+    eq(E.MinPrice(nil), nil); eq(E.MinPrice(0), nil)
+    for _, vendor in ipairs({ 1, 3, 20, 100, 777, 12345 }) do
+        local price = E.MinPrice(vendor)
+        assert(price - E.Fee(price) >= vendor, 'price ' .. price .. ' does not beat vendor ' .. vendor)
+        assert(price - 1 - E.Fee(price - 1) < vendor or price == 1, 'price ' .. price .. ' is not the lowest for vendor ' .. vendor)
+    end
+end)
+
 for _, entry in ipairs(tests) do
     local ok, err = pcall(entry[2])
     if not ok then io.stderr:write('FAIL ' .. entry[1] .. ': ' .. tostring(err) .. '\n'); os.exit(1) end
