@@ -20,10 +20,11 @@ function Undercut.ParsePercent(text)
     return number
 end
 
--- Price in copper, or nil and 'vendor' when it would fall below what a vendor pays.
-function Undercut.Price(lowest, percent, vendor)
+-- Price in copper, or nil and 'vendor' when it would fall below the floor: the lowest price at which a sale, after the
+-- fee, still brings what a vendor pays (Economy.MinPrice).
+function Undercut.Price(lowest, percent, floor)
     local price = math.max(1, math.floor(lowest * (1 - percent / 100)))
-    if vendor and vendor > 0 and price < vendor then return nil, 'vendor' end
+    if floor and floor > 0 and price < floor then return nil, 'vendor' end
     return price
 end
 
@@ -69,13 +70,19 @@ function Undercut:Results(key, list)
     end
     if not lowest then self.api.Say('No other auction of this item: set the Buyout yourself.'); return end
     local percent = self.api.Percent()
-    local price, reason = Undercut.Price(lowest, percent, vendor)
+    -- The floor counts the fee of the auction house: at the vendor price itself a sale would bring less than a vendor.
+    local floor = vendor
+    if vendor and self.api.Floor then
+        local okFloor, value = pcall(self.api.Floor, vendor)
+        floor = okFloor and value or vendor
+    end
+    local price, reason = Undercut.Price(lowest, percent, floor)
     if self.api.Warn then self.api.Warn(nil) end
     if not price then
         -- The percentage would go below what a vendor pays: the Buyout is set to the vendor price and the player is told.
-        price = vendor
-        if self.api.Warn then self.api.Warn(reason, vendor) end
-        self.api.Say('The percentage would go below the vendor price: Buyout set to the vendor price.')
+        price = floor
+        if self.api.Warn then self.api.Warn(reason, floor) end
+        self.api.Say('The percentage would go below what a vendor pays after the fee: Buyout set to the lowest price that beats a vendor.')
     end
     self.api.SetBuyout(price, lowest, percent)
 end
@@ -90,6 +97,7 @@ function Undercut.DefaultAPI()
         return not ok or value ~= false
     end
     api.Search = function(key) pcall(C_AuctionHouse.SendSearchQuery, key.itemKey, {}, true) end
+    api.Floor = function(vendor) return ns.Economy.MinPrice(vendor) end
     api.Vendor = function(key) return ns.Economy and ns.Economy.VendorSell(key.itemKey.itemID) or nil end
     api.SetBuyout = function(copper, lowest, percent)
         local input = Undercut.BuyoutInput(Undercut.sellFrame)
@@ -100,6 +108,7 @@ function Undercut.DefaultAPI()
             Undercut.filling = false
         end
         put()
+        Undercut.Refresh(Undercut.sellFrame)
         local entry = { at = time(), copper = copper, lowest = lowest, percent = percent,
             input = input == Undercut.sellFrame.PriceInput and 'PriceInput' or 'SecondaryPriceInput',
             label = type(input.labelText) == 'string' and input.labelText or nil }
@@ -129,7 +138,7 @@ function Undercut.DefaultAPI()
         local line = Undercut.warning
         if not line then return end
         if reason == 'vendor' and vendor then
-            line:SetText(ns.Style.Text(ns.Style.red, 'Below the vendor price: Buyout set to ') .. ns.Economy.Coin(vendor))
+            line:SetText(ns.Style.Text(ns.Style.red, 'Below the vendor price after the fee: Buyout set to ') .. ns.Economy.Coin(vendor))
             line:Show()
         else
             line:SetText('')
@@ -177,6 +186,50 @@ function Undercut.LogDeposit(sell)
     while #log > 30 do table.remove(log, 1) end
 end
 
+-- A signed amount of coins: green with a plus, red with a minus.
+local function signed(copper)
+    local Style, Coin = ns.Style, ns.Economy.Coin
+    if copper >= 0 then return Style.Text(Style.green, '+') .. Coin(copper) end
+    return Style.Text(Style.red, '-') .. Coin(-copper)
+end
+
+-- The two lines under the Sell form for an auction as it stands (Economy.Posting): what a sale brings and gains over a
+-- vendor, and what an unsold auction costs with the share of auctions that must sell for posting to pay.
+function Undercut.InfoText(post)
+    if not post then return '', '' end
+    local Style, Coin = ns.Style, ns.Economy.Coin
+    local sold = Style.Label('Sold: ') .. Coin(post.net)
+    if post.gain then sold = sold .. Style.Label(' after fee, ') .. signed(post.gain) .. Style.Label(' vs vendor') end
+    local unsold = Style.Label('Unsold: ')
+    if post.loss then
+        unsold = unsold .. signed(-post.loss) .. Style.Label(' deposit')
+        if post.needed == 'never' then
+            unsold = unsold .. Style.Label(', ') .. Style.Text(Style.red, 'a sale does not beat a vendor')
+        elseif post.needed then
+            unsold = unsold .. Style.Label(', pays off if ') .. Style.Value(string.format('%d%%', math.ceil(post.needed * 100 - 1e-9))) .. Style.Label(' sell')
+        end
+    else
+        unsold = unsold .. Style.Label('deposit unknown')
+    end
+    return sold, unsold
+end
+
+-- Reads the form as it stands and shows the lines; an empty form or a price of zero shows nothing.
+function Undercut.Refresh(sell)
+    local info = Undercut.info
+    if not info or not sell then return end
+    local input = Undercut.BuyoutInput(sell)
+    local price = input and input.GetAmount and select(2, pcall(input.GetAmount, input))
+    local quantity = read(sell, 'GetQuantity')
+    local deposit = read(sell, 'GetDepositAmount')
+    local key = Undercut.instance and Undercut.instance.key
+    local itemID = key and key.itemKey and key.itemKey.itemID
+    local vendor = itemID and ns.Economy.VendorSell(itemID) or nil
+    local post = type(price) == 'number' and itemID and ns.Economy.Posting(price, quantity, type(deposit) == 'number' and deposit or nil, vendor) or nil
+    local sold, unsold = Undercut.InfoText(post)
+    info:SetText(post and (sold .. '\n' .. unsold) or '')
+end
+
 local function keyOf(sell, itemLocation)
     if not itemLocation or not C_AuctionHouse.GetItemKeyFromItem then return nil end
     local ok, itemKey = pcall(C_AuctionHouse.GetItemKeyFromItem, itemLocation)
@@ -202,8 +255,14 @@ function Undercut.Attach()
         { value = 2, label = '2 %' }, { value = 5, label = '5 %' }, { value = 10, label = '10 %' },
         { value = 15, label = '15 %' }, { value = 'custom', label = 'Custom' },
     }
+    -- Two lines above the strip, from the left edge of the panel; the red warning sits above them.
+    local info = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
+    info:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 44, 104)
+    info:SetJustifyH('LEFT')
+    if info.SetSpacing then info:SetSpacing(2) end
+    Undercut.info = info
     local warning = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
-    warning:SetPoint('BOTTOMLEFT', strip, 'TOPLEFT', 0, 2)
+    warning:SetPoint('BOTTOMLEFT', info, 'TOPLEFT', 0, 2)
     warning:Hide()
     Undercut.warning = warning
     local box = CreateFrame('EditBox', nil, strip, 'InputBoxTemplate')
@@ -254,10 +313,11 @@ function Undercut.Attach()
             Undercut.sellFrame = self
             local key = keyOf(self, itemLocation)
             if key then Undercut.instance:Select(key) else Undercut.instance.key = nil end
+            if Undercut.info then Undercut.info:SetText('') end
         end)
         -- The client works out its deposit again whenever the quantity, duration or price changes: read it then.
         if type(sell.UpdateDeposit) == 'function' then
-            hooksecurefunc(sell, 'UpdateDeposit', function(self) Undercut.LogDeposit(self) end)
+            hooksecurefunc(sell, 'UpdateDeposit', function(self) Undercut.LogDeposit(self); Undercut.Refresh(self) end)
         end
         -- A typed price (userInput) stops the fill. HookScript keeps the handlers of the client, whose own value callback
         -- of the price inputs (deposit, post button) must not be replaced.
@@ -267,6 +327,7 @@ function Undercut.Attach()
                 if box and box.HookScript then
                     box:HookScript('OnTextChanged', function(_, userInput)
                         if userInput and not Undercut.filling then Undercut.instance:Edited() end
+                        Undercut.Refresh(sell)
                     end)
                 end
             end

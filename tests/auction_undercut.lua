@@ -5,8 +5,11 @@ local function eq(actual, expected) assert(actual == expected, 'expected ' .. to
 local function load(extra)
     local ns = { settings = {}, IsPublic = function() return true end, printed = {}, db = {} }
     ns.Print = function(message) ns.printed[#ns.printed + 1] = message end
-    ns.Style = { Label = function(t) return t end, Value = function(t) return t end }
-    ns.Economy = { Coin = function(c) return c .. 'c' end, VendorSell = function() return 100 end }
+    ns.Style = { red = 'red', green = 'green', Label = function(t) return t end, Value = function(t) return t end,
+        Text = function(color, t) return '<' .. color .. '>' .. t end }
+    assert(loadfile('TitanGatheredForever/Economy.lua'))('TitanGatheredForever', ns)
+    ns.Economy.Coin = function(c) return c .. 'c' end
+    ns.Economy.VendorSell = function() return 100 end
     for key, value in pairs(extra or {}) do ns[key] = value end
     assert(loadfile('TitanGatheredForever/AuctionUndercut.lua'))('TitanGatheredForever', ns)
     return ns
@@ -136,6 +139,34 @@ test('the vendor price floor sets the vendor price, warns in red and clears the 
     eq(f.set[2], 990); eq(warned[#warned], 'nil:nil')
 end)
 
+test('the floor counts the fee: a price at the vendor price is lifted to the lowest price that beats a vendor', function()
+    local f = fixture({ vendor = 100 })
+    f.undercut.api.Floor = function(vendor) return 106 end
+    local warned = {}
+    f.undercut.api.Warn = function(reason, floor) warned[#warned + 1] = tostring(reason) .. ':' .. tostring(floor) end
+    local key = {}
+    f.undercut:Select(key)
+    f.undercut:Results(key, { { price = 110 } })              -- 5 percent under 110 is 104, below the floor of 106
+    eq(f.set[1], 106); eq(warned[#warned], 'vendor:106')
+    f.undercut:Results(key, { { price = 200 } }); eq(f.set[2], 190)
+    f.undercut.api.Floor = function() error('boom') end        -- a failing floor falls back to the vendor price
+    f.undercut:Results(key, { { price = 110 } }); eq(f.set[3], 104)
+end)
+
+test('the info lines show what a sale brings, what an unsold auction costs and the share that must sell', function()
+    local U = load().AuctionUndercut
+    local E = load().Economy
+    local post = E.Posting(1000, 5, 120, 100)
+    local sold, unsold = U.InfoText(post)
+    eq(sold, 'Sold: 4750c after fee, <green>+4250c vs vendor')
+    eq(unsold, 'Unsold: <red>-120c deposit, pays off if 3% sell')
+    sold, unsold = U.InfoText(E.Posting(100, 1, 40, 100))
+    eq(sold, 'Sold: 95c after fee, <red>-5c vs vendor'); eq(unsold, 'Unsold: <red>-40c deposit, <red>a sale does not beat a vendor')
+    sold, unsold = U.InfoText(E.Posting(1000, 1, nil, 100)); eq(unsold, 'Unsold: deposit unknown')
+    sold, unsold = U.InfoText(E.Posting(1000, 1, 50, nil)); eq(sold, 'Sold: 950c'); eq(unsold, 'Unsold: <red>-50c deposit')
+    sold, unsold = U.InfoText(nil); eq(sold, ''); eq(unsold, '')
+end)
+
 -- The client layer with fake frames.
 local function client()
     local created, hooks, texts = {}, {}, {}
@@ -144,6 +175,7 @@ local function client()
         function self:SetSize() end
         function self:SetPoint() end
         function self:SetText(t) self.text = t end
+        function self:SetJustifyH() end
         function self:GetText() return self.text or '' end
         function self:SetAutoFocus() end
         function self:SetMaxLetters() end
@@ -240,6 +272,8 @@ test('the client layer attaches once, searches on selection and fills the price'
     U.frame.scripts.OnEvent(U.frame, 'COMMODITY_SEARCH_RESULTS_UPDATED', 2589)
     eq(sell.PriceInput.amount, 4500)
     eq(#ns.db.auctionUndercutLog, 1); eq(ns.db.auctionUndercutLog[1].input, 'PriceInput')
+    -- The fill also shows the posting lines: 4 units at 4500 each, deposit 30, vendor 100.
+    eq(U.info.text, 'Sold: 17100c after fee, <green>+16700c vs vendor\nUnsold: <red>-30c deposit, pays off if 1% sell')
     -- The client puts its own default price back after our fill: the check after a moment restores ours.
     sell.PriceInput.amount = 5000
     g.timers[#g.timers](); eq(sell.PriceInput.amount, 4500)
@@ -255,6 +289,8 @@ test('the client layer attaches once, searches on selection and fills the price'
     eq(deposits[1].itemID, 2589); eq(deposits[1].form, 'commodity'); eq(deposits[1].vendor, 100); eq(deposits[1].total, 18000)
     sell.quantity = 8; sell.deposit = 60; sell:UpdateDeposit()
     eq(#deposits, 2); eq(deposits[2].deposit, 60); eq(deposits[2].quantity, 8)
+    assert(U.info.text:find('<red>-60c deposit', 1, true), 'the lines follow the deposit of the form')
+    sell.PriceInput.MoneyInputFrame.GoldBox.hooked.OnTextChanged(nil, false)      -- a change of the price refreshes them too
     sell.deposit = nil; sell:UpdateDeposit(); eq(#deposits, 2)               -- an unknown deposit is not logged
     for i = 1, 40 do sell.deposit = 100 + i; sell:UpdateDeposit() end
     eq(#deposits, 30)
