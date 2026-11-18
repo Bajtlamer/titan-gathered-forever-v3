@@ -1,10 +1,14 @@
 # Unreleased development updates
 
-Updated 2026-11-16. These changes describe the 0.5.103 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-16. These changes describe the 0.5.104 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Warning moved under the posting lines, 0.5.104
+
+- On the commodity form the red warning sat between the Create Auction button and the strip, touching the button, and its long text ran into the list pane. It now sits under the two posting lines and is shorter ("Vendor floor after fee: Buyout set to" and the price).
 
 ## Posting lines follow the form, 0.5.103
 
-- On the commodity form the Create Auction button sits just above the undercut strip, so the posting lines and the red warning overlapped it (screenshot of Linen Cloth). There the two lines now go below the strip, where this form has free room, and the red warning sits directly above the strip; on the form of single items nothing changes.
+- On the commodity form the Create Auction button sits just above the undercut strip, so the posting lines and the red warning overlapped it (screenshot of Linen Cloth). There the two lines now go below the strip, where this form has free room, and the red warning sits under them; on the form of single items nothing changes.
 
 ## Posting lines moved up, 0.5.102
 
@@ -13,7 +17,7 @@ Updated 2026-11-16. These changes describe the 0.5.103 source candidate and its 
 ## Posting profit lines and a floor after the fee, 0.5.101
 
 - Two lines above the undercut strip show the auction as it stands (price, quantity, duration, deposit as the client has them): "Sold" with the sale after the 5 percent fee and the gain or loss against a vendor, and "Unsold" with the deposit that an expired auction costs and the share of auctions that must sell for posting to pay (deposit divided by gain plus deposit); a sale that does not beat a vendor says so in red. They follow every change of the quantity, duration and price. The fee rate (assumed 5 percent) and the loss of the deposit on expiry are not yet confirmed with a real sale.
-- The floor of the fill is now the lowest price whose sale after the fee still brings what a vendor pays (Economy.MinPrice), not the vendor price itself, which would have been a loss against selling to a vendor. The red line says "Below the vendor price after the fee".
+- The floor of the fill is now the lowest price whose sale after the fee still brings what a vendor pays (Economy.MinPrice), not the vendor price itself, which would have been a loss against selling to a vendor. The red line says "Vendor floor after fee" (0.5.104: shortened, it ran into the list pane).
 
 ## Trace removed, single-item form confirmed, 0.5.100
 

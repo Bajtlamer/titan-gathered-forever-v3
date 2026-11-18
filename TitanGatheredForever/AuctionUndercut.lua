@@ -138,7 +138,7 @@ function Undercut.DefaultAPI()
         local line = Undercut.warning
         if not line then return end
         if reason == 'vendor' and vendor then
-            line:SetText(ns.Style.Text(ns.Style.red, 'Below the vendor price after the fee: Buyout set to ') .. ns.Economy.Coin(vendor))
+            line:SetText(ns.Style.Text(ns.Style.red, 'Vendor floor after fee: Buyout set to ') .. ns.Economy.Coin(vendor))
             line:Show()
         else
             line:SetText('')
@@ -226,7 +226,7 @@ function Undercut.Place(sell)
     info:ClearAllPoints(); warning:ClearAllPoints()
     if below then
         info:SetPoint('TOPLEFT', frame, 'BOTTOMLEFT', 44, 76)
-        warning:SetPoint('BOTTOMLEFT', strip, 'TOPLEFT', 0, 2)
+        warning:SetPoint('TOPLEFT', info, 'BOTTOMLEFT', 0, -2)
     else
         info:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 44, 114)
         warning:SetPoint('BOTTOMLEFT', info, 'TOPLEFT', 0, 2)
