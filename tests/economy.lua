@@ -88,6 +88,8 @@ test('a posting: net after the fee, the loss of an unsold auction and the share 
     p = E.Posting(1000, 1, nil, 100); eq(p.gain, 850); eq(p.needed, nil); eq(p.loss, nil)   -- unknown deposit stays unknown
     p = E.Posting(1000, 1, 50, nil); eq(p.gain, nil); eq(p.needed, nil); eq(p.net, 950)     -- unknown vendor price stays unknown
     eq(E.Posting(0, 1, 5, 5), nil); eq(E.Posting(nil, 1, 5, 5), nil)
+    p = E.Posting(1000, 5, 120, 100, 300); eq(p.cost, 300); eq(p.profit, 4750 - 1500)     -- the cost counts for every unit
+    p = E.Posting(1000, 5, 120, 100, nil); eq(p.profit, nil); eq(p.cost, nil)              -- an unknown cost stays unknown
     eq(E.Posting(10, 0, 1, 1).quantity, 1)                -- a missing quantity counts as one unit
 end)
 

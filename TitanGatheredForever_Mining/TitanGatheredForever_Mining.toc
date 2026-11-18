@@ -1,7 +1,7 @@
 ## Interface: 16001
 ## Title: Titan Gathered Forever: Mining
 ## Notes: Optional Mining material catalogue for Titan Gathered Forever.
-## Version: 0.5.106
+## Version: 0.5.107
 ## IconTexture: Interface\AddOns\TitanGatheredForever_Mining\Artwork\AddonIcon
 ## Dependencies: Titan, TitanGatheredForever
 

@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-16. These changes describe the 0.5.106 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-16. These changes describe the 0.5.107 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Profit against the cost of the item, 0.5.107
+
+- The "Sold" line now also shows the profit against what one unit costs to buy again (Economy.UnitCost: the lowest buyout of the last auction scan or a merchant price, whichever is cheaper) next to the gain against a vendor, for example "Sold: 4g 7s net, +3g 2s vs cost, +4g vs vendor". Without a known price the figure is left out. The cost is a replacement cost, not what the player paid; an unsold auction still costs the deposit only, because the item stays with the player. The line says "net" instead of "after fee" to stay short enough for the panel.
 
 ## Commodity block as marked by the user, 0.5.106
 

@@ -158,12 +158,15 @@ test('the info lines show what a sale brings, what an unsold auction costs and t
     local E = load().Economy
     local post = E.Posting(1000, 5, 120, 100)
     local sold, unsold = U.InfoText(post)
-    eq(sold, 'Sold: 4750c after fee, <green>+4250c vs vendor')
+    eq(sold, 'Sold: 4750c net, <green>+4250c vs vendor')
     eq(unsold, 'Unsold: <red>-120c deposit, pays off if 3% sell')
     sold, unsold = U.InfoText(E.Posting(100, 1, 40, 100))
-    eq(sold, 'Sold: 95c after fee, <red>-5c vs vendor'); eq(unsold, 'Unsold: <red>-40c deposit, <red>a sale does not beat a vendor')
+    eq(sold, 'Sold: 95c net, <red>-5c vs vendor'); eq(unsold, 'Unsold: <red>-40c deposit, <red>a sale does not beat a vendor')
     sold, unsold = U.InfoText(E.Posting(1000, 1, nil, 100)); eq(unsold, 'Unsold: deposit unknown')
-    sold, unsold = U.InfoText(E.Posting(1000, 1, 50, nil)); eq(sold, 'Sold: 950c'); eq(unsold, 'Unsold: <red>-50c deposit')
+    sold, unsold = U.InfoText(E.Posting(1000, 1, 50, nil)); eq(sold, 'Sold: 950c net'); eq(unsold, 'Unsold: <red>-50c deposit')
+    sold = U.InfoText(E.Posting(1000, 5, 120, 100, 300))
+    eq(sold, 'Sold: 4750c net, <green>+3250c vs cost, <green>+4250c vs vendor')
+    sold = U.InfoText(E.Posting(1000, 5, 120, 100, 1000)); eq(sold, 'Sold: 4750c net, <red>-250c vs cost, <green>+4250c vs vendor')
     sold, unsold = U.InfoText(nil); eq(sold, ''); eq(unsold, '')
 end)
 
@@ -275,7 +278,13 @@ test('the client layer attaches once, searches on selection and fills the price'
     eq(sell.PriceInput.amount, 4500)
     eq(#ns.db.auctionUndercutLog, 1); eq(ns.db.auctionUndercutLog[1].input, 'PriceInput')
     -- The fill also shows the posting lines: 4 units at 4500 each, deposit 30, vendor 100.
-    eq(U.info.text, 'Sold: 17100c after fee, <green>+16700c vs vendor\nUnsold: <red>-30c deposit, pays off if 1% sell')
+    eq(U.info.text, 'Sold: 17100c net, <green>+16700c vs vendor\nUnsold: <red>-30c deposit, pays off if 1% sell')
+    ns.Economy.UnitCost = function() return 20 end             -- a known cost is shown as the profit against it
+    sell:UpdateDeposit()
+    eq(U.info.text:match('^Sold: [^\n]*'), 'Sold: 17100c net, <green>+17020c vs cost, <green>+16700c vs vendor')
+    ns.Economy.UnitCost = function() error('boom') end         -- an error while reading it only drops the figure
+    sell:UpdateDeposit(); assert(U.info.text:find('vs vendor', 1, true) and not U.info.text:find('vs cost', 1, true))
+    ns.Economy.UnitCost = function() return nil end
     -- The client puts its own default price back after our fill: the check after a moment restores ours.
     sell.PriceInput.amount = 5000
     g.timers[#g.timers](); eq(sell.PriceInput.amount, 4500)

@@ -198,8 +198,9 @@ end
 function Undercut.InfoText(post)
     if not post then return '', '' end
     local Style, Coin = ns.Style, ns.Economy.Coin
-    local sold = Style.Label('Sold: ') .. Coin(post.net)
-    if post.gain then sold = sold .. Style.Label(' after fee, ') .. signed(post.gain) .. Style.Label(' vs vendor') end
+    local sold = Style.Label('Sold: ') .. Coin(post.net) .. Style.Label(' net')
+    if post.profit then sold = sold .. Style.Label(', ') .. signed(post.profit) .. Style.Label(' vs cost') end
+    if post.gain then sold = sold .. Style.Label(', ') .. signed(post.gain) .. Style.Label(' vs vendor') end
     local unsold = Style.Label('Unsold: ')
     if post.loss then
         unsold = unsold .. signed(-post.loss) .. Style.Label(' deposit')
@@ -247,7 +248,9 @@ function Undercut.Refresh(sell)
     local key = Undercut.instance and Undercut.instance.key
     local itemID = key and key.itemKey and key.itemKey.itemID
     local vendor = itemID and ns.Economy.VendorSell(itemID) or nil
-    local post = type(price) == 'number' and itemID and ns.Economy.Posting(price, quantity, type(deposit) == 'number' and deposit or nil, vendor) or nil
+    -- The cost is the cheapest known way to buy one unit again (last auction scan or a merchant); unknown stays unknown.
+    local okCost, cost = pcall(ns.Economy.UnitCost, itemID or 0)
+    local post = type(price) == 'number' and itemID and ns.Economy.Posting(price, quantity, type(deposit) == 'number' and deposit or nil, vendor, okCost and cost or nil) or nil
     local sold, unsold = Undercut.InfoText(post)
     info:SetText(post and (sold .. '\n' .. unsold) or '')
 end
