@@ -27,15 +27,6 @@ function Undercut.Price(lowest, percent, vendor)
     return price
 end
 
--- Temporary step trace (0.5.99) to find out why the single-item form is not filled: the last 60 steps in
--- ns.db.auctionUndercutTrace. Removed again once the cause is known.
-function Undercut.Trace(step, detail)
-    local log = ns.db and ns.db.auctionUndercutTrace
-    if not log then return end
-    log[#log + 1] = { at = time(), step = step, detail = detail }
-    while #log > 60 do table.remove(log, 1) end
-end
-
 function Undercut.New(api)
     return setmetatable({ api = api }, Undercut)
 end
@@ -45,7 +36,6 @@ function Undercut:Select(key)
     self.key, self.edited, self.last = key, false, nil
     if self.api.Warn then self.api.Warn(nil) end
     local enabled, ready = self.api.Enabled(), self.api.Ready()
-    if Undercut.Trace then Undercut.Trace('select', string.format('%s item=%s enabled=%s ready=%s', key.commodity and 'commodity' or 'item', tostring(key.itemKey and key.itemKey.itemID), tostring(enabled), tostring(ready))) end
     if not enabled then self.key = nil; return end
     -- The client searches by itself when an item is chosen in the Sell form, so a busy message queue is no reason to
     -- give up: its answer is used. Only a free queue gets a search of our own.
@@ -65,7 +55,6 @@ end
 
 -- The search answer: a list of { price = copper per unit (or buyout), own = true for the player's auctions }.
 function Undercut:Results(key, list)
-    Undercut.Trace('results', string.format('entries=%d current=%s edited=%s', #list, tostring(key == self.key), tostring(self.edited)))
     if key ~= self.key then return end
     self.last = list                       -- kept so a change of the percentage can price the same answer again
     if self.edited then return end
@@ -100,14 +89,10 @@ function Undercut.DefaultAPI()
         local ok, value = pcall(C_AuctionHouse.IsThrottledMessageSystemReady)
         return not ok or value ~= false
     end
-    api.Search = function(key)
-        local ok, err = pcall(C_AuctionHouse.SendSearchQuery, key.itemKey, {}, true)
-        Undercut.Trace('search', string.format('sent ok=%s err=%s', tostring(ok), tostring(err)))
-    end
+    api.Search = function(key) pcall(C_AuctionHouse.SendSearchQuery, key.itemKey, {}, true) end
     api.Vendor = function(key) return ns.Economy and ns.Economy.VendorSell(key.itemKey.itemID) or nil end
     api.SetBuyout = function(copper, lowest, percent)
         local input = Undercut.BuyoutInput(Undercut.sellFrame)
-        Undercut.Trace('setbuyout', string.format('copper=%s input=%s', tostring(copper), input and (input == Undercut.sellFrame.PriceInput and 'PriceInput' or 'SecondaryPriceInput') or 'none'))
         if not input then return end
         local function put()
             Undercut.filling = true
@@ -295,16 +280,13 @@ function Undercut.Initialize()
     if Undercut.frame then return end
     Undercut.instance = Undercut.New(Undercut.DefaultAPI())
     if ns.db and type(ns.db.auctionUndercutLog) ~= 'table' then ns.db.auctionUndercutLog = {} end
-    if ns.db and type(ns.db.auctionUndercutTrace) ~= 'table' then ns.db.auctionUndercutTrace = {} end
+    if ns.db then ns.db.auctionUndercutTrace = nil end          -- the trace of 0.5.99 is gone, its saved rows too
     if ns.db and type(ns.db.auctionDepositLog) ~= 'table' then ns.db.auctionDepositLog = {} end
     local frame = CreateFrame('Frame')
     Undercut.frame = frame
     frame:SetScript('OnEvent', function(_, event, arg)
         if event == 'AUCTION_HOUSE_SHOW' then Undercut.Attach(); return end
         local key = Undercut.instance.key
-        if event ~= 'AUCTION_HOUSE_SHOW' then
-            Undercut.Trace('event', string.format('%s arg=%s argItem=%s key=%s', event, type(arg), type(arg) == 'table' and tostring(arg.itemID) or tostring(arg), key and (key.commodity and 'commodity' or 'item') .. ':' .. tostring(key.itemKey and key.itemKey.itemID) or 'none'))
-        end
         if not key then return end
         local list = {}
         if event == 'COMMODITY_SEARCH_RESULTS_UPDATED' and key.commodity and arg == key.itemKey.itemID then

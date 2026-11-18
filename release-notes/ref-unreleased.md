@@ -1,6 +1,11 @@
 # Unreleased development updates
 
-Updated 2026-11-16. These changes describe the 0.5.99 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-16. These changes describe the 0.5.100 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Trace removed, single-item form confirmed, 0.5.100
+
+- The trace of 0.5.99 is removed (and its saved rows are cleared). It showed that the form of single items is filled: the search event arrives, the answer is used and the Buyout goes into PriceInput. Confirmed on screen with Buyout Mode on (Stiletto, 2 percent under a lowest buyout of 5 silver gave 4 silver 90 copper in Buyout Price). The earlier note that this form was not filled was wrong: the items tried then had no other auction. Buyout Mode off (SecondaryPriceInput) is not yet checked.
+- Deposit, from the readings of 0.5.98 and the Deposit line of the form: for the whole auction, vendor price times quantity times 2.5 percent per hour, whole copper, independent of the price. Duration 1 is 2 hours on the form (3 and 2 follow as 24 and 8 hours from the ratios).
 
 ## Temporary trace for the single-item form, 0.5.99
 
