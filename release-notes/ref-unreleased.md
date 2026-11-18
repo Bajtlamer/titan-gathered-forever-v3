@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-16. These changes describe the 0.5.98 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-16. These changes describe the 0.5.99 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Temporary trace for the single-item form, 0.5.99
+
+- The saved deposit readings (0.5.98) showed that the Buyout was never filled on the form of single items: all fills in auctionUndercutLog are from the commodity form. A step trace (auctionUndercutTrace, last 60 steps: selection, search, search events, results, input used) is added to find the cause and will be removed again. The deposit readings also show that the deposit is for the whole auction, follows vendor price times quantity times 2.5 percent per hour (durations 1, 2, 3 are 2, 8 and 24 hours) and does not depend on the price.
 
 ## Posting cost: calculation and deposit evidence, 0.5.98
 
