@@ -131,7 +131,7 @@ Rough total: 9 to 12 working days; the first useful version (milestones 1 to 5) 
 
 ## 10. Decisions and open questions
 
-Decided 2026-11-19: the name stays Titan Gathered Forever: Discovery Scout with folder TitanGatheredForever_Discovery; operations are slash commands only, with the single exception of the read-only Titan Panel statistics plugin; the bag and bank snapshot is not ported (the core keeps its own).
+Decided 2026-11-19: the displayed name is "Titan Gathered Forever: Discovery" and the folder is TitanGatheredForever_Discovery, so the two match (the manifest Title follows the existing "Titan Gathered Forever: <Module>" pattern); operations are slash commands only, with the single exception of the read-only Titan Panel statistics plugin; the bag and bank snapshot is not ported (the core keeps its own).
 
 Still open:
 
