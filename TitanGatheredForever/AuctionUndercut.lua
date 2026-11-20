@@ -233,13 +233,13 @@ function Undercut.Place(sell)
     info:ClearAllPoints(); warning:ClearAllPoints(); strip:ClearAllPoints()
     -- Commodity form, positions the user marked on a screenshot (0.5.106): the strip further left, the lines indented and lower.
     strip:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', below and 78 or 110, below and 85 or 78)
-    if info.SetWidth then info:SetWidth(side and 180 or 0) end
-    if warning.SetWidth then warning:SetWidth(side and 180 or 0) end
+    if info.SetWidth then info:SetWidth(side and 160 or 0) end
+    if warning.SetWidth then warning:SetWidth(side and 160 or 0) end
     if below then
         info:SetPoint('TOPLEFT', frame, 'BOTTOMLEFT', 80, 74)
         warning:SetPoint('TOPLEFT', info, 'BOTTOMLEFT', 0, -2)
     elseif side then
-        info:SetPoint('TOPLEFT', frame, 'BOTTOMLEFT', 240, 255)
+        info:SetPoint('TOPLEFT', frame, 'BOTTOMLEFT', 190, 222)
         warning:SetPoint('TOPLEFT', info, 'BOTTOMLEFT', 0, -2)
     else
         info:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 44, 114)
