@@ -30,6 +30,7 @@ class RepositoryLayoutTests(unittest.TestCase):
         expected = {line.strip().replace('\\', '/') for line in manifest.read_text().splitlines()
                     if line.strip() and not line.startswith('#')}
         expected.add(manifest.name)
+        expected.add('Artwork/AddonIcon.tga')
         actual = {p.relative_to(folder).as_posix() for p in folder.rglob('*') if p.is_file()}
         self.assertEqual(actual, expected)
 

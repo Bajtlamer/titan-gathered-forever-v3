@@ -64,8 +64,9 @@ commands = [
 ]
 for command in commands:
     subprocess.run(command, cwd=root, check=True, stdin=subprocess.DEVNULL)
-# TitanGatheredForever_Discovery is hand-written and not part of the published set (catalogue/modules.json).
-addons = ['TitanGatheredForever', 'TitanGatheredForever_Discovery'] + [row['folder'] for row in json.loads((root / 'catalogue/modules.json').read_text())]
+# Standalone modules are hand-written and not part of the published set (catalogue/modules.json).
+addons = ['TitanGatheredForever'] + [row['folder'] for row in json.loads((root / 'catalogue/modules.json').read_text())]
+addons += [row['folder'] for row in json.loads((root / 'catalogue/standalone-modules.json').read_text())]
 for addon in addons:
     toc = root / addon / (addon + '.toc')
     for line in toc.read_text().splitlines():

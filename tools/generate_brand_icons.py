@@ -41,6 +41,7 @@ def uncompressed_tga(raw):
 def generate(root=ROOT, check=False):
     folders = ['TitanGatheredForever'] + [row['folder'] for row in
         json.loads((root / 'catalogue/modules.json').read_text())]
+    folders += [row['folder'] for row in json.loads((root / 'catalogue/standalone-modules.json').read_text())]
     for folder in folders:
         source = root / 'artwork/v1' / folder / 'Icon.tga'
         target = root / folder / 'Artwork/AddonIcon.tga'

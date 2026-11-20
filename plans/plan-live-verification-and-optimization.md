@@ -105,6 +105,10 @@ From plans/plan-next-development.md and the older plans: profession actions (eve
 
 Details in that repository's plans/plan-command-history.md. In short: arrow keys walk the history after a /reload; a mistyped command and a line followed by an error are not recorded; /reload, /logout and /quit are; conversation lines are recorded when enabled; favorites run from the window and from the menu; the history window and the minimap button keep their position; the Titan text shows the count after a reload.
 
+### 3.10a Discovery module (0.1.0, standalone)
+
+The checklist is in book-wow-forever-validation.md ("Validate the Discovery module"). Open live gates: the look of the progress window, overview window and Titan Panel plugin; the client calls behind the recipe, map, quest, trainer and zone collectors; the lag and runtime of `/tgfd compare`, the scans, the privacy check and the checksums on a large saved table; that the saved file carries the export stamp after /reload; that a client recipe ID equals the catalogue spell ID. Record the results in ref-wow-forever-progress.md separately from the automated checks.
+
 ### 3.11 Boat and zeppelin routes (0.5.69-beta, in progress)
 
 State: Transport.lua draws thin dashed arcs between docks, with anchor markers (Artwork/RouteAnchor.tga), for every player. Menu: Boat and zeppelin routes (Show routes on the map; Line style with Thickness Thin or Clear and Pattern Dashed, Dotted or Solid). Dock positions come from /tgf dock <name> (recorded, always wins) or are estimated from the flight point of the same town (Menethil Harbor, Southshore, Theramore, Feathermoon, Orgrimmar, Undercity, Grom'gol, Ratchet, Booty Bay). Recorded so far: Stormwind Harbour, Auberdine, Rut'theran Village.

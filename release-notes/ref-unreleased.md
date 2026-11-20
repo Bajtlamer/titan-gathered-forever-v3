@@ -2,6 +2,12 @@
 
 Updated 2026-11-16. These changes describe the 0.5.108 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
 
+## Discovery module 0.1.0 (standalone, separate version line)
+
+- A new folder, TitanGatheredForever_Discovery, with its own version line (0.1.0). It is not part of the published collection and does not change the core, the profession modules or their versions. See [ref-discovery-0.1.0.md](ref-discovery-0.1.0.md) for the full text, [book-discovery-contributors.md](../book-discovery-contributors.md) and [ref-discovery-data-format.md](../ref-discovery-data-format.md).
+- Tooling: catalogue/standalone-modules.json lists such modules; tools/package.py --standalone builds its ZIP, index and checksums into dist/standalone/; tools/install.py --standalone-only installs only it; tools/generate_discovery_art.py draws its emblem and tools/generate_brand_icons.py packages the icon; tools/read_discovery.py is the offline reader. The version check of the manifests lets this module keep its own version.
+- CurseForge text: [curseforge/ref-titan-gathered-forever-discovery.md](../curseforge/ref-titan-gathered-forever-discovery.md). The CI build also builds the standalone package as a verification artifact; it does not publish it.
+
 ## Warning about the old folders, 0.5.108
 
 - The folders were renamed in 0.5.84 (TitanGatheredForeverV3 to TitanGatheredForever, and the modules). A player who unpacks a new download over an old installation has both sets: they share the saved table name TitanGatheredForeverV3DB and the exported namespace, and the new version does not read the old saved file. At login the core now checks whether any of the fourteen old folders is loaded and, if so, prints two chat lines: which folders, and to delete them and copy TitanGatheredForeverV3.lua to TitanGatheredForever.lua to keep the statistics. Nothing is printed when no old folder is loaded. The check cannot stop the start (pcall). The old folders cannot be removed by the add-on itself.

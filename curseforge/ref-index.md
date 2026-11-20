@@ -6,6 +6,7 @@ Copy each Summary into the short project summary and each Description into the m
 - [Titan Gathered Forever: Auction Items](ref-titan-gathered-forever-auction-items.md)
 - [Titan Gathered Forever: Blacksmithing](ref-titan-gathered-forever-blacksmithing.md)
 - [Titan Gathered Forever: Cooking](ref-titan-gathered-forever-cooking.md)
+- [Titan Gathered Forever: Discovery](ref-titan-gathered-forever-discovery.md)
 - [Titan Gathered Forever: Enchanting](ref-titan-gathered-forever-enchanting.md)
 - [Titan Gathered Forever: Engineering](ref-titan-gathered-forever-engineering.md)
 - [Titan Gathered Forever: First Aid](ref-titan-gathered-forever-first-aid.md)

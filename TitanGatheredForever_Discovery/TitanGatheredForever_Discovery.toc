@@ -2,39 +2,40 @@
 ## Title: Titan Gathered Forever: Discovery
 ## Notes: Data collection for the owner and contributors: records what the Forever client shows and compares it with the Titan Gathered Forever catalogue. Records nothing until the notice is accepted with /tgfd accept.
 ## Version: 0.1.0
+## IconTexture: Interface\AddOns\TitanGatheredForever_Discovery\Artwork\AddonIcon
 ## Author: Titan Gathered Forever contributors
 ## Dependencies: Titan, TitanGatheredForever
 ## SavedVariables: TitanGatheredForeverDiscoveryDB
 
-Core\Text.lua
-Core\Util.lua
-Core\Database.lua
-Core\Consent.lua
-Core\Safe.lua
-Core\Privacy.lua
-Core\Records.lua
-Core\Api.lua
-Core\Runner.lua
-Core\Progress.lua
-Core\SelfTest.lua
-Collectors\Area.lua
-Collectors\Entities.lua
-Collectors\Npc.lua
-Collectors\Loot.lua
-Collectors\Vendor.lua
-Collectors\Quest.lua
-Collectors\Skill.lua
-Collectors\Client.lua
-Collectors\Scans.lua
-Core\Manager.lua
-Core\Baseline.lua
-Core\Compare.lua
-Core\Checksum.lua
-Core\Audit.lua
-Core\Export.lua
-Core\View.lua
-Core\Stats.lua
-UI\Window.lua
-Core\Commands.lua
-Core\Main.lua
+Core/Text.lua
+Core/Util.lua
+Core/Database.lua
+Core/Consent.lua
+Core/Safe.lua
+Core/Privacy.lua
+Core/Records.lua
+Core/Api.lua
+Core/Runner.lua
+Core/Progress.lua
+Core/SelfTest.lua
+Collectors/Area.lua
+Collectors/Entities.lua
+Collectors/Npc.lua
+Collectors/Loot.lua
+Collectors/Vendor.lua
+Collectors/Quest.lua
+Collectors/Skill.lua
+Collectors/Client.lua
+Collectors/Scans.lua
+Core/Manager.lua
+Core/Baseline.lua
+Core/Compare.lua
+Core/Checksum.lua
+Core/Audit.lua
+Core/Export.lua
+Core/View.lua
+Core/Stats.lua
+UI/Window.lua
+Core/Commands.lua
+Core/Main.lua
 Start.lua

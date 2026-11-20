@@ -24,7 +24,12 @@ def legacy_names(names):
 
 
 
-def validate(root, destination):
+def legacy_for(root, names):
+    """Old-name folders and state are migrated only when the whole published set is installed."""
+    return legacy_names(names) if names == packager.addon_names(root) else {}
+
+
+def validate(root, destination, names=None):
     root = Path(root).resolve()
     destination = Path(destination).expanduser()
     if destination.is_symlink():
@@ -35,8 +40,12 @@ def validate(root, destination):
         raise ValueError('Destination must be an existing Interface/AddOns directory')
     if destination.is_relative_to(root) or root.is_relative_to(destination):
         raise ValueError('Source and AddOns destination must not overlap')
-    names = packager.addon_names(root)
-    for name in names + list(legacy_names(names)):
+    if names is None:
+        names = packager.addon_names(root)
+    elif not names or not set(names) <= set(packager.standalone_names(root)):
+        raise ValueError('Only standalone modules can be installed on their own')
+    names = list(names)
+    for name in names + list(legacy_for(root, names)):
         if Path(name).name != name or not name.startswith('TitanGatheredForever'):
             raise ValueError(f'Invalid addon folder: {name}')
         target = destination / name
@@ -48,20 +57,24 @@ def validate(root, destination):
     return root, destination, names
 
 
-def install(root, destination, apply=False):
-    """Return the preview, or install with retained backups and failure rollback."""
-    root, destination, names = validate(root, destination)
-    if apply and any((destination / name).exists() for name in legacy_names(names)):
+def install(root, destination, apply=False, names=None):
+    """Return the preview, or install with retained backups and failure rollback.
+
+    names=None installs the whole published set; a list of standalone modules installs only those and touches nothing else."""
+    root, destination, names = validate(root, destination, names)
+    legacy = legacy_for(root, names)
+    selection = None if names == packager.addon_names(root) else names
+    if apply and any((destination / name).exists() for name in legacy):
         state_tools.ensure_game_closed(destination.parent.parent)
-    state = state_tools.StateMigration(destination, legacy_names(names))
+    state = state_tools.StateMigration(destination, legacy)
     result = {'destination': destination, 'addons': names, 'backup': None, 'state_files': len(state.changes)}
     if not apply:
         # Validate all package inputs even in preview, without writing to the client.
         with tempfile.TemporaryDirectory(prefix='tgf-preview-') as directory:
-            packager.package(root, Path(directory) / 'candidate.zip')
+            packager.package(root, Path(directory) / 'candidate.zip', addons=selection)
         return result
 
-    if state.changes or any((destination / name).exists() for name in legacy_names(names)):
+    if state.changes or any((destination / name).exists() for name in legacy):
         state_tools.ensure_game_closed(destination.parent.parent)
     lock = destination.parent / '.tgf-v3-install-lock'
     try:
@@ -71,19 +84,19 @@ def install(root, destination, apply=False):
     try:
         with tempfile.TemporaryDirectory(prefix='.tgf-stage-', dir=destination.parent) as directory:
             stage = Path(directory)
-            archive = packager.package(root, stage / 'candidate.zip')
+            archive = packager.package(root, stage / 'candidate.zip', addons=selection)
             candidate = stage / 'candidate'
             with zipfile.ZipFile(archive) as bundle:
                 bundle.extractall(candidate)
             # Validate again after staging, before replacing any installed folders.
-            validate(root, destination)
+            validate(root, destination, names if selection else None)
             backups = destination.parent / '.tgf-v3-backups'
             backups.mkdir(exist_ok=True)
             backup = Path(tempfile.mkdtemp(prefix='candidate-', dir=backups))
             result['backup'] = backup
             moved, placed = [], []
             try:
-                for name in names + list(legacy_names(names)):
+                for name in names + list(legacy):
                     target = destination / name
                     if target.exists():
                         target.rename(backup / name)
@@ -114,10 +127,13 @@ def main():
     parser.add_argument('--addons-dir', type=Path, required=True,
                         help='Existing Forever client Interface/AddOns directory')
     parser.add_argument('--apply', action='store_true', help='Install; default is preview only')
+    parser.add_argument('--standalone-only', action='store_true',
+                        help='Install only the standalone modules (Discovery) and leave every other folder untouched')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     try:
-        result = install(root, args.addons_dir, apply=args.apply)
+        names = packager.standalone_names(root) if args.standalone_only else None
+        result = install(root, args.addons_dir, apply=args.apply, names=names)
     except (ValueError, OSError, RuntimeError) as error:
         parser.exit(1, f'Installation failed: {error}\n')
     print(('Installed' if args.apply else 'Preview') + f': {result["destination"]}')

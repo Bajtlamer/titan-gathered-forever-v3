@@ -10,6 +10,8 @@ Website: [titan-gathered.com](https://www.titan-gathered.com/).
 
 The current stable candidate is version `0.5.108` and targets **WoW Forever 1.60.1, interface 16001**, with Titan Panel installed separately. The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); they do not represent a new tagged release. Other WoW editions are outside this project's scope.
 
+A separate, optional data-collection module, [Titan Gathered Forever: Discovery](#discovery-data-collection-module) 0.1.0, has its own version line and is released apart from this core; it is installed locally and awaits live acceptance.
+
 Validation: all Python and Lua suites pass, plus Lua 5.1 compilation of every shipped Lua file. The user confirms the icon configurator works; the full [live acceptance checklist](book-wow-forever-validation.md) remains open.
 
 Implemented:
@@ -33,7 +35,7 @@ Implemented:
 - Small icon appearance window: Titan menu > Icon appearance. Configure world-map materials, minimap materials and flight points independently: 12–40 px, circular crop or full image, and an optional thin gold outline. Preview before Apply; Cancel discards edits.
 - Independent profession addons, optional Auction Items and a shared core.
 - Original coordinated artwork for the core, all twelve professions and Auction Items. Each addon has its own packaged AddOns-list icon; the core also uses its new emblem on Titan Panel and the minimap. Large PNG logos and 400px avatars for CurseForge are in [artwork/v1](artwork/v1), grouped by addon. Each other project keeps its own designs in its own root artwork/ directory. Actual client rendering requires a full restart and live confirmation.
-- The four projects together have seventeen emblems. Titan Command History, Titan Approx DPS and Target Ranger each keep their artwork in their own development root. [The inventory](artwork/index.json) records the stable versions and included addons; the artwork prompts are in [prompts.json](artwork/v1/prompts.json).
+- The four projects together have eighteen emblems; Discovery's is drawn procedurally by `tools/generate_discovery_art.py` instead of an image model. Titan Command History, Titan Approx DPS and Target Ranger each keep their artwork in their own development root. [The inventory](artwork/index.json) records the stable versions and included addons; the artwork prompts are in [prompts.json](artwork/v1/prompts.json).
 
 Open issues and next work:
 
@@ -155,6 +157,16 @@ Fixed single-item basic reagent slots are supported. Required alternatives, curr
 
 Each reagent links to personal acquisition evidence and recorded map positions. Source suggestions prioritize larger observed samples; they do not establish the best place to farm. Source/zone rates and saved positions are distinct: a zone-wide observed rate is not a probability at a particular coordinate, and an old position does not establish current resource availability. Native reagent tooltips add only a short per-operation deficit and material-limit summary for the selected recipe. Live recipe selection, slot availability and planner layout remain under validation.
 
+## Discovery data collection module
+
+Titan Gathered Forever: Discovery (folder `TitanGatheredForever_Discovery`, version 0.1.0) is a diagnostic companion for the owner and for contributors who choose to help. It records what the WoW Forever client shows (loot and its sources, NPCs, vendors, trainers, quests, zones, professions, recipes), compares it with the data of Titan Gathered Forever and shows what is new or different, so that the catalogue can be completed on evidence. It is not a player feature, it is not part of the published collection and it requires Titan, the core and a restart after installing.
+
+- Nothing is recorded until you read the notice and type `/tgfd accept`. It never records chat, mail, gossip or quest text, player or pet names or GUIDs, and it does nothing with the auction house. Nothing is sent anywhere: contributors hand over a saved file themselves.
+- Every long operation (`/tgfd compare`, `/tgfd scan recipes`, `/tgfd scan areas`, `/tgfd export`) starts only from a command, shows a progress window, can be cancelled with `/tgfd cancel` and stops on combat or a loading screen. `/tgfd show` opens the overview window and a read-only Titan Panel plugin shows the counts.
+- `/tgfd export` checks for private values and stamps the data; after `/reload` the saved file can be sent. `tools/read_discovery.py` merges contributor files and compares them with `catalogue/` without running them. Nothing found is added to the catalogue automatically.
+- Guides: [contributors](book-discovery-contributors.md), [data format and offline tool](ref-discovery-data-format.md), [plan and execution record](plans/plan-discovery-module.md), [release notes](release-notes/ref-discovery-0.1.0.md) and [CurseForge text](curseforge/ref-titan-gathered-forever-discovery.md).
+- Packaging and installation: `python3 tools/package.py --standalone` and `python3 tools/install.py --addons-dir <path> --standalone-only [--apply]`.
+
 ## Export statistics
 
 Use Export statistics under History and sources. The default is This character with names and GUIDs excluded. All characters retains per-character policy/coverage records plus a weighted combined summary. Include names/GUIDs is an explicit opt-in that resets on closing. Numeric game IDs, map IDs and gameplay timestamps remain in identity-excluded exports.
@@ -167,7 +179,7 @@ See [ref-statistics-export-format.md](ref-statistics-export-format.md) for field
 
 ## Development layout
 
-The repository root contains the shared core and thirteen separate optional addon folders. All addon folders contain only game-required files. Development tools, tests, catalogue inputs, documentation and release notes live at the repository root. Generated packages are written to `dist/`; private local archives remain in ignored `.work/`.
+The repository root contains the shared core and thirteen separate optional addon folders, plus the standalone TitanGatheredForever_Discovery folder (listed in `catalogue/standalone-modules.json`, outside the published set). All addon folders contain only game-required files. Development tools, tests, catalogue inputs, documentation and release notes live at the repository root. Generated packages are written to `dist/`; private local archives remain in ignored `.work/`.
 
 `python3 tools/audit_catalog.py` reports evidence gaps without writes or downloads. Use `--check` for the generated report, `--mirror-file` for pinned mirror verification and `--client-tables` for offline build-labelled CSV verification. Audit/generation share input validation and protect report output from source-file aliases. Unresolved IDs and inherited associations remain; completeness is false.
 
@@ -195,6 +207,8 @@ Every release must provide:
 - Checksums for the downloadable archives.
 
 `python3 tools/package.py` builds the normal distributions and a clean upload directory at `dist/releases/<version>/`. Upload the contents of that version directory to the website's download area. The collection ZIP installs all modules; individual ZIPs let users select only their professions. Source archives supplied automatically by GitHub are development source, not installable addon packages.
+
+The standalone Discovery module is released on its own: `python3 tools/package.py --standalone` builds `dist/standalone/<folder>-<version>/` with the ZIP, a download index and checksums. The published collection and the fourteen ZIPs do not contain it.
 
 Tagged GitHub releases use the same build and verification pipeline. Runtime ZIPs exclude tests, catalogue source JSON, private archives, Git metadata, development documents and unrelated addons. See [the release playbook](book-releases.md) for publishing steps.
 
