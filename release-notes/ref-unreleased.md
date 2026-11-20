@@ -2,9 +2,10 @@
 
 Updated 2026-11-16. These changes describe the 0.5.113 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
 
-## Taller auction house window while selling, 0.5.114
+## Compact posting rows, 0.5.115
 
-- The Sold and Unsold lines and the red vendor floor line covered other controls of the Sell form, because the Create Auction button moves with the Quantity row. While a Sell form is shown the auction house window is now 70 pixels taller (restored when the form or the window closes). What the client anchors to the top stays; what it anchors to the bottom (Buyout Mode, the money bar, the tabs), the Undercut strip and the lines move down with the edge, which leaves free space between. The lines sit above the strip on every form. This replaces the side panels tried in 0.5.112 and 0.5.113 and is an experiment: the client layout code is not available here, so it needs checking live on the single-item, stack and commodity forms.
+- The Undercut row is at the left edge of the Sell form: the label, a narrow combo box (2, 5, 10 and 15 percent) and, right after it, "AH sold" (what a sale brings after the fee) and "Vendor" (what a vendor pays for the same stack). Below it, from the left edge, come the gains against the cost and against a vendor and the unsold line; the red vendor floor warning is above them. The custom percentage and its text field were removed; a saved custom value that equals a preset becomes that preset, any other falls back to 5 percent.
+- The auction house window is 44 pixels taller while a Sell form is shown (70 in 0.5.114), restored when the form or the window closes. What the client anchors to the top stays; what it anchors to the bottom and our rows move down with the edge. The strip is in the same place on every form.
 
 ## Warning about the old folders, 0.5.108
 

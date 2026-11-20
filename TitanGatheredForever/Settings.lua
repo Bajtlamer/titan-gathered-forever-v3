@@ -37,8 +37,10 @@ function ns.Settings.Initialize(saved)
     if type(settings.auctionUndercutEnabled) ~= 'boolean' then settings.auctionUndercutEnabled = true end
     do
         local preset, percent = settings.auctionUndercutPreset, settings.auctionUndercutPercent
-        local valid = preset == 'custom' or preset == 2 or preset == 5 or preset == 10 or preset == 15
-        if not valid or type(percent) ~= 'number' or percent < 0.1 or percent > 90 then
+        -- The custom percentage was removed in 0.5.115: a custom value that is one of the presets becomes that preset.
+        if preset == 'custom' then preset = percent; settings.auctionUndercutPreset = percent end
+        local valid = preset == 2 or preset == 5 or preset == 10 or preset == 15
+        if not valid or percent ~= preset then
             settings.auctionUndercutPreset, settings.auctionUndercutPercent = 5, 5
         end
     end
