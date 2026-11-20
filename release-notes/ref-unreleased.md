@@ -2,9 +2,9 @@
 
 Updated 2026-11-16. These changes describe the 0.5.113 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
 
-## Posting panel beside the auction house window, 0.5.113
+## Taller auction house window while selling, 0.5.114
 
-- The Sold and Unsold lines and the red vendor floor line no longer sit inside the Sell form, where the position of the Create Auction button (and the Quantity row) made them cover other controls. They live in a panel attached to the left edge of the auction house window, as tall as the window and drawn behind its frame so that it reads as part of it, with room for wrapped text, the same on every form. The panel is shown while a Sell form is open and there is something to say. The Undercut strip stays in the form, in the same place as before.
+- The Sold and Unsold lines and the red vendor floor line covered other controls of the Sell form, because the Create Auction button moves with the Quantity row. While a Sell form is shown the auction house window is now 70 pixels taller (restored when the form or the window closes). What the client anchors to the top stays; what it anchors to the bottom (Buyout Mode, the money bar, the tabs), the Undercut strip and the lines move down with the edge, which leaves free space between. The lines sit above the strip on every form. This replaces the side panels tried in 0.5.112 and 0.5.113 and is an experiment: the client layout code is not available here, so it needs checking live on the single-item, stack and commodity forms.
 
 ## Warning about the old folders, 0.5.108
 

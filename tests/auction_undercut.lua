@@ -215,7 +215,11 @@ local function client()
         function s:IsShown() return self.shown end
         return s
     end
-    local g = { AuctionHouseFrame = { CommoditiesSellFrame = sellFrame(), ItemSellFrame = sellFrame() } }
+    local g = { AuctionHouseFrame = { CommoditiesSellFrame = sellFrame(), ItemSellFrame = sellFrame(), height = 538, shown = true } }
+    function g.AuctionHouseFrame:GetHeight() return self.height end
+    function g.AuctionHouseFrame:SetHeight(h) self.height = h end
+    function g.AuctionHouseFrame:IsShown() return self.shown end
+    function g.AuctionHouseFrame:HookScript(name, fn) self.hooked = self.hooked or {}; self.hooked[name] = fn end
     g.CreateFrame = frame
     g.hooksecurefunc = function(object, name, fn)
         local original = object[name]
@@ -317,14 +321,14 @@ test('the client layer attaches once, searches on selection and fills the price'
     single.BuyoutModeCheckButton = {}
     single:SetItem({ id = 5 })
     eq(U.placedBelow, false)       -- and above it on the form of single items
-    -- The posting lines live in a panel beside the window, shown with a Sell form and only when there is something to say.
-    U.info:SetText('Sold: x'); U.SyncPanel(); eq(U.panel.shown, true)
-    U.info:SetText(''); U.warning:Hide(); U.SyncPanel(); eq(U.panel.shown, false)
-    U.warning:Show(); U.SyncPanel(); eq(U.panel.shown, true)
-    U.warning:Hide()
+    -- While a Sell form is shown the window is EXTRA pixels taller; it is restored when the form or the window closes.
+    local ah = _G.AuctionHouseFrame
     forms.ItemSellFrame.shown, forms.CommoditiesSellFrame.shown = false, false
-    forms.ItemSellFrame.hooked.OnHide(); eq(U.panel.shown, false)
-    forms.ItemSellFrame.shown = true; forms.ItemSellFrame.hooked.OnShow()
+    forms.ItemSellFrame.hooked.OnHide(); eq(ah.height, 538)
+    forms.ItemSellFrame.shown = true; forms.ItemSellFrame.hooked.OnShow(); eq(ah.height, 538 + U.EXTRA)
+    forms.ItemSellFrame.hooked.OnShow(); eq(ah.height, 538 + U.EXTRA)             -- not extended twice
+    ah.shown = false; ah.hooked.OnHide(); eq(ah.height, 538)                       -- the window closes with the form open
+    ah.shown = true; forms.ItemSellFrame.hooked.OnShow(); eq(ah.height, 538 + U.EXTRA)
     U.frame.scripts.OnEvent(U.frame, 'ITEM_SEARCH_RESULTS_UPDATED', { itemID = 5 })
     eq(single.SecondaryPriceInput.amount, 18000)
     -- Answers for another item are ignored.
