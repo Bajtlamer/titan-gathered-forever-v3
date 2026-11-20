@@ -133,7 +133,7 @@ function Undercut.DefaultAPI()
             .. ns.Economy.Coin(lowest) .. ns.Style.Label(').'))
     end
     api.Say = function(message) ns.Print(ns.Style.Label(message)) end
-    -- The red line above the strip: shown while the Buyout rests on the vendor price, cleared at the next fill.
+    -- The red line in the panel beside the window: shown while the Buyout rests on the vendor price, cleared at the next fill.
     api.Warn = function(reason, vendor)
         local line = Undercut.warning
         if not line then return end
@@ -144,6 +144,7 @@ function Undercut.DefaultAPI()
             line:SetText('')
             line:Hide()
         end
+        Undercut.SyncPanel()
     end
     return api
 end
@@ -215,36 +216,25 @@ function Undercut.InfoText(post)
     return sold, unsold
 end
 
--- Where the lines go. The Create Auction button sits high on the single-item form (free room above the strip) and low on
--- the commodity form (no room above, but no Buyout Mode check box below): the lines follow the form.
+-- The strip sits in a different place on the commodity form (positions the user marked on a screenshot, 0.5.106). The
+-- posting lines no longer depend on the form: they live in a panel beside the auction house window.
 function Undercut.Place(sell)
-    local info, warning, strip = Undercut.info, Undercut.warning, Undercut.strip
+    local strip = Undercut.strip
     local frame = _G.AuctionHouseFrame
-    if not info or not warning or not strip or not frame then return end
-    -- The button is also low on the single-item form when the Quantity row is shown (a stack). That form has a Buyout
-    -- Mode check box under the strip, so the lines go into the free space right of the Deposit and Total Price rows.
-    local quantity = sell.QuantityInput
+    if not strip or not frame then return end
     local below = sell == frame.CommoditiesSellFrame
-    local side = not below and quantity ~= nil and type(quantity.IsShown) == 'function' and quantity:IsShown() == true
-    local mode = below and 'below' or side and 'side' or 'above'
-    if Undercut.placed == mode then return end
-    Undercut.placed = mode
+    if Undercut.placedBelow == below then return end
     Undercut.placedBelow = below
-    info:ClearAllPoints(); warning:ClearAllPoints(); strip:ClearAllPoints()
-    -- Commodity form, positions the user marked on a screenshot (0.5.106): the strip further left, the lines indented and lower.
+    strip:ClearAllPoints()
     strip:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', below and 78 or 110, below and 85 or 78)
-    if info.SetWidth then info:SetWidth(side and 160 or 0) end
-    if warning.SetWidth then warning:SetWidth(side and 160 or 0) end
-    if below then
-        info:SetPoint('TOPLEFT', frame, 'BOTTOMLEFT', 80, 74)
-        warning:SetPoint('TOPLEFT', info, 'BOTTOMLEFT', 0, -2)
-    elseif side then
-        info:SetPoint('TOPLEFT', frame, 'BOTTOMLEFT', 190, 222)
-        warning:SetPoint('TOPLEFT', info, 'BOTTOMLEFT', 0, -2)
-    else
-        info:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 44, 114)
-        warning:SetPoint('BOTTOMLEFT', info, 'TOPLEFT', 0, 2)
-    end
+end
+
+-- The panel is shown while a Sell form is shown and it has something to say.
+function Undercut.SyncPanel()
+    local panel, info, warning = Undercut.panel, Undercut.info, Undercut.warning
+    if not panel or not info then return end
+    local text = info:GetText() ~= '' or (warning and warning:IsShown())
+    panel:SetShown(Undercut.formShown and text and true or false)
 end
 
 -- Reads the form as it stands and shows the lines; an empty form or a price of zero shows nothing.
@@ -264,6 +254,7 @@ function Undercut.Refresh(sell)
     local post = type(price) == 'number' and itemID and ns.Economy.Posting(price, quantity, type(deposit) == 'number' and deposit or nil, vendor, okCost and cost or nil) or nil
     local sold, unsold = Undercut.InfoText(post)
     info:SetText(post and (sold .. '\n' .. unsold) or '')
+    Undercut.SyncPanel()
 end
 
 local function keyOf(sell, itemLocation)
@@ -291,14 +282,30 @@ function Undercut.Attach()
         { value = 2, label = '2 %' }, { value = 5, label = '5 %' }, { value = 10, label = '10 %' },
         { value = 15, label = '15 %' }, { value = 'custom', label = 'Custom' },
     }
-    -- Two lines above the strip, from the left edge of the panel; the red warning sits above them.
-    local info = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
-    info:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 44, 114)
+    -- The panel beside the auction house window: a title, the two posting lines and the red warning below them.
+    local panel = CreateFrame('Frame', nil, frame, _G.BackdropTemplateMixin and 'BackdropTemplate' or nil)
+    panel:SetSize(250, 150)
+    panel:SetPoint('TOPLEFT', frame, 'TOPRIGHT', 4, -70)
+    if panel.SetBackdrop then
+        panel:SetBackdrop({ bgFile = 'Interface\\Buttons\\WHITE8X8', edgeFile = 'Interface\\Tooltips\\UI-Tooltip-Border',
+            edgeSize = 14, insets = { left = 3, right = 3, top = 3, bottom = 3 } })
+        panel:SetBackdropColor(0.07, 0.07, 0.08, 0.95)
+    end
+    panel:Hide()
+    Undercut.panel = panel
+    local title = panel:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
+    title:SetPoint('TOPLEFT', panel, 'TOPLEFT', 12, -12)
+    title:SetText('Posting')
+    local info = panel:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
+    info:SetPoint('TOPLEFT', title, 'BOTTOMLEFT', 0, -8)
+    if info.SetWidth then info:SetWidth(226) end
     info:SetJustifyH('LEFT')
-    if info.SetSpacing then info:SetSpacing(3) end
+    if info.SetSpacing then info:SetSpacing(4) end
     Undercut.info = info
-    local warning = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
-    warning:SetPoint('BOTTOMLEFT', info, 'TOPLEFT', 0, 2)
+    local warning = panel:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
+    warning:SetPoint('TOPLEFT', info, 'BOTTOMLEFT', 0, -10)
+    if warning.SetWidth then warning:SetWidth(226) end
+    warning:SetJustifyH('LEFT')
     warning:Hide()
     Undercut.warning = warning
     local box = CreateFrame('EditBox', nil, strip, 'InputBoxTemplate')
@@ -339,6 +346,8 @@ function Undercut.Attach()
             if sell.IsShown and sell:IsShown() then shown = true end
         end
         strip:SetShown(shown)
+        Undercut.formShown = shown
+        Undercut.SyncPanel()
     end
     for _, sell in ipairs({ frame.CommoditiesSellFrame, frame.ItemSellFrame }) do
         if sell.HookScript then
@@ -350,7 +359,7 @@ function Undercut.Attach()
             Undercut.Place(self)
             local key = keyOf(self, itemLocation)
             if key then Undercut.instance:Select(key) else Undercut.instance.key = nil end
-            if Undercut.info then Undercut.info:SetText('') end
+            if Undercut.info then Undercut.info:SetText(''); Undercut.SyncPanel() end
         end)
         -- The client works out its deposit again whenever the quantity, duration or price changes: read it then.
         if type(sell.UpdateDeposit) == 'function' then

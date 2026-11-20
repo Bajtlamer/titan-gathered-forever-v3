@@ -1,10 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-16. These changes describe the 0.5.111 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-16. These changes describe the 0.5.112 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
 
-## Posting lines on the form with a quantity row, 0.5.111
+## Posting panel beside the auction house window, 0.5.112
 
-- On the form of single items the Create Auction button sits lower when the Quantity row is shown (a stack), and the Sold and Unsold lines then covered it. On that form the lines now go into the free space right of the Deposit and Total Price rows (wrapped, 160 pixels wide, starting right after the Deposit values); there is no room below the strip because of the Buyout Mode check box. The commodity form and the form without a Quantity row keep their positions.
+- The Sold and Unsold lines and the red vendor floor line no longer sit inside the Sell form, where the position of the Create Auction button (and the Quantity row) made them cover other controls. They live in a small panel attached to the right edge of the auction house window, with room for wrapped text, the same on every form. The panel is shown while a Sell form is open and there is something to say. The Undercut strip stays in the form, in the same place as before.
 
 ## Warning about the old folders, 0.5.108
 

@@ -316,14 +316,14 @@ test('the client layer attaches once, searches on selection and fills the price'
     single.BuyoutModeCheckButton = {}
     single:SetItem({ id = 5 })
     eq(U.placedBelow, false)       -- and above it on the form of single items
-    -- With the Quantity row shown the Create Auction button is low there too, so the lines move to the free space beside the price rows.
-    single.QuantityInput = { IsShown = function() return true end }
-    single:SetItem({ id = 5 })
-    eq(U.placed, 'side')           -- beside the Deposit and Total Price rows: the Buyout Mode check box is under the strip
-    eq(U.placedBelow, false)
-    single.QuantityInput = nil
-    single:SetItem({ id = 5 })
-    eq(U.placedBelow, false)
+    -- The posting lines live in a panel beside the window, shown with a Sell form and only when there is something to say.
+    U.info:SetText('Sold: x'); U.SyncPanel(); eq(U.panel.shown, true)
+    U.info:SetText(''); U.warning:Hide(); U.SyncPanel(); eq(U.panel.shown, false)
+    U.warning:Show(); U.SyncPanel(); eq(U.panel.shown, true)
+    U.warning:Hide()
+    forms.ItemSellFrame.shown, forms.CommoditiesSellFrame.shown = false, false
+    forms.ItemSellFrame.hooked.OnHide(); eq(U.panel.shown, false)
+    forms.ItemSellFrame.shown = true; forms.ItemSellFrame.hooked.OnShow()
     U.frame.scripts.OnEvent(U.frame, 'ITEM_SEARCH_RESULTS_UPDATED', { itemID = 5 })
     eq(single.SecondaryPriceInput.amount, 18000)
     -- Answers for another item are ignored.
