@@ -221,17 +221,25 @@ function Undercut.Place(sell)
     local info, warning, strip = Undercut.info, Undercut.warning, Undercut.strip
     local frame = _G.AuctionHouseFrame
     if not info or not warning or not strip or not frame then return end
-    -- The button is also low on the single-item form when the Quantity row is shown (a stack of items).
+    -- The button is also low on the single-item form when the Quantity row is shown (a stack). That form has a Buyout
+    -- Mode check box under the strip, so the lines go into the free space right of the Deposit and Total Price rows.
     local quantity = sell.QuantityInput
     local below = sell == frame.CommoditiesSellFrame
-        or (quantity ~= nil and type(quantity.IsShown) == 'function' and quantity:IsShown() == true)
-    if Undercut.placedBelow == below then return end
+    local side = not below and quantity ~= nil and type(quantity.IsShown) == 'function' and quantity:IsShown() == true
+    local mode = below and 'below' or side and 'side' or 'above'
+    if Undercut.placed == mode then return end
+    Undercut.placed = mode
     Undercut.placedBelow = below
     info:ClearAllPoints(); warning:ClearAllPoints(); strip:ClearAllPoints()
     -- Commodity form, positions the user marked on a screenshot (0.5.106): the strip further left, the lines indented and lower.
     strip:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', below and 78 or 110, below and 85 or 78)
+    if info.SetWidth then info:SetWidth(side and 180 or 0) end
+    if warning.SetWidth then warning:SetWidth(side and 180 or 0) end
     if below then
         info:SetPoint('TOPLEFT', frame, 'BOTTOMLEFT', 80, 74)
+        warning:SetPoint('TOPLEFT', info, 'BOTTOMLEFT', 0, -2)
+    elseif side then
+        info:SetPoint('TOPLEFT', frame, 'BOTTOMLEFT', 240, 255)
         warning:SetPoint('TOPLEFT', info, 'BOTTOMLEFT', 0, -2)
     else
         info:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 44, 114)

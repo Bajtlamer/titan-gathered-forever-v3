@@ -316,10 +316,11 @@ test('the client layer attaches once, searches on selection and fills the price'
     single.BuyoutModeCheckButton = {}
     single:SetItem({ id = 5 })
     eq(U.placedBelow, false)       -- and above it on the form of single items
-    -- With the Quantity row shown the Create Auction button is low there too, so the lines go below the strip.
+    -- With the Quantity row shown the Create Auction button is low there too, so the lines move to the free space beside the price rows.
     single.QuantityInput = { IsShown = function() return true end }
     single:SetItem({ id = 5 })
-    eq(U.placedBelow, true)
+    eq(U.placed, 'side')           -- beside the Deposit and Total Price rows: the Buyout Mode check box is under the strip
+    eq(U.placedBelow, false)
     single.QuantityInput = nil
     single:SetItem({ id = 5 })
     eq(U.placedBelow, false)
