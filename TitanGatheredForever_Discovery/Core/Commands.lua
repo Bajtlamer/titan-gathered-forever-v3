@@ -45,6 +45,9 @@ local function status()
     say(Text.Label('Module version: ') .. Text.Value(env.moduleVersion or 'unknown'))
     say(Text.Label('Client: ') .. Text.Value(tostring(version) .. ' build ' .. tostring(build)))
     say(Text.Label('Baseline: Titan Gathered Forever ') .. Text.Value(env.coreVersion() or 'not loaded'))
+    if (ns.runtime.errors or 0) > 0 then
+        say(Text.Label('Collector errors: ') .. Text.Value(ns.runtime.errors) .. Text.Label(', last: ') .. Text.Value(ns.runtime.lastError))
+    end
     local progress = ns.Runner.Progress()
     if progress then
         say(Text.Label('Operation: ') .. Text.Value(progress.name) .. Text.Label(', phase ') .. Text.Value(progress.phaseIndex .. ' of ' .. progress.phaseCount)
@@ -66,18 +69,21 @@ local function accept()
     local Text = ns.Text
     local ok, reason = ns.Consent.Accept(ns.db, ns.runtime, ns.env.now())
     if not ok then say(refusal(reason)); return end
+    ns.Manager.Begin()
     say(Text.Value(stateText(ns.Consent.State(ns.db, ns.runtime))) .. Text.Label('. Pause with /tgfd stop, see /tgfd status for what has been recorded.'))
 end
 
 local function stop()
     local Text = ns.Text
     if not ns.Consent.Stop(ns.db, ns.runtime) then say(Text.Label('Nothing to pause: run /tgfd accept first.')); return end
+    ns.Manager.Refresh()
     say(Text.Value('Paused') .. Text.Label('. Resume with /tgfd start.'))
 end
 
 local function start()
     local Text = ns.Text
     if not ns.Consent.Start(ns.db, ns.runtime) then say(Text.Label('Nothing to resume: run /tgfd accept first.')); return end
+    ns.Manager.Begin()
     say(Text.Value(stateText(ns.Consent.State(ns.db, ns.runtime))) .. Text.Label('. Pause with /tgfd stop.'))
 end
 

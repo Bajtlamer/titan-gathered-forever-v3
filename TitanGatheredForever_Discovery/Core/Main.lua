@@ -23,6 +23,7 @@ end
 local function onAddonLoaded()
     ns.Print = ns.Print or function(message) DEFAULT_CHAT_FRAME:AddMessage(message) end
     ns.env = ns.env or realEnv()
+    ns.api = ns.api or ns.Api.Default()
     ns.runtime = {}
     local status
     _G.TitanGatheredForeverDiscoveryDB, status = ns.Database.Init(_G.TitanGatheredForeverDiscoveryDB, ns.env.moduleVersion, ns.env.now())
@@ -40,6 +41,7 @@ local function onLogin()
         ns.Print(Text.Label('Discovery is off: the saved data are from a newer version of this module and are left untouched. Update the module.'))
     end
     if ns.runtime.schemaBlocked then return end
+    ns.Manager.Begin()
     local state = ns.Consent.State(ns.db, ns.runtime)
     if state == 'unaccepted' then
         ns.Print(Text.Label('Discovery records nothing until you read and accept its notice. Type ') .. Text.Value('/tgfd') .. Text.Label('.'))
@@ -69,13 +71,15 @@ end
 function Main.Start()
     ns.frame = CreateFrame('Frame')
     ns.frame:RegisterEvent('ADDON_LOADED')
-    ns.frame:SetScript('OnEvent', function(_, event, name)
+    ns.frame:SetScript('OnEvent', function(_, event, ...)
         if event == 'ADDON_LOADED' then
-            if name == FOLDER then onAddonLoaded() end
+            if (...) == FOLDER then onAddonLoaded() end
         elseif event == 'PLAYER_LOGIN' then
             onLogin()
         elseif ABORT_EVENTS[event] then
             ns.Runner.Cancel(ABORT_EVENTS[event])
+        else
+            ns.Manager.Handle(event, ...)
         end
     end)
     ns.Progress.Attach()
