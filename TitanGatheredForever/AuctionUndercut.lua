@@ -239,7 +239,8 @@ function Undercut.Refresh(sell)
     local post = type(price) == 'number' and itemID and ns.Economy.Posting(price, quantity, type(deposit) == 'number' and deposit or nil, vendor, okCost and cost or nil) or nil
     local head, gains, unsold = Undercut.InfoText(post)
     if Undercut.head then Undercut.head:SetText(head) end
-    info:SetText(post and ((gains ~= '' and (gains .. '\n') or '') .. unsold) or '')
+    info:SetText(post and unsold or '')
+    if Undercut.gains then Undercut.gains:SetText(post and gains or '') end
 end
 
 local function keyOf(sell, itemLocation)
@@ -259,7 +260,7 @@ function Undercut.Attach()
     strip:SetSize(400, 24)
     -- At the left edge of the panel, in the row above the Buyout Mode check box (free on every form), shown only while a
     -- Sell form is shown. The window is taller while it is (Undercut.Resize), so the rows below fit above the check box.
-    strip:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 32, 86)
+    strip:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 44, 78)
     if strip.SetFrameLevel and frame.GetFrameLevel then strip:SetFrameLevel(frame:GetFrameLevel() + 20) end
     local label = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
     label:SetPoint('LEFT', 0, 0)
@@ -280,13 +281,17 @@ function Undercut.Attach()
     head:SetPoint('LEFT', strip, 'LEFT', 128, 0)
     head:SetJustifyH('LEFT')
     Undercut.head = head
+    -- Two single-line texts instead of one with a large line spacing: the coin icons inside a text with extra spacing rose.
     local info = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
-    info:SetPoint('BOTTOMLEFT', strip, 'TOPLEFT', 0, 4)
+    info:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 32, 114)
     info:SetJustifyH('LEFT')
-    if info.SetSpacing then info:SetSpacing(9) end
     Undercut.info = info
+    local gains = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
+    gains:SetPoint('BOTTOMLEFT', info, 'TOPLEFT', 0, 9)
+    gains:SetJustifyH('LEFT')
+    Undercut.gains = gains
     local warning = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
-    warning:SetPoint('BOTTOMLEFT', info, 'TOPLEFT', 0, 2)
+    warning:SetPoint('BOTTOMLEFT', gains, 'TOPLEFT', 0, 2)
     warning:Hide()
     Undercut.warning = warning
 
@@ -309,6 +314,7 @@ function Undercut.Attach()
             local key = keyOf(self, itemLocation)
             if key then Undercut.instance:Select(key) else Undercut.instance.key = nil end
             if Undercut.info then Undercut.info:SetText('') end
+            if Undercut.gains then Undercut.gains:SetText('') end
             if Undercut.head then Undercut.head:SetText('') end
         end)
         -- The client works out its deposit again whenever the quantity, duration or price changes: read it then.

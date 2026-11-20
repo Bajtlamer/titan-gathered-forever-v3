@@ -273,12 +273,13 @@ test('the client layer attaches once, searches on selection and fills the price'
     eq(#ns.db.auctionUndercutLog, 1); eq(ns.db.auctionUndercutLog[1].input, 'PriceInput')
     -- The fill also shows the posting lines: 4 units at 4500 each, deposit 30, vendor 100.
     eq(U.head.text, 'AH sold: 17100c  Vendor: 400c')
-    eq(U.info.text, 'Gain: <green>+16700c vs vendor\nUnsold: <red>-30c deposit, pays off if 1% sell')
+    eq(U.gains.text, 'Gain: <green>+16700c vs vendor')
+    eq(U.info.text, 'Unsold: <red>-30c deposit, pays off if 1% sell')
     ns.Economy.UnitCost = function() return 20 end             -- a known cost is shown as the profit against it
     sell:UpdateDeposit()
-    eq(U.info.text:match('^Gain: [^\n]*'), 'Gain: <green>+17020c vs cost, <green>+16700c vs vendor')
+    eq(U.gains.text, 'Gain: <green>+17020c vs cost, <green>+16700c vs vendor')
     ns.Economy.UnitCost = function() error('boom') end         -- an error while reading it only drops the figure
-    sell:UpdateDeposit(); assert(U.info.text:find('vs vendor', 1, true) and not U.info.text:find('vs cost', 1, true))
+    sell:UpdateDeposit(); assert(U.gains.text:find('vs vendor', 1, true) and not U.gains.text:find('vs cost', 1, true))
     ns.Economy.UnitCost = function() return nil end
     -- The client puts its own default price back after our fill: the check after a moment restores ours.
     sell.PriceInput.amount = 5000
