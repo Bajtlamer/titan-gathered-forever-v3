@@ -316,6 +316,13 @@ test('the client layer attaches once, searches on selection and fills the price'
     single.BuyoutModeCheckButton = {}
     single:SetItem({ id = 5 })
     eq(U.placedBelow, false)       -- and above it on the form of single items
+    -- With the Quantity row shown the Create Auction button is low there too, so the lines go below the strip.
+    single.QuantityInput = { IsShown = function() return true end }
+    single:SetItem({ id = 5 })
+    eq(U.placedBelow, true)
+    single.QuantityInput = nil
+    single:SetItem({ id = 5 })
+    eq(U.placedBelow, false)
     U.frame.scripts.OnEvent(U.frame, 'ITEM_SEARCH_RESULTS_UPDATED', { itemID = 5 })
     eq(single.SecondaryPriceInput.amount, 18000)
     -- Answers for another item are ignored.

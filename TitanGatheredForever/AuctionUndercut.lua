@@ -221,7 +221,10 @@ function Undercut.Place(sell)
     local info, warning, strip = Undercut.info, Undercut.warning, Undercut.strip
     local frame = _G.AuctionHouseFrame
     if not info or not warning or not strip or not frame then return end
+    -- The button is also low on the single-item form when the Quantity row is shown (a stack of items).
+    local quantity = sell.QuantityInput
     local below = sell == frame.CommoditiesSellFrame
+        or (quantity ~= nil and type(quantity.IsShown) == 'function' and quantity:IsShown() == true)
     if Undercut.placedBelow == below then return end
     Undercut.placedBelow = below
     info:ClearAllPoints(); warning:ClearAllPoints(); strip:ClearAllPoints()

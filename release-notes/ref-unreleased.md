@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-16. These changes describe the 0.5.108 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-16. These changes describe the 0.5.109 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+
+## Posting lines on the form with a quantity row, 0.5.109
+
+- On the form of single items the Create Auction button sits lower when the Quantity row is shown (a stack), and the Sold and Unsold lines then covered it. The lines now follow the position of the button: they go below the strip whenever the commodity form or the Quantity row is shown, and above it otherwise.
 
 ## Warning about the old folders, 0.5.108
 
