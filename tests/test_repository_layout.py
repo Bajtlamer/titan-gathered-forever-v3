@@ -22,6 +22,17 @@ class RepositoryLayoutTests(unittest.TestCase):
         self.assertFalse((CORE / '.git').exists())
         self.assertIn('python3 tools/check.py', (ROOT / 'README.md').read_text())
 
+    def test_discovery_module_is_unpublished_and_contains_only_manifest_files(self):
+        folder = ROOT / 'TitanGatheredForever_Discovery'
+        modules = json.loads((ROOT / 'catalogue/modules.json').read_text())
+        self.assertNotIn(folder.name, [module['folder'] for module in modules])
+        manifest = folder / (folder.name + '.toc')
+        expected = {line.strip().replace('\\', '/') for line in manifest.read_text().splitlines()
+                    if line.strip() and not line.startswith('#')}
+        expected.add(manifest.name)
+        actual = {p.relative_to(folder).as_posix() for p in folder.rglob('*') if p.is_file()}
+        self.assertEqual(actual, expected)
+
     def test_every_addon_contains_only_manifest_files_and_required_artwork(self):
         modules = json.loads((ROOT / 'catalogue/modules.json').read_text())
         for name in ['TitanGatheredForever'] + [module['folder'] for module in modules]:

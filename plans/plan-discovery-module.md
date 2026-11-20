@@ -145,3 +145,9 @@ Still open:
 - Passive collection on a busy raid or city frame must stay inside a small per-event cost; measure with the existing performance addon data before enabling by default.
 - Growth of the SavedVariables file lengthens login; the archive command and the status indicator are the control.
 - Contributor data quality: merged files are only evidence, never truth. Reports always show the number of independent observations and builds.
+
+## 12. Execution record
+
+- Milestone 1 (2026-11-20, branch feat/discovery-module): the folder TitanGatheredForever_Discovery 0.1.0 exists with manifest (own saved table TitanGatheredForeverDiscoveryDB), Core/Text, Database, Scout, Consent, Commands, Main and Start. Tests (tests/discovery.lua, 29 checks) were written first and failed for the missing manifest before any module code. Covered: saved-table lifecycle including newer-schema protection, Scout detection, consent and notice versioning, /tgfd help, accept, stop, start and status, login checks, a guard that no file touches the auction house, and that only ADDON_LOADED and PLAYER_LOGIN are used.
+- tools/check.py runs the new suite and compiles the module's Lua. tests/test_branding.py lets the module keep its own version line; tests/test_repository_layout.py guards that it stays out of catalogue/modules.json and holds only manifest files.
+- Not done: no artwork or IconTexture (planned last), not installed in the game (Scout must be removed first and the installer only handles the published set), no live check. Automated results only.

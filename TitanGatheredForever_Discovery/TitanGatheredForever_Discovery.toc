@@ -1,0 +1,15 @@
+## Interface: 16001
+## Title: Titan Gathered Forever: Discovery
+## Notes: Data collection for the owner and contributors: records what the Forever client shows and compares it with the Titan Gathered Forever catalogue. Records nothing until the notice is accepted with /tgfd accept.
+## Version: 0.1.0
+## Author: Titan Gathered Forever contributors
+## Dependencies: Titan, TitanGatheredForever
+## SavedVariables: TitanGatheredForeverDiscoveryDB
+
+Core\Text.lua
+Core\Database.lua
+Core\Scout.lua
+Core\Consent.lua
+Core\Commands.lua
+Core\Main.lua
+Start.lua
