@@ -28,14 +28,6 @@ local function fixture(options)
     return f
 end
 
-test('percent text is parsed with a dot or a comma and limited to 0.1 through 90', function()
-    local U = load().AuctionUndercut
-    eq(U.ParsePercent('7'), 7); eq(U.ParsePercent('2,5'), 2.5); eq(U.ParsePercent(' 12.34 '), 12.3)
-    eq(U.ParsePercent('0'), nil); eq(U.ParsePercent('0.04'), nil); eq(U.ParsePercent('91'), nil)
-    eq(U.ParsePercent('abc'), nil); eq(U.ParsePercent(''), nil); eq(U.ParsePercent(nil), nil)
-    eq(U.ParsePercent('90'), 90); eq(U.ParsePercent('0.1'), 0.1)
-end)
-
 test('the price is the lowest minus the percent, rounded down, at least one copper', function()
     local U = load().AuctionUndercut
     eq(U.Price(10000, 5), 9500); eq(U.Price(999, 10), 899); eq(U.Price(1, 90), 1); eq(U.Price(2, 15), 1)
@@ -157,17 +149,18 @@ test('the info lines show what a sale brings, what an unsold auction costs and t
     local U = load().AuctionUndercut
     local E = load().Economy
     local post = E.Posting(1000, 5, 120, 100)
-    local sold, unsold = U.InfoText(post)
-    eq(sold, 'Sold: 4750c net, <green>+4250c vs vendor')
+    local head, gains, unsold = U.InfoText(post)
+    eq(head, 'AH sold: 4750c  Vendor: 500c')
+    eq(gains, 'Gain: <green>+4250c vs vendor')
     eq(unsold, 'Unsold: <red>-120c deposit, pays off if 3% sell')
-    sold, unsold = U.InfoText(E.Posting(100, 1, 40, 100))
-    eq(sold, 'Sold: 95c net, <red>-5c vs vendor'); eq(unsold, 'Unsold: <red>-40c deposit, <red>a sale does not beat a vendor')
-    sold, unsold = U.InfoText(E.Posting(1000, 1, nil, 100)); eq(unsold, 'Unsold: deposit unknown')
-    sold, unsold = U.InfoText(E.Posting(1000, 1, 50, nil)); eq(sold, 'Sold: 950c net'); eq(unsold, 'Unsold: <red>-50c deposit')
-    sold = U.InfoText(E.Posting(1000, 5, 120, 100, 300))
-    eq(sold, 'Sold: 4750c net, <green>+3250c vs cost, <green>+4250c vs vendor')
-    sold = U.InfoText(E.Posting(1000, 5, 120, 100, 1000)); eq(sold, 'Sold: 4750c net, <red>-250c vs cost, <green>+4250c vs vendor')
-    sold, unsold = U.InfoText(nil); eq(sold, ''); eq(unsold, '')
+    head, gains, unsold = U.InfoText(E.Posting(100, 1, 40, 100))
+    eq(head, 'AH sold: 95c  Vendor: 100c'); eq(gains, 'Gain: <red>-5c vs vendor'); eq(unsold, 'Unsold: <red>-40c deposit, <red>a sale does not beat a vendor')
+    head, gains, unsold = U.InfoText(E.Posting(1000, 1, nil, 100)); eq(unsold, 'Unsold: deposit unknown')
+    head, gains, unsold = U.InfoText(E.Posting(1000, 1, 50, nil)); eq(head, 'AH sold: 950c'); eq(gains, ''); eq(unsold, 'Unsold: <red>-50c deposit')
+    head, gains = U.InfoText(E.Posting(1000, 5, 120, 100, 300))
+    eq(gains, 'Gain: <green>+3250c vs cost, <green>+4250c vs vendor')
+    head, gains = U.InfoText(E.Posting(1000, 5, 120, 100, 1000)); eq(gains, 'Gain: <red>-250c vs cost, <green>+4250c vs vendor')
+    head, gains, unsold = U.InfoText(nil); eq(head, ''); eq(gains, ''); eq(unsold, '')
 end)
 
 -- The client layer with fake frames.
@@ -176,6 +169,7 @@ local function client()
     local function frame()
         local self = { scripts = {}, shown = true }
         function self:SetSize() end
+        function self:SetWidth() end
         function self:SetPoint() end
         function self:SetText(t) self.text = t end
         function self:SetJustifyH() end
@@ -214,7 +208,11 @@ local function client()
         function s:IsShown() return self.shown end
         return s
     end
-    local g = { AuctionHouseFrame = { CommoditiesSellFrame = sellFrame(), ItemSellFrame = sellFrame() } }
+    local g = { AuctionHouseFrame = { CommoditiesSellFrame = sellFrame(), ItemSellFrame = sellFrame(), height = 538, shown = true } }
+    function g.AuctionHouseFrame:GetHeight() return self.height end
+    function g.AuctionHouseFrame:SetHeight(h) self.height = h end
+    function g.AuctionHouseFrame:IsShown() return self.shown end
+    function g.AuctionHouseFrame:HookScript(name, fn) self.hooked = self.hooked or {}; self.hooked[name] = fn end
     g.CreateFrame = frame
     g.hooksecurefunc = function(object, name, fn)
         local original = object[name]
@@ -260,30 +258,28 @@ test('the client layer attaches once, searches on selection and fills the price'
     forms.ItemSellFrame.hooked.OnShow(); eq(U.strip.shown, true)
     forms.CommoditiesSellFrame.shown = true
     eq(#g.dropdowns, 1)
-    eq(#g.dropdowns[1].options, 5)
-    eq(g.dropdowns[1].options[5].value, 'custom')
+    eq(#g.dropdowns[1].options, 4)                 -- 2, 5, 10, 15: no custom value
+    eq(g.dropdowns[1].options[4].value, 15)
     -- Choosing a preset stores the percent; choosing custom keeps it for the text field.
     g.dropdowns[1].set(15); eq(ns.settings.auctionUndercutPercent, 15); eq(ns.settings.auctionUndercutPreset, 15)
-    g.dropdowns[1].set('custom'); eq(U.box.shown, true); eq(ns.settings.auctionUndercutPercent, 15)
-    U.box:SetText('7,5'); U.box.scripts.OnEnterPressed(U.box); eq(ns.settings.auctionUndercutPercent, 7.5)
-    U.box:SetText('500'); U.box.scripts.OnEnterPressed(U.box); eq(ns.settings.auctionUndercutPercent, 7.5); eq(U.box:GetText(), '7.5')
-    g.dropdowns[1].set(10); eq(U.box.shown, false)
+    g.dropdowns[1].set(10)
     U.instance:Refill()      -- nothing selected yet: no effect
     -- Selecting an item in the commodities form sends one search; the answer fills the price input.
     local sell = _G.AuctionHouseFrame.CommoditiesSellFrame
     sell:SetItem({ id = 2589 })
-    eq(U.placedBelow, true)        -- the lines go below the strip on the commodity form
     eq(#g.searches, 1); eq(g.searches[1].itemID, 2589)
     U.frame.scripts.OnEvent(U.frame, 'COMMODITY_SEARCH_RESULTS_UPDATED', 2589)
     eq(sell.PriceInput.amount, 4500)
     eq(#ns.db.auctionUndercutLog, 1); eq(ns.db.auctionUndercutLog[1].input, 'PriceInput')
     -- The fill also shows the posting lines: 4 units at 4500 each, deposit 30, vendor 100.
-    eq(U.info.text, 'Sold: 17100c net, <green>+16700c vs vendor\nUnsold: <red>-30c deposit, pays off if 1% sell')
+    eq(U.head.text, 'AH sold: 17100c  Vendor: 400c')
+    eq(U.gains.text, 'Gain: <green>+16700c vs vendor')
+    eq(U.info.text, 'Unsold: <red>-30c deposit, pays off if 1% sell')
     ns.Economy.UnitCost = function() return 20 end             -- a known cost is shown as the profit against it
     sell:UpdateDeposit()
-    eq(U.info.text:match('^Sold: [^\n]*'), 'Sold: 17100c net, <green>+17020c vs cost, <green>+16700c vs vendor')
+    eq(U.gains.text, 'Gain: <green>+17020c vs cost, <green>+16700c vs vendor')
     ns.Economy.UnitCost = function() error('boom') end         -- an error while reading it only drops the figure
-    sell:UpdateDeposit(); assert(U.info.text:find('vs vendor', 1, true) and not U.info.text:find('vs cost', 1, true))
+    sell:UpdateDeposit(); assert(U.gains.text:find('vs vendor', 1, true) and not U.gains.text:find('vs cost', 1, true))
     ns.Economy.UnitCost = function() return nil end
     -- The client puts its own default price back after our fill: the check after a moment restores ours.
     sell.PriceInput.amount = 5000
@@ -315,7 +311,14 @@ test('the client layer attaches once, searches on selection and fills the price'
     local single = _G.AuctionHouseFrame.ItemSellFrame
     single.BuyoutModeCheckButton = {}
     single:SetItem({ id = 5 })
-    eq(U.placedBelow, false)       -- and above it on the form of single items
+    -- While a Sell form is shown the window is EXTRA pixels taller; it is restored when the form or the window closes.
+    local ah = _G.AuctionHouseFrame
+    forms.ItemSellFrame.shown, forms.CommoditiesSellFrame.shown = false, false
+    forms.ItemSellFrame.hooked.OnHide(); eq(ah.height, 538)
+    forms.ItemSellFrame.shown = true; forms.ItemSellFrame.hooked.OnShow(); eq(ah.height, 538 + U.EXTRA)
+    forms.ItemSellFrame.hooked.OnShow(); eq(ah.height, 538 + U.EXTRA)             -- not extended twice
+    ah.shown = false; ah.hooked.OnHide(); eq(ah.height, 538)                       -- the window closes with the form open
+    ah.shown = true; forms.ItemSellFrame.hooked.OnShow(); eq(ah.height, 538 + U.EXTRA)
     U.frame.scripts.OnEvent(U.frame, 'ITEM_SEARCH_RESULTS_UPDATED', { itemID = 5 })
     eq(single.SecondaryPriceInput.amount, 18000)
     -- Answers for another item are ignored.

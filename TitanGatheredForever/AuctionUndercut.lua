@@ -1,24 +1,11 @@
 local _, ns = ...
 -- Fills the Buyout price of a new auction in the Sell tab of the auction house: the lowest existing buyout of the same
--- item minus a percentage chosen in a combo box (2, 5, 10, 15 percent or a custom value). The search is live, one query
+-- item minus a percentage chosen in a combo box (2, 5, 10 or 15 percent). The search is live, one query
 -- per selected item (plans/plan-auction-undercut.md). Pure logic is behind a replaceable api table; the client wiring
 -- follows it. Own auctions are ignored and the price never goes below what a vendor pays.
 local Undercut = {}
 Undercut.__index = Undercut
 ns.AuctionUndercut = Undercut
-
-Undercut.MIN, Undercut.MAX = 0.1, 90
-
--- "2,5" or "2.5" to 2.5, limited to MIN through MAX with one decimal; nil for anything else.
-function Undercut.ParsePercent(text)
-    if type(text) ~= 'string' then return nil end
-    local trimmed = text:gsub('^%s+', ''):gsub('%s+$', ''):gsub(',', '.')
-    local number = tonumber(trimmed)
-    if not number then return nil end
-    number = math.floor(number * 10 + 0.5) / 10
-    if number < Undercut.MIN or number > Undercut.MAX then return nil end
-    return number
-end
 
 -- Price in copper, or nil and 'vendor' when it would fall below the floor: the lowest price at which a sale, after the
 -- fee, still brings what a vendor pays (Economy.MinPrice).
@@ -133,7 +120,7 @@ function Undercut.DefaultAPI()
             .. ns.Economy.Coin(lowest) .. ns.Style.Label(').'))
     end
     api.Say = function(message) ns.Print(ns.Style.Label(message)) end
-    -- The red line above the strip: shown while the Buyout rests on the vendor price, cleared at the next fill.
+    -- The red line above the posting lines: shown while the Buyout rests on the vendor price, cleared at the next fill.
     api.Warn = function(reason, vendor)
         local line = Undercut.warning
         if not line then return end
@@ -193,14 +180,19 @@ local function signed(copper)
     return Style.Text(Style.red, '-') .. Coin(-copper)
 end
 
--- The two lines under the Sell form for an auction as it stands (Economy.Posting): what a sale brings and gains over a
--- vendor, and what an unsold auction costs with the share of auctions that must sell for posting to pay.
+-- The posting texts for an auction as it stands (Economy.Posting). The head goes next to the Undercut box: what a sale
+-- brings after the fee and what a vendor pays for the same stack. The gains line (against the cost of the item and
+-- against a vendor) and the unsold line (the deposit and the share of auctions that must sell for posting to pay) go
+-- below it.
 function Undercut.InfoText(post)
-    if not post then return '', '' end
+    if not post then return '', '', '' end
     local Style, Coin = ns.Style, ns.Economy.Coin
-    local sold = Style.Label('Sold: ') .. Coin(post.net) .. Style.Label(' net')
-    if post.profit then sold = sold .. Style.Label(', ') .. signed(post.profit) .. Style.Label(' vs cost') end
-    if post.gain then sold = sold .. Style.Label(', ') .. signed(post.gain) .. Style.Label(' vs vendor') end
+    local head = Style.Label('AH sold: ') .. Coin(post.net)
+    if post.vendor and post.vendor > 0 then head = head .. Style.Label('  Vendor: ') .. Coin(post.vendor * post.quantity) end
+    local parts = {}
+    if post.profit then parts[#parts + 1] = signed(post.profit) .. Style.Label(' vs cost') end
+    if post.gain then parts[#parts + 1] = signed(post.gain) .. Style.Label(' vs vendor') end
+    local gains = #parts > 0 and (Style.Label('Gain: ') .. table.concat(parts, Style.Label(', '))) or ''
     local unsold = Style.Label('Unsold: ')
     if post.loss then
         unsold = unsold .. signed(-post.loss) .. Style.Label(' deposit')
@@ -212,35 +204,29 @@ function Undercut.InfoText(post)
     else
         unsold = unsold .. Style.Label('deposit unknown')
     end
-    return sold, unsold
+    return head, gains, unsold
 end
 
--- Where the lines go. The Create Auction button sits high on the single-item form (free room above the strip) and low on
--- the commodity form (no room above, but no Buyout Mode check box below): the lines follow the form.
-function Undercut.Place(sell)
-    local info, warning, strip = Undercut.info, Undercut.warning, Undercut.strip
+-- Room for the posting lines: while a Sell form is shown the auction house window is made EXTRA pixels taller. What the
+-- client anchors to the top of the window stays, what it anchors to the bottom (Buyout Mode, the money bar, the tabs)
+-- and our strip and lines move down with the edge, which leaves the free space between them. Restored when the form closes.
+Undercut.EXTRA = 44
+
+function Undercut.Resize(wanted)
     local frame = _G.AuctionHouseFrame
-    if not info or not warning or not strip or not frame then return end
-    local below = sell == frame.CommoditiesSellFrame
-    if Undercut.placedBelow == below then return end
-    Undercut.placedBelow = below
-    info:ClearAllPoints(); warning:ClearAllPoints(); strip:ClearAllPoints()
-    -- Commodity form, positions the user marked on a screenshot (0.5.106): the strip further left, the lines indented and lower.
-    strip:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', below and 78 or 110, below and 85 or 78)
-    if below then
-        info:SetPoint('TOPLEFT', frame, 'BOTTOMLEFT', 80, 74)
-        warning:SetPoint('TOPLEFT', info, 'BOTTOMLEFT', 0, -2)
-    else
-        info:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 44, 114)
-        warning:SetPoint('BOTTOMLEFT', info, 'TOPLEFT', 0, 2)
-    end
+    if not frame or not frame.GetHeight or not frame.SetHeight then return end
+    wanted = wanted and true or false
+    if (Undercut.extended or false) == wanted then return end
+    local ok, height = pcall(frame.GetHeight, frame)
+    if not ok or type(height) ~= 'number' then return end
+    Undercut.extended = wanted
+    frame:SetHeight(height + (wanted and Undercut.EXTRA or -Undercut.EXTRA))
 end
 
 -- Reads the form as it stands and shows the lines; an empty form or a price of zero shows nothing.
 function Undercut.Refresh(sell)
     local info = Undercut.info
     if not info or not sell then return end
-    Undercut.Place(sell)
     local input = Undercut.BuyoutInput(sell)
     local price = input and input.GetAmount and select(2, pcall(input.GetAmount, input))
     local quantity = read(sell, 'GetQuantity')
@@ -251,8 +237,10 @@ function Undercut.Refresh(sell)
     -- The cost is the cheapest known way to buy one unit again (last auction scan or a merchant); unknown stays unknown.
     local okCost, cost = pcall(ns.Economy.UnitCost, itemID or 0)
     local post = type(price) == 'number' and itemID and ns.Economy.Posting(price, quantity, type(deposit) == 'number' and deposit or nil, vendor, okCost and cost or nil) or nil
-    local sold, unsold = Undercut.InfoText(post)
-    info:SetText(post and (sold .. '\n' .. unsold) or '')
+    local head, gains, unsold = Undercut.InfoText(post)
+    if Undercut.head then Undercut.head:SetText(head) end
+    info:SetText(post and unsold or '')
+    if Undercut.gains then Undercut.gains:SetText(post and gains or '') end
 end
 
 local function keyOf(sell, itemLocation)
@@ -269,58 +257,43 @@ function Undercut.Attach()
     if not frame or not frame.CommoditiesSellFrame or not frame.ItemSellFrame then return false end
     local strip = CreateFrame('Frame', nil, frame)
     Undercut.strip = strip
-    strip:SetSize(220, 24)
-    -- Inside the left panel, at the bottom of the left panel, in the row above the Buyout Mode check box (the position of the Create Auction button changes between the forms, this row is free in both), and only while a Sell form is shown.
-    strip:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 110, 78)
+    strip:SetSize(400, 24)
+    -- At the left edge of the panel, in the row above the Buyout Mode check box (free on every form), shown only while a
+    -- Sell form is shown. The window is taller while it is (Undercut.Resize), so the rows below fit above the check box.
+    strip:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 32, 78)
     if strip.SetFrameLevel and frame.GetFrameLevel then strip:SetFrameLevel(frame:GetFrameLevel() + 20) end
     local label = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
     label:SetPoint('LEFT', 0, 0)
     label:SetText('Undercut')
     local options = {
-        { value = 2, label = '2 %' }, { value = 5, label = '5 %' }, { value = 10, label = '10 %' },
-        { value = 15, label = '15 %' }, { value = 'custom', label = 'Custom' },
+        { value = 2, label = '2 %' }, { value = 5, label = '5 %' }, { value = 10, label = '10 %' }, { value = 15, label = '15 %' },
     }
-    -- Two lines above the strip, from the left edge of the panel; the red warning sits above them.
-    local info = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
-    info:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 44, 114)
-    info:SetJustifyH('LEFT')
-    if info.SetSpacing then info:SetSpacing(3) end
-    Undercut.info = info
-    local warning = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
-    warning:SetPoint('BOTTOMLEFT', info, 'TOPLEFT', 0, 2)
-    warning:Hide()
-    Undercut.warning = warning
-    local box = CreateFrame('EditBox', nil, strip, 'InputBoxTemplate')
-    box:SetSize(44, 20)
-    box:SetAutoFocus(false)
-    box:SetMaxLetters(5)
-    box:SetPoint('LEFT', strip, 'LEFT', 172, 0)
-    local function sync() box:SetShown(ns.settings.auctionUndercutPreset == 'custom') end
-    Undercut.drop = ns.Nav.Dropdown(strip, 56, 0, 105, function() return options end,
+    Undercut.drop = ns.Nav.Dropdown(strip, 54, 0, 64, function() return options end,
         function() return ns.settings.auctionUndercutPreset end,
         function(value)
             ns.settings.auctionUndercutPreset = value
-            if value ~= 'custom' then ns.settings.auctionUndercutPercent = value end
-            box:SetText(tostring(ns.settings.auctionUndercutPercent))
-            sync()
+            ns.settings.auctionUndercutPercent = value
             Undercut.instance:Refill()
         end)
-    local function commit(self)
-        local value = Undercut.ParsePercent(self:GetText())
-        local changed = value and value ~= ns.settings.auctionUndercutPercent
-        if value then ns.settings.auctionUndercutPercent = value end
-        self:SetText(tostring(ns.settings.auctionUndercutPercent))
-        self:ClearFocus()
-        if changed then Undercut.instance:Refill() end
-    end
-    box:SetScript('OnEnterPressed', commit)
-    box:SetScript('OnEditFocusLost', commit)
-    box:SetScript('OnEscapePressed', function(self)
-        self:SetText(tostring(ns.settings.auctionUndercutPercent)); self:ClearFocus()
-    end)
-    box:SetText(tostring(ns.settings.auctionUndercutPercent))
-    sync()
-    Undercut.box = box
+    -- The sale and the vendor price right after the box, then the gains and the unsold line below the strip from the
+    -- left edge, and the red warning above them.
+    local head = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
+    head:SetPoint('LEFT', strip, 'LEFT', 128, 0)
+    head:SetJustifyH('LEFT')
+    Undercut.head = head
+    -- Two single-line texts instead of one with a large line spacing: the coin icons inside a text with extra spacing rose.
+    local info = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
+    info:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 32, 114)
+    info:SetJustifyH('LEFT')
+    Undercut.info = info
+    local gains = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
+    gains:SetPoint('BOTTOMLEFT', info, 'TOPLEFT', 0, 9)
+    gains:SetJustifyH('LEFT')
+    Undercut.gains = gains
+    local warning = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
+    warning:SetPoint('BOTTOMLEFT', gains, 'TOPLEFT', 0, 6)
+    warning:Hide()
+    Undercut.warning = warning
 
     local function refresh()
         local shown = false
@@ -328,7 +301,9 @@ function Undercut.Attach()
             if sell.IsShown and sell:IsShown() then shown = true end
         end
         strip:SetShown(shown)
+        Undercut.Resize(shown and frame.IsShown and frame:IsShown())
     end
+    if frame.HookScript then frame:HookScript('OnHide', refresh) end
     for _, sell in ipairs({ frame.CommoditiesSellFrame, frame.ItemSellFrame }) do
         if sell.HookScript then
             sell:HookScript('OnShow', refresh)
@@ -336,10 +311,11 @@ function Undercut.Attach()
         end
         hooksecurefunc(sell, 'SetItem', function(self, itemLocation)
             Undercut.sellFrame = self
-            Undercut.Place(self)
             local key = keyOf(self, itemLocation)
             if key then Undercut.instance:Select(key) else Undercut.instance.key = nil end
             if Undercut.info then Undercut.info:SetText('') end
+            if Undercut.gains then Undercut.gains:SetText('') end
+            if Undercut.head then Undercut.head:SetText('') end
         end)
         -- The client works out its deposit again whenever the quantity, duration or price changes: read it then.
         if type(sell.UpdateDeposit) == 'function' then
