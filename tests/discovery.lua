@@ -50,7 +50,7 @@ end
 
 local function joined(ns)
     local lines = {}
-    for _, line in ipairs(ns.printed) do lines[#lines + 1] = line end
+    for _, line in ipairs(ns.printed) do lines[#lines + 1] = (line:gsub('|cgold', ''):gsub('|cwhite', ''):gsub('|cgreen', ''):gsub('|r', '')) end
     return table.concat(lines, '\n')
 end
 
@@ -255,23 +255,44 @@ test('text uses the core style when it is loaded and plain text otherwise', func
     eq(plain.Text.Label('abc'), 'abc'); eq(plain.Text.Value('abc'), 'abc'); eq(plain.Text.Date('abc'), 'abc')
 end)
 
+local function widget(kind)
+    local object = { events = {}, kind = kind, shown = false }
+    return setmetatable(object, { __index = function(_, key)
+        return function(self, ...)
+            if key:sub(1, 6) == 'Create' then return widget(key) end
+            return self
+        end
+    end })
+end
+
+local frames
 local function client()
-    local frames, handlers = {}, {}
-    _G.CreateFrame = function()
-        local frame = { events = {} }
+    frames = {}
+    local messages = {}
+    _G.CreateFrame = function(kind)
+        local frame = widget(kind)
         function frame:RegisterEvent(event) self.events[#self.events + 1] = event end
-        function frame:SetScript(kind, fn) self[kind] = fn end
+        function frame:UnregisterEvent(event)
+            for index, value in ipairs(self.events) do if value == event then table.remove(self.events, index); break end end
+        end
+        function frame:SetScript(name, fn) self[name] = fn end
+        function frame:Show() self.shown = true end
+        function frame:Hide() self.shown = false end
+        function frame:IsShown() return self.shown end
         frames[#frames + 1] = frame
         return frame
     end
+    _G.UIParent = widget('UIParent')
     _G.SlashCmdList = {}
-    _G.DEFAULT_CHAT_FRAME = { AddMessage = function(_, message) handlers[#handlers + 1] = message end }
+    _G.DEFAULT_CHAT_FRAME = { AddMessage = function(_, message) messages[#messages + 1] = message end }
     _G.C_AddOns = { IsAddOnLoaded = function() return false end, GetAddOnMetadata = function() return '0.5.108' end }
     _G.GetBuildInfo = function() return '1.60.1', '70862', 'Nov 3 2026', 16001 end
     _G.time = function() return 1000 end
     _G.date = function() return 'today' end
+    _G.debugprofilestop = function() return 0 end
+    _G.InCombatLockdown = function() return false end
     _G.TitanGatheredForeverDiscoveryDB = nil
-    return frames, handlers
+    return frames, messages
 end
 
 test('the saved table is created when the module loads and the slash command is /tgfd only', function()
@@ -329,17 +350,251 @@ test('a newer saved schema is reported at login and blocks collection', function
     eq(_G.TitanGatheredForeverDiscoveryDB.consent, nil)
 end)
 
-test('milestone 1 listens to no game events beyond loading and login', function()
-    local frames = client()
+
+-- Milestone 2: batch runner, progress, cancel, abort events.
+local function runnerEnv(ns, options)
+    options = options or {}
+    local clock = { ms = 0 }
+    ns.env.clock = function() return clock.ms end
+    ns.env.inCombat = function() return options.combat == true end
+    return clock
+end
+
+local function spec(ns, clock, shape)
+    local record = { steps = {}, finished = 0, aborted = nil, totalCalls = 0 }
+    local phases = {}
+    for index, count in ipairs(shape or { 3, 2 }) do
+        phases[index] = { label = 'Phase' .. index .. 'Label',
+            total = function() record.totalCalls = record.totalCalls + 1; return count end,
+            step = function(i) clock.ms = clock.ms + 1; record.steps[#record.steps + 1] = index .. ':' .. i end }
+    end
+    return { name = 'Test operation', phases = phases,
+        onFinish = function() record.finished = record.finished + 1 end,
+        onAbort = function(reason) record.aborted = reason end }, record
+end
+
+local function runAll(ns)
+    local guard = 0
+    while ns.Runner.Active() do ns.Runner.Tick(); guard = guard + 1; assert(guard < 1000, 'operation never ended') end
+end
+
+test('an operation runs its phases step by step within the time budget of one tick', function()
+    local ns = ready(); local clock = runnerEnv(ns)
+    local operation, record = spec(ns, clock, { 4, 4 })
+    eq(ns.Runner.Start(operation), true)
+    eq(ns.Runner.Active(), true)
+    ns.Runner.Tick()
+    eq(#record.steps, ns.Runner.BUDGET_MS)           -- one millisecond per step: the tick stops at the budget
+    runAll(ns)
+    eq(table.concat(record.steps, ','), '1:1,1:2,1:3,1:4,2:1,2:2,2:3,2:4')
+    eq(record.finished, 1); eq(ns.Runner.Active(), false)
+end)
+
+test('a tick always does at least one step, even when a single step exceeds the budget', function()
+    local ns = ready(); local clock = runnerEnv(ns)
+    local operation, record = spec(ns, clock, { 3 })
+    operation.phases[1].step = function(i) clock.ms = clock.ms + 50; record.steps[#record.steps + 1] = i end
+    ns.Runner.Start(operation)
+    ns.Runner.Tick()
+    eq(#record.steps, 1)
+end)
+
+test('start, every phase and the end are reported in chat', function()
+    local ns = ready(); local clock = runnerEnv(ns)
+    local operation = spec(ns, clock, { 2, 2 })
+    ns.Runner.Start(operation); runAll(ns)
+    local text = joined(ns)
+    has(text, 'Test operation'); has(text, 'Phase 1 of 2'); has(text, 'Phase1Label')
+    has(text, 'Phase 2 of 2'); has(text, 'Phase2Label'); has(text, 'Finished')
+end)
+
+test('progress reports the operation, phase, counts and elapsed time, and nothing when idle', function()
+    local ns = ready(); local clock = runnerEnv(ns)
+    eq(ns.Runner.Progress(), nil)
+    local operation = spec(ns, clock, { 10, 10 })
+    ns.Runner.Start(operation)
+    clock.ms = 2000
+    ns.Runner.Tick()
+    local progress = ns.Runner.Progress()
+    eq(progress.name, 'Test operation'); eq(progress.phaseIndex, 1); eq(progress.phaseCount, 2)
+    eq(progress.phaseLabel, 'Phase1Label'); eq(progress.total, 10); eq(progress.done, ns.Runner.BUDGET_MS)
+    assert(progress.fraction > 0 and progress.fraction < 0.5, 'overall fraction ' .. tostring(progress.fraction))
+    assert(progress.elapsed >= 0)
+    runAll(ns)
+    eq(ns.Runner.Progress(), nil)
+end)
+
+test('only one operation runs at a time', function()
+    local ns = ready(); local clock = runnerEnv(ns)
+    local first = spec(ns, clock); local second = spec(ns, clock)
+    eq(ns.Runner.Start(first), true)
+    local ok, reason = ns.Runner.Start(second)
+    eq(ok, false); eq(reason, 'busy')
+    eq(ns.Runner.Progress().name, 'Test operation')
+end)
+
+test('an operation does not start during combat or with an invalid description', function()
+    local ns = ready(); local clock = runnerEnv(ns, { combat = true })
+    local ok, reason = ns.Runner.Start((spec(ns, clock)))
+    eq(ok, false); eq(reason, 'combat'); eq(ns.Runner.Active(), false)
+    clock = runnerEnv(ns)
+    local _, why = ns.Runner.Start({ name = 'x', phases = {} })
+    eq(why, 'invalid')
+    _, why = ns.Runner.Start({ phases = { { label = 'a', total = 1, step = function() end } } })
+    eq(why, 'invalid')
+    _, why = ns.Runner.Start(nil)
+    eq(why, 'invalid')
+end)
+
+test('cancel stops the operation, tells its owner why and reports it', function()
+    local ns = ready(); local clock = runnerEnv(ns)
+    local operation, record = spec(ns, clock, { 10 })
+    ns.Runner.Start(operation); ns.Runner.Tick()
+    eq(ns.Runner.Cancel('cancelled by command'), true)
+    eq(ns.Runner.Active(), false); eq(record.aborted, 'cancelled by command'); eq(record.finished, 0)
+    has(joined(ns), 'Stopped'); has(joined(ns), 'cancelled by command')
+    eq(ns.Runner.Cancel('again'), false)
+    ns.Runner.Tick()                                  -- a tick without an operation does nothing
+end)
+
+test('an error in a step stops the operation with the message and never escapes', function()
+    local ns = ready(); local clock = runnerEnv(ns)
+    local operation, record = spec(ns, clock, { 5 })
+    operation.phases[1].step = function(i) if i == 2 then error('boom') end end
+    ns.Runner.Start(operation)
+    ns.Runner.Tick()
+    eq(ns.Runner.Active(), false)
+    has(record.aborted, 'boom'); has(joined(ns), 'boom')
+end)
+
+test('an error in the total or the finish handler is contained too', function()
+    local ns = ready(); local clock = runnerEnv(ns)
+    local operation, record = spec(ns, clock, { 2 })
+    operation.phases[1].total = function() error('no total') end
+    ns.Runner.Start(operation); ns.Runner.Tick()
+    eq(ns.Runner.Active(), false); has(record.aborted, 'no total')
+    local second = spec(ns, clock, { 1 })
+    second.onFinish = function() error('late') end
+    ns.Runner.Start(second); runAll(ns)
+    eq(ns.Runner.Active(), false)
+    has(joined(ns), 'Finished')
+end)
+
+test('a phase total is read when the phase starts', function()
+    local ns = ready(); local clock = runnerEnv(ns)
+    local operation, record = spec(ns, clock, { 2, 2 })
+    ns.Runner.Start(operation)
+    eq(record.totalCalls, 1)                           -- only the first phase was started so far
+    runAll(ns)
+    eq(record.totalCalls, 2)
+end)
+
+test('an empty phase is skipped without a message and the next one starts at once', function()
+    local ns = ready(); local clock = runnerEnv(ns)
+    local operation, record = spec(ns, clock, { 0, 2 })
+    ns.Runner.Start(operation)
+    eq(ns.Runner.Progress().phaseIndex, 2)
+    runAll(ns)
+    eq(table.concat(record.steps, ','), '2:1,2:2')
+    lacks(joined(ns), 'Phase1Label')
+end)
+
+test('listeners hear about start, phase changes, finish and abort', function()
+    local ns = ready(); local clock = runnerEnv(ns)
+    local heard = {}
+    ns.Runner.Listen(function(event, state) heard[#heard + 1] = event .. (state and state.name and '' or '?') end)
+    local operation = spec(ns, clock, { 1, 1 })
+    ns.Runner.Start(operation); runAll(ns)
+    eq(table.concat(heard, ','), 'start,phase,phase,finish')
+    heard = {}
+    local second = spec(ns, clock, { 3 })
+    ns.Runner.Start(second); ns.Runner.Cancel('x')
+    eq(table.concat(heard, ','), 'start,phase,abort')
+end)
+
+test('the progress text names the operation, the phase, the counts and the elapsed time', function()
+    local ns = ready()
+    local lines = ns.Progress.Format({ name = 'Reading recipes', phaseIndex = 2, phaseCount = 5, phaseLabel = 'Tailoring',
+        done = 120, total = 400, elapsed = 12.34, fraction = 0.3 })
+    has(lines.title, 'Reading recipes'); has(lines.phase, 'Phase 2 of 5'); has(lines.phase, 'Tailoring')
+    has(lines.count, '120'); has(lines.count, '400'); has(lines.count, '30%')
+    has(lines.elapsed, '12.3')
+end)
+
+test('the self test is a three phase operation that records nothing', function()
+    local ns = ready(); local clock = runnerEnv(ns)
+    local work = 0
+    local operation = ns.SelfTest.Spec({ steps = 5, work = function() work = work + 1; clock.ms = clock.ms + 1 end })
+    eq(#operation.phases, 3)
+    ns.Runner.Start(operation); runAll(ns)
+    eq(work, 15); eq(ns.Database.Count(ns.db), 0)
+    has(joined(ns), 'Finished')
+end)
+
+test('cancel and selftest commands drive the runner and are listed in the help', function()
+    local ns = ready(); local clock = runnerEnv(ns)
+    ns.Commands.Handle('cancel'); has(joined(ns), 'Nothing is running')
+    ns.printed = {}
+    ns.Commands.Handle('selftest')
+    eq(ns.Runner.Active(), true); has(joined(ns), 'Self test')
+    ns.printed = {}
+    ns.Commands.Handle('selftest')
+    has(joined(ns), 'already running')
+    ns.printed = {}
+    ns.Commands.Handle('status'); has(joined(ns), 'Operation'); has(joined(ns), 'Self test')
+    ns.printed = {}
+    ns.Commands.Handle('cancel')
+    eq(ns.Runner.Active(), false); has(joined(ns), 'cancelled by command')
+    ns.Consent.Accept(ns.db, ns.runtime, 1)
+    ns.printed = {}
+    ns.Commands.Handle('help')
+    has(joined(ns), '/tgfd cancel'); has(joined(ns), '/tgfd selftest')
+end)
+
+test('the self test refuses to start in combat and says so', function()
+    local ns = ready(); runnerEnv(ns, { combat = true })
+    ns.Commands.Handle('selftest')
+    eq(ns.Runner.Active(), false); has(joined(ns), 'combat')
+end)
+
+test('an operation shows a progress frame, ticks from its own frame and hides both at the end', function()
+    local created, messages = client()
     local ns = load({ raw = true })
     ns.Main.Start()
-    local events = table.concat(frames[1].events, ',')
-    eq(events, 'ADDON_LOADED')
-    frames[1].OnEvent(frames[1], 'ADDON_LOADED', FOLDER)
-    frames[1].OnEvent(frames[1], 'PLAYER_LOGIN')
-    -- PLAYER_LOGIN is registered by the module once its own saved data are ready, like the core does.
-    assert(table.concat(frames[1].events, ','):find('PLAYER_LOGIN', 1, true))
-    assert(not table.concat(frames[1].events, ','):find('LOOT', 1, true))
+    created[1].OnEvent(created[1], 'ADDON_LOADED', FOLDER)
+    eq(#created, 1)                                   -- idle: only the event frame exists, nothing ticks
+    local clock = runnerEnv(ns)
+    local operation = spec(ns, clock, { 2 })
+    ns.Runner.Start(operation)
+    local ticker = ns.ticker
+    assert(ticker and ticker.shown, 'no visible ticker frame')
+    ticker.OnUpdate(ticker, 0.016)
+    ticker.OnUpdate(ticker, 0.016)
+    eq(ns.Runner.Active(), false)
+    eq(ticker.shown, false)
+end)
+
+test('abort events are registered only while an operation runs and cancel it', function()
+    local created = client()
+    local ns = load({ raw = true })
+    ns.Main.Start()
+    local frame = created[1]
+    frame.OnEvent(frame, 'ADDON_LOADED', FOLDER)
+    frame.OnEvent(frame, 'PLAYER_LOGIN')
+    local idle = table.concat(frame.events, ',')
+    assert(not idle:find('REGEN', 1, true) and not idle:find('LEAVING', 1, true) and not idle:find('LOOT', 1, true), idle)
+    local clock = runnerEnv(ns)
+    local operation, record = spec(ns, clock, { 5 })
+    ns.Runner.Start(operation)
+    local busy = table.concat(frame.events, ',')
+    has(busy, 'PLAYER_REGEN_DISABLED'); has(busy, 'PLAYER_LEAVING_WORLD')
+    frame.OnEvent(frame, 'PLAYER_REGEN_DISABLED')
+    eq(ns.Runner.Active(), false); has(record.aborted, 'combat')
+    eq(table.concat(frame.events, ','), idle)
+    local second, record2 = spec(ns, clock, { 5 })
+    ns.Runner.Start(second)
+    frame.OnEvent(frame, 'PLAYER_LEAVING_WORLD')
+    eq(ns.Runner.Active(), false); has(record2.aborted, 'loading')
 end)
 
 test('the last manifest file starts the module', function()

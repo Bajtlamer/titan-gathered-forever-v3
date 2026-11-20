@@ -1,5 +1,5 @@
 local _, ns = ...
--- Loading, saved data, login checks and the slash command. Milestone 1 listens to ADDON_LOADED and PLAYER_LOGIN only.
+-- Loading, saved data, login checks, the slash command and the events that stop a running operation.
 local Main = {}
 ns.Main = Main
 
@@ -14,7 +14,7 @@ end
 
 local function realEnv()
     return {
-        now = time, date = date, build = GetBuildInfo,
+        now = time, date = date, build = GetBuildInfo, clock = debugprofilestop, inCombat = InCombatLockdown,
         moduleVersion = metadata(FOLDER, 'Version') or 'unknown',
         coreVersion = function() return metadata('TitanGatheredForever', 'Version') end,
     }
@@ -57,6 +57,24 @@ local function onLogin()
     end
 end
 
+-- While an operation runs: a visible ticker frame drives it, and combat or a loading screen stops it. Both are removed
+-- again at the end, so an idle module costs no per-frame work and listens to no game events.
+local ABORT_EVENTS = { PLAYER_REGEN_DISABLED = 'combat started', PLAYER_LEAVING_WORLD = 'loading screen or reload' }
+
+local function onOperation(event)
+    if event == 'start' then
+        if not ns.ticker then
+            ns.ticker = CreateFrame('Frame')
+            ns.ticker:SetScript('OnUpdate', function() ns.Runner.Tick() end)
+        end
+        ns.ticker:Show()
+        for abortEvent in pairs(ABORT_EVENTS) do ns.frame:RegisterEvent(abortEvent) end
+    elseif event == 'finish' or event == 'abort' then
+        if ns.ticker then ns.ticker:Hide() end
+        for abortEvent in pairs(ABORT_EVENTS) do ns.frame:UnregisterEvent(abortEvent) end
+    end
+end
+
 function Main.Start()
     ns.frame = CreateFrame('Frame')
     ns.frame:RegisterEvent('ADDON_LOADED')
@@ -65,6 +83,10 @@ function Main.Start()
             if name == FOLDER then onAddonLoaded() end
         elseif event == 'PLAYER_LOGIN' then
             onLogin()
+        elseif ABORT_EVENTS[event] then
+            ns.Runner.Cancel(ABORT_EVENTS[event])
         end
     end)
+    ns.Progress.Attach()
+    ns.Runner.Listen(onOperation)
 end

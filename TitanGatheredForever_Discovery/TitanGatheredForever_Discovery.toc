@@ -10,6 +10,9 @@ Core\Text.lua
 Core\Database.lua
 Core\Scout.lua
 Core\Consent.lua
+Core\Runner.lua
+Core\Progress.lua
+Core\SelfTest.lua
 Core\Commands.lua
 Core\Main.lua
 Start.lua

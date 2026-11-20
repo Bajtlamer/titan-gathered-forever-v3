@@ -38,6 +38,8 @@ local function help()
     say(Text.Value('/tgfd status') .. Text.Label(': state, versions, baseline and record counts'))
     say(Text.Value('/tgfd stop') .. Text.Label(': pause recording'))
     say(Text.Value('/tgfd start') .. Text.Label(': resume recording'))
+    say(Text.Value('/tgfd selftest') .. Text.Label(': a harmless test of the progress window (records nothing)'))
+    say(Text.Value('/tgfd cancel') .. Text.Label(': stop the running operation'))
     say(Text.Value('/tgfd help') .. Text.Label(': this list'))
 end
 
@@ -49,6 +51,11 @@ local function status()
     say(Text.Label('Module version: ') .. Text.Value(env.moduleVersion or 'unknown'))
     say(Text.Label('Client: ') .. Text.Value(tostring(version) .. ' build ' .. tostring(build)))
     say(Text.Label('Baseline: Titan Gathered Forever ') .. Text.Value(env.coreVersion() or 'not loaded'))
+    local progress = ns.Runner.Progress()
+    if progress then
+        say(Text.Label('Operation: ') .. Text.Value(progress.name) .. Text.Label(', phase ') .. Text.Value(progress.phaseIndex .. ' of ' .. progress.phaseCount)
+            .. Text.Label(' (') .. Text.Value(progress.phaseLabel) .. Text.Label('), ') .. Text.Value(progress.done .. ' of ' .. progress.total))
+    end
     local consent = ns.db.consent
     if type(consent) == 'table' and consent.acceptedAt then
         say(Text.Label('Notice accepted: ') .. Text.Date(env.date('%Y-%m-%d %H:%M', consent.acceptedAt)))
@@ -80,7 +87,25 @@ local function start()
     say(Text.Value(stateText(ns.Consent.State(ns.db, ns.runtime))) .. Text.Label('. Pause with /tgfd stop.'))
 end
 
-local handlers = { help = help, status = status, accept = accept, stop = stop, start = start }
+local function cancel()
+    local Text = ns.Text
+    if not ns.Runner.Cancel('cancelled by command') then say(Text.Label('Nothing is running.')) end
+end
+
+local function selftest()
+    local Text = ns.Text
+    local ok, reason = ns.Runner.Start(ns.SelfTest.Spec())
+    if ok then return end
+    if reason == 'busy' then
+        say(Text.Value(ns.Runner.Progress().name) .. Text.Label(' is already running. Stop it with /tgfd cancel first.'))
+    elseif reason == 'combat' then
+        say(Text.Label('Cannot start during combat. Try again after the fight.'))
+    else
+        say(Text.Label('The operation could not be started: ') .. Text.Value(reason))
+    end
+end
+
+local handlers = { cancel = cancel, selftest = selftest, help = help, status = status, accept = accept, stop = stop, start = start }
 
 function Commands.Handle(message)
     local Text = ns.Text
