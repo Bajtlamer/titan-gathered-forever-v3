@@ -4,7 +4,7 @@ local _, ns = ...
 local Consent = {}
 ns.Consent = Consent
 
-Consent.NOTICE_VERSION = 1
+Consent.NOTICE_VERSION = 2
 
 function Consent.Notice()
     local Text = ns.Text
@@ -13,6 +13,7 @@ function Consent.Notice()
         Text.Label('It records: everything you loot and where it came from, the NPCs and objects you talk to or target (IDs, names, services, vendor and trainer goods), quests, the zones and areas you enter, profession skills and the client build.'),
         Text.Label('It never records: chat, whispers, mail text, player GUIDs or names, guild names, or anything about the auction house.'),
         Text.Label('Nothing is sent anywhere. The game cannot send data, so you would hand it over yourself. The export for hand-over arrives in a later version of this module; until then nothing leaves your computer.'),
+        Text.Label('Scans (') .. Text.Value('/tgfd scan recipes') .. Text.Label(', ') .. Text.Value('/tgfd scan areas') .. Text.Label(') run only when you type them. They show their progress, can be cancelled with ') .. Text.Value('/tgfd cancel') .. Text.Label(' and only read what the game already lists; they open no window and ask the server for nothing.'),
         Text.Label('To start recording: ') .. Text.Value('/tgfd accept') .. Text.Label('. To pause: ') .. Text.Value('/tgfd stop') .. Text.Label(', to resume: ') .. Text.Value('/tgfd start') .. Text.Label('.'),
     }
 end

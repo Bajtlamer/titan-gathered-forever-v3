@@ -4,7 +4,7 @@ local Database = {}
 ns.Database = Database
 
 Database.SCHEMA_VERSION = 1
-Database.CATEGORIES = { 'loot', 'npcs', 'vendors', 'entities', 'quests', 'areas', 'skills' }
+Database.CATEGORIES = { 'loot', 'npcs', 'vendors', 'entities', 'quests', 'areas', 'skills', 'recipes', 'maps' }
 
 -- Returns the saved table and 'ok', or the untouched table and 'newer' when it was written by a newer schema.
 function Database.Init(existing, moduleVersion, now)

@@ -32,6 +32,7 @@ local function help()
     say(Text.Value('/tgfd status') .. Text.Label(': state, versions, baseline and record counts'))
     say(Text.Value('/tgfd stop') .. Text.Label(': pause recording'))
     say(Text.Value('/tgfd start') .. Text.Label(': resume recording'))
+    say(Text.Value('/tgfd scan recipes') .. Text.Label(' and ') .. Text.Value('/tgfd scan areas') .. Text.Label(': read recipes or map IDs (shows progress)'))
     say(Text.Value('/tgfd show') .. Text.Label(': open the overview window (also by clicking the Titan Panel plugin)'))
     say(Text.Value('/tgfd compare') .. Text.Label(': compare the observations with the Titan Gathered Forever data (shows progress)'))
     say(Text.Value('/tgfd selftest') .. Text.Label(': a harmless test of the progress window (records nothing)'))
@@ -125,13 +126,46 @@ local function compare()
     startOperation(ns.Compare.Spec(ns.db, baseline))
 end
 
+local function scanUsage()
+    local Text = ns.Text
+    say(Text.Value('/tgfd scan recipes') .. Text.Label(': read the recipes of the open profession window, also the ones you have not learned'))
+    say(Text.Value('/tgfd scan areas [number]') .. Text.Label(': read the map IDs of the client (up to the number, default 4000)'))
+end
+
+local function scan(rest)
+    local Text = ns.Text
+    local what, argument = rest:match('^(%S*)%s*(.-)$')
+    if what == '' then scanUsage(); return end
+    if what ~= 'recipes' and what ~= 'areas' then
+        say(Text.Label('Unknown scan: ') .. Text.Value(what))
+        scanUsage()
+        return
+    end
+    local state = ns.Consent.State(ns.db, ns.runtime)
+    if state == 'unaccepted' or state == 'blocked-schema' then
+        say(Text.Label('A scan records observations, so the notice must be accepted first: ') .. Text.Value('/tgfd accept'))
+        return
+    elseif state == 'paused' then
+        say(Text.Label('Recording is paused. Resume it with ') .. Text.Value('/tgfd start') .. Text.Label(' before scanning.'))
+        return
+    end
+    if what == 'areas' then startOperation(ns.Scans.AreaSpec(argument)); return end
+    local spec = ns.Scans.RecipeSpec()
+    if not spec then
+        say(Text.Label('The game lists no recipes. Open the profession window yourself first; the module never opens it.'))
+        return
+    end
+    startOperation(spec)
+end
+
 local function show() ns.Window.Toggle() end
 
-local handlers = { show = show, cancel = cancel, selftest = selftest, compare = compare, help = help, status = status, accept = accept, stop = stop, start = start }
+local handlers = { scan = scan, show = show, cancel = cancel, selftest = selftest, compare = compare, help = help, status = status, accept = accept, stop = stop, start = start }
 
 function Commands.Handle(message)
     local Text = ns.Text
-    local word = tostring(message or ''):lower():match('^%s*(%S*)') or ''
+    local word, rest = tostring(message or ''):lower():match('^%s*(%S*)%s*(.-)%s*$')
+    word, rest = word or '', rest or ''
     if type(ns.db) ~= 'table' then
         say(Text.Label('Saved data are not loaded yet. Try again after the interface has finished loading.'))
         return
@@ -143,5 +177,5 @@ function Commands.Handle(message)
         help()
         return
     end
-    handler()
+    handler(rest)
 end

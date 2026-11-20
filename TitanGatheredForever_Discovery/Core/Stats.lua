@@ -36,7 +36,7 @@ function Stats.TooltipLines(db, runtime)
     if saved and saved.ranAt then
         lines[#lines + 1] = { left = Text.Label('Last comparison ') .. Text.Date(ns.env.date('%Y-%m-%d %H:%M', saved.ranAt))
             .. Text.Label(' against ') .. Text.Value(saved.baselineVersion or 'unknown') }
-        lines[#lines + 1] = { left = Text.Label('New and different come from that comparison. Areas, quests and entities have no baseline in the game.') }
+        lines[#lines + 1] = { left = Text.Label('New and different come from that comparison. Areas, maps, quests and entities have no baseline in the game.') }
     end
     lines[#lines + 1] = { left = Text.Label('Left click opens the window. /tgfd compare refreshes the counts.') }
     return lines

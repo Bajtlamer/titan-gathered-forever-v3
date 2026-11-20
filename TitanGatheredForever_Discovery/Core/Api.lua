@@ -129,6 +129,61 @@ function Api.Default()
         return result
     end
 
+    local SKILL_NAMES = { [171] = 'Alchemy', [164] = 'Blacksmithing', [185] = 'Cooking', [333] = 'Enchanting',
+        [202] = 'Engineering', [129] = 'First Aid', [165] = 'Leatherworking', [186] = 'Mining', [197] = 'Tailoring' }
+
+    -- The recipe IDs of the open profession window, or nil when the client lists none.
+    api.RecipeIDs = function()
+        local ids = C_TradeSkillUI and S.Call(C_TradeSkillUI.GetAllRecipeIDs)
+        if type(ids) ~= 'table' or not S.Public(ids) or #ids == 0 or #ids > 4096 then return nil end
+        local list = {}
+        for _, id in ipairs(ids) do
+            local number = S.Number(id)
+            if number then list[#list + 1] = number end
+        end
+        return #list > 0 and list or nil
+    end
+
+    -- One recipe with its profession, product and reagents (basic reagent slots only), or nil.
+    api.Recipe = function(id)
+        local trade = C_TradeSkillUI
+        if not trade then return nil end
+        local info = S.Call(trade.GetRecipeInfo, id)
+        if type(info) ~= 'table' or not S.Public(info) or not S.String(info.name) then return nil end
+        local professionInfo = S.Call(trade.GetProfessionInfoByRecipeID, id)
+        local professionID, parentID, professionName
+        if type(professionInfo) == 'table' and S.Public(professionInfo) then
+            professionID, parentID = S.Number(professionInfo.professionID), S.Number(professionInfo.parentProfessionID)
+            professionName = S.String(professionInfo.professionName)
+        end
+        local recipe = { recipeID = id, name = info.name, professionID = professionID, parentProfessionID = parentID,
+            profession = SKILL_NAMES[parentID] or SKILL_NAMES[professionID] or professionName, reagents = {} }
+        local schematic = S.Call(trade.GetRecipeSchematic, id, false)
+        if type(schematic) == 'table' and S.Public(schematic) then
+            recipe.outputItemID, recipe.quantityMin, recipe.quantityMax = S.Number(schematic.outputItemID),
+                S.Number(schematic.quantityMin), S.Number(schematic.quantityMax)
+            local slots = type(schematic.reagentSlotSchematics) == 'table' and schematic.reagentSlotSchematics or {}
+            for _, slot in ipairs(slots) do
+                if type(slot) == 'table' and S.Public(slot) and slot.reagentType == 1 and S.Number(slot.quantityRequired) then
+                    local items = {}
+                    for _, reagent in ipairs(type(slot.reagents) == 'table' and slot.reagents or {}) do
+                        local itemID = type(reagent) == 'table' and S.Number(reagent.itemID)
+                        if itemID then items[#items + 1] = itemID end
+                    end
+                    if #items > 0 then recipe.reagents[#recipe.reagents + 1] = { quantity = slot.quantityRequired, items = items } end
+                end
+            end
+        end
+        return recipe
+    end
+
+    -- One map of the client by ID, or nil when there is none.
+    api.Map = function(id)
+        local info = C_Map and S.Call(C_Map.GetMapInfo, id)
+        if type(info) ~= 'table' or not S.Public(info) or not S.String(info.name) then return nil end
+        return { id = S.Number(info.mapID) or id, name = info.name, mapType = S.Number(info.mapType), parentMapID = S.Number(info.parentMapID) }
+    end
+
     api.Skills = function()
         local result = {}
         if type(GetProfessions) == 'function' then

@@ -24,6 +24,7 @@ Collectors\Vendor.lua
 Collectors\Quest.lua
 Collectors\Skill.lua
 Collectors\Client.lua
+Collectors\Scans.lua
 Core\Manager.lua
 Core\Baseline.lua
 Core\Compare.lua

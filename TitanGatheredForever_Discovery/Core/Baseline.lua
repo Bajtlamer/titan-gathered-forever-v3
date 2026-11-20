@@ -24,6 +24,7 @@ function Baseline.FromCore()
     return {
         item = function(id) return core.Catalog.Get(id) ~= nil end,
         items = function() return core.Items or {} end,
+        recipe = function(id) return type(core.Recipes) == 'table' and core.Recipes[id] or nil end,
         npc = function(id) return seed[id] end,
         npcs = function() return seed end,
         professions = professions,

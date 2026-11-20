@@ -10,7 +10,7 @@ local Compare = {}
 ns.Compare = Compare
 
 Compare.LABELS = { loot = 'Loot', npcs = 'NPCs', vendors = 'Vendors and trainers', entities = 'Entities',
-    quests = 'Quests', areas = 'Areas', skills = 'Professions' }
+    quests = 'Quests', areas = 'Areas', skills = 'Professions', recipes = 'Recipes', maps = 'Maps' }
 
 local NO_BASELINE = 'No baseline in the game for this category; it is compared offline with the catalogue files.'
 
@@ -95,10 +95,22 @@ local function classifySkill(key, _, baseline)
     return 'new', 'Not one of the twelve known professions.', {}
 end
 
+local function normalize(name) return (tostring(name):lower():gsub('%s+', '')) end
+
+local function classifyRecipe(key, record, baseline)
+    local seed = baseline.recipe(key)
+    if not seed then return 'new', 'Not in the installed catalogue modules (the catalogue is not complete).', {} end
+    if record.profession and seed.profession and normalize(record.profession) ~= normalize(seed.profession) then
+        return 'different', 'The profession differs from the catalogue.',
+            { { field = 'profession', baseline = seed.profession, observed = record.profession } }
+    end
+    return 'unchanged', 'In the installed catalogue.', {}
+end
+
 local function unbaselined() return 'unbaselined', NO_BASELINE, {} end
 
 local CLASSIFIERS = { loot = classifyLoot, npcs = classifyNpc, vendors = classifyVendor, skills = classifySkill,
-    areas = unbaselined, quests = unbaselined, entities = unbaselined }
+    areas = unbaselined, quests = unbaselined, entities = unbaselined, recipes = classifyRecipe, maps = unbaselined }
 
 -- One row for one observed record.
 function Compare.Classify(category, key, record, baseline, db)

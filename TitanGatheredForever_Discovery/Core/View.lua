@@ -112,6 +112,8 @@ local function detailLine(detail)
     elseif detail.field == 'skill' then
         return Text.Label('Skill requirement of ') .. Text.Value(name) .. Text.Label(': seed ') .. Text.Value(detail.baseline)
             .. Text.Label(', observed ') .. Text.Value(detail.observed)
+    elseif detail.field == 'profession' then
+        return Text.Label('Profession: seed ') .. Text.Value(detail.baseline) .. Text.Label(', observed ') .. Text.Value(detail.observed)
     elseif detail.field == 'name' then
         return Text.Label('Name: seed ') .. Text.Value(detail.baseline) .. Text.Label(', observed ') .. Text.Value(detail.observed)
     elseif detail.field == 'notOffered' then
