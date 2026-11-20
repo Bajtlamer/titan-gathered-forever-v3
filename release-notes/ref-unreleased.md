@@ -106,14 +106,14 @@ Updated 2026-11-16. These changes describe the 0.5.108 source candidate and its 
 
 - Runtime folders/manifests and dependencies use TitanGatheredForever and TitanGatheredForever_*; texture paths, addon metadata lookups, generated publishers, packages and tests follow those names. The development directory is titan-gathered-forever. The previous exported namespace remains an alias and the saved table key remains TitanGatheredForeverV3DB.
 - The installer backs up and removes old runtime folders, copies previous account/character saved files to the new filenames without executing or changing their contents, and migrates addon enablement. It refuses conflicting saved state, requires a closed client for the real migration and rolls back runtime and state writes together on failure. Original saved files are retained.
-- All five projects have their own versioned artwork/ directory in their development root. Gathered's artwork/v1/ contains all fourteen of its addon designs; the other projects each keep their own design. PNG masters, 1024px logos, 400px avatars and 64px icons are preserved byte-for-byte and excluded from runtime ZIPs. Old artwork is retained in the source migration backup.
-- Development directories are titan-gathered-forever, titan-command-history, titan-approx-dps, target-ranger and wow-forever-scout. Scout gains a separate WoWForeverScout/ runtime folder and matching manifest, with its own saved-file migration in 0.1.2. No remote repositories, releases or CurseForge projects are renamed or published.
+- All four projects have their own versioned artwork/ directory in their development root. Gathered's artwork/v1/ contains all fourteen of its addon designs; the other projects each keep their own design. PNG masters, 1024px logos, 400px avatars and 64px icons are preserved byte-for-byte and excluded from runtime ZIPs. Old artwork is retained in the source migration backup.
+- Development directories are titan-gathered-forever, titan-command-history, titan-approx-dps and target-ranger. No remote repositories, releases or CurseForge projects are renamed or published.
 
 ## Official name and stable version, 0.5.83
 
 - The public product name is Titan Gathered Forever: manifests, Titan Panel, tooltips, status messages and window titles no longer display TG3 or TGF v3. The compact map button says Map spots. Internal folder names, dependencies, namespaces and SavedVariables remain compatible.
 - The user requested stable numeric versions for every addon. All fourteen Gathered manifests now use 0.5.83 without a beta suffix. Historical release notes and evidence retain their original version designations.
-- The complete artwork collection now covers all five local projects and eighteen addon emblems: Gathered's fourteen, Command History, Approx DPS, Target Ranger and WoWFScout. The three previously omitted projects have their own large PNG logos, 400px avatars, 64px previews and game textures. No website or CurseForge publication is implied.
+- The complete artwork collection now covers all four local projects and seventeen addon emblems: Gathered's fourteen, Command History, Approx DPS and Target Ranger. The previously omitted projects have their own large PNG logos, 400px avatars, 64px previews and game textures. No website or CurseForge publication is implied.
 
 ## Original addon artwork, 0.5.82-beta
 

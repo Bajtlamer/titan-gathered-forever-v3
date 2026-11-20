@@ -33,7 +33,7 @@ Implemented:
 - Small icon appearance window: Titan menu > Icon appearance. Configure world-map materials, minimap materials and flight points independently: 12–40 px, circular crop or full image, and an optional thin gold outline. Preview before Apply; Cancel discards edits.
 - Independent profession addons, optional Auction Items and a shared core.
 - Original coordinated artwork for the core, all twelve professions and Auction Items. Each addon has its own packaged AddOns-list icon; the core also uses its new emblem on Titan Panel and the minimap. Large PNG logos and 400px avatars for CurseForge are in [artwork/v1](artwork/v1), grouped by addon. Each other project keeps its own designs in its own root artwork/ directory. Actual client rendering requires a full restart and live confirmation.
-- The five projects together have eighteen emblems. Titan Command History, Titan Approx DPS, Target Ranger and WoW Forever Scout each keep their artwork in their own development root. [The inventory](artwork/index.json) records the stable versions and included addons; the artwork prompts are in [prompts.json](artwork/v1/prompts.json).
+- The four projects together have seventeen emblems. Titan Command History, Titan Approx DPS and Target Ranger each keep their artwork in their own development root. [The inventory](artwork/index.json) records the stable versions and included addons; the artwork prompts are in [prompts.json](artwork/v1/prompts.json).
 
 Open issues and next work:
 
