@@ -259,7 +259,7 @@ function Undercut.Attach()
     strip:SetSize(400, 24)
     -- At the left edge of the panel, in the row above the Buyout Mode check box (free on every form), shown only while a
     -- Sell form is shown. The window is taller while it is (Undercut.Resize), so the rows below fit above the check box.
-    strip:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 44, 78)
+    strip:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 32, 86)
     if strip.SetFrameLevel and frame.GetFrameLevel then strip:SetFrameLevel(frame:GetFrameLevel() + 20) end
     local label = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
     label:SetPoint('LEFT', 0, 0)
@@ -283,7 +283,7 @@ function Undercut.Attach()
     local info = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
     info:SetPoint('BOTTOMLEFT', strip, 'TOPLEFT', 0, 4)
     info:SetJustifyH('LEFT')
-    if info.SetSpacing then info:SetSpacing(4) end
+    if info.SetSpacing then info:SetSpacing(9) end
     Undercut.info = info
     local warning = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
     warning:SetPoint('BOTTOMLEFT', info, 'TOPLEFT', 0, 2)
