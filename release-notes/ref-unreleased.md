@@ -2,10 +2,10 @@
 
 Updated 2026-11-16. These changes describe the 0.5.113 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
 
-## Compact posting rows, 0.5.117
+## Compact posting rows, 0.5.118
 
 - The Undercut row is at the left edge of the Sell form: the label, a narrow combo box (2, 5, 10 and 15 percent) and, right after it, "AH sold" (what a sale brings after the fee) and "Vendor" (what a vendor pays for the same stack). Below it, from the left edge, come the gains against the cost and against a vendor and the unsold line; the red vendor floor warning is above them. The custom percentage and its text field were removed; a saved custom value that equals a preset becomes that preset, any other falls back to 5 percent.
-- 0.5.117: the gains and unsold lines are two separate texts, 32 pixels from the left edge, with a gap between them (a large line spacing in one text made the coin icons rise); the Undercut row is back at its earlier position.
+- 0.5.118: the gains and unsold lines are two separate texts, 32 pixels from the left edge, with a gap between them (a large line spacing in one text made the coin icons rise); the Undercut row is at the same left edge (32 pixels), aligned with the lines above it, and the red warning has a little more room above the gains line.
 - The auction house window is 44 pixels taller while a Sell form is shown (70 in 0.5.114), restored when the form or the window closes. What the client anchors to the top stays; what it anchors to the bottom and our rows move down with the edge. The strip is in the same place on every form.
 
 ## Warning about the old folders, 0.5.108
