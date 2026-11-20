@@ -176,6 +176,7 @@ local function client()
     local function frame()
         local self = { scripts = {}, shown = true }
         function self:SetSize() end
+        function self:SetWidth() end
         function self:SetPoint() end
         function self:SetText(t) self.text = t end
         function self:SetJustifyH() end

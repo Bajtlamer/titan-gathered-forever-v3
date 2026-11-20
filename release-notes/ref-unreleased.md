@@ -1,10 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-16. These changes describe the 0.5.112 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-16. These changes describe the 0.5.113 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
 
-## Posting panel beside the auction house window, 0.5.112
+## Posting panel beside the auction house window, 0.5.113
 
-- The Sold and Unsold lines and the red vendor floor line no longer sit inside the Sell form, where the position of the Create Auction button (and the Quantity row) made them cover other controls. They live in a small panel attached to the right edge of the auction house window, with room for wrapped text, the same on every form. The panel is shown while a Sell form is open and there is something to say. The Undercut strip stays in the form, in the same place as before.
+- The Sold and Unsold lines and the red vendor floor line no longer sit inside the Sell form, where the position of the Create Auction button (and the Quantity row) made them cover other controls. They live in a panel attached to the left edge of the auction house window, as tall as the window and drawn behind its frame so that it reads as part of it, with room for wrapped text, the same on every form. The panel is shown while a Sell form is open and there is something to say. The Undercut strip stays in the form, in the same place as before.
 
 ## Warning about the old folders, 0.5.108
 

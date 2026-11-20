@@ -282,29 +282,32 @@ function Undercut.Attach()
         { value = 2, label = '2 %' }, { value = 5, label = '5 %' }, { value = 10, label = '10 %' },
         { value = 15, label = '15 %' }, { value = 'custom', label = 'Custom' },
     }
-    -- The panel beside the auction house window: a title, the two posting lines and the red warning below them.
+    -- The panel on the left edge of the auction house window, as tall as the window and drawn behind its frame, so that
+    -- it reads as an extension of it: a title, the two posting lines and the red warning below them.
     local panel = CreateFrame('Frame', nil, frame, _G.BackdropTemplateMixin and 'BackdropTemplate' or nil)
-    panel:SetSize(250, 150)
-    panel:SetPoint('TOPLEFT', frame, 'TOPRIGHT', 4, -70)
+    panel:SetWidth(250)
+    panel:SetPoint('TOPRIGHT', frame, 'TOPLEFT', 6, 0)
+    panel:SetPoint('BOTTOMRIGHT', frame, 'BOTTOMLEFT', 6, 0)
+    if panel.SetFrameLevel and frame.GetFrameLevel then panel:SetFrameLevel(math.max(frame:GetFrameLevel() - 1, 0)) end
     if panel.SetBackdrop then
-        panel:SetBackdrop({ bgFile = 'Interface\\Buttons\\WHITE8X8', edgeFile = 'Interface\\Tooltips\\UI-Tooltip-Border',
-            edgeSize = 14, insets = { left = 3, right = 3, top = 3, bottom = 3 } })
-        panel:SetBackdropColor(0.07, 0.07, 0.08, 0.95)
+        panel:SetBackdrop({ bgFile = 'Interface\\Buttons\\WHITE8X8', edgeFile = 'Interface\\DialogFrame\\UI-DialogBox-Border',
+            edgeSize = 24, insets = { left = 6, right = 6, top = 6, bottom = 6 } })
+        panel:SetBackdropColor(0.07, 0.07, 0.08, 1)
     end
     panel:Hide()
     Undercut.panel = panel
     local title = panel:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
-    title:SetPoint('TOPLEFT', panel, 'TOPLEFT', 12, -12)
+    title:SetPoint('TOP', panel, 'TOP', -3, -16)
     title:SetText('Posting')
     local info = panel:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
-    info:SetPoint('TOPLEFT', title, 'BOTTOMLEFT', 0, -8)
-    if info.SetWidth then info:SetWidth(226) end
+    info:SetPoint('TOPLEFT', panel, 'TOPLEFT', 20, -52)
+    if info.SetWidth then info:SetWidth(210) end
     info:SetJustifyH('LEFT')
     if info.SetSpacing then info:SetSpacing(4) end
     Undercut.info = info
     local warning = panel:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
     warning:SetPoint('TOPLEFT', info, 'BOTTOMLEFT', 0, -10)
-    if warning.SetWidth then warning:SetWidth(226) end
+    if warning.SetWidth then warning:SetWidth(210) end
     warning:SetJustifyH('LEFT')
     warning:Hide()
     Undercut.warning = warning
