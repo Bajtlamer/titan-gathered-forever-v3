@@ -13,6 +13,8 @@ function Api.Default()
     api.Build = function() return GetBuildInfo() end
     api.Locale = function() return GetLocale and GetLocale() or nil end
 
+    api.PlayerName = function() return S.String(S.Call(UnitName, 'player')) end
+
     api.Unit = function(unit)
         local guid = S.String(S.Call(UnitGUID, unit))
         if not guid then return nil end

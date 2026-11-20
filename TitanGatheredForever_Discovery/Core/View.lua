@@ -6,6 +6,7 @@ ns.View = View
 View.ROWS = 16
 View.SHOWS = {
     { value = 'changes', label = 'New and different' },
+    { value = 'toreview', label = 'To review (new or different, not marked)' },
     { value = 'new', label = 'New' },
     { value = 'different', label = 'Different' },
     { value = 'notseen', label = 'Not yet seen' },
@@ -18,6 +19,19 @@ local STATE_LABEL = { new = 'New', different = 'Different', unchanged = 'Unchang
 local STATE_COLOR = { new = 'cyan', different = 'orange', unchanged = 'gray', unbaselined = 'gray', notseen = 'violet' }
 
 local notSeenCache
+
+local function reviewKey(row) return row.category .. ':' .. tostring(row.key) end
+
+-- Review marks are local notes in the saved data; they never change the comparison or the catalogue.
+function View.IsReviewed(row) return ns.db.reviewed[reviewKey(row)] ~= nil end
+
+-- Marks or unmarks the row. Returns true when it is marked afterwards.
+function View.ToggleReviewed(row)
+    local key = reviewKey(row)
+    if ns.db.reviewed[key] then ns.db.reviewed[key] = nil; return false end
+    ns.db.reviewed[key] = ns.env.now()
+    return true
+end
 
 -- Baseline entries that no observation touched, as rows (catalogue items first, then seed NPCs).
 local function notSeenRows()
@@ -43,6 +57,7 @@ local function wanted(row)
     if View.category and row.category ~= View.category then return false end
     if show == 'all' then return true end
     if show == 'changes' then return row.state == 'new' or row.state == 'different' end
+    if show == 'toreview' then return (row.state == 'new' or row.state == 'different') and not View.IsReviewed(row) end
     return row.state == show
 end
 
@@ -86,6 +101,7 @@ function View.Cells(row)
     local notes = {}
     if row.otherBuild then notes[#notes + 1] = 'other build' end
     if row.severalBuilds then notes[#notes + 1] = 'several builds' end
+    if View.IsReviewed(row) then notes[#notes + 1] = 'reviewed' end
     if (row.differences or 0) > 0 then
         notes[#notes + 1] = row.differences .. (row.differences == 1 and ' difference' or ' differences')
     end

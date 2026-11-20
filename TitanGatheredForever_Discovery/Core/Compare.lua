@@ -14,15 +14,7 @@ Compare.LABELS = { loot = 'Loot', npcs = 'NPCs', vendors = 'Vendors and trainers
 
 local NO_BASELINE = 'No baseline in the game for this category; it is compared offline with the catalogue files.'
 
-local function sortedKeys(source)
-    local keys = {}
-    for key in pairs(source or {}) do keys[#keys + 1] = key end
-    table.sort(keys, function(a, b)
-        if type(a) == type(b) and (type(a) == 'number' or type(a) == 'string') then return a < b end
-        return tostring(a) < tostring(b)
-    end)
-    return keys
-end
+local sortedKeys = ns.Util.SortedKeys
 
 local function classifyLoot(key, _, baseline)
     if baseline.item(key) then return 'unchanged', 'In the installed catalogue.', {} end

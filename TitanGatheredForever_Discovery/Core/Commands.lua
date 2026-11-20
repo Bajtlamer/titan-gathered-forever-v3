@@ -33,6 +33,9 @@ local function help()
     say(Text.Value('/tgfd stop') .. Text.Label(': pause recording'))
     say(Text.Value('/tgfd start') .. Text.Label(': resume recording'))
     say(Text.Value('/tgfd scan recipes') .. Text.Label(' and ') .. Text.Value('/tgfd scan areas') .. Text.Label(': read recipes or map IDs (shows progress)'))
+    say(Text.Value('/tgfd audit') .. Text.Label(': check the data for private values (shows progress)'))
+    say(Text.Value('/tgfd export') .. Text.Label(': check and stamp the data for hand-over, then /reload and send the saved file'))
+    say(Text.Value('/tgfd archive') .. Text.Label(': clear exported data from the game, with safeguards'))
     say(Text.Value('/tgfd show') .. Text.Label(': open the overview window (also by clicking the Titan Panel plugin)'))
     say(Text.Value('/tgfd compare') .. Text.Label(': compare the observations with the Titan Gathered Forever data (shows progress)'))
     say(Text.Value('/tgfd selftest') .. Text.Label(': a harmless test of the progress window (records nothing)'))
@@ -158,9 +161,37 @@ local function scan(rest)
     startOperation(spec)
 end
 
+local function audit() startOperation(ns.Audit.Spec(ns.db)) end
+
+local function export()
+    if ns.Database.Count(ns.db) == 0 then say(ns.Text.Label('Nothing to export yet.')); return end
+    startOperation(ns.Export.Spec(ns.db))
+end
+
+local ARCHIVE_REFUSALS = {
+    noexport = 'There is no export yet. Run /tgfd export first.',
+    archived = 'The last export was already archived. Export again to archive newer data.',
+    recording = 'Recording is on. Stop it with /tgfd stop first, so that the data cannot change.',
+    noreload = 'The game has not saved the exported file yet. Type /reload (or log out), copy the file, then run this again.',
+    empty = 'There is nothing to archive.',
+}
+
+local function archive(rest)
+    local Text = ns.Text
+    if rest ~= 'confirm' then
+        say(Text.Label('Archive clears the observations from the game after they were exported. Steps: ') .. Text.Value('/tgfd stop') .. Text.Label(', ')
+            .. Text.Value('/tgfd export') .. Text.Label(', ') .. Text.Value('/reload') .. Text.Label(', copy TitanGatheredForeverDiscoveryDB.lua, then ')
+            .. Text.Value('/tgfd archive confirm') .. Text.Label('. Nothing is cleared when the data changed since the export.'))
+        return
+    end
+    local ok, reason = ns.Export.CanArchive()
+    if not ok then say(Text.Label(ARCHIVE_REFUSALS[reason])); return end
+    startOperation(ns.Export.ArchiveSpec(ns.db))
+end
+
 local function show() ns.Window.Toggle() end
 
-local handlers = { scan = scan, show = show, cancel = cancel, selftest = selftest, compare = compare, help = help, status = status, accept = accept, stop = stop, start = start }
+local handlers = { audit = audit, export = export, archive = archive, scan = scan, show = show, cancel = cancel, selftest = selftest, compare = compare, help = help, status = status, accept = accept, stop = stop, start = start }
 
 function Commands.Handle(message)
     local Text = ns.Text

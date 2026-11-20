@@ -21,6 +21,8 @@ function Database.Init(existing, moduleVersion, now)
     if type(db.consent) ~= 'table' then db.consent = {} end
     if db.consent.accepted == nil then db.consent.accepted = false end
     if db.consent.paused == nil then db.consent.paused = false end
+    if type(db.reviewed) ~= 'table' then db.reviewed = {} end
+    if type(db.archives) ~= 'table' then db.archives = {} end
     if type(db.data) ~= 'table' then db.data = {} end
     for _, category in ipairs(Database.CATEGORIES) do
         if type(db.data[category]) ~= 'table' then db.data[category] = {} end

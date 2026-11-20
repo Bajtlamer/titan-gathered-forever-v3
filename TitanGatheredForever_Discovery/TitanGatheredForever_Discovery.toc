@@ -7,6 +7,7 @@
 ## SavedVariables: TitanGatheredForeverDiscoveryDB
 
 Core\Text.lua
+Core\Util.lua
 Core\Database.lua
 Core\Consent.lua
 Core\Safe.lua
@@ -28,6 +29,9 @@ Collectors\Scans.lua
 Core\Manager.lua
 Core\Baseline.lua
 Core\Compare.lua
+Core\Checksum.lua
+Core\Audit.lua
+Core\Export.lua
 Core\View.lua
 Core\Stats.lua
 UI\Window.lua

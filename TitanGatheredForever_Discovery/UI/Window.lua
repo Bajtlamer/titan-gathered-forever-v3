@@ -84,6 +84,9 @@ local function build()
         function(delta) Window.Scroll(-delta * WHEEL_STEP) end)
     w.detail = text(w, 'GameFontHighlightSmall', 15, -500, 950)
     w.detail:SetHeight(90)
+    w.reviewButton = button(w, 'Mark reviewed', 855, -505, 115, function()
+        if View.selected then View.ToggleReviewed(View.selected); Window.Refresh() end
+    end)
     return w
 end
 
@@ -114,6 +117,7 @@ function Window.Refresh()
     end
     _G.TitanGatheredForeverV3.Nav.SyncScrollbar(w.slider, View.offset, math.max(0, #rows - View.ROWS))
     w.detail:SetText(View.selected and table.concat(View.DetailText(View.selected), '\n') or '')
+    w.reviewButton:SetText(View.selected and View.IsReviewed(View.selected) and 'Clear reviewed mark' or 'Mark reviewed')
 end
 
 function Window.Show()

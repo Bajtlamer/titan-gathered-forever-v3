@@ -25,6 +25,7 @@ local function onAddonLoaded()
     ns.env = ns.env or realEnv()
     ns.api = ns.api or ns.Api.Default()
     ns.runtime = {}
+    ns.state.session = tostring(ns.env.now()) .. '-' .. tostring(math.floor(ns.env.clock()))
     local status
     _G.TitanGatheredForeverDiscoveryDB, status = ns.Database.Init(_G.TitanGatheredForeverDiscoveryDB, ns.env.moduleVersion, ns.env.now())
     ns.db = _G.TitanGatheredForeverDiscoveryDB
