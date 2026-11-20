@@ -37,6 +37,7 @@ end
 
 local function onLogin()
     local Text = ns.Text
+    pcall(ns.Stats.Initialize)           -- the Titan Panel plugin is optional; a failure must never stop the start
     if ns.runtime.schemaBlocked then
         ns.Print(Text.Label('Discovery is off: the saved data are from a newer version of this module and are left untouched. Update the module.'))
     end

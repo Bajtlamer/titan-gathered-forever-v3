@@ -41,6 +41,8 @@ function Manager.Handle(event, ...)
     if not ok then
         ns.runtime.errors = (ns.runtime.errors or 0) + 1
         ns.runtime.lastError = tostring(err)
+    elseif ns.Stats then
+        ns.Stats.Dirty()
     end
 end
 

@@ -32,6 +32,7 @@ local function help()
     say(Text.Value('/tgfd status') .. Text.Label(': state, versions, baseline and record counts'))
     say(Text.Value('/tgfd stop') .. Text.Label(': pause recording'))
     say(Text.Value('/tgfd start') .. Text.Label(': resume recording'))
+    say(Text.Value('/tgfd show') .. Text.Label(': open the overview window (also by clicking the Titan Panel plugin)'))
     say(Text.Value('/tgfd compare') .. Text.Label(': compare the observations with the Titan Gathered Forever data (shows progress)'))
     say(Text.Value('/tgfd selftest') .. Text.Label(': a harmless test of the progress window (records nothing)'))
     say(Text.Value('/tgfd cancel') .. Text.Label(': stop the running operation'))
@@ -77,6 +78,7 @@ local function accept()
     local ok, reason = ns.Consent.Accept(ns.db, ns.runtime, ns.env.now())
     if not ok then say(refusal(reason)); return end
     ns.Manager.Begin()
+    ns.Stats.Refresh()
     say(Text.Value(stateText(ns.Consent.State(ns.db, ns.runtime))) .. Text.Label('. Pause with /tgfd stop, see /tgfd status for what has been recorded.'))
 end
 
@@ -84,6 +86,7 @@ local function stop()
     local Text = ns.Text
     if not ns.Consent.Stop(ns.db, ns.runtime) then say(Text.Label('Nothing to pause: run /tgfd accept first.')); return end
     ns.Manager.Refresh()
+    ns.Stats.Refresh()
     say(Text.Value('Paused') .. Text.Label('. Resume with /tgfd start.'))
 end
 
@@ -91,6 +94,7 @@ local function start()
     local Text = ns.Text
     if not ns.Consent.Start(ns.db, ns.runtime) then say(Text.Label('Nothing to resume: run /tgfd accept first.')); return end
     ns.Manager.Begin()
+    ns.Stats.Refresh()
     say(Text.Value(stateText(ns.Consent.State(ns.db, ns.runtime))) .. Text.Label('. Pause with /tgfd stop.'))
 end
 
@@ -121,7 +125,9 @@ local function compare()
     startOperation(ns.Compare.Spec(ns.db, baseline))
 end
 
-local handlers = { cancel = cancel, selftest = selftest, compare = compare, help = help, status = status, accept = accept, stop = stop, start = start }
+local function show() ns.Window.Toggle() end
+
+local handlers = { show = show, cancel = cancel, selftest = selftest, compare = compare, help = help, status = status, accept = accept, stop = stop, start = start }
 
 function Commands.Handle(message)
     local Text = ns.Text

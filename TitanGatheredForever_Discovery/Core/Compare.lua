@@ -219,6 +219,7 @@ function Compare.Spec(db, baseline)
             ns.results = results
             save(results, db, baseline)
             report(results, baseline)
+            if ns.Stats then ns.Stats.Refresh() end
         end,
     }
 end

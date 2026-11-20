@@ -58,6 +58,7 @@ commands = [
     [runtime, 'tests/discovery.lua'],
     [runtime, 'tests/discovery_collectors.lua'],
     [runtime, 'tests/discovery_compare.lua'],
+    [runtime, 'tests/discovery_view.lua'],
 ]
 for command in commands:
     subprocess.run(command, cwd=root, check=True, stdin=subprocess.DEVNULL)

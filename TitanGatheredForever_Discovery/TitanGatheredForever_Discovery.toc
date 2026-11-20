@@ -27,6 +27,9 @@ Collectors\Client.lua
 Core\Manager.lua
 Core\Baseline.lua
 Core\Compare.lua
+Core\View.lua
+Core\Stats.lua
+UI\Window.lua
 Core\Commands.lua
 Core\Main.lua
 Start.lua
