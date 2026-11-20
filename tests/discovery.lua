@@ -1,4 +1,4 @@
--- Titan Gathered Forever: Discovery, milestone 1: manifest, saved data lifecycle, Scout detection, consent, commands.
+-- Titan Gathered Forever: Discovery: manifest, saved data lifecycle, consent, commands, runner and progress.
 local FOLDER = 'TitanGatheredForever_Discovery'
 local tests = {}
 local function test(name, fn) tests[#tests + 1] = { name, fn } end
@@ -44,7 +44,7 @@ end
 local function ready(options)
     local ns = load(options)
     ns.db, ns.status = ns.Database.Init(nil, '0.1.0', 1000)
-    ns.runtime = { scout = {} }
+    ns.runtime = {}
     return ns
 end
 
@@ -61,8 +61,17 @@ test('the manifest names the module like its folder, needs Titan and the core an
     has(toc, '## Dependencies: Titan, TitanGatheredForever')
     has(toc, '## SavedVariables: TitanGatheredForeverDiscoveryDB')
     lacks(toc, 'TitanGatheredForeverV3DB')
-    lacks(toc, 'WoWFScoutDB')
     for _, file in ipairs(manifestFiles()) do assert(io.open(FOLDER .. '/' .. file, 'r'), 'listed file is missing: ' .. file) end
+end)
+
+test('the module and its manifest do not mention the retired addon', function()
+    local words = { 'sco' .. 'ut', 'wowf' .. 'scout' }
+    local files = manifestFiles()
+    files[#files + 1] = FOLDER .. '.toc'
+    for _, file in ipairs(files) do
+        local text = readAll(FOLDER .. '/' .. file):lower()
+        for _, word in ipairs(words) do lacks(text, word) end
+    end
 end)
 
 test('no file of the module touches the auction house', function()
@@ -114,14 +123,6 @@ test('records are counted over all categories', function()
     eq(ns.Database.Count(nil), 0)
 end)
 
-test('the retired Scout is found by its folder names; an error in the check counts as not loaded', function()
-    local ns = load()
-    local found = ns.Scout.Found(function(name) return name == 'WoWForeverScout' end)
-    eq(#found, 1); eq(found[1], 'WoWForeverScout')
-    eq(#ns.Scout.Found(function() return false end), 0)
-    eq(#ns.Scout.Found(function() error('boom') end), 0)
-end)
-
 test('nothing is collected before the notice is accepted, and acceptance is recorded', function()
     local ns = ready()
     eq(ns.Consent.State(ns.db, ns.runtime), 'unaccepted')
@@ -140,19 +141,6 @@ test('stop pauses and start resumes, but only after acceptance', function()
     eq(ns.Consent.State(ns.db, ns.runtime), 'paused'); eq(ns.Consent.Collecting(ns.db, ns.runtime), false)
     eq(ns.Consent.Start(ns.db, ns.runtime), true)
     eq(ns.Consent.State(ns.db, ns.runtime), 'collecting')
-end)
-
-test('a loaded Scout blocks collection and acceptance', function()
-    local ns = ready()
-    ns.runtime.scout = { 'WoWForeverScout' }
-    eq(ns.Consent.Accept(ns.db, ns.runtime, 2000), false)
-    eq(ns.db.consent.accepted, false)
-    eq(ns.Consent.State(ns.db, ns.runtime), 'blocked-scout')
-    ns.runtime.scout = {}
-    ns.Consent.Accept(ns.db, ns.runtime, 2000)
-    ns.runtime.scout = { 'WoWForeverScout' }
-    eq(ns.Consent.Collecting(ns.db, ns.runtime), false)
-    eq(ns.Consent.State(ns.db, ns.runtime), 'blocked-scout')
 end)
 
 test('data of a newer schema block collection and acceptance', function()
@@ -198,14 +186,6 @@ test('help after acceptance lists the commands and not the notice', function()
     lacks(text, '/tgfd accept')
 end)
 
-test('accept is refused with a reason while Scout is loaded', function()
-    local ns = ready()
-    ns.runtime.scout = { 'WoWForeverScout' }
-    ns.Commands.Handle('accept')
-    has(joined(ns), 'WoWForeverScout')
-    eq(ns.db.consent.accepted, false)
-end)
-
 test('stop and start report their result', function()
     local ns = ready()
     ns.Commands.Handle('start'); has(joined(ns), 'accept')
@@ -226,13 +206,6 @@ test('status shows the state, versions, client build, baseline and record count'
     has(text, 'Records'); has(text, 'loot')
 end)
 
-test('status names the Scout that blocks collection', function()
-    local ns = ready()
-    ns.runtime.scout = { 'WoWForeverScout' }
-    ns.Commands.Handle('status')
-    has(joined(ns), 'Blocked'); has(joined(ns), 'WoWForeverScout')
-end)
-
 test('an unknown command prints a message and the help', function()
     local ns = ready()
     ns.Commands.Handle('frobnicate')
@@ -241,7 +214,7 @@ end)
 
 test('commands before the saved table exists print a message and never fail', function()
     local ns = load()
-    ns.runtime = { scout = {} }
+    ns.runtime = {}
     ns.Commands.Handle('status'); has(joined(ns), 'not loaded')
     ns.printed = {}
     ns.Commands.Handle('accept'); has(joined(ns), 'not loaded')
@@ -285,7 +258,7 @@ local function client()
     _G.UIParent = widget('UIParent')
     _G.SlashCmdList = {}
     _G.DEFAULT_CHAT_FRAME = { AddMessage = function(_, message) messages[#messages + 1] = message end }
-    _G.C_AddOns = { IsAddOnLoaded = function() return false end, GetAddOnMetadata = function() return '0.5.108' end }
+    _G.C_AddOns = { GetAddOnMetadata = function() return '0.5.108' end }
     _G.GetBuildInfo = function() return '1.60.1', '70862', 'Nov 3 2026', 16001 end
     _G.time = function() return 1000 end
     _G.date = function() return 'today' end
@@ -318,26 +291,19 @@ test('another addon loading does not create the saved table', function()
     eq(_G.TitanGatheredForeverDiscoveryDB, nil)
 end)
 
-test('at login a loaded Scout is reported once and blocks collection; otherwise a short hint appears', function()
+test('at login a short hint appears until the notice is accepted', function()
     local frames, messages = client()
-    _G.C_AddOns.IsAddOnLoaded = function(name) return name == 'WoWForeverScout' end
     local ns = load({ raw = true })
     ns.Main.Start()
     frames[1].OnEvent(frames[1], 'ADDON_LOADED', FOLDER)
     frames[1].OnEvent(frames[1], 'PLAYER_LOGIN')
-    eq(ns.Consent.State(ns.db, ns.runtime), 'blocked-scout')
-    has(table.concat(messages, '\n'), 'WoWForeverScout')
-
-    local frames2, messages2 = client()
-    local ns2 = load({ raw = true })
-    ns2.Main.Start()
-    frames2[1].OnEvent(frames2[1], 'ADDON_LOADED', FOLDER)
-    frames2[1].OnEvent(frames2[1], 'PLAYER_LOGIN')
-    eq(ns2.Consent.State(ns2.db, ns2.runtime), 'unaccepted')
-    has(table.concat(messages2, '\n'), '/tgfd')
-    lacks(table.concat(messages2, '\n'), 'WoWForeverScout')
+    eq(ns.Consent.State(ns.db, ns.runtime), 'unaccepted')
+    has(table.concat(messages, '\n'), '/tgfd')
+    ns.Consent.Accept(ns.db, ns.runtime, 1)
+    messages[#messages + 1] = '--'
+    frames[1].OnEvent(frames[1], 'PLAYER_LOGIN')
+    has(table.concat(messages, '\n'), 'Collecting')
 end)
-
 test('a newer saved schema is reported at login and blocks collection', function()
     local frames, messages = client()
     _G.TitanGatheredForeverDiscoveryDB = { meta = { schemaVersion = 99 } }

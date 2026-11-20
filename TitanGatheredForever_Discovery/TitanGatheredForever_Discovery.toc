@@ -8,7 +8,6 @@
 
 Core\Text.lua
 Core\Database.lua
-Core\Scout.lua
 Core\Consent.lua
 Core\Runner.lua
 Core\Progress.lua

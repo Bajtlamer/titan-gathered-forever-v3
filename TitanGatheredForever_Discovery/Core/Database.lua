@@ -1,5 +1,5 @@
 local _, ns = ...
--- The saved table TitanGatheredForeverDiscoveryDB. It is separate from the core's table and from the retired Scout's.
+-- The saved table TitanGatheredForeverDiscoveryDB. It is separate from the core's table.
 local Database = {}
 ns.Database = Database
 

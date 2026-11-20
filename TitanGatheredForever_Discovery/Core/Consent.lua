@@ -13,7 +13,7 @@ function Consent.Notice()
         Text.Label('It records: everything you loot and where it came from, the NPCs and objects you talk to or target (IDs, names, services, vendor and trainer goods), quests, the zones and areas you enter, profession skills and the client build.'),
         Text.Label('It never records: chat, whispers, mail text, player GUIDs or names, guild names, or anything about the auction house.'),
         Text.Label('Nothing is sent anywhere. The game cannot send data, so you would hand it over yourself. The export for hand-over arrives in a later version of this module; until then nothing leaves your computer.'),
-        Text.Label('To start recording: ') .. Text.Value('/tgfd accept') .. Text.Label('. To pause: ') .. Text.Value('/tgfd stop') .. Text.Label(', to resume: ') .. Text.Value('/tgfd start') .. Text.Label('. While WoW Forever Scout is loaded, this module stays off.'),
+        Text.Label('To start recording: ') .. Text.Value('/tgfd accept') .. Text.Label('. To pause: ') .. Text.Value('/tgfd stop') .. Text.Label(', to resume: ') .. Text.Value('/tgfd start') .. Text.Label('.'),
     }
 end
 
@@ -22,11 +22,10 @@ local function accepted(db)
         and db.consent.version == Consent.NOTICE_VERSION
 end
 
--- 'blocked-schema', 'blocked-scout', 'unaccepted', 'paused' or 'collecting'.
+-- 'blocked-schema', 'unaccepted', 'paused' or 'collecting'.
 function Consent.State(db, runtime)
     runtime = runtime or {}
     if runtime.schemaBlocked then return 'blocked-schema' end
-    if runtime.scout and #runtime.scout > 0 then return 'blocked-scout' end
     if not accepted(db) then return 'unaccepted' end
     if db.consent.paused then return 'paused' end
     return 'collecting'
@@ -36,10 +35,9 @@ function Consent.Collecting(db, runtime)
     return Consent.State(db, runtime) == 'collecting'
 end
 
--- true, or false with the reason 'scout' or 'schema'.
+-- true, or false with the reason 'schema'.
 function Consent.Accept(db, runtime, now)
     if runtime and runtime.schemaBlocked then return false, 'schema' end
-    if runtime and runtime.scout and #runtime.scout > 0 then return false, 'scout' end
     if not accepted(db) then
         db.consent.accepted = true
         db.consent.version = Consent.NOTICE_VERSION

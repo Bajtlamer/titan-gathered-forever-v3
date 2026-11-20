@@ -12,18 +12,12 @@ local STATE_TEXT = {
 local function say(message) ns.Print(message) end
 
 local function stateText(state)
-    if state == 'blocked-scout' then
-        return 'Blocked: ' .. table.concat(ns.runtime.scout, ', ') .. ' is loaded'
-    end
     if state == 'blocked-schema' then return 'Blocked: saved data are from a newer version' end
     return STATE_TEXT[state]
 end
 
 local function refusal(reason)
     local Text = ns.Text
-    if reason == 'scout' then
-        return Text.Label('Cannot start: ') .. Text.Value(table.concat(ns.runtime.scout, ', ')) .. Text.Label(' is loaded. Disable or remove it and reload the interface.')
-    end
     return Text.Label('Cannot start: the saved data are from a newer version of this module and are left untouched.')
 end
 

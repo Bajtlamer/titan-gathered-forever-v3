@@ -20,15 +20,10 @@ local function realEnv()
     }
 end
 
-local function isLoaded(name)
-    local check = (C_AddOns and C_AddOns.IsAddOnLoaded) or IsAddOnLoaded
-    return check and check(name)
-end
-
 local function onAddonLoaded()
     ns.Print = ns.Print or function(message) DEFAULT_CHAT_FRAME:AddMessage(message) end
     ns.env = ns.env or realEnv()
-    ns.runtime = { scout = {} }
+    ns.runtime = {}
     local status
     _G.TitanGatheredForeverDiscoveryDB, status = ns.Database.Init(_G.TitanGatheredForeverDiscoveryDB, ns.env.moduleVersion, ns.env.now())
     ns.db = _G.TitanGatheredForeverDiscoveryDB
@@ -41,14 +36,10 @@ end
 
 local function onLogin()
     local Text = ns.Text
-    ns.runtime.scout = ns.Scout.Found(isLoaded)
-    if #ns.runtime.scout > 0 then
-        ns.Print(Text.Label('Discovery is off: ') .. Text.Value(table.concat(ns.runtime.scout, ', ')) .. Text.Label(' is loaded. Only one of the two may run. Disable one and reload.'))
-    end
     if ns.runtime.schemaBlocked then
         ns.Print(Text.Label('Discovery is off: the saved data are from a newer version of this module and are left untouched. Update the module.'))
     end
-    if #ns.runtime.scout > 0 or ns.runtime.schemaBlocked then return end
+    if ns.runtime.schemaBlocked then return end
     local state = ns.Consent.State(ns.db, ns.runtime)
     if state == 'unaccepted' then
         ns.Print(Text.Label('Discovery records nothing until you read and accept its notice. Type ') .. Text.Value('/tgfd') .. Text.Label('.'))

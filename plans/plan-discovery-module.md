@@ -1,4 +1,4 @@
-# Plan: Discovery module (replacement for WoW Forever Scout)
+# Plan: Discovery module
 
 Written 2026-11-19 at version 0.5.108. Status: proposed, nothing implemented. Branch: feat/discovery-module (from main). The shared core stays clean for CurseForge releases; all work happens in a new runtime folder and in tools/, and the branch is merged only on the owner's decision.
 
@@ -6,12 +6,11 @@ Written 2026-11-19 at version 0.5.108. Status: proposed, nothing implemented. Br
 
 A data-collection module for the owner (and for contributors who knowingly choose to help) that records what the WoW Forever client shows and compares it with the data Titan Gathered Forever already ships, so that new and different facts can be reviewed and then added to catalogue/ deliberately.
 
-It replaces the retired WoW Forever Scout addon (WoWForeverScout 0.1.3, SavedVariables WoWFScoutDB). Scout and the module never run together.
+It is a new, standalone data-collection module; no earlier addon is kept, detected or imported.
 
 ## 2. Decisions from the owner (2026-11-19)
 
-- Scout and the module do not run side by side. The module refuses to start collecting while WoWForeverScout is loaded and says so in chat. Scout is switched off or removed by the user.
-- The module does nothing with the auction house. No passive auction recording, no scan of the full content. Scout's AuctionScanner is not ported.
+- The module does nothing with the auction house. No passive auction recording, no scan of the full content.
 - Every active scan or heavy operation is started only by a chat command, never automatically and never from a button that could be hit by accident.
 - Every heavy operation shows progress: which operation runs, which phase, how far it is, and can be cancelled by a command.
 - Passive collection is broad: all looting, every contact with an NPC or other entity, every newly seen zone and area. The aim is to catch as many new or different facts as possible.
@@ -44,11 +43,10 @@ It replaces the retired WoW Forever Scout addon (WoWForeverScout 0.1.3, SavedVar
 | Vendor and trainer goods | item or spell IDs, price in copper, stack, stock, extended cost flag, skill requirement | on window open, rate limited, one pass per window |
 | Other entities | game objects (nodes, chests, mailboxes), units seen by tooltip and target, with IDs | target and mouseover, deduplicated per ID |
 | Quests | quest ID, title, giver, turn-in, reward item IDs shown | quest frame events |
-| Areas | zone, subzone, real zone text, instance name and type, map ID, parent map, first visit time | zone changed events, every new name is stored, as Scout intended |
+| Areas | zone, subzone, real zone text, instance name and type, map ID, parent map, first visit time | zone changed events, every new name is stored |
 | Skills | profession names and ranks (evidence which professions exist) | skill lines changed |
 | Client | build, interface version, locale, module version | at login and via /tgfd info |
 
-Scout's loot debug print of raw GUIDs is not ported; GUID segment layout is a documented test fixture instead.
 
 ### 4.2 Commands (active, started by the user only)
 
@@ -61,7 +59,6 @@ All under /tgfd. No command runs on login or from a hidden trigger.
 - /tgfd scan recipes: full recipe list of the open profession window including unlearned recipes and reagents. Needs the window open; the module never opens it.
 - /tgfd scan areas: walk the map hierarchy and record every map ID, name, parent and type the client reports. Chunked, with progress.
 - /tgfd compare: run the comparison against the baseline in chunks, with progress, then open the overview.
-- /tgfd import scout: one-time import of WoWFScoutDB (about 14 kB at present) into the module's tables, marked as imported from Scout 0.1.3.
 - /tgfd export: write the export blob or table for sending; /tgfd archive: export and clear the collected data after confirmation (/tgfd archive confirm).
 - /tgfd cancel: stop the running operation.
 
@@ -79,7 +76,7 @@ Auction commands do not exist.
 Opened with /tgfd show or by clicking the Titan Panel statistics button (section 5.1). Follows the style rules in AGENTS.md: Style.Label and Style.Value, Style.Range for "Showing a-b of n", Style.Date for dates, game money format for prices, small gold informational text.
 
 - Header: baseline TGF version, client build, last compare time, observations total, and one line saying that these are unverified observations.
-- Tabs: New (not in the baseline), Different (same ID, other name, price, location, source or requirement), Not seen (in the baseline, never observed on this client), Areas, NPCs, Items, Quests, Recipes, Imported from Scout.
+- Tabs: New (not in the baseline), Different (same ID, other name, price, location, source or requirement), Not seen (in the baseline, never observed on this client), Areas, NPCs, Items, Quests, Recipes.
 - Each row: ID, name, category, count, first seen, last seen, state (new, different, unchanged, build-dependent) and a short "why" text.
 - Filters by category and state, sorting, paging, and a detail panel with all observations of one row (where, when, how many times, which build).
 - Buttons: Export selection and Mark reviewed. Reviewed marks are local notes only; they do not change the catalogue.
@@ -100,30 +97,30 @@ The only Titan Panel element is a read-only statistics plugin. It shows counts o
 New runtime folder TitanGatheredForever_Discovery (hand-written, not generated; not listed in catalogue/modules.json):
 
 - TitanGatheredForever_Discovery.toc: interface 16001, Dependencies: Titan, TitanGatheredForever (Titan for the statistics plugin), SavedVariables: TitanGatheredForeverDiscoveryDB, version in step with the core on release rules below.
-- Core/: namespace, saved-variable lifecycle with schema version, Scout presence check, notice and consent, command router, batch runner and progress frame.
+- Core/: namespace, saved-variable lifecycle with schema version, notice and consent, command router, batch runner and progress frame.
 - Collectors/: Loot, Npc, Vendor, Entity, Quest, Area, Skill, Client, plus the command-started RecipeScan and AreaScan.
-- Compare/: pure Lua comparison with no WoW calls (testable offline, as Scout's Compare was).
+- Compare/: pure Lua comparison with no WoW calls (testable offline).
 - UI/: overview window and progress frame.
 - Artwork: an emblem following the existing artwork inventory, added last.
 
-Own SavedVariables key, so the core's TitanGatheredForeverV3DB and the retired WoWFScoutDB are never touched. The module's tests live in tests/ with the other suites and are added to tools/check.py; tools/install.py and the packaging allowlist are extended only so the module can be installed locally.
+Own SavedVariables key, so the core's TitanGatheredForeverV3DB is never touched. The module's tests live in tests/ with the other suites and are added to tools/check.py; tools/install.py and the packaging allowlist are extended only so the module can be installed locally.
 
 ## 8. Versioning, branch and release rules
 
 - All work stays on feat/discovery-module (or sub-branches merged into it). main and the CurseForge release line are not touched. Merge to main only on the owner's explicit decision.
 - The module has its own version line, starting at 0.1.0, because it is not part of the published addon set. If a core change turns out to be unavoidable, it is made as a separate, minimal commit that is reviewed on its own; a core change means a patch increment and synchronized manifests as AGENTS.md requires.
-- Install into the live AddOns folder follows AGENTS.md (checks, preview, --apply, verify). Scout must be removed first; the installer is not used to delete it.
+- Install into the live AddOns folder follows AGENTS.md (checks, preview, --apply, verify).
 - Documentation as the repository asks: README section, ref- status update, release notes only on a release. No attribution to an AI tool in commits or the PR description.
 
 ## 9. Milestones
 
-1. Skeleton and safety (about 1 day): folder, manifest, SavedVariables lifecycle, Scout detection, first-run notice and /tgfd accept, command router, status. Tests for lifecycle and consent.
+1. Skeleton and safety (about 1 day): folder, manifest, SavedVariables lifecycle, first-run notice and /tgfd accept, command router, status. Tests for lifecycle and consent.
 2. Batch runner and progress frame (1 day): time-budgeted runner, cancel, abort on combat and loading screens. Tests with a fake clock.
 3. Passive collectors (2 days): loot, NPC contact, vendor and trainer goods, entities, areas, skills, client. Fixtures from real event payloads; privacy tests proving that no player GUID or name is stored.
 4. Comparison engine (1 day): pure Lua, baseline from the published compact records, build-dependent flag.
 5. Overview window (1 to 2 days): tabs, filters, paging, detail panel, style tests with tests/style_stub.lua.
 6. Command-started scans (1 to 2 days): recipes and areas; live validation needed because the C_TradeSkillUI and C_Map shapes are unverified on this client.
-7. Scout import and export or archive (1 day).
+7. Export and archive (1 day).
 8. Offline tool and report (1 to 2 days).
 9. Live acceptance and documentation (1 day): record live results separately from automated checks.
 
@@ -148,7 +145,8 @@ Still open:
 
 ## 12. Execution record
 
-- Milestone 1 (2026-11-20, branch feat/discovery-module): the folder TitanGatheredForever_Discovery 0.1.0 exists with manifest (own saved table TitanGatheredForeverDiscoveryDB), Core/Text, Database, Scout, Consent, Commands, Main and Start. Tests (tests/discovery.lua, 29 checks) were written first and failed for the missing manifest before any module code. Covered: saved-table lifecycle including newer-schema protection, Scout detection, consent and notice versioning, /tgfd help, accept, stop, start and status, login checks, a guard that no file touches the auction house, and that only ADDON_LOADED and PLAYER_LOGIN are used.
+- Milestone 1 (2026-11-20, branch feat/discovery-module): the folder TitanGatheredForever_Discovery 0.1.0 exists with manifest (own saved table TitanGatheredForeverDiscoveryDB), Core/Text, Database, Consent, Commands, Main and Start. Tests (29 checks at that point) were written first and failed for the missing manifest before any module code. Covered: saved-table lifecycle including newer-schema protection, consent and notice versioning, /tgfd help, accept, stop, start and status, login checks, a guard that no file touches the auction house, and that only ADDON_LOADED and PLAYER_LOGIN are used.
 - tools/check.py runs the new suite and compiles the module's Lua. tests/test_branding.py lets the module keep its own version line; tests/test_repository_layout.py guards that it stays out of catalogue/modules.json and holds only manifest files.
-- Not done: no artwork or IconTexture (planned last), not installed in the game (Scout must be removed first and the installer only handles the published set), no live check. Automated results only.
+- Not done: no artwork or IconTexture (planned last), not installed in the game (the installer only handles the published set), no live check. Automated results only.
 - Milestone 2 (2026-11-20): Core/Runner.lua (one operation at a time, phases with lazily read totals, a 5 ms budget per tick with at least one step, errors in steps, totals and finish handlers contained, listeners), Core/Progress.lua (progress window with phase, bar, counts, elapsed time and a Cancel button; built lazily and optional, so a window failure leaves chat progress and the operation intact), Core/SelfTest.lua (/tgfd selftest, a harmless three-phase operation that records nothing) and the commands /tgfd cancel and selftest. Main drives an operation from its own ticker frame and registers PLAYER_REGEN_DISABLED and PLAYER_LEAVING_WORLD only while it runs, so an idle module still has no per-frame work and no game events. tests/discovery.lua now has 46 checks (fake clock for the budget and the order of steps). Operations refuse to start in combat. Live validation still open: the look of the progress window (BackdropTemplate, StatusBar, UIPanelButtonTemplate on the Forever client), the lag of /tgfd selftest and that PLAYER_LEAVING_WORLD stops a running operation on a real loading screen.
+- 2026-11-20: the owner asked for the earlier addon to be removed everywhere. It was deleted from the game folder together with its saved data and backups. The module has no detection of it, no blocked state and no import; a test guards that no module file or manifest mentions it again. tests/discovery.lua has 43 checks after the removal.
