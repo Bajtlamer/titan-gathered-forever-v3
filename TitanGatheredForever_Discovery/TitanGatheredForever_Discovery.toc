@@ -25,6 +25,8 @@ Collectors\Quest.lua
 Collectors\Skill.lua
 Collectors\Client.lua
 Core\Manager.lua
+Core\Baseline.lua
+Core\Compare.lua
 Core\Commands.lua
 Core\Main.lua
 Start.lua

@@ -32,6 +32,7 @@ local function help()
     say(Text.Value('/tgfd status') .. Text.Label(': state, versions, baseline and record counts'))
     say(Text.Value('/tgfd stop') .. Text.Label(': pause recording'))
     say(Text.Value('/tgfd start') .. Text.Label(': resume recording'))
+    say(Text.Value('/tgfd compare') .. Text.Label(': compare the observations with the Titan Gathered Forever data (shows progress)'))
     say(Text.Value('/tgfd selftest') .. Text.Label(': a harmless test of the progress window (records nothing)'))
     say(Text.Value('/tgfd cancel') .. Text.Label(': stop the running operation'))
     say(Text.Value('/tgfd help') .. Text.Label(': this list'))
@@ -56,6 +57,12 @@ local function status()
     local consent = ns.db.consent
     if type(consent) == 'table' and consent.acceptedAt then
         say(Text.Label('Notice accepted: ') .. Text.Date(env.date('%Y-%m-%d %H:%M', consent.acceptedAt)))
+    end
+    local saved = ns.db.compare
+    if type(saved) == 'table' then
+        say(Text.Label('Last comparison: ') .. Text.Date(env.date('%Y-%m-%d %H:%M', saved.ranAt)) .. Text.Label(' against ')
+            .. Text.Value(saved.baselineVersion or 'unknown') .. Text.Label(': ') .. Text.Value(saved.totals.new) .. Text.Label(' new, ')
+            .. Text.Value(saved.totals.different) .. Text.Label(' different'))
     end
     say(Text.Label('Records: ') .. Text.Value(ns.Database.Count(ns.db)))
     local parts = {}
@@ -92,9 +99,10 @@ local function cancel()
     if not ns.Runner.Cancel('cancelled by command') then say(Text.Label('Nothing is running.')) end
 end
 
-local function selftest()
+-- Starts an operation and explains a refusal.
+local function startOperation(spec)
     local Text = ns.Text
-    local ok, reason = ns.Runner.Start(ns.SelfTest.Spec())
+    local ok, reason = ns.Runner.Start(spec)
     if ok then return end
     if reason == 'busy' then
         say(Text.Value(ns.Runner.Progress().name) .. Text.Label(' is already running. Stop it with /tgfd cancel first.'))
@@ -105,7 +113,15 @@ local function selftest()
     end
 end
 
-local handlers = { cancel = cancel, selftest = selftest, help = help, status = status, accept = accept, stop = stop, start = start }
+local function selftest() startOperation(ns.SelfTest.Spec()) end
+
+local function compare()
+    local baseline, reason = ns.Baseline.FromCore()
+    if not baseline then say(ns.Text.Label(reason)); return end
+    startOperation(ns.Compare.Spec(ns.db, baseline))
+end
+
+local handlers = { cancel = cancel, selftest = selftest, compare = compare, help = help, status = status, accept = accept, stop = stop, start = start }
 
 function Commands.Handle(message)
     local Text = ns.Text
