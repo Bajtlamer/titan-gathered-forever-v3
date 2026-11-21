@@ -91,6 +91,8 @@ function ns.Settings.Initialize(saved)
     if type(saved.npcs) ~= 'table' then saved.npcs = {} end
     if type(saved.npcLog) ~= 'table' then saved.npcLog = {} end
     if type(saved.auctionLog) ~= 'table' then saved.auctionLog = {} end
+    if type(saved.sales) ~= 'table' then saved.sales = {} end
+    if type(saved.mailLog) ~= 'table' then saved.mailLog = {} end
     if type(saved.windowPositions) ~= 'table' then saved.windowPositions = {} end
     if type(saved.recipeMakes) ~= 'table' then saved.recipeMakes = {} end
     if type(saved.recipeExtra) ~= 'table' then saved.recipeExtra = {} end

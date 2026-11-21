@@ -154,7 +154,7 @@ local function fixture(interface, saved, noBroker, noModules)
     local ns = {}
     for _, path in ipairs({ 'Localization/enUS.lua', 'Style.lua', 'Data/Metadata.lua', 'Data/NpcSeed.lua', 'Catalog.lua',
                             'Settings.lua', 'DebugLog.lua', 'Professions.lua', 'KnownRecipes.lua', 'Inventory.lua', 'Gathering.lua', 'History.lua', 'Actions.lua', 'PvP.lua', 'Production.lua', 'Crafting.lua', 'Export.lua', 'Observations.lua', 'Sources.lua', 'NpcSources.lua', 'NpcObserver.lua', 'PinStyle.lua', 'IconConfig.lua', 'FlightPaths.lua', 'Transport.lua', 'Map.lua', 'Minimap.lua',
-                            'Tooltips.lua', 'Reports.lua', 'CraftingView.lua', 'ProfessionButton.lua', 'Movable.lua', 'AuctionScan.lua', 'AuctionUndercut.lua', 'LegacyFolders.lua', 'Economy.lua', 'Yields.lua', 'RecipeBrowser.lua', 'MinimapButton.lua', 'Titan.lua', 'Core.lua' }) do
+                            'Tooltips.lua', 'Reports.lua', 'CraftingView.lua', 'ProfessionButton.lua', 'Movable.lua', 'AuctionScan.lua', 'AuctionUndercut.lua', 'Sales.lua', 'LegacyFolders.lua', 'Economy.lua', 'Yields.lua', 'RecipeBrowser.lua', 'MinimapButton.lua', 'Titan.lua', 'Core.lua' }) do
         assert(loadfile('TitanGatheredForever/' .. path))('TitanGatheredForever', ns)
     end
     -- Keep integration scenarios small; the generated data is validated separately.
@@ -261,6 +261,20 @@ test('the scanned auction price, what the held items are worth and the age of th
     assert(contains(tip.lines, 'Lowest buyout of 5 auctions (40 items), scanned 2 h ago'))
     ns.db.auction.items[2589] = nil
     tip:ClearLines(); s.post(tip, { id = 2589 }); assert(not contains(tip.lines, 'Auction:'))   -- no price for this item
+end)
+
+test('the sales ledger starts with the add-on, keeps its saved sales and answers /tgf sales', function()
+    local s, ns = fixture(); s:Start()
+    assert(ns.Sales.instance, 'the ledger is created')
+    eq(type(ns.db.sales.entries), 'table'); eq(type(ns.db.mailLog), 'table')
+    ns.db.sales.entries[1] = { itemName = 'Linen Cloth', count = 20, received = 3800, soldAt = 86400 }
+    local saved = TitanGatheredForeverV3DB
+    local nextState, nextNS = fixture(nil, saved); nextState:Start()
+    eq(#nextNS.db.sales.entries, 1)                                                       -- survives a reload
+    SlashCmdList.TITANGATHEREDFOREVERV3('sales')
+    local found = false
+    for _, message in ipairs(nextState.messages) do if tostring(message):find('Linen Cloth', 1, true) then found = true end end
+    assert(found, 'the newest sale is printed')
 end)
 
 test('a product outside the catalogue gets its auction price, the vendor comparison and nothing else', function()

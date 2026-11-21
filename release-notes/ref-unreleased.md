@@ -2,6 +2,11 @@
 
 Updated 2026-11-16. These changes describe the 0.5.113 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
 
+## Sales ledger from the mail, 0.5.122
+
+- New `Sales.lua`: when a mailbox is opened (and when a mail is opened, which makes the client load its invoice) the inbox is read and each "Auction successful" mail that holds money is recorded once in the saved variables (`sales.entries`): character, item name and id when the client knows it, stack size when the subject carries it, money received, the estimated sale time, and the price, deposit, fee and buyer when the invoice is readable. Unknown values stay nil. Mails are matched on character, subject, money and estimated expiry (30 seconds tolerance), so rereading never duplicates, identical mails stay separate sales, and a mail emptied later (money 0) neither erases nor repeats its sale. Nothing is opened, taken or changed in the mailbox.
+- `/tgf sales` prints the number of recorded sales and the newest five. `mailLog` keeps the last 40 raw readings (new sales and skipped auction mails such as "Sale Pending") to check against the client. Open questions to verify live: the exact subject text and whether it carries the stack size, whether the invoice is readable before the mail is opened, and what the money in the mail contains (proceeds plus the returned deposit).
+
 ## Undercut row back in the window, 0.5.121
 
 - The Undercut row (label, combo box, "AH sold" and "Vendor") is back inside the Sell form, in the free line above the Buyout Mode check box (a little higher on the commodity form). Only the gains line, the unsold line and the red warning stay in the panel under the window, which is smaller now. The window is still never resized.

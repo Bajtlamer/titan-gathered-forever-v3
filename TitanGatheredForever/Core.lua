@@ -288,6 +288,8 @@ local function start()
     ns.Movable.Initialize()
     ns.AuctionScan.Initialize()
     ns.AuctionUndercut.Initialize()
+    local salesOK, salesError = pcall(ns.Sales.Initialize)          -- reading the mailbox must never stop the start
+    if not salesOK then ns.Debug('Sales ledger not started: ' .. tostring(salesError)) end
     ns.Titan.Initialize()
     ns.MinimapButton.Attach()
     for _, event in ipairs({ 'BAG_UPDATE_DELAYED', 'BANKFRAME_OPENED', 'BANKFRAME_CLOSED',
@@ -316,7 +318,7 @@ local function start()
         ns.Print('NPC world axes swapped: ' .. tostring(ns.settings.npcAxisSwap))
         ns.NpcNearest()
     end
-    local help = 'Most functions are in the right-click menu of the Titan entry. Command with a parameter: /tgf recipe <recipeID> [operations].'
+    local help = 'Most functions are in the right-click menu of the Titan entry. Command with a parameter: /tgf recipe <recipeID> [operations]. /tgf sales lists the auction sales read from the mail.'
     function ns.ShowStatus(toChat)
         local report = toChat and ns.Print or ns.Debug
         local count = ns.inventory:Get(0)
@@ -394,6 +396,7 @@ local function start()
         if command == 'next' or command == 'prev' then ns.ChangeSummaryPage(command == 'next' and 1 or -1); return end
         if command == 'history' or command == 'chances' or command == 'actions' or command == 'production' or command == 'pvp' then ns.Reports.Show(command); return end
         if command == 'settings' then ns.Titan.Menu(UIParent); return end
+        if command == 'sales' then ns.Sales.Report(); return end
         if command ~= 'status' and not ns.settings.debugMode then ns.Print(help); return end
         ns.ShowStatus(command == 'status')
     end
