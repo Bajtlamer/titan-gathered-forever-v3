@@ -81,6 +81,17 @@ The Discovery module is released on its own and is not part of the collection or
 
 For an existing release, upload corrected assets explicitly after review; the workflow does not overwrite a published release silently.
 
+## Publish on CurseForge
+
+The ZIPs of `dist/releases/<version>/` go to the fourteen CurseForge projects (the core to Titan Gathered Forever, each module ZIP to its own project) with `tools/curseforge_upload.py`. It reads `CF_UPLOAD_TOKEN` from `../curseforge/.env` and never prints it; the project IDs are those of `../curseforge/ref-curseforge-project-ids.md`.
+
+1. `python3 tools/curseforge_upload.py versions` lists the game versions; WoW Forever 1.60.1 is ID 17053 (type 88568).
+2. `python3 tools/curseforge_upload.py plan --game-version 17053` shows the fourteen uploads without sending anything.
+3. `python3 tools/curseforge_upload.py upload --apply --game-version 17053` uploads them as release files with the changelog of `release-notes/ref-<version>.md` (the core) or a short note (modules), and marks the modules as requiring the core. Use `--only <folder>` to send one project. A file that has been sent is not sent again by the tool: check the project's file list first.
+4. The project descriptions are not part of the API; paste them from `curseforge/ref-*.md` on the author portal.
+
+0.5.143 was uploaded on 2026-11-22 (file IDs 9742259 core, 9742265 Alchemy, 9742270 to 9742282 the other twelve modules); CurseForge shows a file after its own review.
+
 ## Prepare the website
 
 Upload the contents of `dist/releases/<version>/` to the website's versioned downloads location. The directory is ready for manual upload; packaging does not connect to or change hosting. Use downloads.json to populate selectable downloads and dependencies. Serve the index and its matching ZIP set together, then verify links and checksums from the website.

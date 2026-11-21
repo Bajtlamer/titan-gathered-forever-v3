@@ -176,6 +176,24 @@ test('without the menu API only the button is used, and a failing registration i
     Menu = nil
 end)
 
+test('the right click menu of a recipe also tells how many were crafted in total', function()
+    local registered = {}
+    local ns = fresh()
+    ns.characterID = 'a'
+    ns.Style = { Label = function(t) return '<l>' .. t end, Value = function(t) return '<v>' .. t end }
+    ns.production = { Completed = function(_, character, recipeID) return recipeID == 2550 and 7 or 0 end }
+    Menu = { ModifyMenu = function(tag, fn) registered[#registered + 1] = { tag, fn } end }
+    _G.ProfessionsFrame = nil
+    ns.ProfessionButton.Initialize()
+    local titles = {}
+    local root = { CreateButton = function() end, CreateTitle = function(_, text) titles[#titles + 1] = text end }
+    registered[1][2](recipeButton({ recipeID = 2550 }, 'method'), root)
+    eq(#titles, 1); assert(titles[1]:find('Crafted so far', 1, true)); assert(titles[1]:find('<v>7', 1, true))
+    registered[1][2](recipeButton({ recipeID = 3000 }, 'method'), root)               -- nothing crafted: no line
+    eq(#titles, 1)
+    Menu = nil
+end)
+
 for _, entry in ipairs(tests) do
     local ok, err = pcall(entry[2])
     if not ok then io.stderr:write('FAIL ' .. entry[1] .. ': ' .. tostring(err) .. '\n'); os.exit(1) end

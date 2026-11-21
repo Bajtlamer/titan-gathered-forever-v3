@@ -1,6 +1,104 @@
 # Unreleased development updates
 
-Updated 2026-11-16. These changes describe the 0.5.113 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-21. These changes describe source candidates since the latest published versioned notes.
+
+## Equipment repair costs, 0.5.143
+
+- What repairs cost is recorded for each character (a running total and the number of repairs) and shown in Economy as "Equipment repairs", next to the merchant buybacks, as spending. A repair is recognised at a merchant when the wallet falls by exactly the amount by which the cost of "repair all" (`GetRepairAllCost`) falls, which also covers a single repaired piece; a drop that does not match that (a purchase, for instance) is not a repair, and a client without the cost API records nothing. A repair paid from the guild bank costs the player nothing and is not counted. Repairs made before this version are not known.
+
+## Sell All Junk Items in the vendor statistics, 0.5.142
+
+- The buyback list of a vendor holds 12 stacks, so a sale of more stacks at once (Sell All Junk Items) could not be matched to it and was logged `unmatched`, missing from the Economy statistics. When the list cannot prove a sale, the bags now do: the items that left them, counted per item (a moved stack cancels out) and valued at their vendor price, must add up to exactly the money gained. Then each changed stack is recorded as a sale (diagnostic reason `bags` in `vendorLog`). An item without a known vendor price, a different total or a bag API that cannot be read keeps the old result (`unmatched`), so nothing is guessed. Junk sold before this version stays unrecorded.
+
+## Statistics view combo box and all gathering, 0.5.141
+
+- The three views (Attempts, Materials, Gathered items) are chosen in a combo box on the row of the pickers instead of three buttons, like every other picker.
+- The profession picker of the Gathered view has "All gathering" (the first, and the default unless the other views were filtered to one gathering profession): every installed gathering profession one after the other, with a blank line between them, as the Yields data already supports.
+
+## One Statistics panel for crafts and gathering, 0.5.140
+
+- The Statistics panel in Professions has three views, Attempts, Materials and Gathered. Attempts is one sortable list of the crafted recipes and, as one row each, Mining, Herbalism, Skinning, Fishing and Disenchanting (gathering rows are marked "(gathering)"), with attempts, completed and completed %. A click on a gathering row shows its details (failed, interrupted, stopped, unresolved, when recording began, and the note that Fishing completion means a catch window).
+- Gathered is what the Profession actions window showed as "Gathered, most items" and "Gathered, most valuable": the items one gathering profession collected with share, unit value, total value and best sale and the summary lines; click Quantity or Total value to sort, click an item for its sources.
+- The profession picker has the gathering professions as well, and opening a Skinning, Herbalism or Fishing page in Professions selects that profession.
+- The Profession actions tab is gone from the statistics windows and from the Titan menu; `/tgf actions` opens Statistics. The code of that window is not used any more and can be removed in a cleanup; the saved data is untouched.
+
+## Sortable Statistics headers, 0.5.139
+
+- The header of the Statistics list sorts it. A click on a column sorts by it (recipe and material names a to z, the numbers from the highest); a second click on the same column reverses the order, and a small arrow marks the column and direction. Recipes and Materials keep their own choice (Recipes by name, Materials by estimated use, as before). Equal values keep a fixed order, by name, so the list does not jump between refreshes; recipes without attempts sort last by Completed %.
+
+## Statistics columns reduced, portrait free, 0.5.138
+
+- The Statistics list has the columns Recipe, Attempts, Completed and Completed %. Matched, Items, Bonus and Multicraft are gone: across all 1277 recorded crafts none had a matched output or a known bonus or multicraft rate (the client gave no value), so they only ever showed Unknown. The recipe names get the room; the same figures are still in the details menu of a recipe (click it) for when the client provides them.
+- The panel background no longer covers the round profession portrait in the top-left corner of the window: the top band of the background starts to the right of it.
+
+## Statistics close with the profession tabs, 0.5.137
+
+- Statistics are shown only after a click on the Statistics button. A click on any tab of a profession (found by their place beside the right edge of the window) closes them and shows the profession; a change of the profession reported by the client does the same, as does the native Book page. The Statistics button still opens and closes the panel.
+- While the panel is open the native pages (crafting, book, specializations, orders) are made transparent, so their skill bars no longer draw over it; their alpha is given back when the panel closes. Nothing of the native window is hidden or changed otherwise. `professionLog` records the first openings (stage `stats-tabs`: how many tab buttons were hooked).
+
+## Statistics panel above every native frame, 0.5.136
+
+- A higher frame level alone did not stop the skill bars from drawing over the Statistics panel. When the panel is shown it now measures the frames of the Professions window and the frames of other add-ons anchored to it, and takes a frame strata and level above all of them (strata at most FULLSCREEN, so the menus of the client stay on top; its own controls move up with it). The first three openings are logged in `professionLog` (stage `stats-layer`: how many frames were measured, the strata and level chosen and the five highest frames with their names), so the frames that drew over the panel can be identified from the saved variables.
+
+## Statistics layering and lifetime counts, 0.5.135
+
+- The Statistics panel is drawn far above the native Professions window (frame level plus 500): the skill bars of the professions page (Leatherworking, Skinning, Cooking, Fishing, First Aid) showed through it. The Items column is wider so "Unknown" is not cut.
+- The lifetime number of crafts is no longer written beside the recipes in the native list: that list already shows, in square brackets, how many can be made with the materials at hand, and the two numbers were confused. The count is the Completed column of the panel and a "Crafted so far" line in the right click menu of a recipe (shown when it is above zero).
+
+## Statistics columns and button placement, 0.5.134
+
+- The Statistics panel in Professions shows all columns of the removed Crafting and cooking window again: Recipe, Attempts, Completed, Completed %, Matched, Items, Bonus and Multicraft, with the explanation of Completed % and of the readable-field counts under the list. The materials view keeps the material and the estimated use.
+- The Recipes and Materials buttons moved to the row of the pickers: the profession portrait and the skill bar of the native window covered them in the top-left corner of the panel.
+
+## Statistics in Professions, 0.5.133
+
+- Move Crafting and cooking to Statistics at the bottom of the native Professions window. Recipes shows tracked crafting outcomes and output details. Materials shows estimated reagent use. Both views have profession and character filters.
+- (Replaced in 0.5.135: the count is no longer appended to the native recipe rows.)
+- Restart the client to load ProfessionStats.lua.
+
+## Economy with an empty Forever realm name, 0.5.132
+
+- Accept the empty realm name returned by Forever for merchant sales and cash quest rewards. Economy already reads auction and loot records under this key.
+
+## Quest rewards and combined economy, 0.5.131
+
+- Record the cash reported by Forever when turning in a quest, including repeated turn-ins. Economy shows recorded merchant proceeds, net auction proceeds, quest rewards and mob coin pickups across characters on the current realm.
+- Exclude overlapping quest and loot wallet changes from merchant attribution. Keep unverified amounts out of the total. Market history and Economy share the confirmed auction mail ledger.
+- QuestIncome.lua is a new runtime file. Restart the client to load it.
+
+## Merchant event routing and read diagnostics, 0.5.130
+
+- Send merchant and wallet events to the vendor ledger from the core event handler. The saved vendor log records collector startup, merchant opening and the specific unreadable buyback field. The item-link fallback can recover an item ID when the primary API fails.
+
+## Merchant sales and buybacks, 0.5.129
+
+- Economy records merchant sales when items added to the native buyback list match the wallet credit. The merchant row shows units sold and proceeds, which contribute to Total income.
+- Buybacks show units and spending separately. The saved diagnostic log `vendorLog` keeps the latest verified transactions and unmatched merchant changes.
+
+## Mob loot income, 0.5.128
+
+- Economy shows money picked up from mobs and adds the verified amount to the recorded income total. The collector requires a cleared coin slot attributed to a dead creature and a matching wallet increase. Coverage starts with recorded pickups.
+
+## Economy overview in the main window, 0.5.127
+
+- The Economy tab shows quantities and verified net income from confirmed auction invoices recorded on the current realm, with separate auction settlement amounts. Open it from the tab strip or Titan menu > History and sources > Economy.
+- Merchant sales and quest rewards show that recording is pending. The combined income is shown as a lower bound when verified auction income is available.
+
+## Compare Sell with settled sales and scanned prices, 0.5.126
+
+- Current listing compares the entered unit buyout with the latest scanned buyout and the estimated net per unit with the weighted net per unit from confirmed sales.
+- Your sales shows the actual sale price, net after the invoice fee and the credit attached to the mail, which can include returned deposits. The client invoice supplies the sale amount and quantity when available. Net is shown when the invoice reconciles with the amount in the mail.
+- The opened-mail hook follows the native Forever mail frame so a later invoice can complete the existing ledger entry.
+
+## Sell panel layout follow-up, 0.5.125
+
+- Show history sits below the auction title bar, to the right of the Create Auction tab.
+- The Current listing section in Market history shows the gains, unsold deposit, break-even rate and vendor floor warning. Removing the old panel below the auction house frees the tabs and Scan prices.
+
+## Sell market history panel, 0.5.124
+
+- The selected item or material in Sell has a collapsible market history panel at the left edge of the auction house. It docks outside the window when space permits and opens on request as an overlay near the screen edge.
+- The panel shows the last scanned lowest unit buyout and a seven-day trend from completed scans. It also summarizes 30 days of confirmed sales from the mailbox ledger, with estimated sale dates and unit prices when invoice and quantity data are available.
 
 ## Mail log without commands, 0.5.123
 

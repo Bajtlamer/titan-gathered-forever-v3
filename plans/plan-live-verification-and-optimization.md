@@ -83,6 +83,14 @@ Do these in the game after a full restart (new files exist in 0.5.36, 0.5.37, 0.
 - [ ] The Titan menu check box (Auction prices > Fill Buyout in the Sell tab) stops the fill; the setting stays after /reload.
 - What went wrong on the way, to avoid repeating it: the client had no global GetItemInfo (use C_Item through ns.Economy.VendorSell); IsThrottledMessageSystemReady was false right after an item was chosen, so the add-on waits for the answer of the client's own search; SetOnValueChangedCallback would replace the callback of the client (HookScript on the money boxes is used); the Create Auction button moves between the two Sell forms, so the strip is anchored to the window, not to a form.
 
+### 3.5b Market history in Sell (0.5.125)
+
+- [x] The owner confirmed that the 0.5.125 layout and feature work in the client after the toggle and bottom panel were moved from their 0.5.124 positions.
+- [ ] Select a material and a single item in Sell. Check the left panel, coin amounts, the Hide history and Show history controls, and the transition when the native form clears the previous selection. The panel and toggle disappear with an empty slot, outside Sell, and when the window closes.
+- [ ] Drag the auction window toward and away from the screen's left edge. Confirm the panel docks with room, opens on request as an overlay without room, and can always be collapsed.
+- [ ] Compare the latest price and date with an existing scan. After completing scans on distinct days, check the plotted values and change. Open a mailbox containing a confirmed sale and compare quantities and available invoice prices with the panel.
+- [ ] On 0.5.126, open a completed auction mail with its funds still attached and then choose the same item in Sell. Compare gross, fee, deposit and net with the invoice. Change the unit buyout and check the two Current listing comparisons. There were no completed mail entries in the saved variables before this candidate.
+
 ### 3.6 Crafting profit and the recipe harvest
 
 - [ ] Open every profession window once: no frame stall (40 recipes per frame, 0.5.51) even for Leatherworking and Tailoring; note the delay if any.
