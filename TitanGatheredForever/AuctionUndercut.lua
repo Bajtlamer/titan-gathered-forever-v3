@@ -113,24 +113,22 @@ function Undercut.DefaultAPI()
                 local ok, amount = pcall(input.GetAmount, input)
                 entry.readback = ok and amount or nil
                 Undercut.LogDeposit(Undercut.sellFrame)
-                if ok and amount ~= copper then entry.reapplied = true; put() end
+                if ok and amount ~= copper then
+                    entry.reapplied = true
+                    put()
+                    Undercut.Refresh(Undercut.sellFrame)
+                end
             end)
         end
         ns.Print(ns.Style.Label('Buyout set to ') .. ns.Economy.Coin(copper) .. ns.Style.Label(string.format(' (%s%% under the lowest, ', tostring(percent)))
             .. ns.Economy.Coin(lowest) .. ns.Style.Label(').'))
     end
     api.Say = function(message) ns.Print(ns.Style.Label(message)) end
-    -- The red line above the posting lines: shown while the Buyout rests on the vendor price, cleared at the next fill.
-    api.Warn = function(reason, vendor)
-        local line = Undercut.warning
-        if not line then return end
-        if reason == 'vendor' and vendor then
-            line:SetText(ns.Style.Text(ns.Style.red, 'Vendor floor after fee: Buyout set to ') .. ns.Economy.Coin(vendor))
-            line:Show()
-        else
-            line:SetText('')
-            line:Hide()
-        end
+    -- Keep the warning for the current selection so it can also be drawn when Market history is opened.
+    api.Warn = function(reason, floor)
+        local Style = ns.Style
+        Undercut.warning = reason == 'vendor' and floor
+            and (Style.Text(Style.red, 'Vendor floor applied: ') .. Style.Value(ns.Economy.Coin(floor))) or nil
     end
     return api
 end
@@ -151,7 +149,7 @@ end
 local function read(sell, name)
     if type(sell[name]) ~= 'function' then return nil end
     local ok, value = pcall(sell[name], sell)
-    if ok then return value end
+    if ok and ns.IsPublic(value) then return value end
     return nil
 end
 
@@ -176,56 +174,66 @@ end
 -- A signed amount of coins: green with a plus, red with a minus.
 local function signed(copper)
     local Style, Coin = ns.Style, ns.Economy.Coin
-    if copper >= 0 then return Style.Text(Style.green, '+') .. Coin(copper) end
-    return Style.Text(Style.red, '-') .. Coin(-copper)
+    return Style.Text(copper >= 0 and Style.green or Style.red, copper >= 0 and '+' or '-')
+        .. Style.Value(Coin(math.abs(copper)))
 end
 
--- The posting texts for an auction as it stands (Economy.Posting). The head goes next to the Undercut box: what a sale
--- brings after the fee and what a vendor pays for the same stack. The gains line (against the cost of the item and
--- against a vendor) and the unsold line (the deposit and the share of auctions that must sell for posting to pay) go
--- below it.
+-- The first line belongs beside Undercut. The other lines fit the narrow Market history panel.
 function Undercut.InfoText(post)
-    if not post then return '', '', '' end
+    if not post then return '', '', '', '', '' end
     local Style, Coin = ns.Style, ns.Economy.Coin
-    local head = Style.Label('AH sold: ') .. Coin(post.net)
-    if post.vendor and post.vendor > 0 then head = head .. Style.Label('  Vendor: ') .. Coin(post.vendor * post.quantity) end
-    local parts = {}
-    if post.profit then parts[#parts + 1] = signed(post.profit) .. Style.Label(' vs cost') end
-    if post.gain then parts[#parts + 1] = signed(post.gain) .. Style.Label(' vs vendor') end
-    local gains = #parts > 0 and (Style.Label('Gain: ') .. table.concat(parts, Style.Label(', '))) or ''
-    local unsold = Style.Label('Unsold: ')
-    if post.loss then
-        unsold = unsold .. signed(-post.loss) .. Style.Label(' deposit')
-        if post.needed == 'never' then
-            unsold = unsold .. Style.Label(', ') .. Style.Text(Style.red, 'a sale does not beat a vendor')
-        elseif post.needed then
-            unsold = unsold .. Style.Label(', pays off if ') .. Style.Value(string.format('%d%%', math.ceil(post.needed * 100 - 1e-9))) .. Style.Label(' sell')
-        end
-    else
-        unsold = unsold .. Style.Label('deposit unknown')
+    local head = Style.Label('AH sold: ') .. Style.Value(Coin(post.net))
+    if post.vendor and post.vendor > 0 then
+        head = head .. Style.Label('  Vendor: ') .. Style.Value(Coin(post.vendor * post.quantity))
     end
-    return head, gains, unsold
+    local profit = post.profit and (Style.Label('Gain vs cost: ') .. signed(post.profit)) or ''
+    local gain = post.gain and (Style.Label('Gain vs vendor: ') .. signed(post.gain)) or ''
+    local loss = Style.Label('Unsold deposit: ') .. (post.loss and signed(-post.loss) or Style.Label('Unavailable'))
+    local threshold = ''
+    if post.needed == 'never' then
+        threshold = Style.Text(Style.red, 'A sale does not beat a vendor')
+    elseif post.needed then
+        threshold = Style.Label('Break-even sales: ')
+            .. Style.Value(string.format('%d%%', math.ceil(post.needed * 100 - 1e-9)))
+    end
+    return head, profit, gain, loss, threshold
 end
 
--- Reads the form as it stands and shows the lines; an empty form or a price of zero shows nothing.
-function Undercut.Refresh(sell)
-    local info = Undercut.info
-    if not info or not sell then return end
-    Undercut.Place(sell)
+local function readItemID(sell)
+    local location = sell:GetItem()
+    if ns.IsPublic(location) and location and location:IsValid() then
+        local itemID = C_Item.GetItemID(location)
+        if ns.IsPublic(itemID) and type(itemID) == 'number' and itemID > 0 then return itemID end
+    end
+end
+
+function Undercut.SelectedItemID(sell)
+    local ok, itemID = pcall(readItemID, sell)
+    if ok then return itemID end
+end
+
+-- Valuation uses the form's actual selection, even when automatic fill is disabled.
+function Undercut.Posting(sell, itemID)
+    itemID = itemID or Undercut.SelectedItemID(sell)
+    if not itemID then return end
     local input = Undercut.BuyoutInput(sell)
-    local price = input and input.GetAmount and select(2, pcall(input.GetAmount, input))
+    local price = input and read(input, 'GetAmount')
+    if type(price) ~= 'number' or price <= 0 then return end
     local quantity = read(sell, 'GetQuantity')
     local deposit = read(sell, 'GetDepositAmount')
-    local key = Undercut.instance and Undercut.instance.key
-    local itemID = key and key.itemKey and key.itemKey.itemID
-    local vendor = itemID and ns.Economy.VendorSell(itemID) or nil
-    -- The cost is the cheapest known way to buy one unit again (last auction scan or a merchant); unknown stays unknown.
-    local okCost, cost = pcall(ns.Economy.UnitCost, itemID or 0)
-    local post = type(price) == 'number' and itemID and ns.Economy.Posting(price, quantity, type(deposit) == 'number' and deposit or nil, vendor, okCost and cost or nil) or nil
-    local head, gains, unsold = Undercut.InfoText(post)
-    if Undercut.head then Undercut.head:SetText(head) end
-    info:SetText(post and unsold or '')
-    if Undercut.gains then Undercut.gains:SetText(post and gains or '') end
+    local vendor = ns.Economy.VendorSell(itemID)
+    local okCost, cost = pcall(ns.Economy.UnitCost, itemID)
+    local post = ns.Economy.Posting(price, quantity, type(deposit) == 'number' and deposit or nil, vendor, okCost and cost or nil)
+    return post, Undercut.sellFrame == sell and Undercut.warning or nil
+end
+
+function Undercut.Refresh(sell)
+    if not Undercut.head or not sell or not sell:IsShown() then return end
+    Undercut.Place(sell)
+    local post, warning = Undercut.Posting(sell)
+    local head = Undercut.InfoText(post)
+    Undercut.head:SetText(head)
+    if ns.AuctionHistory then ns.AuctionHistory.UpdatePosting(sell, post, warning) end
 end
 
 local function keyOf(sell, itemLocation)
@@ -234,11 +242,6 @@ local function keyOf(sell, itemLocation)
     if not ok or type(itemKey) ~= 'table' then return nil end
     return { itemKey = itemKey, commodity = sell == _G.AuctionHouseFrame.CommoditiesSellFrame }
 end
-
--- The row inside the Sell form (label, combo box, what a sale brings) and, hanging under the window, a panel with the
--- remaining posting lines. The window itself is never resized: changing its height made the client's scroll lists lay
--- out again and fail when the window closed.
-Undercut.HEIGHT = 76
 
 -- The row sits in the free line above the Buyout Mode check box; the commodity form needs it a little higher.
 function Undercut.Place(sell)
@@ -261,22 +264,6 @@ function Undercut.Attach()
     strip:SetSize(400, 24)
     strip:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 32, 78)
     if strip.SetFrameLevel and level then strip:SetFrameLevel(level + 20) end
-    local panel = CreateFrame('Frame', nil, frame)
-    Undercut.panel = panel
-    panel:SetHeight(Undercut.HEIGHT)
-    panel:SetPoint('TOPLEFT', frame, 'BOTTOMLEFT', 4, 2)
-    panel:SetPoint('TOPRIGHT', frame, 'BOTTOMRIGHT', -4, 2)
-    if panel.SetFrameLevel and level then panel:SetFrameLevel(level + 20) end
-    if panel.CreateTexture then
-        local background = panel:CreateTexture(nil, 'BACKGROUND')
-        background:SetAllPoints(panel)
-        background:SetColorTexture(0.04, 0.05, 0.09, 0.96)
-        local edge = panel:CreateTexture(nil, 'BORDER')
-        edge:SetPoint('TOPLEFT', panel, 'TOPLEFT', 0, 0)
-        edge:SetPoint('TOPRIGHT', panel, 'TOPRIGHT', 0, 0)
-        edge:SetHeight(2)
-        edge:SetColorTexture(0.78, 0.62, 0.22, 1)
-    end
     local label = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
     label:SetPoint('LEFT', 0, 0)
     label:SetText('Undercut')
@@ -295,28 +282,13 @@ function Undercut.Attach()
     head:SetPoint('LEFT', strip, 'LEFT', 128, 0)
     head:SetJustifyH('LEFT')
     Undercut.head = head
-    -- Two single-line texts instead of one with a large line spacing: the coin icons inside a text with extra spacing rose.
-    local info = panel:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
-    info:SetPoint('BOTTOMLEFT', panel, 'BOTTOMLEFT', 32, 12)
-    info:SetJustifyH('LEFT')
-    Undercut.info = info
-    local gains = panel:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
-    gains:SetPoint('BOTTOMLEFT', info, 'TOPLEFT', 0, 9)
-    gains:SetJustifyH('LEFT')
-    Undercut.gains = gains
-    local warning = panel:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
-    warning:SetPoint('BOTTOMLEFT', gains, 'TOPLEFT', 0, 6)
-    warning:Hide()
-    Undercut.warning = warning
-
     local function refresh()
         local shown
         for _, sell in ipairs({ frame.CommoditiesSellFrame, frame.ItemSellFrame }) do
             if sell.IsShown and sell:IsShown() then shown = shown or sell end
         end
         strip:SetShown(shown ~= nil)
-        panel:SetShown(shown ~= nil)
-        if shown then Undercut.Place(shown) end
+        if shown then Undercut.Refresh(shown) end
     end
     for _, sell in ipairs({ frame.CommoditiesSellFrame, frame.ItemSellFrame }) do
         if sell.HookScript then
@@ -325,11 +297,10 @@ function Undercut.Attach()
         end
         hooksecurefunc(sell, 'SetItem', function(self, itemLocation)
             Undercut.sellFrame = self
+            Undercut.warning = nil
             local key = keyOf(self, itemLocation)
             if key then Undercut.instance:Select(key) else Undercut.instance.key = nil end
-            if Undercut.info then Undercut.info:SetText('') end
-            if Undercut.gains then Undercut.gains:SetText('') end
-            if Undercut.head then Undercut.head:SetText('') end
+            Undercut.Refresh(self)
         end)
         -- The client works out its deposit again whenever the quantity, duration or price changes: read it then.
         if type(sell.UpdateDeposit) == 'function' then
@@ -342,7 +313,10 @@ function Undercut.Attach()
             for _, box in ipairs({ money and money.GoldBox, money and money.SilverBox, money and money.CopperBox }) do
                 if box and box.HookScript then
                     box:HookScript('OnTextChanged', function(_, userInput)
-                        if userInput and not Undercut.filling then Undercut.instance:Edited() end
+                        if userInput and not Undercut.filling then
+                            Undercut.instance:Edited()
+                            if Undercut.sellFrame == sell then Undercut.warning = nil end
+                        end
                         Undercut.Refresh(sell)
                     end)
                 end

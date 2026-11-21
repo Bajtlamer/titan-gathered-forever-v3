@@ -3,7 +3,7 @@ local History = {}
 ns.AuctionHistory = History
 
 local DAY, PRICE_DAYS, SALES_DAYS = 86400, 7, 30
-local WIDTH, HEIGHT = 300, 342
+local WIDTH, POSTING_TOP, POSTING_STEP = 300, 368, 16
 local Style = ns.Style
 
 local function positive(value)
@@ -100,7 +100,7 @@ function History.Sales(entries, realm, itemID, now)
 end
 
 local function money(price)
-    return price and ns.Economy.Coin(price) or Style.Label('Unavailable')
+    return price and Style.Value(ns.Economy.Coin(price)) or Style.Label('Unavailable')
 end
 
 local function text(parent, point, x, y, value, font)
@@ -123,7 +123,7 @@ local function section(panel, y, title, days)
     box(panel, 12, y, WIDTH - 24, 22, 0.16, 0.09, 0.045, 0.7)
     box(panel, 12, y - 22, WIDTH - 24, 1, 0.55, 0.36, 0.17, 0.7)
     text(panel, 'TOPLEFT', 16, y - 5, Style.Label(title), 'GameFontNormal')
-    text(panel, 'TOPRIGHT', -16, y - 6, Style.Value(days) .. Style.Label(' days'))
+    if days then text(panel, 'TOPRIGHT', -16, y - 6, Style.Value(days) .. Style.Label(' days')) end
 end
 
 local function row(panel, y, label)
@@ -222,12 +222,22 @@ local function render(view, itemID)
         and Style.Label('Average uses sales with known prices and quantities.') or '')
 end
 
-local function selectedItem(sell)
-    local location = sell:GetItem()
-    if location and location:IsValid() then
-        local itemID = C_Item.GetItemID(location)
-        if ns.IsPublic(itemID) and positive(itemID) then return itemID end
+function History.UpdatePosting(sell, post, warning)
+    local view = History.view
+    if not view or view.sell ~= sell or not view.panel:IsVisible() then return end
+    local _, profit, gain, loss, threshold = ns.AuctionUndercut.InfoText(post)
+    local lines = { profit, gain, loss, threshold, post and warning or '' }
+    if not post then lines[1] = Style.Label('Enter a buyout to estimate the result.') end
+    local count = 0
+    for _, line in ipairs(lines) do
+        if line ~= '' then
+            count = count + 1
+            view.posting[count]:SetText(line)
+            view.posting[count]:Show()
+        end
     end
+    for i = count + 1, #view.posting do view.posting[i]:Hide() end
+    view.panel:SetHeight(POSTING_TOP + count * POSTING_STEP + 4)
 end
 
 local function canDock(frame)
@@ -240,14 +250,14 @@ end
 function History.Refresh()
     local view = History.view
     if not view then return end
-    local itemID
+    local selected, itemID
     for _, sell in ipairs(view.forms) do
         if sell:IsVisible() then
-            local ok, id = pcall(selectedItem, sell)
-            if ok and id then itemID = id; break end
+            local id = ns.AuctionUndercut.SelectedItemID(sell)
+            if id then selected, itemID = sell, id; break end
         end
     end
-    view.itemID = itemID
+    view.sell, view.itemID = selected, itemID
     if not itemID then
         view.panel:Hide(); view.toggle:Hide()
         return
@@ -263,9 +273,12 @@ function History.Refresh()
         end
     end
     view.docked = docked
-    if expanded then render(view, itemID) end
     view.panel:SetShown(expanded)
     view.toggle:SetShown(not expanded)
+    if expanded then
+        render(view, itemID)
+        History.UpdatePosting(selected, ns.AuctionUndercut.Posting(selected, itemID))
+    end
 end
 
 function History.Attach(frame)
@@ -280,7 +293,7 @@ function History.Attach(frame)
     panel:SetClampedToScreen(true)
     panel:SetFrameLevel(frame:GetFrameLevel() + 30)
     panel:EnableMouse(true)
-    panel:SetSize(WIDTH, HEIGHT)
+    panel:SetSize(WIDTH, POSTING_TOP + POSTING_STEP + 4)
     panel:SetBackdrop({
         bgFile = 'Interface\\DialogFrame\\UI-DialogBox-Background-Dark',
         edgeFile = 'Interface\\DialogFrame\\UI-DialogBox-Gold-Border',
@@ -306,7 +319,8 @@ function History.Attach(frame)
     toggle:Hide()
     toggle:SetFrameLevel(frame:GetFrameLevel() + 30)
     toggle:SetSize(106, 20)
-    toggle:SetPoint('TOPLEFT', frame, 'TOPLEFT', 73, -11)
+    -- To the right of the Create Auction tab, below the frame's title bar.
+    toggle:SetPoint('TOPLEFT', frame, 'TOPLEFT', 200, -40)
     toggle:SetText('Show history')
     toggle:SetScript('OnClick', function()
         ns.settings.auctionHistoryCollapsed = false
@@ -315,6 +329,11 @@ function History.Attach(frame)
     end)
     section(panel, -66, 'Auction prices', PRICE_DAYS)
     section(panel, -228, 'Your sales', SALES_DAYS)
+    section(panel, -340, 'Current listing')
+    local posting = {}
+    for i = 1, 5 do
+        posting[i] = text(panel, 'TOPLEFT', 16, -POSTING_TOP - (i - 1) * POSTING_STEP)
+    end
     local view = {
         frame = frame, forms = forms, panel = panel, toggle = toggle, hide = hide, item = item,
         price = row(panel, -96, 'Last scanned buyout / unit'),
@@ -325,6 +344,7 @@ function History.Attach(frame)
         average = row(panel, -278, 'Average / unit'),
         last = row(panel, -297, 'Last sale (est. date)'),
         salesNote = text(panel, 'TOPLEFT', 16, -317),
+        posting = posting,
     }
     History.view = view
     local elapsed = 0

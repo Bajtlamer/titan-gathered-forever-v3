@@ -4,7 +4,9 @@ Written 2026-11-21 as a handover (the work moves to another computer). It record
 
 ## Left-side Market History candidate
 
-The left-side panel supersedes the placement of history described in the handover below. The existing posting calculations belong to the Sell form and its bottom panel. Both Sell forms expose history only while holding a valid item. Keep the player's collapsed preference across item and tab changes. Use native dialog materials, with a left-edge overlay available through the toggle when there is too little screen space to dock the panel outside the window.
+The left-side panel supersedes the placement described in the handover below. Both Sell forms expose history only while holding a valid item. Keep the player's collapsed preference across item and tab changes. Use native dialog materials, with a left-edge overlay available through the toggle when there is too little screen space to dock the panel outside the window.
+
+Live screenshots of 0.5.124 showed the docked panel, a Show history button clipped by the title bar and the old posting panel covering the auction tabs. In 0.5.125 the toggle goes below the title bar, and Current listing in the left panel replaces the bottom panel. Keep Undercut, AH sold and Vendor inside the Sell form.
 
 - Record only prices from completed scans. Archive the previous scan by realm and UTC day as the next scan completes. Read the current snapshot through the same history view so an existing snapshot is available on first use. Retain at most the visible seven days of daily snapshots, including the current day. Clearing scanned prices clears both sources.
 - Summarize confirmed mail entries for the same base item and realm over 30 days. Calculate the realized unit price from the invoice buyout and known quantity. Preserve partial and unknown quantities and mark the sale date as estimated.

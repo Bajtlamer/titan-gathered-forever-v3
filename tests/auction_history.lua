@@ -10,6 +10,7 @@ _G.GetRealmName = function() return 'Forever' end
 load('Style')
 load('AuctionScan')
 load('Economy')
+load('AuctionUndercut')
 load('AuctionHistory')
 local History = ns.AuctionHistory
 local ore, gear = 2770, 1234
@@ -105,6 +106,9 @@ for _, form in ipairs({ item, commodity }) do
         if location and location.rejected then return end
         self.selected = location
     end
+    form.PriceInput = { GetAmount = function() return form.price end }
+    function form:GetQuantity() return 20 end
+    function form:GetDepositAmount() return 15 end
 end
 _G.CreateFrame = function(_, _, parent) return frame(parent) end
 _G.hooksecurefunc = function(target, method, hook)
@@ -112,7 +116,7 @@ _G.hooksecurefunc = function(target, method, hook)
     target[method] = function(self, ...) old(self, ...); hook(self, ...) end
 end
 _G.C_Item = { GetItemID = function(location) return location.id end }
-_G.GetCoinTextureString = function(amount) return tostring(amount) end
+ns.Economy.VendorSell = function() return 15 end
 ns.ItemName = function(id) return id == ore and 'Copper Ore' or 'Test Gear' end
 local function location(id) return { id = id, IsValid = function(self) return not self.invalid end } end
 ns.db.sales = { entries = entries }
@@ -124,17 +128,33 @@ item:SetItem(location(gear))
 assert(view.panel:IsVisible() and not view.toggle:IsVisible())
 eq(view.panel.anchor[1], 'TOPRIGHT')
 eq(view.item.text, ns.Style.Value('Test Gear'))
+assert(view.posting[1].text:find('Enter a buyout', 1, true))
 item:SetItem({ id = ore, rejected = true })
 eq(view.item.text, ns.Style.Value('Test Gear'))
 view.hide.scripts.OnClick()
 assert(not view.panel:IsVisible() and view.toggle:IsVisible())
+eq(view.toggle.anchor[3], 200)
+eq(view.toggle.anchor[4], -40)
 item:Hide()
 commodity:Show()
+commodity.price = 76
 commodity:SetItem(location(ore))
 assert(not view.panel:IsVisible() and view.toggle:IsVisible())
 view.toggle.scripts.OnClick()
 eq(view.item.text, ns.Style.Value('Copper Ore'))
 assert(view.panel:IsVisible() and not view.toggle:IsVisible())
+assert(view.posting[1].text:find('1144c', 1, true))
+assert(view.posting[2].text:find('15c', 1, true))
+assert(view.posting[3].text:find('2%', 1, true))
+commodity.price = 100
+History.UpdatePosting(commodity, ns.AuctionUndercut.Posting(commodity))
+assert(view.posting[1].text:find('1600c', 1, true))
+History.UpdatePosting(item, nil)
+assert(view.posting[1].text:find('1600c', 1, true), 'the hidden item form cannot replace the commodity figures')
+History.UpdatePosting(commodity, ns.AuctionUndercut.Posting(commodity), ns.Style.Label('Vendor floor applied'))
+assert(view.posting[4].text:find('Vendor floor applied', 1, true))
+History.UpdatePosting(commodity, ns.AuctionUndercut.Posting(commodity))
+assert(not view.posting[4]:IsVisible())
 commodity:SetItem(nil)
 assert(not view.panel:IsVisible() and not view.toggle:IsVisible())
 ah.left = 20

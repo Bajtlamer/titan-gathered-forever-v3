@@ -2,6 +2,11 @@
 
 Updated 2026-11-21. These changes describe source candidates since the latest published versioned notes.
 
+## Sell panel layout follow-up, 0.5.125
+
+- Show history sits below the auction title bar, to the right of the Create Auction tab.
+- The Current listing section in Market history shows the gains, unsold deposit, break-even rate and vendor floor warning. Removing the old panel below the auction house frees the tabs and Scan prices.
+
 ## Sell market history panel, 0.5.124
 
 - The selected item or material in Sell has a collapsible market history panel at the left edge of the auction house. It docks outside the window when space permits and opens on request as an overlay near the screen edge.
