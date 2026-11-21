@@ -61,7 +61,7 @@ Do these in the game after a full restart (new files exist in 0.5.36, 0.5.37, 0.
 ### 3.5 Auction scan and prices
 
 - [ ] The Scan prices button and the progress bar appear below the auction house window; the bar shows waiting and then reading with a percentage; the chat shows the answer, every quarter of a long list and the result (0.5.37 to 0.5.41, buttons seen once).
-- [ ] Sales ledger (0.5.122): sell items, open the mailbox, run `/tgf sales`; check the saved variables `sales.entries` and `mailLog` (subject text, stack size, invoice values before and after opening the mail, received money against buyout minus fee plus deposit).
+- [ ] Sales ledger (0.5.122, log 0.5.123): sell items, open the mailbox, then /reload; read the saved variables `sales.entries` and `mailLog` (subject text, stack size, invoice values before and after opening the mail, received money against buyout minus fee plus deposit).
 - [ ] auctionLog after a scan: requested, the throttled message events, update-ignored once, done with entries, items, distinct and seconds. Compare seconds with the 7.2 s of the second scan (287,853 auctions).
 - [ ] The saved block `auction` is smaller than the 139 KB of the full item list because only reagents and products of the installed professions are kept (0.5.53). Note the size before and after.
 - [ ] Item tooltips of reagents and products show Auction, Worth, Vendor pays and the age of the scan; no price line for other items; Titan menu > Auction prices > Show auction prices in item tooltips switches it off.

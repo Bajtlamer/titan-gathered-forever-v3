@@ -195,9 +195,36 @@ test('the diagnostic log records new sales and skipped auction mails once', func
     f.mails[1] = sold('Linen Cloth', 4770, 30, { 'seller', 'Linen Cloth', 'Buyer', 0, 5000, 20, 250 })
     f.mails[2] = { subject = 'Sale Pending: X', money = 0, days = 30, invoice = { 'seller_temp_invoice', 'X', 'B', 0, 1, 1, 1 } }
     f.ledger:Scan(); f.ledger:Scan()
-    eq(#f.ns.db.mailLog, 2)
-    eq(f.ns.db.mailLog[1].result, 'recorded'); eq(f.ns.db.mailLog[1].invoice[1], 'seller')
-    eq(f.ns.db.mailLog[2].result, 'pending')
+    local rows = {}
+    for _, row in ipairs(f.ns.db.mailLog) do rows[row.result] = (rows[row.result] or 0) + 1 end
+    eq(rows.recorded, 1); eq(rows.pending, 1)
+    local recorded
+    for _, row in ipairs(f.ns.db.mailLog) do if row.result == 'recorded' then recorded = row end end
+    eq(recorded.invoice[1], 'seller')
+end)
+
+test('every reading of the inbox is logged with its source, and other mails are sampled once', function()
+    local f = fixture()
+    f.mails[1] = { subject = 'Welcome', sender = 'Someone', money = 0, days = 20 }
+    f.mails[2] = sold('Linen Cloth', 3800, 30)
+    f.ledger:Scan('MAIL_SHOW')
+    local scan, other
+    for _, row in ipairs(f.ns.db.mailLog) do
+        if row.result == 'scan' then scan = row elseif row.result == 'other-mail' then other = row end
+    end
+    eq(scan.mails, 2); eq(scan.recorded, 1); eq(scan.source, 'MAIL_SHOW')
+    eq(other.subject, 'Welcome'); eq(other.sender, 'Someone'); eq(other.days, 20)
+    local before = #f.ns.db.mailLog
+    f.ledger:Scan('MAIL_INBOX_UPDATE')                                                        -- nothing changed: nothing new
+    eq(#f.ns.db.mailLog, before)
+    f.mails[3] = { subject = 'Another', money = 0, days = 20 }
+    f.ledger:Scan('MAIL_INBOX_UPDATE')                                                        -- the count changed
+    local scans = 0
+    for _, row in ipairs(f.ns.db.mailLog) do if row.result == 'scan' then scans = scans + 1 end end
+    eq(scans, 2)
+    f.mails = {}
+    f.ledger:Scan('MAIL_SHOW')                                                                -- an empty inbox is a fact too
+    eq(f.ns.db.mailLog[#f.ns.db.mailLog].mails, 0)
 end)
 
 test('the report lists the newest sales with prices in the money format', function()

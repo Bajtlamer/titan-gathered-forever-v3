@@ -2,6 +2,10 @@
 
 Updated 2026-11-16. These changes describe the 0.5.113 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
 
+## Mail log without commands, 0.5.123
+
+- The sales ledger writes its own evidence into `mailLog` at the game events, with no command needed: a row for every reading of the inbox that found something new or a different number of mails (source MAIL_SHOW, MAIL_INBOX_UPDATE or OpenMail_Update, number of mails, sales recorded), a sample of every other mail (subject, sender, money, days left) once per session, the raw invoice values of sales and of skipped auction mails, and a row when the client call fails. The log keeps 120 rows.
+
 ## Sales ledger from the mail, 0.5.122
 
 - New `Sales.lua`: when a mailbox is opened (and when a mail is opened, which makes the client load its invoice) the inbox is read and each "Auction successful" mail that holds money is recorded once in the saved variables (`sales.entries`): character, item name and id when the client knows it, stack size when the subject carries it, money received, the estimated sale time, and the price, deposit, fee and buyer when the invoice is readable. Unknown values stay nil. Mails are matched on character, subject, money and estimated expiry (30 seconds tolerance), so rereading never duplicates, identical mails stay separate sales, and a mail emptied later (money 0) neither erases nor repeats its sale. Nothing is opened, taken or changed in the mailbox.

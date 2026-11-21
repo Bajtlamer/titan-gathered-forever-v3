@@ -9,7 +9,7 @@ Sales.__index = Sales
 ns.Sales = Sales
 
 Sales.MAX = 10000         -- sales kept
-Sales.LOG_MAX = 40        -- diagnostic rows kept
+Sales.LOG_MAX = 120       -- diagnostic rows kept
 Sales.MAIL_DAYS = 30      -- life of a sale mail with money; the sale time is estimated from the days left
 Sales.TOLERANCE = 30      -- seconds the estimated expiry of the same mail may differ between two readings
 local DAY = 86400
@@ -90,6 +90,10 @@ function Sales:Consider(index, now, claimed)
         elseif kind then
             self:Log({ result = 'other', subject = header.subject, money = header.money, invoice = raw(invoice) },
                 'other|' .. header.subject .. '|' .. tostring(header.money))
+        else
+            -- A sample of the other mails, to learn the client's subjects and senders; once per session.
+            self:Log({ result = 'other-mail', subject = header.subject, sender = header.sender, money = header.money,
+                days = header.days }, 'other-mail|' .. header.subject .. '|' .. tostring(header.sender))
         end
         return 0
     end
@@ -141,15 +145,24 @@ function Sales:Consider(index, now, claimed)
 end
 
 -- Reads the whole inbox; returns how many new sales were recorded. A mail that cannot be read never stops the others.
-function Sales:Scan()
+function Sales:Scan(source)
     local api = self.api
     local ok, total = pcall(api.Count)
-    if not ok or type(total) ~= 'number' then return 0 end
+    if not ok or type(total) ~= 'number' then
+        self:Log({ result = 'scan-failed', source = source }, 'scan-failed')
+        return 0
+    end
     local now, claimed, added = api.Now(), {}, 0
     for index = 1, total do
         local read, result = pcall(self.Consider, self, index, now, claimed)
         if read and type(result) == 'number' then added = added + result end
     end
+    -- Every reading that found something new, or a different number of mails, is a row: the log shows that the inbox
+    -- was read even when it held no sale.
+    if added > 0 or total ~= self.lastTotal then
+        self:Log({ result = 'scan', source = source, mails = total, recorded = added })
+    end
+    self.lastTotal = total
     return added
 end
 
@@ -216,12 +229,12 @@ function Sales.Initialize()
     Sales.frame = frame
     local pending = false
     -- The inbox raises many updates in a row; one reading a moment after the last is enough. A failure is contained.
-    local function schedule()
+    local function schedule(source)
         if pending then return end
         pending = true
         local function run()
             pending = false
-            pcall(Sales.instance.Scan, Sales.instance)
+            pcall(Sales.instance.Scan, Sales.instance, source)
         end
         if C_Timer and C_Timer.After then C_Timer.After(0.5, run) else run() end
     end
@@ -230,9 +243,9 @@ function Sales.Initialize()
         if event == 'MAIL_SHOW' and not hooked and type(_G.OpenMail_Update) == 'function' then
             -- Opening a sale mail makes the client load its invoice: read the inbox again then.
             hooked = true
-            hooksecurefunc('OpenMail_Update', function() pcall(schedule) end)
+            hooksecurefunc('OpenMail_Update', function() pcall(schedule, 'OpenMail_Update') end)
         end
-        schedule()
+        schedule(event)
     end)
     frame:RegisterEvent('MAIL_SHOW')
     frame:RegisterEvent('MAIL_INBOX_UPDATE')
