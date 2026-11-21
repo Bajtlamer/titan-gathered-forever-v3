@@ -171,7 +171,7 @@ local function client()
         function self:SetSize() end
         function self:SetHeight() end
         function self:SetWidth() end
-        function self:SetPoint() end
+        function self:SetPoint(...) self.point = { ... } end
         function self:SetText(t) self.text = t end
         function self:SetJustifyH() end
         function self:ClearAllPoints() self.points = 0 end
@@ -250,13 +250,13 @@ test('the client layer attaches once, searches on selection and fills the price'
     eq(U.frame.events, 3)
     U.instance = U.instance
     eq(U.Attach(), true); eq(U.Attach(), true)
-    eq(U.strip.shown, true)
+    eq(U.strip.shown, true); eq(U.panel.shown, true)
     -- The strip follows the Sell forms: hidden when none is shown (Buy and Auctions tabs).
     local forms = _G.AuctionHouseFrame
     forms.CommoditiesSellFrame.shown, forms.ItemSellFrame.shown = false, false
-    forms.CommoditiesSellFrame.hooked.OnHide(); eq(U.strip.shown, false)
+    forms.CommoditiesSellFrame.hooked.OnHide(); eq(U.strip.shown, false); eq(U.panel.shown, false)
     forms.ItemSellFrame.shown = true
-    forms.ItemSellFrame.hooked.OnShow(); eq(U.strip.shown, true)
+    forms.ItemSellFrame.hooked.OnShow(); eq(U.strip.shown, true); eq(U.panel.shown, true)
     forms.CommoditiesSellFrame.shown = true
     eq(#g.dropdowns, 1)
     eq(#g.dropdowns[1].options, 4)                 -- 2, 5, 10, 15: no custom value
@@ -318,6 +318,13 @@ test('the client layer attaches once, searches on selection and fills the price'
     forms.ItemSellFrame.shown, forms.CommoditiesSellFrame.shown = false, false
     forms.ItemSellFrame.hooked.OnHide(); eq(U.strip.shown, false); eq(ah.height, 538)
     forms.ItemSellFrame.shown = true; forms.ItemSellFrame.hooked.OnShow(); eq(U.strip.shown, true); eq(ah.height, 538)
+    -- The row keeps its place inside the window (a little higher on the commodity form); only the panel hangs below it.
+    eq(U.strip.point[4], 32); eq(U.strip.point[5], 78)
+    forms.ItemSellFrame.shown, forms.CommoditiesSellFrame.shown = false, true
+    forms.CommoditiesSellFrame.hooked.OnShow(); eq(U.strip.point[5], 85); eq(U.strip.point[2], ah)
+    eq(U.panel.point[1], 'TOPRIGHT'); eq(U.panel.point[2], ah); eq(U.panel.point[3], 'BOTTOMRIGHT')
+    forms.ItemSellFrame.shown, forms.CommoditiesSellFrame.shown = true, false
+    forms.ItemSellFrame.hooked.OnShow(); eq(U.strip.point[5], 78)
     U.frame.scripts.OnEvent(U.frame, 'ITEM_SEARCH_RESULTS_UPDATED', { itemID = 5 })
     eq(single.SecondaryPriceInput.amount, 18000)
     -- Answers for another item are ignored.

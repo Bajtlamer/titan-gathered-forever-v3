@@ -211,6 +211,7 @@ end
 function Undercut.Refresh(sell)
     local info = Undercut.info
     if not info or not sell then return end
+    Undercut.Place(sell)
     local input = Undercut.BuyoutInput(sell)
     local price = input and input.GetAmount and select(2, pcall(input.GetAmount, input))
     local quantity = read(sell, 'GetQuantity')
@@ -234,73 +235,88 @@ local function keyOf(sell, itemLocation)
     return { itemKey = itemKey, commodity = sell == _G.AuctionHouseFrame.CommoditiesSellFrame }
 end
 
--- The strip under the Sell form: label, combo box and the field for a custom percentage.
-Undercut.HEIGHT = 112
+-- The row inside the Sell form (label, combo box, what a sale brings) and, hanging under the window, a panel with the
+-- remaining posting lines. The window itself is never resized: changing its height made the client's scroll lists lay
+-- out again and fail when the window closed.
+Undercut.HEIGHT = 76
+
+-- The row sits in the free line above the Buyout Mode check box; the commodity form needs it a little higher.
+function Undercut.Place(sell)
+    local strip, frame = Undercut.strip, _G.AuctionHouseFrame
+    if not strip or not frame or not sell then return end
+    local commodity = sell == frame.CommoditiesSellFrame
+    if Undercut.placedCommodity == commodity then return end
+    Undercut.placedCommodity = commodity
+    strip:ClearAllPoints()
+    strip:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 32, commodity and 85 or 78)
+end
 
 function Undercut.Attach()
     if Undercut.strip then return true end
     local frame = _G.AuctionHouseFrame
     if not frame or not frame.CommoditiesSellFrame or not frame.ItemSellFrame then return false end
-    -- A panel hangs under the window like a drawer, shown only while a Sell form is shown. The window itself is never
-    -- resized: changing its height made the client's scroll lists lay out again and fail when the window closed.
+    local level = frame.GetFrameLevel and frame:GetFrameLevel() or nil
     local strip = CreateFrame('Frame', nil, frame)
     Undercut.strip = strip
-    strip:SetHeight(Undercut.HEIGHT)
-    strip:SetPoint('TOPLEFT', frame, 'BOTTOMLEFT', 4, 2)
-    strip:SetPoint('TOPRIGHT', frame, 'BOTTOMRIGHT', -4, 2)
-    if strip.SetFrameLevel and frame.GetFrameLevel then strip:SetFrameLevel(frame:GetFrameLevel() + 20) end
-    if strip.CreateTexture then
-        local background = strip:CreateTexture(nil, 'BACKGROUND')
-        background:SetAllPoints(strip)
+    strip:SetSize(400, 24)
+    strip:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 32, 78)
+    if strip.SetFrameLevel and level then strip:SetFrameLevel(level + 20) end
+    local panel = CreateFrame('Frame', nil, frame)
+    Undercut.panel = panel
+    panel:SetHeight(Undercut.HEIGHT)
+    panel:SetPoint('TOPLEFT', frame, 'BOTTOMLEFT', 4, 2)
+    panel:SetPoint('TOPRIGHT', frame, 'BOTTOMRIGHT', -4, 2)
+    if panel.SetFrameLevel and level then panel:SetFrameLevel(level + 20) end
+    if panel.CreateTexture then
+        local background = panel:CreateTexture(nil, 'BACKGROUND')
+        background:SetAllPoints(panel)
         background:SetColorTexture(0.04, 0.05, 0.09, 0.96)
-        local edge = strip:CreateTexture(nil, 'BORDER')
-        edge:SetPoint('TOPLEFT', strip, 'TOPLEFT', 0, 0)
-        edge:SetPoint('TOPRIGHT', strip, 'TOPRIGHT', 0, 0)
+        local edge = panel:CreateTexture(nil, 'BORDER')
+        edge:SetPoint('TOPLEFT', panel, 'TOPLEFT', 0, 0)
+        edge:SetPoint('TOPRIGHT', panel, 'TOPRIGHT', 0, 0)
         edge:SetHeight(2)
         edge:SetColorTexture(0.78, 0.62, 0.22, 1)
     end
-    local row = CreateFrame('Frame', nil, strip)
-    row:SetSize(400, 24)
-    row:SetPoint('BOTTOMLEFT', strip, 'BOTTOMLEFT', 32, 12)
-    local label = row:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
+    local label = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
     label:SetPoint('LEFT', 0, 0)
     label:SetText('Undercut')
     local options = {
         { value = 2, label = '2 %' }, { value = 5, label = '5 %' }, { value = 10, label = '10 %' }, { value = 15, label = '15 %' },
     }
-    Undercut.drop = ns.Nav.Dropdown(row, 54, 0, 64, function() return options end,
+    Undercut.drop = ns.Nav.Dropdown(strip, 54, 0, 64, function() return options end,
         function() return ns.settings.auctionUndercutPreset end,
         function(value)
             ns.settings.auctionUndercutPreset = value
             ns.settings.auctionUndercutPercent = value
             Undercut.instance:Refill()
         end)
-    -- The sale and the vendor price right after the box, then the gains and the unsold line below the strip from the
-    -- left edge, and the red warning above them.
-    local head = row:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
-    head:SetPoint('LEFT', row, 'LEFT', 128, 0)
+    -- What a sale brings and what a vendor pays, right after the box.
+    local head = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
+    head:SetPoint('LEFT', strip, 'LEFT', 128, 0)
     head:SetJustifyH('LEFT')
     Undercut.head = head
     -- Two single-line texts instead of one with a large line spacing: the coin icons inside a text with extra spacing rose.
-    local info = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
-    info:SetPoint('BOTTOMLEFT', strip, 'BOTTOMLEFT', 32, 48)
+    local info = panel:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
+    info:SetPoint('BOTTOMLEFT', panel, 'BOTTOMLEFT', 32, 12)
     info:SetJustifyH('LEFT')
     Undercut.info = info
-    local gains = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
+    local gains = panel:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
     gains:SetPoint('BOTTOMLEFT', info, 'TOPLEFT', 0, 9)
     gains:SetJustifyH('LEFT')
     Undercut.gains = gains
-    local warning = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
+    local warning = panel:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
     warning:SetPoint('BOTTOMLEFT', gains, 'TOPLEFT', 0, 6)
     warning:Hide()
     Undercut.warning = warning
 
     local function refresh()
-        local shown = false
+        local shown
         for _, sell in ipairs({ frame.CommoditiesSellFrame, frame.ItemSellFrame }) do
-            if sell.IsShown and sell:IsShown() then shown = true end
+            if sell.IsShown and sell:IsShown() then shown = shown or sell end
         end
-        strip:SetShown(shown)
+        strip:SetShown(shown ~= nil)
+        panel:SetShown(shown ~= nil)
+        if shown then Undercut.Place(shown) end
     end
     for _, sell in ipairs({ frame.CommoditiesSellFrame, frame.ItemSellFrame }) do
         if sell.HookScript then

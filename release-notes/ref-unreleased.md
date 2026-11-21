@@ -2,6 +2,10 @@
 
 Updated 2026-11-16. These changes describe the 0.5.113 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
 
+## Undercut row back in the window, 0.5.121
+
+- The Undercut row (label, combo box, "AH sold" and "Vendor") is back inside the Sell form, in the free line above the Buyout Mode check box (a little higher on the commodity form). Only the gains line, the unsold line and the red warning stay in the panel under the window, which is smaller now. The window is still never resized.
+
 ## Posting lines in a panel under the window, 0.5.120
 
 - Closing the auction house with ESC after a price had been filled raised errors in the client's own code (Pool release of nil in the scroll list, GetCommoditySearchResultInfo). With the window height change switched off the errors stopped, so the height is no longer changed at all.
