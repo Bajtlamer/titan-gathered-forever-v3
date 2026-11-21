@@ -36,6 +36,34 @@ function Sales.Amounts(entry)
     if reconciled(buyout) then return buyout, buyout - fee end
 end
 
+-- The overview includes all confirmed sales on this realm, including invoices whose item ID is unknown.
+function Sales.Totals(entries, realm)
+    local total = {
+        invoices = 0, units = 0, unitCount = 0, gross = 0, grossCount = 0,
+        net = 0, netCount = 0, fees = 0, deposits = 0, credit = 0, creditCount = 0,
+    }
+    if not realm then return total end
+    for _, entry in ipairs(entries or {}) do
+        if type(entry) == 'table' and entry.source == 'invoice' and entry.realm == realm then
+            total.invoices = total.invoices + 1
+            local count = copper(entry.count)
+            if count and count == entry.count and count > 0 then
+                total.units, total.unitCount = total.units + count, total.unitCount + 1
+            end
+            local gross, net = Sales.Amounts(entry)
+            if gross then total.gross, total.grossCount = total.gross + gross, total.grossCount + 1 end
+            if net then
+                total.net, total.netCount = total.net + net, total.netCount + 1
+                total.fees = total.fees + copper(entry.fee)
+                total.deposits = total.deposits + copper(entry.deposit)
+            end
+            local credit = copper(entry.received)
+            if credit and credit > 0 then total.credit, total.creditCount = total.credit + credit, total.creditCount + 1 end
+        end
+    end
+    return total
+end
+
 local function escape(text) return (text:gsub('[%^%$%(%)%%%.%[%]%*%+%-%?]', '%%%0')) end
 
 -- The subject of a sold auction mail as the client formats it ("Auction successful: %s"), optionally with a stack size
@@ -285,7 +313,10 @@ function Sales.Initialize()
     local pending = false
     local function run(source)
         local ok = pcall(Sales.instance.Scan, Sales.instance, source)
-        if ok and ns.AuctionHistory then ns.AuctionHistory.Refresh() end
+        if ok then
+            if ns.AuctionHistory then ns.AuctionHistory.Refresh() end
+            if ns.EconomyView then ns.EconomyView.Refresh() end
+        end
     end
     -- The inbox raises many updates in a row; one reading a moment after the last is enough. A failure is contained.
     local function schedule(source)

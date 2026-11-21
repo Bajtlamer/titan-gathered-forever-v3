@@ -154,7 +154,7 @@ local function fixture(interface, saved, noBroker, noModules)
     local ns = {}
     for _, path in ipairs({ 'Localization/enUS.lua', 'Style.lua', 'Data/Metadata.lua', 'Data/NpcSeed.lua', 'Catalog.lua',
                             'Settings.lua', 'DebugLog.lua', 'Professions.lua', 'KnownRecipes.lua', 'Inventory.lua', 'Gathering.lua', 'History.lua', 'Actions.lua', 'PvP.lua', 'Production.lua', 'Crafting.lua', 'Export.lua', 'Observations.lua', 'Sources.lua', 'NpcSources.lua', 'NpcObserver.lua', 'PinStyle.lua', 'IconConfig.lua', 'FlightPaths.lua', 'Transport.lua', 'Map.lua', 'Minimap.lua',
-                            'Tooltips.lua', 'Reports.lua', 'CraftingView.lua', 'ProfessionButton.lua', 'Movable.lua', 'AuctionScan.lua', 'AuctionUndercut.lua', 'Sales.lua', 'LegacyFolders.lua', 'Economy.lua', 'AuctionHistory.lua', 'Yields.lua', 'RecipeBrowser.lua', 'MinimapButton.lua', 'Titan.lua', 'Core.lua' }) do
+                            'Tooltips.lua', 'Reports.lua', 'CraftingView.lua', 'ProfessionButton.lua', 'ProfessionStats.lua', 'Movable.lua', 'AuctionScan.lua', 'AuctionUndercut.lua', 'Sales.lua', 'LegacyFolders.lua', 'Economy.lua', 'LootIncome.lua', 'VendorSales.lua', 'QuestIncome.lua', 'EconomyView.lua', 'AuctionHistory.lua', 'Yields.lua', 'RecipeBrowser.lua', 'MinimapButton.lua', 'Titan.lua', 'Core.lua' }) do
         assert(loadfile('TitanGatheredForever/' .. path))('TitanGatheredForever', ns)
     end
     -- Keep integration scenarios small; the generated data is validated separately.
@@ -202,6 +202,65 @@ test('initializes a Forever-only broker after player identity is ready', functio
     eq(ns.inventory:Get(2589).bags, 3)
     eq(ns.inventory:Get(2589).bankState, 'unknown')
     eq(s.broker.label, 'Titan Gathered Forever');eq(s.broker.text, '- v0.1.0')
+end)
+
+test('core merchant events record a sale when Forever returns an empty realm name', function()
+    local s, ns = fixture()
+    local balance, count = 100, 0
+    _G.GetRealmName = function() return '' end
+    _G.GetMoney = function() return balance end
+    _G.GetNumBuybackItems = function() return count end
+    _G.GetBuybackItemInfo = function() return 'Cloth', nil, 25, 3 end
+    _G.C_MerchantFrame = { GetBuybackItemID = function() return 2589 end }
+    s:Start()
+    local frame = ns.eventFrame
+    assert(frame.events.MERCHANT_SHOW and frame.events.PLAYER_MONEY)
+    frame:Fire('OnEvent', 'MERCHANT_SHOW')
+    count = 1
+    frame:Fire('OnEvent', 'MERCHANT_UPDATE')
+    balance = 125
+    frame:Fire('OnEvent', 'PLAYER_MONEY')
+    s:Flush()
+    local total = ns.VendorSales.Totals(ns.db.vendorSales, '')
+    eq(total.soldUnits, 3); eq(total.soldCopper, 25)
+    eq(ns.VendorSales.Totals(ns.db.vendorSales, 'Other realm').soldCopper, 0)
+    eq(ns.db.vendorLog[#ns.db.vendorLog].result, 'sale')
+    _G.GetRealmName, _G.GetMoney, _G.GetNumBuybackItems, _G.GetBuybackItemInfo, _G.C_MerchantFrame = nil, nil, nil, nil, nil
+end)
+
+test('quest turn-ins on an empty realm key record the reward and exclude it from merchant sales', function()
+    local s, ns = fixture()
+    local balance, count = 100, 0
+    _G.GetRealmName = function() return '' end
+    _G.GetMoney = function() return balance end
+    _G.GetNumBuybackItems = function() return count end
+    _G.GetBuybackItemInfo = function() return 'Cloth', nil, 25, 1 end
+    _G.C_MerchantFrame = { GetBuybackItemID = function() return 2589 end }
+    s:Start()
+    assert(ns.eventFrame.events.QUEST_TURNED_IN)
+    s:Event('MERCHANT_SHOW')
+    count, balance = 1, 125
+    s:Event('MERCHANT_UPDATE')
+    s:Event('PLAYER_MONEY')
+    s:Event('QUEST_TURNED_IN', 42, 0, 25)
+    s:Flush()
+    eq(ns.VendorSales.Totals(ns.db.vendorSales, '').soldCopper, 0)
+    s:Event('QUEST_TURNED_IN', 42, 0, 25)
+    s:Event('QUEST_TURNED_IN', 43, 0, 0)
+    s:Event('QUEST_TURNED_IN', 44, 0, 'unreadable')
+    local copper, turnIns = ns.QuestIncome.Total(ns.db.questIncome, '')
+    eq(copper, 50); eq(turnIns, 3)
+    local entry = ns.db.questIncome[''][UnitGUID('player')][42]
+    eq(entry.copper, 50); eq(entry.turnIns, 2)
+    eq(ns.QuestIncome.Total(ns.db.questIncome, 'Other realm'), nil)
+    s:Event('MERCHANT_CLOSED')
+    s:Event('MERCHANT_SHOW')
+    count, balance = 2, 150
+    s:Event('PLAYER_MONEY')
+    s:Event('MERCHANT_UPDATE')
+    s:Flush()
+    eq(ns.VendorSales.Totals(ns.db.vendorSales, '').soldCopper, 25)
+    _G.GetRealmName, _G.GetMoney, _G.GetNumBuybackItems, _G.GetBuybackItemInfo, _G.C_MerchantFrame = nil, nil, nil, nil, nil
 end)
 
 test('honor-confirmed outdoor PvP creates a spot while BG awards only update PvP summary data',function()
@@ -1042,7 +1101,7 @@ test('action recording works independently without changing loot history or maps
     s:Event('UNIT_SPELLCAST_SUCCEEDED','player','d1',13262)
     local r=ns.actions:Rows(UnitGUID('player'))[1];eq(r.attempts,1);eq(r.completed,1)
     eq(#ns.history:Totals(),0);eq(ns.gathering:Count(1,'Enchanting'),0)
-    s.broker.OnClick({},'RightButton');assert(s.menu.buttons['Profession actions'])
+    s.broker.OnClick({},'RightButton');assert(not s.menu.buttons['Profession actions'],'the actions window is part of Statistics now');assert(s.menu.buttons['Profession statistics'])
     assert(s.menu.checkboxes['Record profession actions']);assert(s.menu.checkboxes['Record Disenchanting actions'])
     s.menu.checkboxes['Record Disenchanting actions'].callback()
     s:Event('UNIT_SPELLCAST_SUCCEEDED','player','d2',13262);eq(ns.actions:Rows()[1].attempts,1)
@@ -1096,7 +1155,8 @@ test('dedicated production results enrich lifetime views without changing loot i
     eq(#ns.history:Rates(),0);eq(ns.inventory:Get(2680).bags,before);eq(ns.gathering:Count(1,'Cooking'),0)
     local tip=CreateFrame('GameTooltip');s.post(tip,{id=2680});assert(contains(tip.lines,'Lifetime crafted: 2'))
     local rows=ns.Reports.Rows('history',UnitGUID('player'),'Cooking');eq(#rows,1);eq(rows[1].crafted,2);eq(rows[1].quantity,0)
-    s.broker.OnClick({},'RightButton');assert(s.menu.buttons['Crafting and cooking'])
+    s.broker.OnClick({},'RightButton');assert(s.menu.buttons['Profession statistics'])
+    assert(not s.menu.buttons['Crafting and cooking'])
     assert(s.menu.checkboxes['Record production']);assert(s.menu.checkboxes['Record Cooking production'])
 end)
 test('production switches are independent and seal late results across recording gaps',function()

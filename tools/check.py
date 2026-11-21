@@ -31,6 +31,8 @@ commands = [
     [runtime, 'tests/observations.lua'],
     [runtime, 'tests/pvp.lua'],
     [runtime, 'tests/reports.lua'],
+    [runtime, 'tests/loot_income.lua'],
+    [runtime, 'tests/vendor_sales.lua'],
     [runtime, 'tests/map.lua'],
     [runtime, 'tests/flight_paths.lua'],
     [runtime, 'tests/pin_style.lua'],

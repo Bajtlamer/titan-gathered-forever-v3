@@ -14,6 +14,25 @@ The owner confirmed 0.5.125 working in the client. Version 0.5.126 compares the 
 - Summarize confirmed mail entries for the same base item and realm over 30 days. Calculate the realized unit price from the invoice sale amount and known quantity. Preserve partial and unknown quantities and mark the sale date as estimated.
 - Exercise scan persistence, realm isolation, expiry, incomplete invoices, both forms and the toggle with LuaJIT. Verify frame placement, small screen behavior, and actual mail values in the client.
 
+## Economy tab in the main TGF window
+
+Add a dedicated Economy tab for overall trading, quest and loot income. Show the quantities sold to merchants and through auctions, the proceeds from each source, cash awarded for turning in quests, cash looted from mobs, and combined income from those sources. The auction house Sell panel remains the item-level view. Both views must read the same auction sales ledger.
+
+The 0.5.127 candidate introduced the Economy tab and Titan menu entry with confirmed auction totals. Version 0.5.131 includes all four income sources and displays the recorded total as a lower bound. The scope is all recorded characters on the current realm.
+
+- Merchant sales in 0.5.129 match changes in the native buyback list to the wallet credit and retain item, quantity and proceeds by character and realm. Matched buybacks are tracked as spending. Earlier buyback entries provide a baseline. Unchanged snapshots, including an indistinguishable rotation of a full list, provide no attributable sale evidence. Verify manual sales, several stacks, buybacks and repairs in the client. [Forever merchant frame source](https://raw.githubusercontent.com/Gethe/wow-ui-source/9dc84f0d3bbae1768ac3405b3716000bd93eda06/Interface/AddOns/Blizzard_UIPanels_Game/Mainline/MerchantFrame.lua#L383-L395)
+- Auction sales use the confirmed seller invoices already recorded by the mail ledger. Preserve gross sale amount, fee, returned deposit and credited amount. Use net sale proceeds in combined income so a returned deposit does not increase earnings. Waiting auctions and scanned prices are useful context for Sell.
+- Quest income records the quest ID and the cash awarded through `QUEST_TURNED_IN`. Each repeatable quest completion counts once. Merchant or auction sales of quest reward items belong to the corresponding sale source. [Forever quest event definition](https://raw.githubusercontent.com/Gethe/wow-ui-source/9dc84f0d3bbae1768ac3405b3716000bd93eda06/Interface/AddOns/Blizzard_APIDocumentationGenerated/QuestLogDocumentation.lua#L1325-L1334)
+- Mob loot counts cash pickups from dead creatures. Version 0.5.128 records a cleared coin slot when the creature source is known and the visible amount matches a single change in the player's wallet. Cash from opening an inventory item and ambiguous money changes stay out. Check manual loot, auto-loot and group shares in the client. [Forever loot frame source](https://raw.githubusercontent.com/Gethe/wow-ui-source/forever/Interface/AddOns/Blizzard_UIPanels_Game/Mainline/LootFrame.lua#L83-L90)
+
+The 0.5.129 live save had an initialized vendor ledger and zero vendor log records after merchant visits at 21:22:21 and 21:22:48 CET. The core debug log recorded both opens, the updates and the closes. The 0.5.130 candidate routes the vendor collector through that core handler and saves the opening before reading the buyback data. Verify a new sale and inspect the saved ledger and vendor log after a reload.
+
+The 0.5.131 live save at 21:45:04 CET showed `realm unavailable` for all three merchant visits at 21:41. The stored auction mail and mob coin records use the empty string returned by Forever. Version 0.5.132 accepts that same key for merchant sales and quest rewards. The rejected merchant visits had no recorded wallet or buyback data to recover.
+
+The 0.5.132 live save at 21:59:21 CET confirmed a merchant sale at 21:49:56 CET. The buyback list grew from six entries to seven and the wallet increased by 273 copper. The ledger stored one stack with one item for 273 copper.
+
+Automated checks cover overlapping quest and wallet events, a later merchant sale, and totals rendered from all four sources. Verify new merchant sales, cash quest turn-ins and a real auction settlement in Forever. Keep the amounts and quantities with missing evidence unknown and indicate incomplete coverage in the overview.
+
 ## Goal
 
 1. In the auction house Sell tab keep the Undercut row (label, combo box, "AH sold", "Vendor") inside the original window, and show the remaining information about the item being posted in a panel that hangs under the window. The panel should look like part of the window (same frame and background as the original window), not a custom dark box as it does now.
