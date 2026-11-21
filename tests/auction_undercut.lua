@@ -169,6 +169,7 @@ local function client()
     local function frame()
         local self = { scripts = {}, shown = true }
         function self:SetSize() end
+        function self:SetHeight() end
         function self:SetWidth() end
         function self:SetPoint() end
         function self:SetText(t) self.text = t end
@@ -210,7 +211,7 @@ local function client()
     end
     local g = { AuctionHouseFrame = { CommoditiesSellFrame = sellFrame(), ItemSellFrame = sellFrame(), height = 538, shown = true } }
     function g.AuctionHouseFrame:GetHeight() return self.height end
-    function g.AuctionHouseFrame:SetHeight(h) self.height = h end
+    function g.AuctionHouseFrame:SetHeight() error('the auction window must never be resized') end
     function g.AuctionHouseFrame:IsShown() return self.shown end
     function g.AuctionHouseFrame:HookScript(name, fn) self.hooked = self.hooked or {}; self.hooked[name] = fn end
     g.CreateFrame = frame
@@ -311,23 +312,12 @@ test('the client layer attaches once, searches on selection and fills the price'
     local single = _G.AuctionHouseFrame.ItemSellFrame
     single.BuyoutModeCheckButton = {}
     single:SetItem({ id = 5 })
-    -- While a Sell form is shown the window is EXTRA pixels taller; it is restored when the form or the window closes.
+    -- The window is never resized (that made the client's scroll lists fail when it closed): the lines live in a panel that
+    -- hangs under it and follows the Sell forms.
     local ah = _G.AuctionHouseFrame
     forms.ItemSellFrame.shown, forms.CommoditiesSellFrame.shown = false, false
-    forms.ItemSellFrame.hooked.OnHide(); eq(ah.height, 538)
-    forms.ItemSellFrame.shown = true; forms.ItemSellFrame.hooked.OnShow(); eq(ah.height, 538 + U.EXTRA)
-    forms.ItemSellFrame.hooked.OnShow(); eq(ah.height, 538 + U.EXTRA)             -- not extended twice
-    -- The window closes with the form open (ESC after a sale): the client is still tearing its lists down, so the size is
-    -- not touched then (a resize makes its scroll lists lay out again and they fail); it is restored a moment later.
-    ah.shown = false; ah.hooked.OnHide(); eq(ah.height, 538 + U.EXTRA)
-    forms.ItemSellFrame.shown = false; forms.ItemSellFrame.hooked.OnHide(); eq(ah.height, 538 + U.EXTRA)
-    local pending = {}
-    for i = #g.timers, 1, -1 do pending[#pending + 1] = table.remove(g.timers, i) end
-    assert(#pending > 0, 'the restore is scheduled')
-    for _, fn in ipairs(pending) do fn() end
-    eq(ah.height, 538)
-    forms.ItemSellFrame.shown = true
-    ah.shown = true; forms.ItemSellFrame.hooked.OnShow(); eq(ah.height, 538 + U.EXTRA)
+    forms.ItemSellFrame.hooked.OnHide(); eq(U.strip.shown, false); eq(ah.height, 538)
+    forms.ItemSellFrame.shown = true; forms.ItemSellFrame.hooked.OnShow(); eq(U.strip.shown, true); eq(ah.height, 538)
     U.frame.scripts.OnEvent(U.frame, 'ITEM_SEARCH_RESULTS_UPDATED', { itemID = 5 })
     eq(single.SecondaryPriceInput.amount, 18000)
     -- Answers for another item are ignored.

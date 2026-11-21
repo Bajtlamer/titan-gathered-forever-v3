@@ -207,22 +207,6 @@ function Undercut.InfoText(post)
     return head, gains, unsold
 end
 
--- Room for the posting lines: while a Sell form is shown the auction house window is made EXTRA pixels taller. What the
--- client anchors to the top of the window stays, what it anchors to the bottom (Buyout Mode, the money bar, the tabs)
--- and our strip and lines move down with the edge, which leaves the free space between them. Restored when the form closes.
-Undercut.EXTRA = 44
-
-function Undercut.Resize(wanted)
-    local frame = _G.AuctionHouseFrame
-    if not frame or not frame.GetHeight or not frame.SetHeight then return end
-    wanted = wanted and true or false
-    if (Undercut.extended or false) == wanted then return end
-    local ok, height = pcall(frame.GetHeight, frame)
-    if not ok or type(height) ~= 'number' then return end
-    Undercut.extended = wanted
-    frame:SetHeight(height + (wanted and Undercut.EXTRA or -Undercut.EXTRA))
-end
-
 -- Reads the form as it stands and shows the lines; an empty form or a price of zero shows nothing.
 function Undercut.Refresh(sell)
     local info = Undercut.info
@@ -251,24 +235,40 @@ local function keyOf(sell, itemLocation)
 end
 
 -- The strip under the Sell form: label, combo box and the field for a custom percentage.
+Undercut.HEIGHT = 112
+
 function Undercut.Attach()
     if Undercut.strip then return true end
     local frame = _G.AuctionHouseFrame
     if not frame or not frame.CommoditiesSellFrame or not frame.ItemSellFrame then return false end
+    -- A panel hangs under the window like a drawer, shown only while a Sell form is shown. The window itself is never
+    -- resized: changing its height made the client's scroll lists lay out again and fail when the window closed.
     local strip = CreateFrame('Frame', nil, frame)
     Undercut.strip = strip
-    strip:SetSize(400, 24)
-    -- At the left edge of the panel, in the row above the Buyout Mode check box (free on every form), shown only while a
-    -- Sell form is shown. The window is taller while it is (Undercut.Resize), so the rows below fit above the check box.
-    strip:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 32, 78)
+    strip:SetHeight(Undercut.HEIGHT)
+    strip:SetPoint('TOPLEFT', frame, 'BOTTOMLEFT', 4, 2)
+    strip:SetPoint('TOPRIGHT', frame, 'BOTTOMRIGHT', -4, 2)
     if strip.SetFrameLevel and frame.GetFrameLevel then strip:SetFrameLevel(frame:GetFrameLevel() + 20) end
-    local label = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
+    if strip.CreateTexture then
+        local background = strip:CreateTexture(nil, 'BACKGROUND')
+        background:SetAllPoints(strip)
+        background:SetColorTexture(0.04, 0.05, 0.09, 0.96)
+        local edge = strip:CreateTexture(nil, 'BORDER')
+        edge:SetPoint('TOPLEFT', strip, 'TOPLEFT', 0, 0)
+        edge:SetPoint('TOPRIGHT', strip, 'TOPRIGHT', 0, 0)
+        edge:SetHeight(2)
+        edge:SetColorTexture(0.78, 0.62, 0.22, 1)
+    end
+    local row = CreateFrame('Frame', nil, strip)
+    row:SetSize(400, 24)
+    row:SetPoint('BOTTOMLEFT', strip, 'BOTTOMLEFT', 32, 12)
+    local label = row:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
     label:SetPoint('LEFT', 0, 0)
     label:SetText('Undercut')
     local options = {
         { value = 2, label = '2 %' }, { value = 5, label = '5 %' }, { value = 10, label = '10 %' }, { value = 15, label = '15 %' },
     }
-    Undercut.drop = ns.Nav.Dropdown(strip, 54, 0, 64, function() return options end,
+    Undercut.drop = ns.Nav.Dropdown(row, 54, 0, 64, function() return options end,
         function() return ns.settings.auctionUndercutPreset end,
         function(value)
             ns.settings.auctionUndercutPreset = value
@@ -277,13 +277,13 @@ function Undercut.Attach()
         end)
     -- The sale and the vendor price right after the box, then the gains and the unsold line below the strip from the
     -- left edge, and the red warning above them.
-    local head = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
-    head:SetPoint('LEFT', strip, 'LEFT', 128, 0)
+    local head = row:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
+    head:SetPoint('LEFT', row, 'LEFT', 128, 0)
     head:SetJustifyH('LEFT')
     Undercut.head = head
     -- Two single-line texts instead of one with a large line spacing: the coin icons inside a text with extra spacing rose.
     local info = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
-    info:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 32, 114)
+    info:SetPoint('BOTTOMLEFT', strip, 'BOTTOMLEFT', 32, 48)
     info:SetJustifyH('LEFT')
     Undercut.info = info
     local gains = strip:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
@@ -295,27 +295,13 @@ function Undercut.Attach()
     warning:Hide()
     Undercut.warning = warning
 
-    local function refresh(later)
+    local function refresh()
         local shown = false
         for _, sell in ipairs({ frame.CommoditiesSellFrame, frame.ItemSellFrame }) do
             if sell.IsShown and sell:IsShown() then shown = true end
         end
         strip:SetShown(shown)
-        local windowShown = frame.IsShown and frame:IsShown() or false
-        if not windowShown and Undercut.extended and not later then
-            -- The window is closing (ESC after a sale): the client is still releasing its scroll lists, and a resize now
-            -- makes them lay out again over emptied data (errors in its own code). Restore the size a moment later.
-            if C_Timer and C_Timer.After then
-                C_Timer.After(0.5, function() Undercut.refreshForm(true) end)
-            else
-                Undercut.Resize(false)
-            end
-            return
-        end
-        Undercut.Resize(shown and windowShown)
     end
-    Undercut.refreshForm = refresh
-    if frame.HookScript then frame:HookScript('OnHide', function() refresh() end) end
     for _, sell in ipairs({ frame.CommoditiesSellFrame, frame.ItemSellFrame }) do
         if sell.HookScript then
             sell:HookScript('OnShow', function() refresh() end)

@@ -2,15 +2,16 @@
 
 Updated 2026-11-16. These changes describe the 0.5.113 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
 
-## Auction window closing, 0.5.119
+## Posting lines in a panel under the window, 0.5.120
 
-- Closing the auction house with ESC right after a sale could raise errors in the client's own code (list pool releases, GetCommoditySearchResultInfo). Cause: the window was resized back while the client was still emptying its scroll lists, which made them lay out again over removed data. The size is now restored half a second after the window has closed (or at once when only the form changes while the window stays open).
+- Closing the auction house with ESC after a price had been filled raised errors in the client's own code (Pool release of nil in the scroll list, GetCommoditySearchResultInfo). With the window height change switched off the errors stopped, so the height is no longer changed at all.
+- The Undercut row and the posting lines now sit in a panel that hangs under the auction house window (full width, dark with a gold top edge) and is shown only while a Sell form is shown. The window keeps its size on every form.
 
 ## Compact posting rows, 0.5.118
 
 - The Undercut row is at the left edge of the Sell form: the label, a narrow combo box (2, 5, 10 and 15 percent) and, right after it, "AH sold" (what a sale brings after the fee) and "Vendor" (what a vendor pays for the same stack). Below it, from the left edge, come the gains against the cost and against a vendor and the unsold line; the red vendor floor warning is above them. The custom percentage and its text field were removed; a saved custom value that equals a preset becomes that preset, any other falls back to 5 percent.
 - 0.5.118: the gains and unsold lines are two separate texts, 32 pixels from the left edge, with a gap between them (a large line spacing in one text made the coin icons rise); the Undercut row is at the same left edge (32 pixels), aligned with the lines above it, and the red warning has a little more room above the gains line.
-- The auction house window is 44 pixels taller while a Sell form is shown (70 in 0.5.114), restored when the form or the window closes. What the client anchors to the top stays; what it anchors to the bottom and our rows move down with the edge. The strip is in the same place on every form.
+- (Replaced in 0.5.120: the window is no longer made taller; the rows are in a panel under it.)
 
 ## Warning about the old folders, 0.5.108
 
