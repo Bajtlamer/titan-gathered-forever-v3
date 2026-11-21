@@ -295,19 +295,31 @@ function Undercut.Attach()
     warning:Hide()
     Undercut.warning = warning
 
-    local function refresh()
+    local function refresh(later)
         local shown = false
         for _, sell in ipairs({ frame.CommoditiesSellFrame, frame.ItemSellFrame }) do
             if sell.IsShown and sell:IsShown() then shown = true end
         end
         strip:SetShown(shown)
-        Undercut.Resize(shown and frame.IsShown and frame:IsShown())
+        local windowShown = frame.IsShown and frame:IsShown() or false
+        if not windowShown and Undercut.extended and not later then
+            -- The window is closing (ESC after a sale): the client is still releasing its scroll lists, and a resize now
+            -- makes them lay out again over emptied data (errors in its own code). Restore the size a moment later.
+            if C_Timer and C_Timer.After then
+                C_Timer.After(0.5, function() Undercut.refreshForm(true) end)
+            else
+                Undercut.Resize(false)
+            end
+            return
+        end
+        Undercut.Resize(shown and windowShown)
     end
-    if frame.HookScript then frame:HookScript('OnHide', refresh) end
+    Undercut.refreshForm = refresh
+    if frame.HookScript then frame:HookScript('OnHide', function() refresh() end) end
     for _, sell in ipairs({ frame.CommoditiesSellFrame, frame.ItemSellFrame }) do
         if sell.HookScript then
-            sell:HookScript('OnShow', refresh)
-            sell:HookScript('OnHide', refresh)
+            sell:HookScript('OnShow', function() refresh() end)
+            sell:HookScript('OnHide', function() refresh() end)
         end
         hooksecurefunc(sell, 'SetItem', function(self, itemLocation)
             Undercut.sellFrame = self

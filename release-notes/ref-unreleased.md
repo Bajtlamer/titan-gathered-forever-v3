@@ -2,6 +2,10 @@
 
 Updated 2026-11-16. These changes describe the 0.5.113 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
 
+## Auction window closing, 0.5.119
+
+- Closing the auction house with ESC right after a sale could raise errors in the client's own code (list pool releases, GetCommoditySearchResultInfo). Cause: the window was resized back while the client was still emptying its scroll lists, which made them lay out again over removed data. The size is now restored half a second after the window has closed (or at once when only the form changes while the window stays open).
+
 ## Compact posting rows, 0.5.118
 
 - The Undercut row is at the left edge of the Sell form: the label, a narrow combo box (2, 5, 10 and 15 percent) and, right after it, "AH sold" (what a sale brings after the fee) and "Vendor" (what a vendor pays for the same stack). Below it, from the left edge, come the gains against the cost and against a vendor and the unsold line; the red vendor floor warning is above them. The custom percentage and its text field were removed; a saved custom value that equals a preset becomes that preset, any other falls back to 5 percent.

@@ -317,7 +317,16 @@ test('the client layer attaches once, searches on selection and fills the price'
     forms.ItemSellFrame.hooked.OnHide(); eq(ah.height, 538)
     forms.ItemSellFrame.shown = true; forms.ItemSellFrame.hooked.OnShow(); eq(ah.height, 538 + U.EXTRA)
     forms.ItemSellFrame.hooked.OnShow(); eq(ah.height, 538 + U.EXTRA)             -- not extended twice
-    ah.shown = false; ah.hooked.OnHide(); eq(ah.height, 538)                       -- the window closes with the form open
+    -- The window closes with the form open (ESC after a sale): the client is still tearing its lists down, so the size is
+    -- not touched then (a resize makes its scroll lists lay out again and they fail); it is restored a moment later.
+    ah.shown = false; ah.hooked.OnHide(); eq(ah.height, 538 + U.EXTRA)
+    forms.ItemSellFrame.shown = false; forms.ItemSellFrame.hooked.OnHide(); eq(ah.height, 538 + U.EXTRA)
+    local pending = {}
+    for i = #g.timers, 1, -1 do pending[#pending + 1] = table.remove(g.timers, i) end
+    assert(#pending > 0, 'the restore is scheduled')
+    for _, fn in ipairs(pending) do fn() end
+    eq(ah.height, 538)
+    forms.ItemSellFrame.shown = true
     ah.shown = true; forms.ItemSellFrame.hooked.OnShow(); eq(ah.height, 538 + U.EXTRA)
     U.frame.scripts.OnEvent(U.frame, 'ITEM_SEARCH_RESULTS_UPDATED', { itemID = 5 })
     eq(single.SecondaryPriceInput.amount, 18000)
