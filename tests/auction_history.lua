@@ -10,6 +10,7 @@ _G.GetRealmName = function() return 'Forever' end
 load('Style')
 load('AuctionScan')
 load('Economy')
+load('Sales')
 load('AuctionUndercut')
 load('AuctionHistory')
 local History = ns.AuctionHistory
@@ -50,19 +51,46 @@ points, latest = History.Prices(ns.db, 'Forever', ore, now)
 eq(#points, 1); eq(latest.price, 7000)
 
 local function sale(age, count, buyout, itemID, realm)
+    local fee = buyout and math.floor(buyout * 0.05)
     return { soldAt = now - age * day, realm = realm or 'Forever', itemID = itemID or ore,
-        itemName = 'Copper Ore', received = 999999, count = count, buyout = buyout, source = buyout and 'invoice' or 'header' }
+        itemName = 'Copper Ore', received = buyout and buyout - fee + 20 or 98, count = count,
+        bid = buyout, buyout = buyout, fee = fee, deposit = 20, source = buyout and 'invoice' or 'header' }
 end
 local entries = {
     sale(3, 10, 10000), sale(4, 30, 15000), sale(2, 2), sale(1, nil, 100), sale(31, 99, 100),
     sale(0, 99, 100, gear), sale(0, 99, 100, ore, 'Another realm'),
 }
 local summary = History.Sales(entries, 'Forever', ore, now)
-eq(summary.sales, 4); eq(summary.knownUnits, 42); eq(summary.completeQuantity, false)
+eq(summary.sales, 3); eq(summary.knownUnits, 40); eq(summary.completeQuantity, false)
 eq(summary.average, 625); eq(summary.pricedSales, 2)
+eq(summary.averageNet, 593.75); eq(summary.netSales, 2)
+eq(summary.received, 23905)
 eq(summary.last.at, now - day); eq(summary.last.price, nil)
-summary = History.Sales({ sale(1, nil) }, 'Forever', ore, now)
+summary = History.Sales({ sale(1, nil, 100) }, 'Forever', ore, now)
 eq(summary.knownUnits, 0); eq(summary.completeQuantity, false); eq(summary.average, nil)
+summary = History.Sales({ sale(1, 200) }, 'Forever', ore, now)
+eq(summary.sales, 0); eq(summary.received, nil)
+
+-- A real ledger pass carries the confirmed invoice values through to the selected item's comparison basis.
+local store = {}
+local ledger = ns.Sales.New({
+    Count = function() return 2 end,
+    Header = function(i)
+        return { subject = 'Auction successful: Copper Ore', money = i == 1 and 430 or 500, days = 29 }
+    end,
+    Invoice = function(i)
+        if i == 1 then return { 'seller', 'Copper Ore', nil, 440, 900, 12, 22, nil, nil, nil, 5 } end
+        return { 'seller_temp_invoice', 'Copper Ore' }
+    end,
+    ItemID = function() return ore end,
+    Now = function() return now end,
+    Character = function() return 'Seller' end,
+    Realm = GetRealmName,
+}, store)
+eq(ledger:Scan(), 1)
+summary = History.Sales(store.entries, 'Forever', ore, now)
+eq(summary.knownUnits, 5); eq(summary.received, 430)
+eq(summary.average, 88); eq(summary.averageNet, 83.6)
 
 -- The UI uses the actual displayed item, including when the client rejects a SetItem request.
 local function frame(parent)
@@ -146,6 +174,10 @@ assert(view.panel:IsVisible() and not view.toggle:IsVisible())
 assert(view.posting[1].text:find('1144c', 1, true))
 assert(view.posting[2].text:find('15c', 1, true))
 assert(view.posting[3].text:find('2%', 1, true))
+assert(view.posting[4].text:find('-98.9%', 1, true))
+assert(view.posting[5].text:find('522c', 1, true))
+assert(view.received.text:find('23905c', 1, true))
+assert(view.averageNet.text:find('594c', 1, true))
 commodity.price = 100
 History.UpdatePosting(commodity, ns.AuctionUndercut.Posting(commodity))
 assert(view.posting[1].text:find('1600c', 1, true))
@@ -154,7 +186,7 @@ assert(view.posting[1].text:find('1600c', 1, true), 'the hidden item form cannot
 History.UpdatePosting(commodity, ns.AuctionUndercut.Posting(commodity), ns.Style.Label('Vendor floor applied'))
 assert(view.posting[4].text:find('Vendor floor applied', 1, true))
 History.UpdatePosting(commodity, ns.AuctionUndercut.Posting(commodity))
-assert(not view.posting[4]:IsVisible())
+assert(not view.posting[4].text:find('Vendor floor applied', 1, true))
 commodity:SetItem(nil)
 assert(not view.panel:IsVisible() and not view.toggle:IsVisible())
 ah.left = 20

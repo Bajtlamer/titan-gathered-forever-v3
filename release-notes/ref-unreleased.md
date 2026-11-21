@@ -2,6 +2,12 @@
 
 Updated 2026-11-21. These changes describe source candidates since the latest published versioned notes.
 
+## Compare Sell with settled sales and scanned prices, 0.5.126
+
+- Current listing compares the entered unit buyout with the latest scanned buyout and the estimated net per unit with the weighted net per unit from confirmed sales.
+- Your sales shows the actual sale price, net after the invoice fee and the credit attached to the mail, which can include returned deposits. The client invoice supplies the sale amount and quantity when available. Net is shown when the invoice reconciles with the amount in the mail.
+- The opened-mail hook follows the native Forever mail frame so a later invoice can complete the existing ledger entry.
+
 ## Sell panel layout follow-up, 0.5.125
 
 - Show history sits below the auction title bar, to the right of the Create Auction tab.

@@ -85,10 +85,11 @@ Do these in the game after a full restart (new files exist in 0.5.36, 0.5.37, 0.
 
 ### 3.5b Market history in Sell (0.5.125)
 
-- [ ] Confirm the layout on the 0.5.125 candidate. The 0.5.124 live screenshots showed the panel on the left but also showed the title bar clipping Show history and the bottom panel covering the tabs. Check the repositioned toggle, the tabs and Scan prices, and the Current listing updates when editing price, quantity or duration.
+- [x] The owner confirmed that the 0.5.125 layout and feature work in the client after the toggle and bottom panel were moved from their 0.5.124 positions.
 - [ ] Select a material and a single item in Sell. Check the left panel, coin amounts, the Hide history and Show history controls, and the transition when the native form clears the previous selection. The panel and toggle disappear with an empty slot, outside Sell, and when the window closes.
 - [ ] Drag the auction window toward and away from the screen's left edge. Confirm the panel docks with room, opens on request as an overlay without room, and can always be collapsed.
 - [ ] Compare the latest price and date with an existing scan. After completing scans on distinct days, check the plotted values and change. Open a mailbox containing a confirmed sale and compare quantities and available invoice prices with the panel.
+- [ ] On 0.5.126, open a completed auction mail with its funds still attached and then choose the same item in Sell. Compare gross, fee, deposit and net with the invoice. Change the unit buyout and check the two Current listing comparisons. There were no completed mail entries in the saved variables before this candidate.
 
 ### 3.6 Crafting profit and the recipe harvest
 

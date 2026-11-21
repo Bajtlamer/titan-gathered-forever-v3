@@ -3,7 +3,7 @@ local History = {}
 ns.AuctionHistory = History
 
 local DAY, PRICE_DAYS, SALES_DAYS = 86400, 7, 30
-local WIDTH, POSTING_TOP, POSTING_STEP = 300, 368, 16
+local WIDTH, POSTING_TOP, POSTING_STEP = 300, 399, 16
 local Style = ns.Style
 
 local function positive(value)
@@ -69,23 +69,30 @@ function History.Prices(db, realm, itemID, now)
     return points, latest
 end
 
--- Use invoice prices before fees. A mail payout can include a returned deposit.
+-- Aggregate each basis over the quantities with that basis. Mail credit can include a returned deposit.
 function History.Sales(entries, realm, itemID, now)
-    local result = { sales = 0, knownUnits = 0, completeQuantity = true, pricedSales = 0 }
-    local totalPrice, pricedUnits = 0, 0
+    local result = { sales = 0, knownUnits = 0, completeQuantity = true, pricedSales = 0, netSales = 0 }
+    local totalPrice, pricedUnits, totalNet, netUnits = 0, 0, 0, 0
     local first = now - SALES_DAYS * DAY
     for _, entry in ipairs(entries or {}) do
-        if type(entry) == 'table' and entry.realm == realm and entry.itemID == itemID
+        if type(entry) == 'table' and entry.source == 'invoice' and entry.realm == realm and entry.itemID == itemID
             and type(entry.soldAt) == 'number' and entry.soldAt >= first and entry.soldAt <= now then
             result.sales = result.sales + 1
+            if positive(entry.received) then result.received = (result.received or 0) + entry.received end
             local unitPrice
             if positive(entry.count) then
                 result.knownUnits = result.knownUnits + entry.count
-                if entry.source == 'invoice' and positive(entry.buyout) then
-                    totalPrice = totalPrice + entry.buyout
+                local gross, net = ns.Sales.Amounts(entry)
+                if gross then
+                    totalPrice = totalPrice + gross
                     pricedUnits = pricedUnits + entry.count
                     result.pricedSales = result.pricedSales + 1
-                    unitPrice = entry.buyout / entry.count
+                    unitPrice = gross / entry.count
+                end
+                if net then
+                    totalNet = totalNet + net
+                    netUnits = netUnits + entry.count
+                    result.netSales = result.netSales + 1
                 end
             else
                 result.completeQuantity = false
@@ -96,6 +103,7 @@ function History.Sales(entries, realm, itemID, now)
         end
     end
     if pricedUnits > 0 then result.average = totalPrice / pricedUnits end
+    if netUnits > 0 then result.averageNet = totalNet / netUnits end
     return result
 end
 
@@ -195,6 +203,7 @@ local function render(view, itemID)
     local now, realm = time(), GetRealmName()
     local points, latest = History.Prices(ns.db, realm, itemID, now)
     local sales = History.Sales(ns.db.sales and ns.db.sales.entries, realm, itemID, now)
+    view.marketUnit, view.soldNetUnit = latest and latest.price, sales.averageNet
     view.item:SetText(Style.Value(ns.ItemName(itemID)))
     view.price:SetText(money(latest and latest.price))
     view.scanDate:SetText(latest and (Style.Label('Scanned ') .. Style.Date(date('%d %b %H:%M', latest.at))) or '')
@@ -216,10 +225,13 @@ local function render(view, itemID)
     end
     view.units:SetText(units)
     view.average:SetText(money(sales.average))
+    view.averageNet:SetText(money(sales.averageNet))
+    view.received:SetText(money(sales.received))
     view.last:SetText(sales.last and
         (Style.Date(date('%d %b', sales.last.at)) .. '   ' .. money(sales.last.price)) or money(nil))
-    view.salesNote:SetText(sales.pricedSales > 0 and sales.pricedSales < sales.sales
-        and Style.Label('Average uses sales with known prices and quantities.') or '')
+    local partial = (sales.pricedSales > 0 and sales.pricedSales < sales.sales)
+        or (sales.netSales > 0 and sales.netSales < sales.sales)
+    view.salesNote:SetText(partial and Style.Label('Averages use sales with known amounts and counts.') or '')
 end
 
 function History.UpdatePosting(sell, post, warning)
@@ -227,7 +239,20 @@ function History.UpdatePosting(sell, post, warning)
     if not view or view.sell ~= sell or not view.panel:IsVisible() then return end
     local _, profit, gain, loss, threshold = ns.AuctionUndercut.InfoText(post)
     local lines = { profit, gain, loss, threshold, post and warning or '' }
-    if not post then lines[1] = Style.Label('Enter a buyout to estimate the result.') end
+    if not post then
+        lines[1] = Style.Label('Enter a buyout to estimate the result.')
+    else
+        if view.marketUnit then
+            local change = (post.total / post.quantity / view.marketUnit - 1) * 100
+            lines[#lines + 1] = Style.Label('Buyout vs last scan: ') .. Style.Value(string.format('%+.1f%%', change))
+        end
+        if view.soldNetUnit then
+            local change = post.net / post.quantity - view.soldNetUnit
+            local magnitude = math.floor(math.abs(change) + 0.5)
+            local sign = magnitude > 0 and (change > 0 and Style.Text(Style.green, '+') or Style.Text(Style.red, '-')) or ''
+            lines[#lines + 1] = Style.Label('Net vs sales avg / unit: ') .. sign .. money(magnitude)
+        end
+    end
     local count = 0
     for _, line in ipairs(lines) do
         if line ~= '' then
@@ -329,9 +354,9 @@ function History.Attach(frame)
     end)
     section(panel, -66, 'Auction prices', PRICE_DAYS)
     section(panel, -228, 'Your sales', SALES_DAYS)
-    section(panel, -340, 'Current listing')
+    section(panel, -371, 'Current listing')
     local posting = {}
-    for i = 1, 5 do
+    for i = 1, 7 do
         posting[i] = text(panel, 'TOPLEFT', 16, -POSTING_TOP - (i - 1) * POSTING_STEP)
     end
     local view = {
@@ -341,9 +366,11 @@ function History.Attach(frame)
         trend = text(panel, 'TOPRIGHT', -16, -114),
         chart = createChart(panel),
         units = row(panel, -259, 'Units sold'),
-        average = row(panel, -278, 'Average / unit'),
-        last = row(panel, -297, 'Last sale (est. date)'),
-        salesNote = text(panel, 'TOPLEFT', 16, -317),
+        average = row(panel, -277, 'Avg sale price / unit'),
+        averageNet = row(panel, -295, 'Avg net / unit'),
+        received = row(panel, -313, 'Mail credit (incl. deposits)'),
+        last = row(panel, -331, 'Last sale (est. date)'),
+        salesNote = text(panel, 'TOPLEFT', 16, -349),
         posting = posting,
     }
     History.view = view

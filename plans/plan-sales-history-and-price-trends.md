@@ -8,8 +8,10 @@ The left-side panel supersedes the placement described in the handover below. Bo
 
 Live screenshots of 0.5.124 showed the docked panel, a Show history button clipped by the title bar and the old posting panel covering the auction tabs. In 0.5.125 the toggle goes below the title bar, and Current listing in the left panel replaces the bottom panel. Keep Undercut, AH sold and Vendor inside the Sell form.
 
+The owner confirmed 0.5.125 working in the client. Version 0.5.126 compares the current buyout per unit with the latest scanned price and the estimated net per unit with the weighted net from this item's confirmed sales. Both comparisons use the selected item and realm. The local save has one price snapshot and no completed sale mail yet. The Forever mail UI uses the seller invoice's bid field as the actual sale amount and shows proceeds as that amount less the fee plus the returned deposit. The add-on checks this arithmetic against the amount attached to the mail before reporting historical net proceeds. [Forever mail frame source](https://raw.githubusercontent.com/Gethe/wow-ui-source/forever/Interface/AddOns/Blizzard_MailFrame/MailFrame.lua#L763-L778)
+
 - Record only prices from completed scans. Archive the previous scan by realm and UTC day as the next scan completes. Read the current snapshot through the same history view so an existing snapshot is available on first use. Retain at most the visible seven days of daily snapshots, including the current day. Clearing scanned prices clears both sources.
-- Summarize confirmed mail entries for the same base item and realm over 30 days. Calculate the realized unit price from the invoice buyout and known quantity. Preserve partial and unknown quantities and mark the sale date as estimated.
+- Summarize confirmed mail entries for the same base item and realm over 30 days. Calculate the realized unit price from the invoice sale amount and known quantity. Preserve partial and unknown quantities and mark the sale date as estimated.
 - Exercise scan persistence, realm isolation, expiry, incomplete invoices, both forms and the toggle with LuaJIT. Verify frame placement, small screen behavior, and actual mail values in the client.
 
 ## Goal
