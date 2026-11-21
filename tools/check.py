@@ -48,6 +48,7 @@ commands = [
     [runtime, 'tests/movable.lua'],
     [runtime, 'tests/auction_scan.lua'],
     [runtime, 'tests/auction_undercut.lua'],
+    [runtime, 'tests/auction_history.lua'],
     [runtime, 'tests/legacy_folders.lua'],
     [runtime, 'tests/economy.lua'],
     [runtime, 'tests/transport.lua'],

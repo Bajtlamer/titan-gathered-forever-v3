@@ -1,6 +1,11 @@
 # Unreleased development updates
 
-Updated 2026-11-16. These changes describe the 0.5.113 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
+Updated 2026-11-21. These changes describe source candidates since the latest published versioned notes.
+
+## Sell market history panel, 0.5.124
+
+- The selected item or material in Sell has a collapsible market history panel at the left edge of the auction house. It docks outside the window when space permits and opens on request as an overlay near the screen edge.
+- The panel shows the last scanned lowest unit buyout and a seven-day trend from completed scans. It also summarizes 30 days of confirmed sales from the mailbox ledger, with estimated sale dates and unit prices when invoice and quantity data are available.
 
 ## Mail log without commands, 0.5.123
 

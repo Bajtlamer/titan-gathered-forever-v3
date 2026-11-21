@@ -1,7 +1,7 @@
 ## Interface: 16001
 ## Title: Titan Gathered Forever
 ## Notes: Profession uses and material counts in bags and the personal bank. Forever only.
-## Version: 0.5.123
+## Version: 0.5.124
 ## IconTexture: Interface\AddOns\TitanGatheredForever\Artwork\AddonIcon
 ## Author: Titan Gathered Forever contributors
 ## Dependencies: Titan
@@ -46,6 +46,7 @@ AuctionUndercut.lua
 Sales.lua
 LegacyFolders.lua
 Economy.lua
+AuctionHistory.lua
 Yields.lua
 Profit.lua
 RecipeBrowser.lua

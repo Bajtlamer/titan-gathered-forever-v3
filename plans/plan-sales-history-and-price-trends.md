@@ -2,6 +2,14 @@
 
 Written 2026-11-21 as a handover (the work moves to another computer). It records the decisions, the state of the code, what is verified and what is not, and the next steps. Version at the time of writing: 0.5.123 on `main`.
 
+## Left-side Market History candidate
+
+The left-side panel supersedes the placement of history described in the handover below. The existing posting calculations belong to the Sell form and its bottom panel. Both Sell forms expose history only while holding a valid item. Keep the player's collapsed preference across item and tab changes. Use native dialog materials, with a left-edge overlay available through the toggle when there is too little screen space to dock the panel outside the window.
+
+- Record only prices from completed scans. Archive the previous scan by realm and UTC day as the next scan completes. Read the current snapshot through the same history view so an existing snapshot is available on first use. Retain at most the visible seven days of daily snapshots, including the current day. Clearing scanned prices clears both sources.
+- Summarize confirmed mail entries for the same base item and realm over 30 days. Calculate the realized unit price from the invoice buyout and known quantity. Preserve partial and unknown quantities and mark the sale date as estimated.
+- Exercise scan persistence, realm isolation, expiry, incomplete invoices, both forms and the toggle with LuaJIT. Verify frame placement, small screen behavior, and actual mail values in the client.
+
 ## Goal
 
 1. In the auction house Sell tab keep the Undercut row (label, combo box, "AH sold", "Vendor") inside the original window, and show the remaining information about the item being posted in a panel that hangs under the window. The panel should look like part of the window (same frame and background as the original window), not a custom dark box as it does now.

@@ -288,6 +288,7 @@ local function start()
     ns.Movable.Initialize()
     ns.AuctionScan.Initialize()
     ns.AuctionUndercut.Initialize()
+    ns.AuctionHistory.Initialize()
     local salesOK, salesError = pcall(ns.Sales.Initialize)          -- reading the mailbox must never stop the start
     if not salesOK then ns.Debug('Sales ledger not started: ' .. tostring(salesError)) end
     ns.Titan.Initialize()
