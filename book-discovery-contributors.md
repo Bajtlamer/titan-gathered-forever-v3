@@ -5,7 +5,7 @@ Steps for anyone who wants to help collect data with Titan Gathered Forever: Dis
 ## Before you start
 
 - Install the TitanGatheredForever_Discovery folder next to Titan, Titan Gathered Forever and its profession modules. It is not part of the published downloads.
-- Type /tgfd. The module prints a notice that says what it records and what it never records. It records nothing until you type /tgfd accept.
+- Install the module. It starts recording by itself at the first login and prints a notice that says what it records and what it never records (type /tgfd to read it again). To pause type /tgfd stop, to resume /tgfd start. The window of the collected data opens with /tgfd show, from the Titan Panel entry "Titan Gathered Forever: Discovery" or from the menu of the Titan Gathered Forever minimap button (Discovery: collected data).
 - You can pause with /tgfd stop and resume with /tgfd start at any time.
 
 ## What happens while you play

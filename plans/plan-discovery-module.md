@@ -130,6 +130,8 @@ Rough total: 9 to 12 working days; the first useful version (milestones 1 to 5) 
 
 Decided 2026-11-19: the displayed name is "Titan Gathered Forever: Discovery" and the folder is TitanGatheredForever_Discovery, so the two match (the manifest Title follows the existing "Titan Gathered Forever: <Module>" pattern); operations are slash commands only, with the single exception of the read-only Titan Panel statistics plugin; the bag and bank snapshot is not ported (the core keeps its own).
 
+Decided 2026-11-22: recording starts by itself when the module is installed (the original rule "enabling the module is the consent" is applied literally: a module that has to be switched on is loaded and never used). The notice is printed at the first start and again when it changes, `/tgfd stop` pauses and the pause is kept, `/tgfd accept` stays as a fallback. The Titan Panel plugin carries the whole name "Titan Gathered Forever: Discovery", and the overview window opens also from the right click menu of the minimap button and of the Titan entry (the core offers `Titan.AddMenuExtension` for that).
+
 Still open:
 
 

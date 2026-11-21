@@ -70,8 +70,8 @@ function Stats.Initialize()
     local ldb = LibStub and LibStub.GetLibrary and LibStub:GetLibrary('LibDataBroker-1.1', true)
     if not ldb then return false end
     Stats.broker = ldb:NewDataObject('TitanGatheredForeverDiscovery', {
-        type = 'data source', label = 'Discovery', text = Stats.Text(ns.db, ns.runtime),
-        icon = 'Interface\\Icons\\INV_Misc_Spyglass_02',
+        type = 'data source', label = 'Titan Gathered Forever: Discovery', text = Stats.Text(ns.db, ns.runtime),
+        icon = 'Interface\\AddOns\\TitanGatheredForever_Discovery\\Artwork\\AddonIcon',
         OnEnter = showTooltip,
         OnLeave = function() GameTooltip:Hide() end,
         OnClick = function(_, button)

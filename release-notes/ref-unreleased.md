@@ -2,6 +2,10 @@
 
 Updated 2026-11-21. These changes describe source candidates since the latest published versioned notes.
 
+## Menu entries for modules, 0.5.144
+
+- The menu of the add-on (right click on the minimap button or on the Titan entry) can be extended by other modules with `ns.Titan.AddMenuExtension(function(root) ... end)`; a failing extension never breaks the menu. Titan Gathered Forever: Discovery uses it for "Discovery: collected data".
+
 ## Equipment repair costs, 0.5.143
 
 - What repairs cost is recorded for each character (a running total and the number of repairs) and shown in Economy as "Equipment repairs", next to the merchant buybacks, as spending. A repair is recognised at a merchant when the wallet falls by exactly the amount by which the cost of "repair all" (`GetRepairAllCost`) falls, which also covers a single repaired piece; a drop that does not match that (a purchase, for instance) is not a repair, and a client without the cost API records nothing. A repair paid from the guild bank costs the player nothing and is not counted. Repairs made before this version are not known.

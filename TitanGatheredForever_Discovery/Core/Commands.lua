@@ -26,6 +26,7 @@ local function help()
     local state = ns.Consent.State(ns.db, ns.runtime)
     if state == 'unaccepted' then
         for _, line in ipairs(ns.Consent.Notice()) do say(line) end
+        say(Text.Label('Recording has not started yet: ') .. Text.Value('/tgfd accept'))
         return
     end
     say(Text.Label('Titan Gathered Forever: Discovery commands:'))

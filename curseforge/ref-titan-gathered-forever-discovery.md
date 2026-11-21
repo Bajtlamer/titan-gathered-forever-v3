@@ -27,7 +27,7 @@ Requires **WoW Forever 1.60.1**, **Titan Panel** and the **Titan Gathered Foreve
 
 ### Getting started
 
-1. Type `/tgfd`. A notice says what is recorded and what is not. Nothing is recorded until you type `/tgfd accept`.
+1. Install the module. It starts recording by itself at the first login and prints a notice that says what is recorded and what is not (`/tgfd` shows it again).
 2. Play as usual. `/tgfd status` shows what has been recorded, and `/tgfd stop` and `/tgfd start` pause and resume.
 3. Type `/tgfd compare` to compare with the Titan Gathered Forever data, then `/tgfd show` to see the result.
 4. To help the owner: `/tgfd export`, then `/reload`, then send `TitanGatheredForeverDiscoveryDB.lua` from `WTF/Account/<your account>/SavedVariables/`. The file contains only what the notice lists.

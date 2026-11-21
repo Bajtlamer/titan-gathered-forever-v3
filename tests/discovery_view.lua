@@ -245,7 +245,7 @@ test('the Titan Panel plugin is a data source that opens the window and updates 
     local made
     _G.LibStub = { GetLibrary = function() return { NewDataObject = function(_, name, object) made = { name = name, object = object }; return object end } end }
     eq(ns.Stats.Initialize(), true)
-    eq(made.name, 'TitanGatheredForeverDiscovery'); eq(made.object.type, 'data source'); eq(made.object.label, 'Discovery')
+    eq(made.name, 'TitanGatheredForeverDiscovery'); eq(made.object.type, 'data source'); eq(made.object.label, 'Titan Gathered Forever: Discovery')
     eq(made.object.text, 'off')
     local toggled = 0
     ns.Window.Toggle = function() toggled = toggled + 1 end

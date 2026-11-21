@@ -162,7 +162,7 @@ end)
 test('the notice says what is recorded, what never is, how to start, stop and hand data over', function()
     local ns = load()
     local text = table.concat(ns.Consent.Notice(), '\n')
-    has(text, '/tgfd accept'); has(text, '/tgfd stop')
+    has(text, 'starts by itself'); has(text, '/tgfd stop'); has(text, '/tgfd start'); lacks(text, 'To start recording')
     has(text, 'chat'); has(text, 'GUID'); has(text, 'auction')
     has(text, 'export')
 end)
@@ -291,19 +291,89 @@ test('another addon loading does not create the saved table', function()
     eq(_G.TitanGatheredForeverDiscoveryDB, nil)
 end)
 
-test('at login a short hint appears until the notice is accepted', function()
+local function login(saved)
     local frames, messages = client()
+    _G.TitanGatheredForeverDiscoveryDB = saved
     local ns = load({ raw = true })
     ns.Main.Start()
     frames[1].OnEvent(frames[1], 'ADDON_LOADED', FOLDER)
     frames[1].OnEvent(frames[1], 'PLAYER_LOGIN')
-    eq(ns.Consent.State(ns.db, ns.runtime), 'unaccepted')
-    has(table.concat(messages, '\n'), '/tgfd')
-    ns.Consent.Accept(ns.db, ns.runtime, 1)
+    return ns, messages, frames
+end
+
+test('installing the module starts the collection at the first login and shows the notice once', function()
+    local ns, messages, frames = login(nil)
+    eq(ns.Consent.State(ns.db, ns.runtime), 'collecting')
+    eq(ns.db.consent.accepted, true); eq(ns.db.consent.version, ns.Consent.NOTICE_VERSION); eq(ns.db.consent.auto, true)
+    local text = table.concat(messages, '\n')
+    has(text, 'starts by itself'); has(text, 'It never records'); has(text, '/tgfd stop')
     messages[#messages + 1] = '--'
-    frames[1].OnEvent(frames[1], 'PLAYER_LOGIN')
-    has(table.concat(messages, '\n'), 'Collecting')
+    local before = #messages
+    frames[1].OnEvent(frames[1], 'PLAYER_LOGIN')                        -- the next login: a short line, not the notice
+    local second = table.concat(messages, '\n', before + 1)
+    has(second, 'Collecting'); lacks(second, 'It never records')
 end)
+
+test('a pause is kept across logins, also after the notice changed', function()
+    local ns = login(nil)
+    ns.Consent.Stop(ns.db, ns.runtime)
+    local saved = _G.TitanGatheredForeverDiscoveryDB
+    local again, messages = login(saved)
+    eq(again.Consent.State(again.db, again.runtime), 'paused')
+    has(table.concat(messages, '\n'), 'Paused')
+    again.db.consent.version = again.Consent.NOTICE_VERSION - 1          -- an older notice was accepted and paused
+    local third = login(again.db)
+    eq(third.db.consent.version, third.Consent.NOTICE_VERSION); eq(third.Consent.State(third.db, third.runtime), 'paused')
+end)
+
+test('an acceptance of an older notice is renewed and the notice shown again, collecting continues', function()
+    local saved = { meta = { schemaVersion = 1, moduleVersion = '0.1.0', createdAt = 5 },
+        consent = { accepted = true, version = 2, acceptedAt = 7, paused = false } }
+    local ns, messages = login(saved)
+    eq(ns.db.consent.version, ns.Consent.NOTICE_VERSION); eq(ns.db.consent.acceptedAt, 7)
+    eq(ns.Consent.State(ns.db, ns.runtime), 'collecting')
+    has(table.concat(messages, '\n'), 'It never records')
+end)
+
+test('data collection is not started by itself when the saved data are of a newer schema', function()
+    local ns = login({ meta = { schemaVersion = 99 } })
+    eq(ns.Consent.State(ns.db, ns.runtime), 'blocked-schema')
+    eq(_G.TitanGatheredForeverDiscoveryDB.consent, nil)
+end)
+
+test('the plugin of Titan Panel carries the whole name of the module and its own icon', function()
+    local frames = client()
+    local registered
+    _G.LibStub = { GetLibrary = function()
+        return { NewDataObject = function(_, name, object) registered = { name = name, object = object }; return object end }
+    end }
+    local ns = load({ raw = true })
+    ns.Main.Start()
+    frames[1].OnEvent(frames[1], 'ADDON_LOADED', FOLDER)
+    frames[1].OnEvent(frames[1], 'PLAYER_LOGIN')
+    _G.LibStub = nil
+    eq(registered.name, 'TitanGatheredForeverDiscovery')
+    eq(registered.object.label, 'Titan Gathered Forever: Discovery')
+    has(registered.object.icon, 'TitanGatheredForever_Discovery')
+end)
+
+test('the window of the collected data is in the menu of the add-on (the minimap button and Titan Panel)', function()
+    local frames = client()
+    local extensions = {}
+    local ns = load({ raw = true })
+    _G.TitanGatheredForeverV3.Titan = { AddMenuExtension = function(fn) extensions[#extensions + 1] = fn end }
+    ns.Main.Start()
+    frames[1].OnEvent(frames[1], 'ADDON_LOADED', FOLDER)
+    frames[1].OnEvent(frames[1], 'PLAYER_LOGIN')
+    eq(#extensions, 1)
+    local buttons = {}
+    extensions[1]({ CreateButton = function(_, label, fn) buttons[#buttons + 1] = { label, fn } end })
+    eq(#buttons, 1); has(buttons[1][1], 'Discovery')
+    local toggled = 0
+    ns.Window.Toggle = function() toggled = toggled + 1 end
+    buttons[1][2](); eq(toggled, 1)
+end)
+
 test('a newer saved schema is reported at login and blocks collection', function()
     local frames, messages = client()
     _G.TitanGatheredForeverDiscoveryDB = { meta = { schemaVersion = 99 } }
@@ -542,6 +612,9 @@ end)
 
 test('abort events are registered only while an operation runs and cancel it', function()
     local created = client()
+    -- A paused module: it listens to nothing but the operation (a collecting one also registers its collectors).
+    _G.TitanGatheredForeverDiscoveryDB = { meta = { schemaVersion = 1, moduleVersion = '0.1.0', createdAt = 5 },
+        consent = { accepted = true, version = 3, acceptedAt = 7, paused = true } }
     local ns = load({ raw = true })
     ns.Main.Start()
     local frame = created[1]

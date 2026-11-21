@@ -43,10 +43,22 @@ local function onLogin()
         ns.Print(Text.Label('Discovery is off: the saved data are from a newer version of this module and are left untouched. Update the module.'))
     end
     if ns.runtime.schemaBlocked then return end
+    -- The window of the collected data is also in the menu of the core (minimap button and Titan Panel).
+    local core = _G.TitanGatheredForeverV3
+    if core and core.Titan and core.Titan.AddMenuExtension then
+        pcall(core.Titan.AddMenuExtension, function(root)
+            root:CreateButton('Discovery: collected data', function() ns.Window.Toggle() end)
+        end)
+    end
+    local began = ns.Consent.Auto(ns.db, ns.runtime, ns.env.now())
     ns.Manager.Begin()
     local state = ns.Consent.State(ns.db, ns.runtime)
-    if state == 'unaccepted' then
-        ns.Print(Text.Label('Discovery records nothing until you read and accept its notice. Type ') .. Text.Value('/tgfd') .. Text.Label('.'))
+    if began then
+        for _, line in ipairs(ns.Consent.Notice()) do ns.Print(line) end
+        ns.Print(Text.Label('Discovery ') .. Text.Value(state == 'paused' and 'is paused' or 'has started recording')
+            .. Text.Label('. Type ') .. Text.Value('/tgfd status') .. Text.Label(', or open the window from the menu of the minimap button.'))
+    elseif state == 'unaccepted' then
+        ns.Print(Text.Label('Discovery records nothing until you accept its notice. Type ') .. Text.Value('/tgfd') .. Text.Label('.'))
     else
         ns.Print(Text.Label('Discovery: ') .. Text.Value(state == 'paused' and 'Paused' or 'Collecting') .. Text.Label('. Type ') .. Text.Value('/tgfd status') .. Text.Label('.'))
     end
