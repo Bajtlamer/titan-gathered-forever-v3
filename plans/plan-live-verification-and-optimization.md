@@ -1,5 +1,7 @@
 # Plan: live verification and optimization (continuation for a clean session)
 
+See also plans/plan-sales-history-and-price-trends.md (auction panel, sales ledger from the mail, handover notes).
+
 Written 2026-11-15 at the state of 0.5.53-beta (branch feat/npc-sources, pull request 3) and Titan Command History 0.1.5-alpha (repository titan-command-history, branch main). This is the single continuation plan: it lists everything that is implemented but not yet confirmed in the game, and everything that is worth optimizing next. Older plans in this folder keep their original designs and evidence; where they disagree with this plan, this plan wins.
 
 ## 1. How to start a clean session
