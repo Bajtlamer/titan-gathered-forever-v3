@@ -169,8 +169,9 @@ local function client()
     local function frame()
         local self = { scripts = {}, shown = true }
         function self:SetSize() end
+        function self:SetHeight() end
         function self:SetWidth() end
-        function self:SetPoint() end
+        function self:SetPoint(...) self.point = { ... } end
         function self:SetText(t) self.text = t end
         function self:SetJustifyH() end
         function self:ClearAllPoints() self.points = 0 end
@@ -210,7 +211,7 @@ local function client()
     end
     local g = { AuctionHouseFrame = { CommoditiesSellFrame = sellFrame(), ItemSellFrame = sellFrame(), height = 538, shown = true } }
     function g.AuctionHouseFrame:GetHeight() return self.height end
-    function g.AuctionHouseFrame:SetHeight(h) self.height = h end
+    function g.AuctionHouseFrame:SetHeight() error('the auction window must never be resized') end
     function g.AuctionHouseFrame:IsShown() return self.shown end
     function g.AuctionHouseFrame:HookScript(name, fn) self.hooked = self.hooked or {}; self.hooked[name] = fn end
     g.CreateFrame = frame
@@ -249,13 +250,13 @@ test('the client layer attaches once, searches on selection and fills the price'
     eq(U.frame.events, 3)
     U.instance = U.instance
     eq(U.Attach(), true); eq(U.Attach(), true)
-    eq(U.strip.shown, true)
+    eq(U.strip.shown, true); eq(U.panel.shown, true)
     -- The strip follows the Sell forms: hidden when none is shown (Buy and Auctions tabs).
     local forms = _G.AuctionHouseFrame
     forms.CommoditiesSellFrame.shown, forms.ItemSellFrame.shown = false, false
-    forms.CommoditiesSellFrame.hooked.OnHide(); eq(U.strip.shown, false)
+    forms.CommoditiesSellFrame.hooked.OnHide(); eq(U.strip.shown, false); eq(U.panel.shown, false)
     forms.ItemSellFrame.shown = true
-    forms.ItemSellFrame.hooked.OnShow(); eq(U.strip.shown, true)
+    forms.ItemSellFrame.hooked.OnShow(); eq(U.strip.shown, true); eq(U.panel.shown, true)
     forms.CommoditiesSellFrame.shown = true
     eq(#g.dropdowns, 1)
     eq(#g.dropdowns[1].options, 4)                 -- 2, 5, 10, 15: no custom value
@@ -311,14 +312,19 @@ test('the client layer attaches once, searches on selection and fills the price'
     local single = _G.AuctionHouseFrame.ItemSellFrame
     single.BuyoutModeCheckButton = {}
     single:SetItem({ id = 5 })
-    -- While a Sell form is shown the window is EXTRA pixels taller; it is restored when the form or the window closes.
+    -- The window is never resized (that made the client's scroll lists fail when it closed): the lines live in a panel that
+    -- hangs under it and follows the Sell forms.
     local ah = _G.AuctionHouseFrame
     forms.ItemSellFrame.shown, forms.CommoditiesSellFrame.shown = false, false
-    forms.ItemSellFrame.hooked.OnHide(); eq(ah.height, 538)
-    forms.ItemSellFrame.shown = true; forms.ItemSellFrame.hooked.OnShow(); eq(ah.height, 538 + U.EXTRA)
-    forms.ItemSellFrame.hooked.OnShow(); eq(ah.height, 538 + U.EXTRA)             -- not extended twice
-    ah.shown = false; ah.hooked.OnHide(); eq(ah.height, 538)                       -- the window closes with the form open
-    ah.shown = true; forms.ItemSellFrame.hooked.OnShow(); eq(ah.height, 538 + U.EXTRA)
+    forms.ItemSellFrame.hooked.OnHide(); eq(U.strip.shown, false); eq(ah.height, 538)
+    forms.ItemSellFrame.shown = true; forms.ItemSellFrame.hooked.OnShow(); eq(U.strip.shown, true); eq(ah.height, 538)
+    -- The row keeps its place inside the window (a little higher on the commodity form); only the panel hangs below it.
+    eq(U.strip.point[4], 32); eq(U.strip.point[5], 78)
+    forms.ItemSellFrame.shown, forms.CommoditiesSellFrame.shown = false, true
+    forms.CommoditiesSellFrame.hooked.OnShow(); eq(U.strip.point[5], 85); eq(U.strip.point[2], ah)
+    eq(U.panel.point[1], 'TOPRIGHT'); eq(U.panel.point[2], ah); eq(U.panel.point[3], 'BOTTOMRIGHT')
+    forms.ItemSellFrame.shown, forms.CommoditiesSellFrame.shown = true, false
+    forms.ItemSellFrame.hooked.OnShow(); eq(U.strip.point[5], 78)
     U.frame.scripts.OnEvent(U.frame, 'ITEM_SEARCH_RESULTS_UPDATED', { itemID = 5 })
     eq(single.SecondaryPriceInput.amount, 18000)
     -- Answers for another item are ignored.

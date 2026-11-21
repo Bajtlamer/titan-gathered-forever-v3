@@ -2,11 +2,29 @@
 
 Updated 2026-11-16. These changes describe the 0.5.113 source candidate and its versioned update. They have not been assigned a new release tag or published as replacement release assets. Historical versioned notes describe their original releases.
 
+## Mail log without commands, 0.5.123
+
+- The sales ledger writes its own evidence into `mailLog` at the game events, with no command needed: a row for every reading of the inbox that found something new or a different number of mails (source MAIL_SHOW, MAIL_INBOX_UPDATE or OpenMail_Update, number of mails, sales recorded), a sample of every other mail (subject, sender, money, days left) once per session, the raw invoice values of sales and of skipped auction mails, and a row when the client call fails. The log keeps 120 rows.
+
+## Sales ledger from the mail, 0.5.122
+
+- New `Sales.lua`: when a mailbox is opened (and when a mail is opened, which makes the client load its invoice) the inbox is read and each "Auction successful" mail that holds money is recorded once in the saved variables (`sales.entries`): character, item name and id when the client knows it, stack size when the subject carries it, money received, the estimated sale time, and the price, deposit, fee and buyer when the invoice is readable. Unknown values stay nil. Mails are matched on character, subject, money and estimated expiry (30 seconds tolerance), so rereading never duplicates, identical mails stay separate sales, and a mail emptied later (money 0) neither erases nor repeats its sale. Nothing is opened, taken or changed in the mailbox.
+- `/tgf sales` prints the number of recorded sales and the newest five. `mailLog` keeps the last 40 raw readings (new sales and skipped auction mails such as "Sale Pending") to check against the client. Open questions to verify live: the exact subject text and whether it carries the stack size, whether the invoice is readable before the mail is opened, and what the money in the mail contains (proceeds plus the returned deposit).
+
+## Undercut row back in the window, 0.5.121
+
+- The Undercut row (label, combo box, "AH sold" and "Vendor") is back inside the Sell form, in the free line above the Buyout Mode check box (a little higher on the commodity form). Only the gains line, the unsold line and the red warning stay in the panel under the window, which is smaller now. The window is still never resized.
+
+## Posting lines in a panel under the window, 0.5.120
+
+- Closing the auction house with ESC after a price had been filled raised errors in the client's own code (Pool release of nil in the scroll list, GetCommoditySearchResultInfo). With the window height change switched off the errors stopped, so the height is no longer changed at all.
+- The Undercut row and the posting lines now sit in a panel that hangs under the auction house window (full width, dark with a gold top edge) and is shown only while a Sell form is shown. The window keeps its size on every form.
+
 ## Compact posting rows, 0.5.118
 
 - The Undercut row is at the left edge of the Sell form: the label, a narrow combo box (2, 5, 10 and 15 percent) and, right after it, "AH sold" (what a sale brings after the fee) and "Vendor" (what a vendor pays for the same stack). Below it, from the left edge, come the gains against the cost and against a vendor and the unsold line; the red vendor floor warning is above them. The custom percentage and its text field were removed; a saved custom value that equals a preset becomes that preset, any other falls back to 5 percent.
 - 0.5.118: the gains and unsold lines are two separate texts, 32 pixels from the left edge, with a gap between them (a large line spacing in one text made the coin icons rise); the Undercut row is at the same left edge (32 pixels), aligned with the lines above it, and the red warning has a little more room above the gains line.
-- The auction house window is 44 pixels taller while a Sell form is shown (70 in 0.5.114), restored when the form or the window closes. What the client anchors to the top stays; what it anchors to the bottom and our rows move down with the edge. The strip is in the same place on every form.
+- (Replaced in 0.5.120: the window is no longer made taller; the rows are in a panel under it.)
 
 ## Discovery module 0.1.0 (standalone, separate version line)
 
