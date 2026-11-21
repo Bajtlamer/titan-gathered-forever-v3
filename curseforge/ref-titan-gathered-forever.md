@@ -16,6 +16,8 @@ Titan Gathered Forever brings profession materials, recipe uses and your own gat
 - Outdoor gathering locations on the world map and minimap, with configurable icon appearance.
 - Recipe browsing, trainer and recipe-vendor information, and reagent planning for supported recipes.
 - Auction-price snapshots and crafting-profit estimates when suitable data is available.
+- Statistics in the Professions window: crafts and gathering in one sortable list, estimated material use and what the gathering professions collected, with its value.
+- An Economy window with verified merchant sales (also Sell All Junk Items), buybacks, equipment repairs, auction proceeds, quest rewards and mob coin, and a market history panel in the auction house Sell tab.
 - Titan Panel menus, a minimap launcher and separate controls for recording and map visibility.
 
 ### Requirements and installation
