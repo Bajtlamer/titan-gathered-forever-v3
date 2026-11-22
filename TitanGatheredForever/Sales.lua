@@ -19,6 +19,51 @@ local function copper(value)
     return math.floor(value)
 end
 
+-- The seller invoice calls the actual sale amount "bid", even for a buyout.
+-- Reconcile the fee and returned deposit with the attachment before reporting net proceeds.
+function Sales.Amounts(entry)
+    if entry.source ~= 'invoice' then return end
+    local bid = copper(entry.bid)
+    local gross = bid and bid > 0 and bid or nil
+    local fee, deposit, received = copper(entry.fee), copper(entry.deposit), copper(entry.received)
+    local function reconciled(amount)
+        return amount and amount > 0 and fee and fee <= amount and deposit and received
+            and amount - fee + deposit == received
+    end
+    if gross then return gross, reconciled(gross) and (gross - fee) or nil end
+    -- Older ledgers saved only the listing buyout. Use it when the mail proves it was also the sale price.
+    local buyout = copper(entry.buyout)
+    if reconciled(buyout) then return buyout, buyout - fee end
+end
+
+-- The overview includes all confirmed sales on this realm, including invoices whose item ID is unknown.
+function Sales.Totals(entries, realm)
+    local total = {
+        invoices = 0, units = 0, unitCount = 0, gross = 0, grossCount = 0,
+        net = 0, netCount = 0, fees = 0, deposits = 0, credit = 0, creditCount = 0,
+    }
+    if not realm then return total end
+    for _, entry in ipairs(entries or {}) do
+        if type(entry) == 'table' and entry.source == 'invoice' and entry.realm == realm then
+            total.invoices = total.invoices + 1
+            local count = copper(entry.count)
+            if count and count == entry.count and count > 0 then
+                total.units, total.unitCount = total.units + count, total.unitCount + 1
+            end
+            local gross, net = Sales.Amounts(entry)
+            if gross then total.gross, total.grossCount = total.gross + gross, total.grossCount + 1 end
+            if net then
+                total.net, total.netCount = total.net + net, total.netCount + 1
+                total.fees = total.fees + copper(entry.fee)
+                total.deposits = total.deposits + copper(entry.deposit)
+            end
+            local credit = copper(entry.received)
+            if credit and credit > 0 then total.credit, total.creditCount = total.credit + credit, total.creditCount + 1 end
+        end
+    end
+    return total
+end
+
 local function escape(text) return (text:gsub('[%^%$%(%)%%%.%[%]%*%+%-%?]', '%%%0')) end
 
 -- The subject of a sold auction mail as the client formats it ("Auction successful: %s"), optionally with a stack size
@@ -60,21 +105,51 @@ function Sales:Log(row, once)
     while #log > Sales.LOG_MAX do table.remove(log, 1) end
 end
 
--- The same mail as an earlier reading: the same character, subject and money, and an estimated expiry within the
--- tolerance; a mail is claimed once per scan so identical mails stay separate sales.
+local INVOICE_KEYS = { 'bid', 'buyer', 'deposit', 'fee' }
+
+local function invoiceMatch(entry, wanted)
+    if wanted.source ~= 'invoice' then return entry.source == 'invoice' and 0 or 1 end
+    local score = 0
+    for _, field in ipairs(INVOICE_KEYS) do
+        if entry[field] ~= nil and wanted[field] ~= nil then
+            if entry[field] ~= wanted[field] then return end
+            score = score + 1
+        end
+    end
+    if entry.countFromInvoice and wanted.invoiceCount then
+        if entry.count ~= wanted.invoiceCount then return end
+        score = score + 1
+    end
+    return score
+end
+
+-- Stable invoice details distinguish similar mails. Estimated expiry breaks ties, and each row can be claimed
+-- once per inbox scan so even identical mails remain separate.
 local function find(entries, wanted, now, claimed)
+    local best, bestScore, bestDistance
     for i = #entries, 1, -1 do
         local entry = entries[i]
         if type(entry.at) == 'number' and entry.at < now - (Sales.MAIL_DAYS + 2) * DAY then break end
-        if not claimed[entry] and entry.character == wanted.character and entry.subject == wanted.subject
-            and entry.received == wanted.received and type(entry.expiry) == 'number'
-            and math.abs(entry.expiry - wanted.expiry) <= Sales.TOLERANCE then
-            return entry
+        if not claimed[entry] and entry.realm == wanted.realm and entry.character == wanted.character
+            and entry.subject == wanted.subject and entry.received == wanted.received and type(entry.expiry) == 'number' then
+            local distance = math.abs(entry.expiry - wanted.expiry)
+            local score = distance <= Sales.TOLERANCE and invoiceMatch(entry, wanted)
+            if score and (not best or score > bestScore or (score == bestScore and distance < bestDistance)) then
+                best, bestScore, bestDistance = entry, score, distance
+            end
         end
     end
+    return best
 end
 
-local FIELDS = { 'buyer', 'buyout', 'deposit', 'fee' }
+local FIELDS = { 'buyer', 'bid', 'buyout', 'deposit', 'fee' }
+
+local function resolveItemID(api, name)
+    if name then
+        local ok, id = pcall(api.ItemID, name)
+        if ok and type(id) == 'number' and id > 0 then return id end
+    end
+end
 
 function Sales:Consider(index, now, claimed)
     local api = self.api
@@ -83,7 +158,7 @@ function Sales:Consider(index, now, claimed)
     local invoice = api.Invoice(index)
     local kind = invoice and invoice[1]
     local name, count = Sales.ParseSubject(header.subject)
-    if not name and kind ~= 'seller' then
+    if kind ~= 'seller' and (kind ~= nil or not name) then
         if kind == 'seller_temp_invoice' then
             self:Log({ result = 'pending', subject = header.subject, money = header.money, invoice = raw(invoice) },
                 'pending|' .. header.subject)
@@ -114,7 +189,11 @@ function Sales:Consider(index, now, claimed)
     if kind == 'seller' then
         if type(invoice[2]) == 'string' and invoice[2] ~= '' then wanted.itemName = invoice[2] end
         if type(invoice[3]) == 'string' and invoice[3] ~= '' then wanted.buyer = invoice[3] end
+        local bid = copper(invoice[4])
+        wanted.bid = bid and bid > 0 and bid or nil
         wanted.buyout, wanted.deposit, wanted.fee = copper(invoice[5]), copper(invoice[6]), copper(invoice[7])
+        local quantity = copper(invoice[11])
+        if quantity and quantity > 0 and quantity == invoice[11] then wanted.invoiceCount = quantity end
         wanted.source = 'invoice'
     end
     local entries = self.store.entries
@@ -122,20 +201,24 @@ function Sales:Consider(index, now, claimed)
     if entry then
         claimed[entry] = true
         if wanted.source == 'invoice' and entry.source ~= 'invoice' then entry.source = 'invoice' end
+        if wanted.invoiceCount and not entry.countFromInvoice then
+            entry.count, entry.countFromInvoice = wanted.invoiceCount, true
+        end
+        if not entry.itemID then
+            entry.itemID = resolveItemID(api, wanted.itemName)
+            if entry.itemID then entry.itemName = wanted.itemName end
+        end
         for _, field in ipairs(FIELDS) do
             if entry[field] == nil and wanted[field] ~= nil then entry[field] = wanted[field] end
         end
         return 0
     end
-    local itemID
-    if wanted.itemName then
-        local ok, id = pcall(api.ItemID, wanted.itemName)
-        if ok and type(id) == 'number' then itemID = id end
-    end
+    local itemID = resolveItemID(api, wanted.itemName)
     entry = { at = now, character = wanted.character, realm = wanted.realm, subject = wanted.subject,
-        itemName = wanted.itemName, itemID = itemID, count = count, received = received, expiry = wanted.expiry,
+        itemName = wanted.itemName, itemID = itemID, count = wanted.invoiceCount or count, received = received, expiry = wanted.expiry,
+        countFromInvoice = wanted.invoiceCount and true or nil,
         soldAt = math.floor(wanted.expiry - Sales.MAIL_DAYS * DAY), source = wanted.source or 'header',
-        buyer = wanted.buyer, buyout = wanted.buyout, deposit = wanted.deposit, fee = wanted.fee }
+        buyer = wanted.buyer, bid = wanted.bid, buyout = wanted.buyout, deposit = wanted.deposit, fee = wanted.fee }
     entries[#entries + 1] = entry
     claimed[entry] = true
     while #entries > Sales.MAX do table.remove(entries, 1) end
@@ -179,7 +262,7 @@ function Sales.DefaultAPI()
         if not values[1] or values[5] == nil then return nil end
         return { sender = values[4], subject = values[5], money = values[6], cod = values[7], days = values[8] }
     end
-    -- invoiceType, itemName, playerName, bid, buyout, deposit, consignment, ...; nil for a mail without an invoice
+    -- invoiceType, itemName, playerName, bid, buyout, deposit, consignment, delay, hour, min, count, commerceAuction
     api.Invoice = function(index)
         local values = { pcall(GetInboxInvoiceInfo, index) }
         if not values[1] or values[2] == nil then return nil end
@@ -228,22 +311,35 @@ function Sales.Initialize()
     local frame = CreateFrame('Frame')
     Sales.frame = frame
     local pending = false
+    local function run(source)
+        local ok = pcall(Sales.instance.Scan, Sales.instance, source)
+        if ok then
+            if ns.AuctionHistory then ns.AuctionHistory.Refresh() end
+            if ns.EconomyView then ns.EconomyView.Refresh() end
+        end
+    end
     -- The inbox raises many updates in a row; one reading a moment after the last is enough. A failure is contained.
     local function schedule(source)
         if pending then return end
         pending = true
-        local function run()
+        local function settled()
             pending = false
-            pcall(Sales.instance.Scan, Sales.instance, source)
+            run(source)
         end
-        if C_Timer and C_Timer.After then C_Timer.After(0.5, run) else run() end
+        if C_Timer and C_Timer.After then C_Timer.After(0.5, settled) else settled() end
     end
     local hooked = false
     frame:SetScript('OnEvent', function(_, event)
-        if event == 'MAIL_SHOW' and not hooked and type(_G.OpenMail_Update) == 'function' then
-            -- Opening a sale mail makes the client load its invoice: read the inbox again then.
-            hooked = true
-            hooksecurefunc('OpenMail_Update', function() pcall(schedule, 'OpenMail_Update') end)
+        if event == 'MAIL_SHOW' and not hooked then
+            -- Read the invoice as soon as the mail is opened, while its money is still attached.
+            local openMail = _G.OpenMailFrame
+            if openMail and type(openMail.Update) == 'function' then
+                hooksecurefunc(openMail, 'Update', function() pcall(run, 'OpenMailFrame.Update') end)
+                hooked = true
+            elseif type(_G.OpenMail_Update) == 'function' then
+                hooksecurefunc('OpenMail_Update', function() pcall(run, 'OpenMail_Update') end)
+                hooked = true
+            end
         end
         schedule(event)
     end)

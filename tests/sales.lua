@@ -90,11 +90,27 @@ end)
 
 test('a seller invoice adds the buyer, the price, the deposit and the fee', function()
     local f = fixture()
-    f.mails[1] = sold('Linen Cloth', 4770, 30, { 'seller', 'Linen Cloth', 'Buyer', 0, 5000, 20, 250 })
+    f.mails[1] = sold('Linen Cloth', 4770, 30, { 'seller', 'Linen Cloth', 'Buyer', 5000, 6000, 20, 250, nil, nil, nil, 20 })
     f.ledger:Scan()
     local entry = f.ns.db.sales.entries[1]
-    eq(entry.source, 'invoice'); eq(entry.buyer, 'Buyer'); eq(entry.buyout, 5000); eq(entry.deposit, 20); eq(entry.fee, 250)
+    eq(entry.source, 'invoice'); eq(entry.buyer, 'Buyer'); eq(entry.buyout, 6000); eq(entry.deposit, 20); eq(entry.fee, 250)
+    eq(entry.bid, 5000); eq(entry.count, 20)
     eq(entry.received, 4770)
+    local gross, net = f.ns.Sales.Amounts(entry)
+    eq(gross, 5000); eq(net, 4750)
+    entry.received = 5000
+    gross, net = f.ns.Sales.Amounts(entry)
+    eq(gross, 5000); eq(net, nil)
+end)
+
+test('legacy buyout is only used when it explains the amount in the mail', function()
+    local amount = load().Sales.Amounts
+    local entry = { source = 'invoice', buyout = 5000, fee = 250, deposit = 20, received = 4770 }
+    local gross, net = amount(entry)
+    eq(gross, 5000); eq(net, 4750)
+    entry.received = 1000
+    gross, net = amount(entry)
+    eq(gross, nil); eq(net, nil)
 end)
 
 test('an invoice type of seller counts even when the subject is not the usual one', function()
@@ -137,6 +153,21 @@ test('two identical mails are two sales, and stay two', function()
     eq(#f.ns.db.sales.entries, 3)
 end)
 
+test('seller invoices keep their quantities when similar mails change order', function()
+    local f = fixture()
+    local one = sold('Linen Cloth', 4770, 30, { 'seller', 'Linen Cloth', 'Buyer', 5000, 6000, 20, 250, nil, nil, nil, 5 })
+    local two = sold('Linen Cloth', 4770, 30, { 'seller', 'Linen Cloth', 'Buyer', 4900, 6000, 20, 150, nil, nil, nil, 10 })
+    f.mails = { one, two }
+    eq(f.ledger:Scan(), 2)
+    eq(f.ledger:Scan(), 0)
+    local entries = f.ns.db.sales.entries
+    eq(entries[1].count, 5); eq(entries[2].count, 10)
+    f.mails = { two, one }
+    eq(f.ledger:Scan(), 0)
+    eq(#entries, 2); eq(entries[1].bid, 5000); eq(entries[1].count, 5)
+    eq(entries[2].bid, 4900); eq(entries[2].count, 10)
+end)
+
 test('another character with the same mail is a separate sale', function()
     local f = fixture()
     f.mails[1] = sold('Linen Cloth', 3800, 30)
@@ -145,14 +176,24 @@ test('another character with the same mail is a separate sale', function()
     eq(f.ledger:Scan(), 1)
 end)
 
+test('the same character name and mail on a different realm does not merge the sales', function()
+    local f = fixture()
+    f.mails[1] = sold('Linen Cloth', 3800, 30)
+    eq(f.ledger:Scan(), 1)
+    f.api.Realm = function() return 'Another realm' end
+    eq(f.ledger:Scan(), 1)
+    eq(#f.ns.db.sales.entries, 2)
+end)
+
 test('opening the mail later adds the invoice to the same sale', function()
     local f = fixture()
     f.mails[1] = sold('Linen Cloth', 4770, 30)
     f.ledger:Scan()
-    f.mails[1].invoice = { 'seller', 'Linen Cloth', 'Buyer', 0, 5000, 20, 250 }
+    f.mails[1].invoice = { 'seller', 'Linen Cloth', 'Buyer', 5000, 5000, 20, 250, nil, nil, nil, 20 }
     eq(f.ledger:Scan(), 0)
     local entry = f.ns.db.sales.entries[1]
     eq(#f.ns.db.sales.entries, 1); eq(entry.source, 'invoice'); eq(entry.buyout, 5000); eq(entry.at, f.now)
+    eq(entry.bid, 5000); eq(entry.count, 20)
 end)
 
 test('collecting the money later does not erase or duplicate the sale', function()
@@ -250,8 +291,8 @@ test('the client layer scans after the inbox settles and hooks the open mail onc
         return self
     end
     _G.C_Timer = { After = function(_, fn) timers[#timers + 1] = fn end }
-    _G.OpenMail_Update = function() end
-    _G.hooksecurefunc = function(name, fn) hooks[#hooks + 1] = { name, fn } end
+    _G.OpenMailFrame = { Update = function() end }
+    _G.hooksecurefunc = function(target, method, fn) hooks[#hooks + 1] = { target, method, fn } end
     _G.time = function() return f.now end
     ns.Sales.DefaultAPI = function() return f.api end
     f.mails[1] = sold('Linen Cloth', 3800, 30)
@@ -267,13 +308,16 @@ test('the client layer scans after the inbox settles and hooks the open mail onc
     timers[1]()
     eq(#ns.db.sales.entries, 1)
     frame.scripts.OnEvent(frame, 'MAIL_SHOW'); frame.scripts.OnEvent(frame, 'MAIL_SHOW')
-    eq(#hooks, 1); eq(hooks[1][1], 'OpenMail_Update')
+    eq(#hooks, 1); eq(hooks[1][1], OpenMailFrame); eq(hooks[1][2], 'Update')
     eq(#timers, 2); timers[2]()
-    hooks[1][2]()                                                                             -- a hook never raises
-    eq(#timers, 3)
+    f.mails[1].invoice = { 'seller', 'Linen Cloth', 'Buyer', 4000, 4500, 0, 200, nil, nil, nil, 20 }
+    hooks[1][3]()
+    eq(ns.db.sales.entries[1].bid, 4000)
+    eq(ns.db.sales.entries[1].count, 20)
+    eq(#timers, 2)
     f.api.Count = function() error('boom') end
-    timers[#timers]()
-    for _, key in ipairs({ 'CreateFrame', 'C_Timer', 'OpenMail_Update', 'hooksecurefunc', 'time' }) do _G[key] = nil end
+    hooks[1][3]()                                                                             -- a hook never raises
+    for _, key in ipairs({ 'CreateFrame', 'C_Timer', 'OpenMailFrame', 'hooksecurefunc', 'time' }) do _G[key] = nil end
 end)
 
 test('the default api reads the mail functions of the client', function()

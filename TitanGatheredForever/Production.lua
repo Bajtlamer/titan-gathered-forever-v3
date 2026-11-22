@@ -17,6 +17,11 @@ local function readable(record,keys)
     for _,key in ipairs(keys)do if not ns.IsPublic(record[key])then return false end end
     return true
 end
+function Production.Kind(profession)
+    if not ns.IsPublic(profession) or type(profession)~='table'
+        or not readable(profession,{'professionID','parentProfessionID'})then return end
+    return skillKinds[profession.parentProfessionID]or skillKinds[profession.professionID]
+end
 function Production.Recipe(recipeID)
     if not integer(recipeID)or not C_TradeSkillUI then return end
     local info=metadata(C_TradeSkillUI.GetRecipeInfo,recipeID)
@@ -24,7 +29,6 @@ function Production.Recipe(recipeID)
     local schematic=metadata(C_TradeSkillUI.GetRecipeSchematic,recipeID,false)
     if not readable(info,{'recipeID','name','learned','qualityItemIDs','isRecraft','isDummyRecipe',
         'isGatheringRecipe','isEnchantingRecipe','isSalvageRecipe'})
-        or not readable(profession,{'professionID','parentProfessionID'})
         or not readable(schematic,{'recipeID','recipeType','isRecraft','outputItemID'})then return end
     if info.recipeID~=recipeID or schematic.recipeID~=recipeID or info.learned~=true
         or type(info.name)~='string' or schematic.isRecraft~=false or schematic.recipeType~=1
@@ -32,7 +36,7 @@ function Production.Recipe(recipeID)
     for _,flag in ipairs({'isRecraft','isDummyRecipe','isGatheringRecipe','isEnchantingRecipe','isSalvageRecipe'})do
         if info[flag]~=false then return end
     end
-    local kind=skillKinds[profession.parentProfessionID]or skillKinds[profession.professionID]
+    local kind=Production.Kind(profession)
     if not kind then return end
     local ids={[schematic.outputItemID]=true}
     if type(info.qualityItemIDs)=='table'then
@@ -247,16 +251,21 @@ function Production:Total(character,itemID)
     end
     return quantity
 end
-function Production:ReagentUsage(character)
+function Production:Completed(character,recipeID)
+    local owner=self.saved.schema==1 and self.saved.characters[character]
+    local row=owner and owner.recipes[recipeID]
+    return row and row.completed or 0
+end
+function Production:ReagentUsage(character,kind)
     local usage,unsupported={},0
-    for _,recipe in ipairs(self:Rows(character))do
+    for _,recipe in ipairs(self:Rows(character))do if not kind or recipe.kind==kind then
         unsupported=unsupported+(recipe.reagentUnsupportedCasts or 0)
         for itemID,quantity in pairs(recipe.reagentUse or{})do
             local row=usage[itemID]or{itemID=itemID,quantity=0,professions={},coverageBegan=self.saved.reagentCoverageBegan,incomplete=false}
             usage[itemID]=row;row.quantity=row.quantity+quantity
             row.professions[recipe.kind]=(row.professions[recipe.kind]or 0)+quantity
         end
-    end
+    end end
     local rows={}
     for _,row in pairs(usage)do
         local leading,maximum

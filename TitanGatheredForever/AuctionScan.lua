@@ -228,7 +228,8 @@ function Scan.Status()
 end
 
 function Scan.Clear()
-    if ns.db then ns.db.auction = nil end
+    if ns.db then ns.db.auction, ns.db.auctionHistory = nil, nil end
+    if ns.AuctionHistory then ns.AuctionHistory.Refresh() end
 end
 
 -- The real client.
@@ -264,7 +265,9 @@ function Scan.DefaultAPI()
     api.Keep = function(itemID) return api.Reagent(itemID) or (ns.Catalog ~= nil and ns.Catalog.IsProduct(itemID)) end
     api.Save = function(result)
         if not ns.db then return end
-        ns.db.auction = { realm = GetRealmName and GetRealmName() or nil, at = result.at, entries = result.entries,
+        local realm = GetRealmName and GetRealmName() or nil
+        if ns.AuctionHistory then ns.AuctionHistory.Archive(ns.db, result.at, realm) end
+        ns.db.auction = { realm = realm, at = result.at, entries = result.entries,
             items = result.items, others = result.others, distinct = result.distinct }
     end
     api.Say = function(message) ns.Print(message) end
@@ -272,6 +275,7 @@ function Scan.DefaultAPI()
     api.Changed = function()
         if ns.CraftingView and ns.CraftingView.Refresh then ns.CraftingView.Refresh() end
         if ns.ProfitBrowser and ns.ProfitBrowser.Refresh then ns.ProfitBrowser.Refresh() end
+        if ns.AuctionHistory then ns.AuctionHistory.Refresh() end
         if Scan.RefreshButton then Scan.RefreshButton() end
     end
     api.Log = function(result, details)

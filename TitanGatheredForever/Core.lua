@@ -213,7 +213,10 @@ local function start()
         Name=function() return (UnitName and UnitName('player') or ns.characterID)
             .. ' - ' .. (GetRealmName and GetRealmName() or '') end,
         Timestamp=time, Now=GetTime, Enabled=ns.Production.Enabled, Public=ns.IsPublic,
-        Recipe=ns.Production.Recipe, Changed=function() ns.Reports.Refresh() end,
+        Recipe=ns.Production.Recipe, Changed=function()
+            ns.Reports.Refresh()
+            ns.ProfessionStats.Refresh()
+        end,
     })
     local pvpAPI=gatheringAPI()
     pvpAPI.Character=function()return ns.characterID end
@@ -285,9 +288,13 @@ local function start()
     ns.Tooltips.Initialize()
     ns.Crafting.Initialize()
     ns.ProfessionButton.Initialize()
+    ns.ProfessionStats.Initialize()
     ns.Movable.Initialize()
     ns.AuctionScan.Initialize()
     ns.AuctionUndercut.Initialize()
+    ns.AuctionHistory.Initialize()
+    ns.LootIncome.Initialize()
+    ns.VendorSales.Initialize()
     local salesOK, salesError = pcall(ns.Sales.Initialize)          -- reading the mailbox must never stop the start
     if not salesOK then ns.Debug('Sales ledger not started: ' .. tostring(salesError)) end
     ns.Titan.Initialize()
@@ -298,7 +305,8 @@ local function start()
                             'TRADE_SKILL_DATA_SOURCE_CHANGING', 'TRADE_SKILL_DATA_SOURCE_CHANGED',
                             'TRADE_SKILL_DETAILS_UPDATE', 'TRADE_SKILL_CLOSE',
                             'TRAINER_SHOW', 'TRAINER_UPDATE', 'TRAINER_CLOSED',
-                            'MERCHANT_SHOW', 'MERCHANT_UPDATE', 'MERCHANT_CLOSED' }) do frame:RegisterEvent(event) end
+                            'MERCHANT_SHOW', 'MERCHANT_UPDATE', 'MERCHANT_CLOSED', 'PLAYER_MONEY',
+                            'QUEST_TURNED_IN' }) do frame:RegisterEvent(event) end
     -- Shared by the right-click menu and the slash commands so each function has one implementation.
     function ns.ChangeSummaryPage(delta)
         ns.Titan.page = math.max(1, ns.Titan.page + delta)
@@ -394,7 +402,8 @@ local function start()
         if command == 'recipes' then ns.RecipeBrowser.Show(); return end
         if command == 'refresh' then ns.ScheduleRefresh(); return end
         if command == 'next' or command == 'prev' then ns.ChangeSummaryPage(command == 'next' and 1 or -1); return end
-        if command == 'history' or command == 'chances' or command == 'actions' or command == 'production' or command == 'pvp' then ns.Reports.Show(command); return end
+        if command == 'production' or command == 'actions' then ns.ProfessionStats.Open(); return end
+        if command == 'history' or command == 'chances' or command == 'pvp' then ns.Reports.Show(command); return end
         if command == 'settings' then ns.Titan.Menu(UIParent); return end
         if command == 'sales' then ns.Sales.Report(); return end
         if command ~= 'status' and not ns.settings.debugMode then ns.Print(help); return end
@@ -414,6 +423,16 @@ frame:SetScript('OnEvent', function(_, event, ...)
     if event == 'PLAYER_LOGIN' then start(); return end
     if not ns.inventory then return end
     ns.DebugLog.Event(event, ...)
+    if event == 'QUEST_TURNED_IN' then
+        local questID, _, moneyReward = ...
+        ns.QuestIncome.TurnedIn(questID, moneyReward)
+        return
+    end
+    if event == 'MERCHANT_SHOW' or event == 'MERCHANT_UPDATE' or event == 'MERCHANT_CLOSED'
+        or event == 'PLAYER_MONEY' or event == 'PLAYER_LEAVING_WORLD' then
+        ns.VendorSales.Handle(event)
+        if event == 'PLAYER_MONEY' then return end
+    end
     if event=='TRADE_SKILL_DATA_SOURCE_CHANGING'or event=='TRADE_SKILL_CLOSE'or event=='PLAYER_LEAVING_WORLD'then ns.Crafting.Select(nil)end
     if event=='CHAT_MSG_COMBAT_HONOR_GAIN'then
         if ns.settings.recordPvP == false then return end

@@ -5,8 +5,8 @@ local function eq(actual, expected) assert(actual == expected, 'expected ' .. to
 local function load(extra)
     local ns = { settings = {}, IsPublic = function() return true end, printed = {}, db = {} }
     ns.Print = function(message) ns.printed[#ns.printed + 1] = message end
-    ns.Style = { red = 'red', green = 'green', Label = function(t) return t end, Value = function(t) return t end,
-        Text = function(color, t) return '<' .. color .. '>' .. t end }
+    ns.Style = { red = 'red', Text = function(color, t) return '<' .. color .. '>' .. t end }
+    dofile('tests/style_stub.lua')(ns.Style)
     assert(loadfile('TitanGatheredForever/Economy.lua'))('TitanGatheredForever', ns)
     ns.Economy.Coin = function(c) return c .. 'c' end
     ns.Economy.VendorSell = function() return 100 end
@@ -145,22 +145,24 @@ test('the floor counts the fee: a price at the vendor price is lifted to the low
     f.undercut:Results(key, { { price = 110 } }); eq(f.set[3], 104)
 end)
 
-test('the info lines show what a sale brings, what an unsold auction costs and the share that must sell', function()
-    local U = load().AuctionUndercut
-    local E = load().Economy
-    local post = E.Posting(1000, 5, 120, 100)
-    local head, gains, unsold = U.InfoText(post)
-    eq(head, 'AH sold: 4750c  Vendor: 500c')
-    eq(gains, 'Gain: <green>+4250c vs vendor')
-    eq(unsold, 'Unsold: <red>-120c deposit, pays off if 3% sell')
-    head, gains, unsold = U.InfoText(E.Posting(100, 1, 40, 100))
-    eq(head, 'AH sold: 95c  Vendor: 100c'); eq(gains, 'Gain: <red>-5c vs vendor'); eq(unsold, 'Unsold: <red>-40c deposit, <red>a sale does not beat a vendor')
-    head, gains, unsold = U.InfoText(E.Posting(1000, 1, nil, 100)); eq(unsold, 'Unsold: deposit unknown')
-    head, gains, unsold = U.InfoText(E.Posting(1000, 1, 50, nil)); eq(head, 'AH sold: 950c'); eq(gains, ''); eq(unsold, 'Unsold: <red>-50c deposit')
-    head, gains = U.InfoText(E.Posting(1000, 5, 120, 100, 300))
-    eq(gains, 'Gain: <green>+3250c vs cost, <green>+4250c vs vendor')
-    head, gains = U.InfoText(E.Posting(1000, 5, 120, 100, 1000)); eq(gains, 'Gain: <red>-250c vs cost, <green>+4250c vs vendor')
-    head, gains, unsold = U.InfoText(nil); eq(head, ''); eq(gains, ''); eq(unsold, '')
+test('the narrow panel has separate lines for costs, vendor comparison, deposit and break-even', function()
+    local ns = load()
+    local U, E = ns.AuctionUndercut, ns.Economy
+    local head, cost, vendor, deposit, threshold = U.InfoText(E.Posting(1000, 5, 120, 100, 300))
+    eq(head, '<gold>AH sold: <white>4750c<gold>  Vendor: <white>500c')
+    eq(cost, '<gold>Gain vs cost: <green>+<white>3250c')
+    eq(vendor, '<gold>Gain vs vendor: <green>+<white>4250c')
+    eq(deposit, '<gold>Unsold deposit: <red>-<white>120c')
+    eq(threshold, '<gold>Break-even sales: <white>3%')
+    head, cost, vendor, deposit, threshold = U.InfoText(E.Posting(100, 1, 40, 100, 100))
+    eq(cost, '<gold>Gain vs cost: <red>-<white>5c')
+    eq(vendor, '<gold>Gain vs vendor: <red>-<white>5c')
+    eq(threshold, '<red>A sale does not beat a vendor')
+    head, cost, vendor, deposit, threshold = U.InfoText(E.Posting(1000, 1, nil, nil))
+    eq(head, '<gold>AH sold: <white>950c'); eq(cost, ''); eq(vendor, '')
+    eq(deposit, '<gold>Unsold deposit: <gold>Unavailable'); eq(threshold, '')
+    head, cost, vendor, deposit, threshold = U.InfoText(nil)
+    eq(head, ''); eq(cost, ''); eq(vendor, ''); eq(deposit, ''); eq(threshold, '')
 end)
 
 -- The client layer with fake frames.
@@ -196,7 +198,10 @@ local function client()
     local function sellFrame()
         local s = { PriceInput = frame(), SecondaryPriceInput = frame() }
         s.PriceInput.MoneyInputFrame = money(); s.SecondaryPriceInput.MoneyInputFrame = money()
-        function s:SetItem() end
+        function s:SetItem(item)
+            self.location = item and { id = item.id, IsValid = function() return true end }
+        end
+        function s:GetItem() return self.location end
         s.deposit, s.quantity = 30, 4
         function s:GetDepositAmount() return self.deposit end
         function s:GetDuration() return 3 end
@@ -214,7 +219,12 @@ local function client()
     function g.AuctionHouseFrame:SetHeight() error('the auction window must never be resized') end
     function g.AuctionHouseFrame:IsShown() return self.shown end
     function g.AuctionHouseFrame:HookScript(name, fn) self.hooked = self.hooked or {}; self.hooked[name] = fn end
-    g.CreateFrame = frame
+    g.addonChildren = {}
+    g.CreateFrame = function(_, _, parent)
+        local child = frame()
+        if parent == g.AuctionHouseFrame then g.addonChildren[#g.addonChildren + 1] = child end
+        return child
+    end
     g.hooksecurefunc = function(object, name, fn)
         local original = object[name]
         object[name] = function(...) original(...); fn(...) end
@@ -231,6 +241,7 @@ local function client()
         GetNumItemSearchResults = function() return 1 end,
         GetItemSearchResultInfo = function() return { buyoutAmount = 20000, containsOwnerItem = false } end,
     }
+    g.C_Item = { GetItemID = function(location) return location.id end }
     g.GetItemInfo = function() return 'n', nil, nil, nil, nil, nil, nil, nil, nil, nil, 100 end
     g.time = function() return 7 end
     g.dropdowns = {}
@@ -240,7 +251,10 @@ end
 test('the client layer attaches once, searches on selection and fills the price', function()
     local g = client()
     for key, value in pairs(g) do _G[key] = value end
-    local ns = load({ Nav = { Dropdown = function(_, _, _, _, options, get, set)
+    local postings = {}
+    local ns = load({ AuctionHistory = { UpdatePosting = function(sell, post, warning)
+        postings[sell] = { post = post, warning = warning }
+    end }, Nav = { Dropdown = function(_, _, _, _, options, get, set)
         g.dropdowns[#g.dropdowns + 1] = { options = options(), get = get, set = set }
         return {}
     end } })
@@ -250,13 +264,13 @@ test('the client layer attaches once, searches on selection and fills the price'
     eq(U.frame.events, 3)
     U.instance = U.instance
     eq(U.Attach(), true); eq(U.Attach(), true)
-    eq(U.strip.shown, true); eq(U.panel.shown, true)
+    eq(U.strip.shown, true); eq(#g.addonChildren, 1)
     -- The strip follows the Sell forms: hidden when none is shown (Buy and Auctions tabs).
     local forms = _G.AuctionHouseFrame
     forms.CommoditiesSellFrame.shown, forms.ItemSellFrame.shown = false, false
-    forms.CommoditiesSellFrame.hooked.OnHide(); eq(U.strip.shown, false); eq(U.panel.shown, false)
+    forms.CommoditiesSellFrame.hooked.OnHide(); eq(U.strip.shown, false)
     forms.ItemSellFrame.shown = true
-    forms.ItemSellFrame.hooked.OnShow(); eq(U.strip.shown, true); eq(U.panel.shown, true)
+    forms.ItemSellFrame.hooked.OnShow(); eq(U.strip.shown, true)
     forms.CommoditiesSellFrame.shown = true
     eq(#g.dropdowns, 1)
     eq(#g.dropdowns[1].options, 4)                 -- 2, 5, 10, 15: no custom value
@@ -273,14 +287,13 @@ test('the client layer attaches once, searches on selection and fills the price'
     eq(sell.PriceInput.amount, 4500)
     eq(#ns.db.auctionUndercutLog, 1); eq(ns.db.auctionUndercutLog[1].input, 'PriceInput')
     -- The fill also shows the posting lines: 4 units at 4500 each, deposit 30, vendor 100.
-    eq(U.head.text, 'AH sold: 17100c  Vendor: 400c')
-    eq(U.gains.text, 'Gain: <green>+16700c vs vendor')
-    eq(U.info.text, 'Unsold: <red>-30c deposit, pays off if 1% sell')
+    eq(U.head.text, '<gold>AH sold: <white>17100c<gold>  Vendor: <white>400c')
+    eq(postings[sell].post.gain, 16700); eq(postings[sell].post.loss, 30)
     ns.Economy.UnitCost = function() return 20 end             -- a known cost is shown as the profit against it
     sell:UpdateDeposit()
-    eq(U.gains.text, 'Gain: <green>+17020c vs cost, <green>+16700c vs vendor')
+    eq(postings[sell].post.profit, 17020)
     ns.Economy.UnitCost = function() error('boom') end         -- an error while reading it only drops the figure
-    sell:UpdateDeposit(); assert(U.gains.text:find('vs vendor', 1, true) and not U.gains.text:find('vs cost', 1, true))
+    sell:UpdateDeposit(); eq(postings[sell].post.gain, 16700); eq(postings[sell].post.profit, nil)
     ns.Economy.UnitCost = function() return nil end
     -- The client puts its own default price back after our fill: the check after a moment restores ours.
     sell.PriceInput.amount = 5000
@@ -297,7 +310,7 @@ test('the client layer attaches once, searches on selection and fills the price'
     eq(deposits[1].itemID, 2589); eq(deposits[1].form, 'commodity'); eq(deposits[1].vendor, 100); eq(deposits[1].total, 18000)
     sell.quantity = 8; sell.deposit = 60; sell:UpdateDeposit()
     eq(#deposits, 2); eq(deposits[2].deposit, 60); eq(deposits[2].quantity, 8)
-    assert(U.info.text:find('<red>-60c deposit', 1, true), 'the lines follow the deposit of the form')
+    eq(postings[sell].post.loss, 60)
     sell.PriceInput.MoneyInputFrame.GoldBox.hooked.OnTextChanged(nil, false)      -- a change of the price refreshes them too
     sell.deposit = nil; sell:UpdateDeposit(); eq(#deposits, 2)               -- an unknown deposit is not logged
     for i = 1, 40 do sell.deposit = 100 + i; sell:UpdateDeposit() end
@@ -312,26 +325,35 @@ test('the client layer attaches once, searches on selection and fills the price'
     local single = _G.AuctionHouseFrame.ItemSellFrame
     single.BuyoutModeCheckButton = {}
     single:SetItem({ id = 5 })
-    -- The window is never resized (that made the client's scroll lists fail when it closed): the lines live in a panel that
-    -- hangs under it and follows the Sell forms.
+    -- The auction window keeps its native size, with only the Undercut strip attached by this module.
     local ah = _G.AuctionHouseFrame
     forms.ItemSellFrame.shown, forms.CommoditiesSellFrame.shown = false, false
     forms.ItemSellFrame.hooked.OnHide(); eq(U.strip.shown, false); eq(ah.height, 538)
     forms.ItemSellFrame.shown = true; forms.ItemSellFrame.hooked.OnShow(); eq(U.strip.shown, true); eq(ah.height, 538)
-    -- The row keeps its place inside the window (a little higher on the commodity form); only the panel hangs below it.
+    -- The row keeps its place inside the window, a little higher on the commodity form.
     eq(U.strip.point[4], 32); eq(U.strip.point[5], 78)
     forms.ItemSellFrame.shown, forms.CommoditiesSellFrame.shown = false, true
     forms.CommoditiesSellFrame.hooked.OnShow(); eq(U.strip.point[5], 85); eq(U.strip.point[2], ah)
-    eq(U.panel.point[1], 'TOPRIGHT'); eq(U.panel.point[2], ah); eq(U.panel.point[3], 'BOTTOMRIGHT')
+    eq(#g.addonChildren, 1)
     forms.ItemSellFrame.shown, forms.CommoditiesSellFrame.shown = true, false
     forms.ItemSellFrame.hooked.OnShow(); eq(U.strip.point[5], 78)
     U.frame.scripts.OnEvent(U.frame, 'ITEM_SEARCH_RESULTS_UPDATED', { itemID = 5 })
     eq(single.SecondaryPriceInput.amount, 18000)
+    U.instance:Results(U.instance.key, { { price = 100 } })
+    eq(single.SecondaryPriceInput.amount, 105)
+    eq(postings[single].warning, '<red>Vendor floor applied: <white>105c')
+    single.SecondaryPriceInput.MoneyInputFrame.CopperBox.hooked.OnTextChanged(nil, true)
+    eq(postings[single].warning, nil)
     -- Answers for another item are ignored.
     single:SetItem({ id = 6 })
     local before = #ns.db.auctionUndercutLog
     U.frame.scripts.OnEvent(U.frame, 'ITEM_SEARCH_RESULTS_UPDATED', { itemID = 5 })
     eq(#ns.db.auctionUndercutLog, before)
+    ns.settings.auctionUndercutEnabled = false
+    single.SecondaryPriceInput.amount = 150
+    single:SetItem({ id = 7 })
+    eq(U.instance.key, nil)
+    eq(postings[single].post.gain, 170)
     for key in pairs(g) do _G[key] = nil end
 end)
 

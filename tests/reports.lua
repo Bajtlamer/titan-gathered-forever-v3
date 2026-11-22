@@ -8,6 +8,7 @@ local function region()
  function r:SetHeight(v)self.height=v end
  function r:SetJustifyH()end
  function r:SetText(v)self.text=tostring(v)end
+ function r:SetWordWrap()end
  function r:GetStringHeight()
   local height=0
   for line in ((self.text or '')..'\n'):gmatch('(.-)\n')do
@@ -183,7 +184,6 @@ test('production report distinguishes completions matched results and explicit f
   ns.production:Result({operationID=i,itemID=2680,itemGUID='Item-output',quantity=2,firstCraftReward=false,isEnchant=false,bonusCraft=false,multicraft=0})
  end
  ns.Reports.Show('production');local w=ns.Reports.windows.production;assert(w and w:IsShown());eq(#w.rows,18)
- assert(not ns.Reports.windows.actions:IsShown())
  assert(w.rows[1].name.text:find('Cook 2501',1,true));eq(w.rows[1].cells[2].text,'1');eq(w.rows[1].cells[3].text,'1')
  eq(w.rows[1].cells[4].text,'100.0%');eq(w.rows[1].cells[5].text,'1')
  eq(w.rows[1].cells[6].text,'2');eq(w.rows[1].cells[7].text,'0.0% (0/1)')
@@ -192,7 +192,8 @@ test('production report distinguishes completions matched results and explicit f
   local menu={CreateTitle=function(_,v)titles[#titles+1]=v end,SetScrollMode=function()end};fn({},menu)
  end}
  w.rows[1].scripts.OnClick(w.rows[1]);local found=false
- for _,v in ipairs(titles)do if v:find('2 items in 1 operations',1,true)then found=true end end;assert(found)
+ local distribution=ns.Style.Value(2)..ns.Style.Label(' items in ')..ns.Style.Value(1)..ns.Style.Label(' operations')
+ for _,v in ipairs(titles)do if v==distribution then found=true end end;assert(found)
  local rows=ns.Reports.Rows('history','a','Cooking');local output
  for _,r in ipairs(rows)do if r.itemID==2680 then output=r end end
  assert(output);eq(output.quantity,0);eq(output.crafted,12)
@@ -413,5 +414,308 @@ test('every report copes with a player who has no profession addon installed',fu
  eq(w.filter,nil);eq(w.rows[1]:IsShown(),false);assert(w.empty.text:find('No gathering profession',1,true))
  pick(w.group,'Actions summary')
  ns.Catalog.Modules,ns.Catalog.Hidden=modules,hiddenKind;ns.Yields,ns.Economy=nil,nil
+end)
+test('Economy shows confirmed receipts for the empty Forever realm key and labels missing coverage', function()
+    GetRealmName = function() return '' end
+    ns.Economy = { Coin = function(copper) return copper .. 'c' end }
+    ns.db = { sales = { entries = {
+        { realm = '', source = 'invoice', count = 5, bid = 1000, fee = 50, deposit = 20, received = 970 },
+        { realm = '', source = 'invoice', bid = 500, fee = 25, deposit = 10, received = 300 },
+        { realm = '', source = 'header', count = 8, received = 2000 },
+        { realm = 'Other realm', source = 'invoice', count = 20, bid = 1000, fee = 50, deposit = 100, received = 1050 },
+    } }, lootIncome = { [''] = { player = { copper = 35, pickups = 2 } } },
+        vendorSales = { [''] = { player = {
+            sale = { [42] = { units = 3, copper = 68, stacks = 1 } },
+            buyback = { [40] = { units = 2, copper = 45, stacks = 1 } },
+            repair = { copper = 96, count = 3 },
+        } } }, questIncome = { [''] = { player = { [12] = { copper = 40, turnIns = 2 } } } } }
+    assert(loadfile('TitanGatheredForever/Sales.lua'))('Titan Gathered Forever', ns)
+    assert(loadfile('TitanGatheredForever/LootIncome.lua'))('Titan Gathered Forever', ns)
+    assert(loadfile('TitanGatheredForever/VendorSales.lua'))('Titan Gathered Forever', ns)
+    assert(loadfile('TitanGatheredForever/QuestIncome.lua'))('Titan Gathered Forever', ns)
+    assert(loadfile('TitanGatheredForever/EconomyView.lua'))('Titan Gathered Forever', ns)
+    local previous = ns.Nav.Current()
+    assert(previous)
+    ns.Nav.Open('economy')
+    local w = ns.EconomyView.window
+    eq(ns.Nav.Current(), 'economy')
+    eq(w.rows[1].units.text, ns.Style.Value(3))
+    eq(w.rows[1].income.text, ns.Style.Value('68c'))
+    eq(w.vendorBuybacks.text, ns.Style.Value(2) .. ns.Style.Label(' units for ') .. ns.Style.Value('45c'))
+    eq(w.vendorRepairs.text, ns.Style.Value(3) .. ns.Style.Label(' repairs for ') .. ns.Style.Value('96c'))
+    eq(w.rows[2].units.text, ns.Style.Label('At least ') .. ns.Style.Value(5))
+    eq(w.rows[2].income.text, ns.Style.Label('At least ') .. ns.Style.Value('950c'))
+    eq(w.rows[3].income.text, ns.Style.Value('40c'))
+    eq(w.rows[3].coverage.text, ns.Style.Value(2) .. ns.Style.Label(' verified turn-ins'))
+    eq(w.rows[4].income.text, ns.Style.Value('35c'))
+    eq(w.rows[4].coverage.text, ns.Style.Value(2) .. ns.Style.Label(' verified coin pickups'))
+    eq(w.rows[5].income.text, ns.Style.Label('At least ') .. ns.Style.Value('1093c'))
+    eq(w.invoiceCount.text, ns.Style.Value(2))
+    eq(w.gross.text, ns.Style.Value('1500c'))
+    eq(w.credit.text, ns.Style.Value('1270c'))
+    ns.db.sales.entries[2].received = 485
+    ns.db.sales.entries[2].count = 2
+    ns.EconomyView.Refresh()
+    eq(w.rows[2].units.text, ns.Style.Value(7))
+    eq(w.rows[2].income.text, ns.Style.Value('1425c'))
+    eq(w.rows[5].income.text, ns.Style.Label('At least ') .. ns.Style.Value('1568c'))
+    ns.Nav.Open('history')
+    assert(not w:IsShown())
+    ns.db.sales.entries = {}
+    ns.Nav.Open('economy')
+    eq(w.invoiceCount.text, ns.Style.Value(0))
+    eq(w.rows[5].income.text, ns.Style.Label('At least ') .. ns.Style.Value('143c'))
+    ns.db.lootIncome = {}
+    ns.db.vendorSales = {}
+    ns.db.questIncome = {}
+    ns.EconomyView.Refresh()
+    eq(w.rows[4].income.text, ns.Style.Label('Unavailable'))
+    eq(w.rows[5].income.text, ns.Style.Label('Unavailable'))
+end)
+test('profession statistics attach below the native window, preserve recipe counts and show scoped history',function()
+    local base=CreateFrame
+    local created={}
+    CreateFrame=function(_,_,parent)
+        local f=base();f.parent=parent;created[#created+1]=f
+        function f:GetFrameLevel()return self.frameLevel or 5 end
+        function f:SetFrameLevel(level)self.frameLevel=level end
+        function f:SetHighlightTexture()end
+        function f:LockHighlight()self.highlighted=true end
+        function f:UnlockHighlight()self.highlighted=false end
+        function f:HookScript(name,callback)self.scripts[name]=callback end
+        function f:Show()if self.shown then return end;self.shown=true;if self.scripts.OnShow then self.scripts.OnShow()end end
+        function f:Hide()if not self.shown then return end;self.shown=false;if self.scripts.OnHide then self.scripts.OnHide()end end
+        function f:SetShown(shown)if shown then self:Show()else self:Hide()end end
+        function f:IsVisible()return self:IsShown()and(not self.parent or self.parent:IsVisible())end
+        function f:RegisterEvent()end
+        return f
+    end
+    ns.characterID='a';ns.IsPublic=function()return true end
+    ns.Crafting={Resolve=function(info)return info.recipeID end}
+    ns.ProfessionButton={Sync=function()end}
+    ns.production=ns.Production.New({}, {Character=function()return'a'end,Name=function()return'A'end,
+        Timestamp=function()return 100 end,Now=function()return 100 end,Enabled=function()return true end,
+        Public=function()return true end,Recipe=function(id)
+            return {recipeID=id,name='Soup',kind='Cooking',outputItemID=2680,outputIDs={[2680]=true},
+                reagents={[159]=3},reagentsSupported=true}
+        end})
+    ProfessionsFrame=CreateFrame('Frame');ProfessionsFrame:Show()
+    local page=CreateFrame('Frame',nil,ProfessionsFrame);page:Show();ProfessionsFrame.CraftingPage=page
+    function page:SetAlpha(v)self.alpha=v end;function page:GetAlpha()return self.alpha or 1 end
+    local book=CreateFrame('Frame',nil,ProfessionsFrame);book:Show();ProfessionsFrame.BookPage=book
+    function book:SetAlpha(v)self.alpha=v end;function book:GetAlpha()return self.alpha or 1 end
+    function book:HookScript(name,callback)self.scripts[name]=callback end
+    local sideTabs={}
+    local function sideTab(left,width)
+        local b=CreateFrame('Button',nil,UIParent);b.clicks=0
+        function b:GetObjectType()return'CheckButton'end
+        function b:GetLeft()return left end;function b:GetRight()return left+width end
+        function b:GetWidth()return width end;function b:GetHeight()return 60 end
+        function b:HookScript(name,callback)self.hookedScripts=self.hookedScripts or{};self.hookedScripts[name]=callback end
+        b:Show();sideTabs[#sideTabs+1]=b;return b
+    end
+    local tabOne,tabTwo,insideButton=sideTab(805,60),sideTab(805,60),sideTab(300,60)   -- the last one is inside the window
+    function ProfessionsFrame:GetRight()return 800 end
+    function ProfessionsFrame:GetChildren()return tabOne,tabTwo,insideButton end
+    page.professionInfo={professionID=185}
+    local row=CreateFrame('Button');row.learned=true
+    local info={recipeID=2536};local node={GetData=function()return {recipeInfo=info}end}
+    function row:GetElementData()return node end
+    function row:GetWidth()return 200 end
+    row.Label=region();row.Label:SetText('Soup');function row.Label:GetStringWidth()return 40 end
+    row.Count=CreateFrame('Frame');row.Count:Show();row.Count:SetText(' [7] ')
+    function row.Count:GetStringWidth()return #self.text*4 end
+    row.SkillUps={GetWidth=function()return 16 end}
+    local box={ForEachFrame=function(_,callback)callback(row)end}
+    page.RecipeList={ScrollBox=box}
+    ScrollUtil={AddInitializedFrameCallback=function(scroll,callback,owner)eq(scroll,box)
+        box.initialized=function()callback(owner,row,node)end
+    end}
+    local function cast(outcome,guid)ns.production:Cast('UNIT_SPELLCAST_'..outcome,'player',guid,2536)end
+    cast('START','first');cast('SUCCEEDED','first');cast('START','second');cast('FAILED','second')
+    assert(loadfile('TitanGatheredForever/ProfessionStats.lua'))('Titan Gathered Forever',ns)
+    local view=ns.ProfessionStats
+    view.Initialize();eq(view.tab.parent,ProfessionsFrame);eq(view.tab.point[3],'BOTTOMRIGHT')
+    -- The native list shows the number that can be made with the materials at hand in square brackets: the add-on must not
+    -- write a second number beside it (the lifetime count is in the Statistics panel and in the recipe menu).
+    eq(row.Count.text,' [7] ');view.Refresh();eq(row.Count.text,' [7] ')
+    eq(box.initialized,nil)
+    view.tab.scripts.OnClick();assert(view.panel:IsVisible());eq(view.panel.kind,'Cooking')
+    eq(#view.panel.backgrounds,2,'the background leaves the portrait of the window free')
+    -- The panel covers everything in the native window, also its skill bars (they are drawn at high frame levels).
+    assert(view.panel.frameLevel>=ProfessionsFrame:GetFrameLevel()+500,'the panel is above the native window')
+    eq(view.panel.lines[1].cells[1].text,ns.Style.Value('Soup'))
+    eq(view.panel.lines[1].cells[2].text,ns.Style.Value(2));eq(view.panel.lines[1].cells[3].text,ns.Style.Value(1))
+    -- Matched outputs, Items, Bonus and Multicraft were always Unknown in this client: they are not columns, the details
+    -- stay in the menu of a recipe.
+    eq(view.panel.lines[1].cells[4].text,ns.Style.Value('50.0%'))
+    eq(view.panel.lines[1].cells[5].text,'')
+    local heads={};for index=1,4 do heads[index]=view.panel.head[index].text end
+    eq(heads[1],ns.Style.Label('Recipe'));eq(heads[2],ns.Style.Label('Attempts'));eq(heads[3],ns.Style.Label('Completed'))
+    eq(heads[4],ns.Style.Label('Completed %'));eq(view.panel.head[5].text,'')
+    assert(view.panel.coverage.text:find('Completed % = completed',1,true),'the explanation of the column is kept')
+    -- The views are chosen in a combo box on the row of the pickers (the portrait and the skill bar of the native window
+    -- cover the top-left corner of the panel), like the other pickers.
+    local viewPicker=view.panel.viewPicker
+    eq(viewPicker.point[5],-40);assert(viewPicker.point[4]>=360,'right of the pickers')
+    local viewOptions=view.panel.ViewOptions()
+    eq(#viewOptions,3);eq(viewOptions[1].value,'attempts');eq(viewOptions[1].label,'Attempts')
+    eq(viewOptions[2].label,'Materials');eq(viewOptions[3].value,'gathered');eq(viewOptions[3].label,'Gathered items')
+    view.panel.SetView('materials')
+    eq(view.panel.lines[1].cells[1].text,'Item 159');eq(view.panel.lines[1].cells[4].text,ns.Style.Value(3))
+    eq(view.panel.lines[1].cells[2].text,'');eq(view.panel.lines[1].cells[3].text,'')
+    -- The header sorts the list: a click on a column sorts by it (names a to z, numbers from the highest), a second click
+    -- reverses the order, and the choice is kept for each of the two views.
+    local rows={
+        {name='Beta',recipeID=2,attempts=10,completed=5},{name='Alpha',recipeID=1,attempts=4,completed=4},
+        {name='Gamma',recipeID=3,attempts=7,completed=7},{name='Delta',recipeID=4,attempts=0,completed=0},
+    }
+    local function names(list)local r={};for _,row in ipairs(list)do r[#r+1]=row.name end;return table.concat(r,',')end
+    local function sorted(state)local copy={};for i,row in ipairs(rows)do copy[i]=row end;view.SortRows(copy,'attempts',state);return names(copy)end
+    eq(sorted({column=1,descending=false}),'Alpha,Beta,Delta,Gamma');eq(sorted({column=1,descending=true}),'Gamma,Delta,Beta,Alpha')
+    eq(sorted({column=2,descending=true}),'Beta,Gamma,Alpha,Delta');eq(sorted({column=2,descending=false}),'Delta,Alpha,Gamma,Beta')
+    eq(sorted({column=3,descending=true}),'Gamma,Beta,Alpha,Delta')
+    eq(sorted({column=4,descending=true}),'Alpha,Gamma,Beta,Delta')      -- 100%, 100%, 50%, unknown last; ties by name
+    local usage={{itemID=3,quantity=5},{itemID=1,quantity=9},{itemID=2,quantity=5}}
+    view.SortRows(usage,'materials',{column=4,descending=true});eq(usage[1].itemID,1);eq(usage[2].itemID,2);eq(usage[3].itemID,3)
+    view.SortRows(usage,'materials',{column=1,descending=false});eq(usage[1].itemID,1);eq(usage[3].itemID,3)
+    view.panel.SetView('attempts')
+    local buttons=view.panel.headButtons
+    eq(#buttons,6);eq(view.panel.sorts.attempts.column,1);eq(view.panel.sorts.attempts.descending,false)
+    buttons[3].scripts.OnClick();eq(view.panel.sorts.attempts.column,3);eq(view.panel.sorts.attempts.descending,true)
+    buttons[3].scripts.OnClick();eq(view.panel.sorts.attempts.descending,false)
+    buttons[1].scripts.OnClick();eq(view.panel.sorts.attempts.column,1);eq(view.panel.sorts.attempts.descending,false)
+    eq(view.panel.sorts.materials.column,4);eq(view.panel.sorts.materials.descending,true)   -- the other view keeps its own
+    -- One list for crafts and for gathering: the Herbalism attempts are a row next to the recipes, with their own details.
+    ns.Economy=ns.Economy or {Coin=function(copper)return copper..'c' end}
+    local originalRows=ns.Reports.Rows
+    ns.Reports.Rows=function(mode,...)
+        local result=originalRows(mode,...)
+        if mode=='actions'then result[#result+1]={kind='Herbs',attempts=3,completed=2,failed=1,interrupted=0,stopped=0,unresolved=0,began=100}end
+        return result
+    end
+    view.panel.kind=false;view.Refresh()
+    local gathering,disenchant
+    for _,line in ipairs(view.panel.lines)do
+        if line.data and line.data.action and line.data.action.kind=='Herbs' then gathering=line end
+        if line.data and line.data.action and line.data.action.kind=='Enchanting' then disenchant=line end
+    end
+    assert(gathering,'a gathering row is in the list');assert(gathering.cells[1].text:find('Herbalism',1,true))
+    assert(gathering.cells[1].text:find('(gathering)',1,true),'it is marked as gathering')
+    assert(disenchant and not disenchant.cells[1].text:find('(gathering)',1,true),'disenchanting is not called gathering')
+    eq(gathering.cells[2].text,ns.Style.Value(gathering.data.attempts))
+    local titles={};local previousMenu=MenuUtil
+    MenuUtil={CreateContextMenu=function(owner,fn)fn(owner,{CreateTitle=function(_,t)titles[#titles+1]=t end,SetScrollMode=function()end})end}
+    gathering.scripts.OnClick(gathering)
+    local joined=table.concat(titles,'\n');assert(joined:find('Failed',1,true) and joined:find('Interrupted',1,true),joined)
+    MenuUtil=previousMenu;ns.Reports.Rows=originalRows
+    ns.Catalog.modules.Herbs={label='Herbalism',items={}}
+    local options=view.KindOptions(view.panel);local seen={}
+    for _,option in ipairs(options)do seen[option.value]=true end
+    assert(seen[false] and seen.Cooking and seen.Herbs,'crafts and gathering professions are in the picker')
+    page.professionInfo={professionID=393}
+    eq(view.ActiveKind(),'Skinning');page.professionInfo={professionID=185}
+    -- The Gathered view: what was gathered and what it is worth, one gathering profession at a time.
+    local asked={}
+    ns.Yields={Available=function()return{'Herbs'}end,Rows=function(character,kind,sort)
+        asked[#asked+1]={character,kind,sort}
+        return {{summary=true,title=true,text='Herbalism',gold=true},{summary=true,spacer=true,small=true,text=''},
+            {itemID=3,quantity=5,share=50,unit=100,value=500,source='Peacebloom'},
+            {summary=true,spacer=true,text=''},{summary=true,title=true,text='Fishing',gold=true},
+            {itemID=4,quantity=2,share=100,unit=50,value=100,source='Vendor'}}
+    end}
+    ns.Reports.ItemSources=function(owner,itemID,character)ns.sourcesAsked={itemID,character}end
+    view.panel.SetView('gathered')
+    eq(view.panel.view,'gathered');eq(asked[#asked][2],nil,'all gathering professions at first');eq(asked[#asked][3],'quantity')
+    eq(#view.panel.data,5,'the small spacer is left out, the one between two professions stays')
+    eq(view.panel.lines[3].cells[1].text,'');assert(view.panel.lines[4].cells[1].text:find('Fishing',1,true))
+    view.panel.SelectKind('Herbs');eq(asked[#asked][2],'Herbs')
+    view.panel.SelectKind(false);eq(asked[#asked][2],nil)
+    assert(view.panel.lines[1].cells[1].text:find('Herbalism',1,true))
+    eq(view.panel.lines[2].cells[1].text,'Item 3');eq(view.panel.lines[2].cells[2].text,ns.Style.Value(5))
+    eq(view.panel.lines[2].cells[3].text,ns.Style.Value('50.0%'));eq(view.panel.lines[2].cells[5].text,'500c')
+    eq(view.panel.head[2].text,ns.Style.Label('Quantity'));eq(view.panel.head[5].text,ns.Style.Label('Total value'))
+    eq(view.panel.head[6].text,ns.Style.Label('Best sale'))
+    view.panel.headButtons[5].scripts.OnClick();eq(asked[#asked][3],'value')
+    view.panel.headButtons[2].scripts.OnClick();eq(asked[#asked][3],'quantity')
+    local calls=#asked;view.panel.headButtons[1].scripts.OnClick();eq(#asked,calls)   -- names are not a sort of this view
+    view.panel.lines[2].scripts.OnClick(view.panel.lines[2]);eq(ns.sourcesAsked[1],3)
+    local gatheredOptions=view.KindOptions(view.panel)
+    eq(#gatheredOptions,2);eq(gatheredOptions[1].value,false);eq(gatheredOptions[1].label,'All gathering');eq(gatheredOptions[2].value,'Herbs')
+    view.panel.SetView('attempts')
+    eq(view.panel.view,'attempts');eq(view.panel.head[2].text,ns.Style.Label('Attempts'))
+    view.panel.SetView('materials')
+    ns.Yields=nil
+    -- The native pages under the panel are made transparent while it is open (their skill bars drew over it) and are
+    -- restored when it closes.
+    eq(page.alpha,0);eq(book.alpha,0)
+    view.panel:Hide();eq(page.alpha,1);eq(book.alpha,1)
+    view.tab.scripts.OnClick();assert(view.panel:IsShown());eq(page.alpha,0)
+    -- A click on any tab of a profession (the buttons beside the window) closes the panel.
+    assert(tabOne.hookedScripts and tabOne.hookedScripts.OnClick,'the first tab is hooked')
+    assert(tabTwo.hookedScripts and tabTwo.hookedScripts.OnClick,'the second tab is hooked')
+    eq(insideButton.hookedScripts,nil)
+    tabTwo.hookedScripts.OnClick();assert(not view.panel:IsShown());eq(page.alpha,1)
+    view.tab.scripts.OnClick();assert(view.panel:IsShown())
+    -- A change of the profession (an event of the client) closes it as well; the same profession does not.
+    local listener
+    for _,control in ipairs(created)do if control.scripts.OnEvent and control.events==nil then listener=control end end
+    local previousTimer=C_Timer;C_Timer={After=function(_,fn)fn()end}
+    ns.IsPublic=function()return true end
+    view.listener.scripts.OnEvent(view.listener,'TRADE_SKILL_DATA_SOURCE_CHANGED')
+    assert(view.panel:IsShown(),'the same profession keeps the panel')
+    page.professionInfo={professionID=164}
+    view.listener.scripts.OnEvent(view.listener,'TRADE_SKILL_DATA_SOURCE_CHANGED')
+    assert(not view.panel:IsShown(),'another profession closes it');eq(page.alpha,1)
+    page.professionInfo={professionID=185};C_Timer=previousTimer
+    -- A profession that could not be read when the panel opened is adopted later instead of closing the panel.
+    page.professionInfo=nil;view.tab.scripts.OnClick();assert(view.panel:IsShown())
+    page.professionInfo={professionID=185};C_Timer={After=function(_,fn)fn()end}
+    view.listener.scripts.OnEvent(view.listener,'TRADE_SKILL_DATA_SOURCE_CHANGED')
+    assert(view.panel:IsShown(),'the late reading is adopted');C_Timer=previousTimer
+    view.panel:Hide();page.professionInfo={professionID=185}
+    view.tab.scripts.OnClick()
+    ProfessionsFrame:Hide();assert(not view.panel:IsShown());assert(not view.tab.highlighted)
+    ProfessionsFrame,ScrollUtil,CreateFrame=nil,nil,base
+end)
+test('the statistics panel is raised above every frame of the native window and every frame anchored to it',function()
+    local function fake(name,strata,level,children,anchor)
+        local f={name=name,strata=strata,level=level,children=children or{},anchor=anchor,shown=true}
+        function f:GetName()return self.name end
+        function f:GetObjectType()return 'Frame' end
+        function f:GetChildren()return unpack(self.children)end
+        function f:GetFrameStrata()return self.strata end
+        function f:GetFrameLevel()return self.level end
+        function f:SetFrameStrata(v)self.strata=v end
+        function f:SetFrameLevel(v)self.level=v end
+        function f:GetNumPoints()return self.anchor and 1 or 0 end
+        function f:GetPoint()return 'TOP',self.anchor,'BOTTOM',0,0 end
+        return f
+    end
+    local view=ns.ProfessionStats
+    local label=fake('Label','MEDIUM',506)
+    local panel=fake('Panel','MEDIUM',505,{label})
+    local deepBar=fake('DeepBar','HIGH',700)
+    local page=fake('Page','MEDIUM',20,{deepBar})
+    local host=fake('Host','MEDIUM',5,{page,panel})
+    local outside=fake('OutsideBar','DIALOG',1200,{},host)             -- another add-on's bar anchored to the window
+    local unrelated=fake('Chat','TOOLTIP',9000)
+    UIParent=fake('UIParent','MEDIUM',0,{outside,unrelated,host})
+    ns.db={professionLog={}}
+    view.layerSeen=0
+    view.Raise(panel,host)
+    eq(panel.strata,'DIALOG');assert(panel.level>1200,'above the bar of the other add-on')
+    eq(label.level,506+(panel.level-505))                              -- the children of the panel move with it
+    assert(panel.level<=9990)
+    local row=ns.db.professionLog[1]
+    eq(row.stage,'stats-layer');assert(row.highest[1]:find('OutsideBar',1,true),row.highest[1])
+    -- nothing to raise when the panel is already on top
+    local before=panel.level;view.Raise(panel,host);eq(panel.level,before)
+    -- the strata never go above FULLSCREEN: the menus of the client stay over the panel
+    host.children={page,panel,fake('Tip','TOOLTIP',50)};panel.strata='MEDIUM';panel.level=1
+    view.Raise(panel,host);eq(panel.strata,'FULLSCREEN')
+    -- broken frames never raise
+    local ok=pcall(view.Raise,nil,host);assert(ok)
+    UIParent=frame()
 end)
 print('PASS '..passed..' history/report window checks')

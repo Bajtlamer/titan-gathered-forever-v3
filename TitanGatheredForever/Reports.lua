@@ -289,22 +289,55 @@ function Reports.ItemSources(owner,itemID,character)
 end
 function Reports.ProductionDetails(owner,row)
     MenuUtil.CreateContextMenu(owner,function(_,root)
-        root:CreateTitle(row.name..' (#'..row.recipeID..')')
+        local style=ns.Style
+        local function entry(label,value) root:CreateTitle(style.Label(label..': ')..style.Value(value)) end
+        local function count(hits,total)
+            return total>0 and string.format('%.1f%% (%d/%d)',hits/total*100,hits,total) or 'Unknown'
+        end
+        root:CreateTitle(style.Value(row.name))
         if ns.CraftingView then root:CreateButton('Plan recipe reagents',function()ns.CraftingView.Show(row.recipeID,1)end)end
-        root:CreateTitle(string.format('%d failed, %d interrupted, %d unresolved attempts',row.failed,row.interrupted,
-            row.attempts-row.completed-row.failed-row.interrupted))
-        root:CreateTitle('First recorded: '..ns.Style.Date(date and date('%Y-%m-%d',row.began)or tostring(row.began)))
-        ns.Style.MenuNote(root,'Observed output quantities; unmatched operations are excluded')
+        entry('Completed',count(row.completed,row.attempts))
+        entry('Failed',row.failed);entry('Interrupted',row.interrupted)
+        entry('Unresolved',math.max(0,row.attempts-row.completed-row.failed-row.interrupted))
+        entry('Matched outputs',row.matched)
+        entry('Bonus',count(row.bonusHits,row.bonusKnown))
+        entry('Multicraft',count(row.multicraftHits,row.multicraftKnown))
+        root:CreateTitle(style.Label('First recorded: ')..style.Date(date and date('%Y-%m-%d',row.began)or tostring(row.began)))
+        style.MenuNote(root,'Observed output quantities for matched operations')
         local ids={};for id in pairs(row.outputs)do ids[#ids+1]=id end;table.sort(ids)
         for _,id in ipairs(ids)do
             local output=row.outputs[id]
-            root:CreateTitle(ns.ItemName(id)..': '..output.quantity..' items in '..output.hits..' matched operations')
+            root:CreateTitle(style.ItemName(id)..style.Label(': ')..style.Value(output.quantity)..style.Label(' items in ')
+                ..style.Value(output.hits)..style.Label(' matched operations'))
             local quantities={};for quantity,count in pairs(output.distribution)do if count>0 then quantities[#quantities+1]=quantity end end;table.sort(quantities)
             for _,quantity in ipairs(quantities)do
-                root:CreateTitle(string.format('%d items in %d operations',quantity,output.distribution[quantity]))
+                root:CreateTitle(style.Value(quantity)..style.Label(' items in ')..style.Value(output.distribution[quantity])
+                    ..style.Label(' operations'))
             end
         end
-        if #ids==0 then ns.Style.MenuNote(root,'No matched output results yet.')end
+        if #ids==0 then style.MenuNote(root,'No matched output results yet.')end
+        local materials={};for id in pairs(row.reagentUse or {})do materials[#materials+1]=id end;table.sort(materials)
+        if #materials>0 then
+            style.MenuNote(root,'Estimated use of fixed required materials')
+            for _,id in ipairs(materials)do
+                root:CreateTitle(style.ItemName(id)..style.Label(': ')..style.Value(row.reagentUse[id]))
+            end
+        end
+        root:SetScrollMode(350)
+    end)
+end
+-- The details of a gathering or disenchanting row of Statistics: what the attempts came to, in a menu like the one of a recipe.
+function Reports.ActionDetails(owner,row)
+    MenuUtil.CreateContextMenu(owner,function(_,root)
+        local style=ns.Style
+        local function entry(label,value) root:CreateTitle(style.Label(label..': ')..style.Value(value)) end
+        root:CreateTitle(style.Value(labels[row.kind]or row.kind or''))
+        entry('Attempts',row.attempts)
+        entry('Completed',row.attempts>0 and string.format('%.1f%% (%d/%d)',row.completed/row.attempts*100,row.completed,row.attempts)or'Unknown')
+        entry('Failed',row.failed);entry('Interrupted',row.interrupted);entry('Stopped',row.stopped)
+        entry('Unresolved',row.unresolved or math.max(0,row.attempts-row.completed-row.failed-row.interrupted-row.stopped))
+        root:CreateTitle(style.Label('Recording began: ')..style.Date(date and date('%Y-%m-%d %H:%M',row.began)or tostring(row.began)))
+        style.MenuNote(root,ACTIONS_NOTE)
         root:SetScrollMode(350)
     end)
 end

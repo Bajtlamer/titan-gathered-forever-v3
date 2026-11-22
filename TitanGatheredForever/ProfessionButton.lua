@@ -45,6 +45,14 @@ function Button.ModifyMenu(owner, rootDescription)
     local recipeID = Button.RecipeOf(owner)
     if not recipeID then return end
     rootDescription:CreateButton('Reagents', function() ns.CraftingView.Show(recipeID, 1) end)
+    -- How many of this recipe this character has crafted in total (the native list already uses its number column for
+    -- what can be made with the materials at hand, so the lifetime count is shown here and in the Statistics panel).
+    if ns.production and ns.production.Completed and rootDescription.CreateTitle then
+        local ok, count = pcall(ns.production.Completed, ns.production, ns.characterID, recipeID)
+        if ok and type(count) == 'number' and count > 0 then
+            rootDescription:CreateTitle(ns.Style.Label('Crafted so far: ') .. ns.Style.Value(count))
+        end
+    end
 end
 
 function Button.HookMenu()
@@ -80,6 +88,8 @@ function Button.Sync()
     if not frame or not button then return end
     local page = frame.CraftingPage
     local visible = frame:IsShown() and (not page or page:IsShown())
+    local stats = ns.ProfessionStats and ns.ProfessionStats.panel
+    if stats and stats:IsVisible() then visible = false end
     button:SetShown(visible)
     if visible then Button.Place() end
 end

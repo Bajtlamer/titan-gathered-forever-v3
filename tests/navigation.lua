@@ -71,7 +71,9 @@ test('tabs use the classic panel tab template and select the active tab', functi
     local window = frame()
     ns.Nav.Tabs(window, 'chances')
     eq(numTabs, #ns.Nav.tabs); eq(selected, 4); eq(window.tabButtons.pvp.template, 'PanelTabButtonTemplate')
-    eq(#window.Tabs, 9); eq(window.Tabs[2].calls.SetID[1], 2)
+    eq(#window.Tabs, #ns.Nav.tabs); eq(window.Tabs[2].calls.SetID[1], 2)
+    eq(window.tabButtons.economy.text, 'Economy')
+    eq(window.tabButtons.production, nil)
     -- Tab widths are measured again when the window is shown, right away and a moment later.
     local resized, timers = 0, {}
     local textWidth
@@ -83,10 +85,10 @@ test('tabs use the classic panel tab template and select the active tab', functi
     window.IsShown = function() return true end
     resized, timers = 0, {}
     window.scripts.OnShow()
-    eq(resized, 9); eq(textWidth, 77)
+    eq(resized, #ns.Nav.tabs); eq(textWidth, 77)
     eq(order[1], 'set0'); eq(order[2], 'get')                -- the fixed text width goes first, then the measuring; eq(#timers, 3)
-    timers[1](); eq(resized, 18)
-    timers[3](); eq(resized, 27)
+    timers[1](); eq(resized, 2 * #ns.Nav.tabs)
+    timers[3](); eq(resized, 3 * #ns.Nav.tabs)
     PanelTemplates_TabResize, C_Timer = nil, nil
     -- A frame that is already shown never fires OnShow for its first Show, so the tabs measure at creation too.
     local created = 0
@@ -94,7 +96,7 @@ test('tabs use the classic panel tab template and select the active tab', functi
     C_Timer = { After = function() end }
     local fresh = frame(); fresh.IsShown = function() return true end
     ns.Nav.Tabs(fresh, 'recipes')
-    eq(created, 9)
+    eq(created, #ns.Nav.tabs)
     PanelTemplates_TabResize, C_Timer = nil, nil
 end)
 
