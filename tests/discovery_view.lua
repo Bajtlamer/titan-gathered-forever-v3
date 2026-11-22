@@ -328,6 +328,34 @@ test('the filters of the window change the rows and a click on a row shows its d
     window.search.OnTextChanged(window.search, true)
 end)
 
+test('without a comparison Everything observed still lists what was observed', function()
+    local ns = load()
+    local data = ns.db.data
+    data.loot[765] = { name = 'Silverleaf', seen = 2, first = 2000, last = 3000 }
+    data.npcs[223] = { name = 'Dan the Elder', seen = 1, last = 100 }
+    data.areas['1|A|A||'] = { zone = 'A', seen = 1 }
+    ns.View.show = 'changes'
+    eq(ns.View.Rows(), nil)                                    -- new and different need the comparison
+    ns.View.show = 'all'
+    local rows = ns.View.Rows()
+    eq(#rows, 3)
+    for _, row in ipairs(rows) do eq(row.state, 'observed') end
+    has(plain(ns.View.DetailText(rows[1])[1]), '/tgfd compare')
+    has(plain(ns.View.Cells(rows[1])[4]), 'Observed')
+    ns.View.search = 'silver'
+    eq(#ns.View.Rows(), 1)
+    ns.View.search = ''; ns.View.category = 'npcs'
+    eq(#ns.View.Rows(), 1)
+    ns.View.category = false
+    ns.Window.Show()
+    ns.View.show = 'all'; ns.Window.Refresh()
+    local window = ns.Window.window
+    eq(window.lines[1].shown, true); eq(window.lines[3].shown, true); eq(window.lines[4].shown, false)
+    has(plain(window.rangeText.text), 'Showing 1-3 of 3')
+    ns.db.data.loot[765] = nil; ns.db.data.npcs[223] = nil; ns.db.data.areas['1|A|A||'] = nil
+    eq(#ns.View.Rows(), 0)
+end)
+
 test('the window has two tabs: the collected data and how the module works', function()
     local ns = compared()
     ns.Window.Show()
@@ -354,8 +382,12 @@ test('the guide explains the module, the data, their use and how to hand them ov
         has(text:lower(), part:lower())
     end
     assert(not text:find('DiscoveryDB.lua', 1, true), 'the file is named after the addon')
-    -- Without contact details the guide points to the project page, with them it names Discord and e-mail.
-    has(text, 'CurseForge')
+    -- The contacts of the owner are in the text; without them the guide points to the project page.
+    has(text, 'Discord'); has(text, '_bajt'); has(text, 'E-mail'); has(text, 'bajtlamer@gmail.com')
+    local saved = { ns.Guide.CONTACTS.discord, ns.Guide.CONTACTS.email }
+    ns.Guide.CONTACTS.discord, ns.Guide.CONTACTS.email = nil, nil
+    has(plain(table.concat(ns.Guide.Lines(), '\n')), 'CurseForge')
+    ns.Guide.CONTACTS.discord, ns.Guide.CONTACTS.email = saved[1], saved[2]
     ns.Guide.CONTACTS.discord, ns.Guide.CONTACTS.email = 'https://discord.gg/example', 'author@example.org'
     local contact = plain(table.concat(ns.Guide.Lines(), '\n'))
     has(contact, 'Discord'); has(contact, 'https://discord.gg/example'); has(contact, 'E-mail'); has(contact, 'author@example.org')

@@ -4,8 +4,8 @@ local _, ns = ...
 local Guide = {}
 ns.Guide = Guide
 
--- Where to send the data. A nil value is left out of the text.
-Guide.CONTACTS = { discord = nil, email = nil }
+-- Where to send the data (the Discord user name and the e-mail of the owner). A nil value is left out of the text.
+Guide.CONTACTS = { discord = '_bajt', email = 'bajtlamer@gmail.com' }
 
 local function contactLines()
     local Text = ns.Text

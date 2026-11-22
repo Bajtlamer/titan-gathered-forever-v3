@@ -1,4 +1,4 @@
-# Titan Gathered Discovery 0.1.2
+# Titan Gathered Discovery 0.1.3
 
 Update to 0.1.0. This text is the changelog for the release page.
 
@@ -11,6 +11,7 @@ Update to 0.1.0. This text is the changelog for the release page.
 
 ## Fixed
 
+- The list of the window was empty before a comparison had run in the session, even with Everything observed selected, while the Titan Panel plugin counted the records. Everything observed now lists the observed records at once (state Observed); New and different, Different and the other lists still need `/tgfd compare`, and the header says so.
 - The hand-over text named the file `TitanGatheredForeverDiscoveryDB.lua`, which is the name of the variable. The game writes the saved variables of this module to `TitanGatheredForever_Discovery.lua` in `WTF/Account/<account>/SavedVariables`; that is the file to send.
 
 ## Upgrading

@@ -25,7 +25,7 @@ These run only when you type them, show their progress and can be cancelled with
 
 1. Type /tgfd export. It checks the data for private values and stamps them with versions and checksums. If it finds a private value it refuses and names where.
 2. Type /reload, or log out, so the game writes the file.
-3. Send TitanGatheredForever_Discovery.lua from WTF/Account/<your account>/SavedVariables/ to the owner. Nothing is sent by the game itself.
+3. Send TitanGatheredForever_Discovery.lua from WTF/Account/<your account>/SavedVariables/ to the owner on Discord (_bajt) or by e-mail (bajtlamer@gmail.com). Nothing is sent by the game itself.
 
 ## Clearing the data afterwards (optional)
 

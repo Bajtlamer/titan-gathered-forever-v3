@@ -15,8 +15,10 @@ View.SHOWS = {
     { value = 'all', label = 'Everything observed' },
 }
 
-local STATE_LABEL = { new = 'New', different = 'Different', unchanged = 'Unchanged', unbaselined = 'No baseline', notseen = 'Not yet seen' }
-local STATE_COLOR = { new = 'cyan', different = 'orange', unchanged = 'gray', unbaselined = 'gray', notseen = 'violet' }
+local STATE_LABEL = { new = 'New', different = 'Different', unchanged = 'Unchanged', unbaselined = 'No baseline', notseen = 'Not yet seen',
+    observed = 'Observed' }
+local STATE_COLOR = { new = 'cyan', different = 'orange', unchanged = 'gray', unbaselined = 'gray', notseen = 'violet',
+    observed = 'gray' }
 
 local notSeenCache
 
@@ -67,12 +69,44 @@ local function matches(row, needle)
     return haystack:lower():find(needle, 1, true) ~= nil
 end
 
--- The rows for the current filters, or nil when no comparison has run in this session.
+-- What was observed, as rows, before any comparison has run in this session (the comparison is started by /tgfd compare):
+-- they have no state of a comparison, only the record itself.
+local observedCache
+local function observedRows()
+    -- Built again only when the number of records changed or a moment has passed: scrolling asks for the rows all the time.
+    local count = 0
+    for _, category in ipairs(ns.Database.CATEGORIES) do
+        for _ in pairs(ns.db.data[category] or {}) do count = count + 1 end
+    end
+    local now = ns.env.now()
+    if observedCache and observedCache.db == ns.db and observedCache.count == count and now - observedCache.at < 2 then
+        return observedCache.rows
+    end
+    local rows = {}
+    for _, category in ipairs(ns.Database.CATEGORIES) do
+        local records = ns.db.data[category] or {}
+        for _, key in ipairs(ns.Util.SortedKeys(records)) do
+            local record = records[key]
+            local name = record.name or record.title or (type(key) == 'string' and key) or nil
+            if category == 'vendors' and ns.db.data.npcs[key] then name = ns.db.data.npcs[key].name or name end
+            rows[#rows + 1] = { category = category, key = key, name = name, state = 'observed', details = {}, differences = 0,
+                why = 'Observed, not compared yet. Type /tgfd compare to see what is new or different.',
+                seen = record.seen, first = record.first, last = record.last }
+        end
+    end
+    observedCache = { db = ns.db, count = count, at = now, rows = rows }
+    return rows
+end
+
+-- The rows for the current filters. Without a comparison in this session only Everything observed has rows (the
+-- records themselves); the other lists need the comparison and give nil.
 function View.Rows()
-    if not ns.results then return nil end
+    if not ns.results and View.show ~= 'all' then return nil end
     local needle = tostring(View.search or ''):lower()
     local source = {}
-    if View.show == 'notseen' then
+    if not ns.results then
+        source = observedRows()
+    elseif View.show == 'notseen' then
         source = notSeenRows()
     else
         for _, category in ipairs(ns.Database.CATEGORIES) do
@@ -151,7 +185,7 @@ end
 function View.Header()
     local Text = ns.Text
     if not ns.results then
-        return Text.Label('No comparison in this session. Type ') .. Text.Value('/tgfd compare')
+        return Text.Label('No comparison in this session: only Everything observed has rows. Type ') .. Text.Value('/tgfd compare')
             .. Text.Label(' to compare the observations with the Titan Gathered Forever data.')
     end
     local saved = ns.db.compare or {}

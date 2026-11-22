@@ -31,7 +31,7 @@ Requires **WoW Forever 1.60.1**, **Titan Panel** and the **Titan Gathered Foreve
 2. Play as usual. `/tgfd status` shows what has been recorded, and `/tgfd stop` and `/tgfd start` pause and resume.
 3. Open the window (the minimap button menu, the Titan Panel entry or `/tgfd show`): the second tab, How it works, explains the module and how to hand data over.
 4. Type `/tgfd compare` to compare with the Titan Gathered Forever data, then `/tgfd show` to see the result.
-5. To help the owner: `/tgfd export`, then `/reload`, then send `TitanGatheredForever_Discovery.lua` from `WTF/Account/<your account>/SavedVariables/`. The file contains only what the notice lists.
+5. To help the owner: `/tgfd export`, then `/reload`, then send `TitanGatheredForever_Discovery.lua` from `WTF/Account/<your account>/SavedVariables/`. The file contains only what the notice lists. Send it on Discord (`_bajt`) or by e-mail (bajtlamer@gmail.com).
 
 ### Notes and limitations
 
