@@ -104,13 +104,25 @@ local function unbaselined() return 'unbaselined', NO_BASELINE, {} end
 local CLASSIFIERS = { loot = classifyLoot, npcs = classifyNpc, vendors = classifyVendor, skills = classifySkill,
     areas = unbaselined, quests = unbaselined, entities = unbaselined, recipes = classifyRecipe, maps = unbaselined }
 
+-- The readable name of an area record: the instance, or the zone and the subzone (the key is a long text with bars).
+function Compare.AreaName(record, key)
+    if record.instanceName and record.instanceName ~= '' then return record.instanceName end
+    local zone = record.zone ~= '' and record.zone or record.realZone
+    local sub = record.subZone
+    if zone and zone ~= '' and sub and sub ~= '' and sub ~= zone then return zone .. ' / ' .. sub end
+    if zone and zone ~= '' then return zone end
+    if sub and sub ~= '' then return sub end
+    return type(key) == 'string' and key or nil
+end
+
 -- One row for one observed record.
 function Compare.Classify(category, key, record, baseline, db)
     local state, why, details = CLASSIFIERS[category](key, record, baseline)
     local name = record.name or record.title or (type(key) == 'string' and key) or nil
+    if category == 'areas' then name = Compare.AreaName(record, key) end
     if category == 'vendors' and db and db.data.npcs[key] then name = db.data.npcs[key].name or name end
     return {
-        category = category, key = key, name = name, state = state, why = why, details = details,
+        category = category, key = key, name = name, mapID = record.mapID, state = state, why = why, details = details,
         differences = #details, seen = record.seen, first = record.first, last = record.last,
         firstBuild = record.firstBuild, lastBuild = record.lastBuild,
         otherBuild = baseline.build ~= nil and record.lastBuild ~= nil and record.lastBuild ~= baseline.build,

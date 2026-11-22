@@ -39,13 +39,17 @@ local function installFrames()
         function frame:Hide() self.shown = false end
         function frame:IsShown() return self.shown end
         function frame:SetScript(script, fn) self[script] = fn end
-        function frame:CreateFontString() local fs = widget('FontString'); function fs:SetText(t) self.text = t end; return fs end
+        function frame:CreateFontString() local fs = widget('FontString'); function fs:SetText(t) self.text = t end; function fs:SetWordWrap(v) self.wordWrap = v end; return fs end
+        if template == 'PanelTabButtonTemplate' then
+            frame.Text = { SetWidth = function() end, GetStringWidth = function() return 94 end }
+        end
         if template == 'BasicFrameTemplateWithInset' then frame.TitleText = widget('Title'); function frame.TitleText:SetText(t) self.text = t end end
         frames[#frames + 1] = frame
         return frame
     end
     _G.UIParent = widget('UIParent')
     _G.UISpecialFrames = {}
+    _G.PanelTemplates_TabResize = function(b, _, _, _, _, width) b.resized = width end
     _G.date = function(format, time) return 'D' .. tostring(time) end
 end
 
@@ -173,17 +177,18 @@ test('paging clamps the offset and the range text is plain when empty and styled
     eq(plain(ns.View.RangeText(0, 40)), 'Showing 1-' .. ns.View.ROWS .. ' of 40')
 end)
 
-test('a row becomes cells with the category, key, name, colored state, count, date and notes', function()
+test('a row becomes cells with the category, key, name, colored state, count and date', function()
     local ns = compared()
     local rows = ns.View.Rows()
     local cells = ns.View.Cells(rows[1])                -- loot 12345: new, seen on two builds, another build than the baseline
-    eq(#cells, 7)
+    eq(#cells, 6)                                       -- there is no column of notes: the room is for the name
     eq(plain(cells[1]), 'Loot'); eq(plain(cells[2]), '12345'); eq(plain(cells[3]), 'Strange Herb')
     has(cells[4], '|ccyan'); eq(plain(cells[4]), 'New'); eq(plain(cells[5]), '1')
     has(cells[6], '|cgreen'); has(cells[6], 'D4000')
-    has(plain(cells[7]), 'other build'); has(plain(cells[7]), 'several builds')
+    local detail = plain(table.concat(ns.View.DetailText(rows[1]), '\n'))
+    has(detail, 'another build'); has(detail, 'more than one build')
     local different = ns.View.Cells(rows[3])            -- vendors 340
-    has(different[4], '|corange'); eq(plain(different[4]), 'Different'); has(plain(different[7]), '1 difference')
+    has(different[4], '|corange'); eq(plain(different[4]), 'Different (1)')
     eq(plain(ns.View.Cells({ category = 'npcs', key = 1, state = 'notseen' })[4]), 'Not yet seen')
 end)
 
@@ -299,7 +304,7 @@ test('the window is built once, fills its lines from the rows and hides the unus
     ns.Window.Show()
     local count = #frames
     local window = ns.Window.window
-    assert(window and window.shown)
+    assert(window and window.shown, table.concat(ns.printed, ' | '))
     eq(#window.lines, ns.View.ROWS)
     eq(plain(window.lines[1].cells[3].text), 'Strange Herb')
     eq(window.lines[1].shown, true); eq(window.lines[5].shown, false)
@@ -354,6 +359,41 @@ test('without a comparison Everything observed still lists what was observed', f
     has(plain(window.rangeText.text), 'Showing 1-3 of 3')
     ns.db.data.loot[765] = nil; ns.db.data.npcs[223] = nil; ns.db.data.areas['1|A|A||'] = nil
     eq(#ns.View.Rows(), 0)
+end)
+
+test('an area is shown by its name and map number, and a profession without a repeated id', function()
+    local ns = load()
+    local data = ns.db.data
+    data.areas['1455|Ironforge|Ironforge|Ironforge|'] = { mapID = 1455, zone = 'Ironforge', subZone = 'Ironforge', seen = 2 }
+    data.areas['1456|Ironforge|Ironforge|The Commons|'] = { mapID = 1456, zone = 'Ironforge', subZone = 'The Commons', seen = 1 }
+    data.areas['2159|Onyxia|Onyxia||Onyxia\'s Lair'] = { mapID = 2159, instanceName = 'Onyxia\'s Lair', zone = 'Onyxia', seen = 1 }
+    data.skills.Cooking = { rank = 1, seen = 1 }
+    ns.View.show = 'all'
+    local rows = ns.View.Rows()
+    local byKey = {}
+    for _, row in ipairs(rows) do byKey[row.key] = row end
+    local plainSame = byKey['1455|Ironforge|Ironforge|Ironforge|']
+    eq(plainSame.name, 'Ironforge')
+    eq(byKey['1456|Ironforge|Ironforge|The Commons|'].name, 'Ironforge / The Commons')
+    eq(byKey['2159|Onyxia|Onyxia||Onyxia\'s Lair'].name, 'Onyxia\'s Lair')
+    eq(plain(ns.View.Cells(plainSame)[2]), '1455')
+    eq(plain(ns.View.Cells(byKey.Cooking)[2]), '')               -- the name says it all
+    -- A compared row reads the same.
+    ns.results = ns.Compare.Run(ns.db, assert(ns.Baseline.FromCore()))
+    for _, row in ipairs(ns.results.rows.areas) do
+        if row.key == '1456|Ironforge|Ironforge|The Commons|' then
+            eq(row.name, 'Ironforge / The Commons'); eq(plain(ns.View.Cells(row)[2]), '1456')
+        end
+    end
+end)
+
+test('the cells of the rows stay on one line and the tabs are fitted to their text when the window is built', function()
+    local ns = load()
+    local wraps = {}
+    ns.Window.Show()
+    local window = ns.Window.window
+    eq(window.tabButtons.data.resized, 94); eq(window.tabButtons.guide.resized, 94)
+    for _, cell in ipairs(window.lines[1].cells) do assert(cell.wordWrap == false, 'a cell must not wrap') end
 end)
 
 test('the window has two tabs: the collected data and how the module works', function()

@@ -240,7 +240,7 @@ test('a review mark is local, shows in the row and removes it from the to review
     eq(ns.View.IsReviewed(row), false)
     eq(ns.View.ToggleReviewed(row), true)
     eq(ns.View.IsReviewed(row), true); eq(ns.db.reviewed['loot:765'], 5000)
-    has(plain(ns.View.Cells(row)[7]), 'reviewed')
+    has(plain(ns.View.Cells(row)[4]), 'reviewed')
     ns.results = { rows = {} }
     for _, category in ipairs(ns.Database.CATEGORIES) do ns.results.rows[category] = {} end
     ns.results.rows.loot[1] = row
@@ -260,6 +260,7 @@ test('the window has a button that marks the selected row as reviewed and back',
     ns.results.rows.loot[1] = { category = 'loot', key = 765, name = 'Silverleaf', state = 'new', details = {}, differences = 0 }
     ns.Window.Show()
     local window = ns.Window.window
+    assert(window, table.concat(ns.printed, ' | '))
     window.lines[1].OnClick(window.lines[1])
     eq(window.reviewButton.text, 'Mark reviewed')
     window.reviewButton.OnClick()

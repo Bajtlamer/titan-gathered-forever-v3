@@ -9,14 +9,19 @@ ns.Window = Window
 local ROW_HEIGHT, ROW_WIDTH, WHEEL_STEP = 22, 910, 3
 local GUIDE_TOP, GUIDE_HEIGHT, GUIDE_LINE = -40, 520, 14       -- the text of the guide scrolls by lines of 14 pixels
 local TABS = { { 'data', 'Collected data' }, { 'guide', 'How it works' } }
-local columns = { { 'Category', 0, 90 }, { 'ID', 95, 70 }, { 'Name', 170, 220 }, { 'State', 395, 90 }, { 'Seen', 490, 45 },
-    { 'Last seen', 540, 90 }, { 'Notes', 635, 275 } }
+local columns = { { 'Category', 0, 95 }, { 'ID', 100, 75 }, { 'Name', 180, 360 }, { 'State', 545, 170 }, { 'Seen', 720, 50 },
+    { 'Last seen', 775, 100 } }
 
-local function text(parent, font, x, y, width)
+local function text(parent, font, x, y, width, single)
     local fontString = parent:CreateFontString(nil, 'OVERLAY', font)
     fontString:SetPoint('TOPLEFT', parent, 'TOPLEFT', x, y)
     fontString:SetWidth(width)
     fontString:SetJustifyH('LEFT')
+    -- A cell of a row is one line: a long text is cut instead of running into the next row.
+    if single then
+        fontString:SetWordWrap(false)
+        if fontString.SetMaxLines then fontString:SetMaxLines(1) end
+    end
     return fontString
 end
 
@@ -79,7 +84,7 @@ local function build()
         line:SetSize(ROW_WIDTH, ROW_HEIGHT)
         line:SetPoint('TOPLEFT', data, 'TOPLEFT', 15, -138 - (index - 1) * ROW_HEIGHT)
         line.cells = {}
-        for i, column in ipairs(columns) do line.cells[i] = text(line, 'GameFontHighlightSmall', column[2], 0, column[3]) end
+        for i, column in ipairs(columns) do line.cells[i] = text(line, 'GameFontHighlightSmall', column[2], 0, column[3], true) end
         line:SetScript('OnClick', function(self)
             if self.row then View.selected = self.row; Window.Refresh() end
         end)
@@ -131,29 +136,32 @@ local function build()
     if PanelTemplates_SetNumTabs then pcall(PanelTemplates_SetNumTabs, w, #TABS) end
     -- A panel tab measures its text before the first layout pass and cuts it: fit the tabs when the window opens, and
     -- again a moment later (the same way the tabs of the core windows are fitted).
-    if w.HookScript then
-        w:HookScript('OnShow', function()
-            Window.FitTabs()
-            if C_Timer and C_Timer.After then
-                for _, delay in ipairs({ 0.1, 0.5, 1.5 }) do
-                    C_Timer.After(delay, function() if w:IsShown() then Window.FitTabs() end end)
-                end
+    local function fit()
+        Window.FitTabs(w)
+        if C_Timer and C_Timer.After then
+            for _, delay in ipairs({ 0.1, 0.5, 1.5 }) do
+                C_Timer.After(delay, function() if w:IsShown() then Window.FitTabs(w) end end)
             end
-        end)
+        end
     end
+    if w.HookScript then w:HookScript('OnShow', fit) end
+    fit()                    -- a new frame is already shown, so its first Show never raises OnShow
     return w
 end
 
-function Window.FitTabs()
-    local w = Window.window
+function Window.FitTabs(w)
+    w = w or Window.window
     if not w or not w.tabButtons then return end
     for _, b in pairs(w.tabButtons) do
-        local label = b.Text or (b.GetName and b:GetName() and _G[b:GetName() .. 'Text'])
+        local name = b.GetName and b:GetName()
+        local label = b.Text or (type(name) == 'string' and _G[name .. 'Text'])
+        if type(label) ~= 'table' then label = nil end
         if label and label.SetWidth then label:SetWidth(0) end
         local width = label and label.GetStringWidth and label:GetStringWidth()
         if type(width) ~= 'number' or width <= 0 then width = nil end
         if PanelTemplates_TabResize then pcall(PanelTemplates_TabResize, b, nil, nil, nil, nil, width) end
-        if width and b.GetWidth and b.SetWidth and (b:GetWidth() or 0) < width + 16 then b:SetWidth(width + 30) end
+        local current = b.GetWidth and b:GetWidth()
+        if width and b.SetWidth and type(current) == 'number' and current < width + 16 then b:SetWidth(width + 30) end
     end
 end
 

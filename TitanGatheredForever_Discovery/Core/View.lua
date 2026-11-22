@@ -88,8 +88,9 @@ local function observedRows()
         for _, key in ipairs(ns.Util.SortedKeys(records)) do
             local record = records[key]
             local name = record.name or record.title or (type(key) == 'string' and key) or nil
+            if category == 'areas' then name = ns.Compare.AreaName(record, key) end
             if category == 'vendors' and ns.db.data.npcs[key] then name = ns.db.data.npcs[key].name or name end
-            rows[#rows + 1] = { category = category, key = key, name = name, state = 'observed', details = {}, differences = 0,
+            rows[#rows + 1] = { category = category, key = key, name = name, mapID = record.mapID, state = 'observed', details = {}, differences = 0,
                 why = 'Observed, not compared yet. Type /tgfd compare to see what is new or different.',
                 seen = record.seen, first = record.first, last = record.last }
         end
@@ -132,21 +133,24 @@ end
 
 function View.Cells(row)
     local Text = ns.Text
-    local notes = {}
-    if row.otherBuild then notes[#notes + 1] = 'other build' end
-    if row.severalBuilds then notes[#notes + 1] = 'several builds' end
-    if View.IsReviewed(row) then notes[#notes + 1] = 'reviewed' end
-    if (row.differences or 0) > 0 then
-        notes[#notes + 1] = row.differences .. (row.differences == 1 and ' difference' or ' differences')
-    end
+    -- The state also says how many differences there are and whether the row was marked as reviewed (the builds are in
+    -- the detail of the row), so that the name gets the room.
+    local state = STATE_LABEL[row.state] or tostring(row.state)
+    if (row.differences or 0) > 0 then state = state .. ' (' .. row.differences .. ')' end
+    local stateCell = Text.Color(STATE_COLOR[row.state] or 'gray', state)
+    if View.IsReviewed(row) then stateCell = stateCell .. Text.Label(', reviewed') end
+    -- The ID column: a number as it is, the map number of an area (its key is a long text), nothing when the name is the key.
+    local id
+    if row.category == 'areas' and row.mapID then id = tostring(row.mapID)
+    elseif row.key == row.name then id = ''
+    else id = tostring(row.key) end
     return {
         Text.Value(ns.Compare.LABELS[row.category] or row.category),
-        Text.Value(tostring(row.key)),
+        Text.Value(id),
         Text.Value(row.name or ''),
-        Text.Color(STATE_COLOR[row.state] or 'gray', STATE_LABEL[row.state] or tostring(row.state)),
+        stateCell,
         Text.Value(row.seen and tostring(row.seen) or ''),
         row.last and Text.Date(ns.env.date('%Y-%m-%d', row.last)) or '',
-        Text.Label(table.concat(notes, ', ')),
     }
 end
 
@@ -179,6 +183,8 @@ end
 function View.DetailText(row)
     local lines = { ns.Text.Label(row.why or '') }
     for _, detail in ipairs(row.details or {}) do lines[#lines + 1] = detailLine(detail) end
+    if row.otherBuild then lines[#lines + 1] = ns.Text.Label('Seen on another build than the target build of the baseline.') end
+    if row.severalBuilds then lines[#lines + 1] = ns.Text.Label('Seen on more than one build.') end
     return lines
 end
 

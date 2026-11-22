@@ -1,4 +1,4 @@
-# Titan Gathered Discovery 0.1.3
+# Titan Gathered Discovery 0.1.4
 
 Update to 0.1.0. This text is the changelog for the release page.
 
@@ -11,6 +11,9 @@ Update to 0.1.0. This text is the changelog for the release page.
 
 ## Fixed
 
+- The rows of the list no longer run into each other: every cell is one line and a long text is cut. An area shows its name (the zone, the zone and subzone, or the instance) and its map number instead of its long internal key, and a profession does not repeat its name in the ID column.
+- The column Notes was always empty before a comparison and took a third of the width. It is gone; the name gets the room. The state says how many differences a row has (Different (2)) and whether it was marked as reviewed, and the detail of the row says if it was seen on another build or on more than one build.
+- The tabs at the bottom of the window were cut ("Collecte...", "How it w..."): they are fitted to their text when the window is built.
 - The list of the window was empty before a comparison had run in the session, even with Everything observed selected, while the Titan Panel plugin counted the records. Everything observed now lists the observed records at once (state Observed); New and different, Different and the other lists still need `/tgfd compare`, and the header says so.
 - The hand-over text named the file `TitanGatheredForeverDiscoveryDB.lua`, which is the name of the variable. The game writes the saved variables of this module to `TitanGatheredForever_Discovery.lua` in `WTF/Account/<account>/SavedVariables`; that is the file to send.
 
