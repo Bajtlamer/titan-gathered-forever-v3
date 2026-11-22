@@ -29,7 +29,7 @@ local function help()
         say(Text.Label('Recording has not started yet: ') .. Text.Value('/tgfd accept'))
         return
     end
-    say(Text.Label('Titan Gathered Forever: Discovery commands:'))
+    say(Text.Label('Titan Gathered Discovery commands:'))
     say(Text.Value('/tgfd status') .. Text.Label(': state, versions, baseline and record counts'))
     say(Text.Value('/tgfd stop') .. Text.Label(': pause recording'))
     say(Text.Value('/tgfd start') .. Text.Label(': resume recording'))
@@ -181,7 +181,7 @@ local function archive(rest)
     local Text = ns.Text
     if rest ~= 'confirm' then
         say(Text.Label('Archive clears the observations from the game after they were exported. Steps: ') .. Text.Value('/tgfd stop') .. Text.Label(', ')
-            .. Text.Value('/tgfd export') .. Text.Label(', ') .. Text.Value('/reload') .. Text.Label(', copy TitanGatheredForeverDiscoveryDB.lua, then ')
+            .. Text.Value('/tgfd export') .. Text.Label(', ') .. Text.Value('/reload') .. Text.Label(', copy TitanGatheredForever_Discovery.lua, then ')
             .. Text.Value('/tgfd archive confirm') .. Text.Label('. Nothing is cleared when the data changed since the export.'))
         return
     end

@@ -59,7 +59,7 @@ function Export.Spec(db)
             ns.Print(Text.Label('Export check passed: ') .. Text.Value(db.export.total) .. Text.Label(' records, no private data found, checksum ')
                 .. Text.Value(total) .. Text.Label('.'))
             ns.Print(Text.Label('Now type ') .. Text.Value('/reload') .. Text.Label(' (or log out) so the game writes the file, then send ')
-                .. Text.Value('TitanGatheredForeverDiscoveryDB.lua') .. Text.Label(' from ') .. Text.Value('WTF/Account/<your account>/SavedVariables/')
+                .. Text.Value('TitanGatheredForever_Discovery.lua') .. Text.Label(' from ') .. Text.Value('WTF/Account/<your account>/SavedVariables/')
                 .. Text.Label(' to the owner. Recording continues; export again after more play.'))
         end,
     }

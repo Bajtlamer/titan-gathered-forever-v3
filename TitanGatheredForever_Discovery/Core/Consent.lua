@@ -10,7 +10,7 @@ Consent.NOTICE_VERSION = 3
 function Consent.Notice()
     local Text = ns.Text
     return {
-        Text.Label('Titan Gathered Forever: Discovery records what this game client shows, so that new or different data can be compared with the Titan Gathered Forever catalogue. It is a data-collection tool for the owner and for contributors who choose to help, not a player feature.'),
+        Text.Label('Titan Gathered Discovery records what this game client shows, so that new or different data can be compared with the Titan Gathered Forever catalogue. It is a data-collection tool for the owner and for contributors who choose to help, not a player feature.'),
         Text.Label('It records: everything you loot and where it came from, the NPCs and objects you talk to or target (IDs, names, services, vendor and trainer goods), quests, the zones and areas you enter, profession skills and the client build.'),
         Text.Label('It never records: chat, whispers, mail text, player GUIDs or names, guild names, or anything about the auction house.'),
         Text.Label('Nothing is sent anywhere. The game cannot send data, so you would hand it over yourself: ') .. Text.Value('/tgfd export') .. Text.Label(' checks and stamps the data, then you send the saved file.'),

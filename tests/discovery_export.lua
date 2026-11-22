@@ -156,7 +156,7 @@ test('the export checks privacy, stamps the data with versions, counts and check
     eq(export.client.build, '70862'); eq(export.counts.loot, 2); eq(export.counts.npcs, 1); eq(export.total, 4)
     eq(export.session, 'S1'); eq(export.checksums.loot, ns.Checksum.Category(ns.db.data.loot)); eq(#export.checksum, 8)
     local text = printed(ns)
-    has(text, '/reload'); has(text, 'TitanGatheredForeverDiscoveryDB.lua'); has(text, 'SavedVariables')
+    has(text, '/reload'); has(text, 'TitanGatheredForever_Discovery.lua'); has(text, 'SavedVariables')
     lacks(text, 'Radekovo')
 end)
 

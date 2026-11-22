@@ -132,6 +132,8 @@ Decided 2026-11-19: the displayed name is "Titan Gathered Forever: Discovery" an
 
 Decided 2026-11-22: recording starts by itself when the module is installed (the original rule "enabling the module is the consent" is applied literally: a module that has to be switched on is loaded and never used). The notice is printed at the first start and again when it changes, `/tgfd stop` pauses and the pause is kept, `/tgfd accept` stays as a fallback. The Titan Panel plugin carries the whole name "Titan Gathered Forever: Discovery", and the overview window opens also from the right click menu of the minimap button and of the Titan entry (the core offers `Titan.AddMenuExtension` for that).
 
+Decided 2026-11-22 (later): the displayed name is now "Titan Gathered Discovery" everywhere in the game (the folder stays TitanGatheredForever_Discovery, so the addon files are unchanged on disk); the window has two tabs, the collected data and a guide (what it is, what it records, how it works, what the data are for, how to hand them over by Discord or e-mail), contact details are set in `Guide.CONTACTS`.
+
 Still open:
 
 

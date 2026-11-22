@@ -1,11 +1,11 @@
 # Discovery contributor guide
 
-Steps for anyone who wants to help collect data with Titan Gathered Forever: Discovery. The module is a diagnostic tool, not a player feature. It reads what the game client shows and keeps it so that new or different data can be compared with the Titan Gathered Forever catalogue. You only hand data over; you decide when.
+Steps for anyone who wants to help collect data with Titan Gathered Discovery. The module is a diagnostic tool, not a player feature. It reads what the game client shows and keeps it so that new or different data can be compared with the Titan Gathered Forever catalogue. You only hand data over; you decide when.
 
 ## Before you start
 
 - Install the TitanGatheredForever_Discovery folder next to Titan, Titan Gathered Forever and its profession modules. It is not part of the published downloads.
-- Install the module. It starts recording by itself at the first login and prints a notice that says what it records and what it never records (type /tgfd to read it again). To pause type /tgfd stop, to resume /tgfd start. The window of the collected data opens with /tgfd show, from the Titan Panel entry "Titan Gathered Forever: Discovery" or from the menu of the Titan Gathered Forever minimap button (Discovery: collected data).
+- Install the module. It starts recording by itself at the first login and prints a notice that says what it records and what it never records (type /tgfd to read it again). To pause type /tgfd stop, to resume /tgfd start. The window has two tabs (the collected data, and how the module works with how to hand the data over); it opens with /tgfd show, from the Titan Panel entry "Titan Gathered Discovery" or from the menu of the Titan Gathered Forever minimap button (Titan Gathered Discovery).
 - You can pause with /tgfd stop and resume with /tgfd start at any time.
 
 ## What happens while you play
@@ -25,7 +25,7 @@ These run only when you type them, show their progress and can be cancelled with
 
 1. Type /tgfd export. It checks the data for private values and stamps them with versions and checksums. If it finds a private value it refuses and names where.
 2. Type /reload, or log out, so the game writes the file.
-3. Send TitanGatheredForeverDiscoveryDB.lua from WTF/Account/<your account>/SavedVariables/ to the owner. Nothing is sent by the game itself.
+3. Send TitanGatheredForever_Discovery.lua from WTF/Account/<your account>/SavedVariables/ to the owner. Nothing is sent by the game itself.
 
 ## Clearing the data afterwards (optional)
 

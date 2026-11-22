@@ -1,7 +1,7 @@
 ## Interface: 16001
-## Title: Titan Gathered Forever: Discovery
+## Title: Titan Gathered Discovery
 ## Notes: Data collection for the owner and contributors: records what the Forever client shows and compares it with the Titan Gathered Forever catalogue. Starts recording by itself when installed; pause with /tgfd stop.
-## Version: 0.1.1
+## Version: 0.1.2
 ## IconTexture: Interface\AddOns\TitanGatheredForever_Discovery\Artwork\AddonIcon
 ## Author: Titan Gathered Forever contributors
 ## Dependencies: Titan, TitanGatheredForever
@@ -33,6 +33,7 @@ Core/Compare.lua
 Core/Checksum.lua
 Core/Audit.lua
 Core/Export.lua
+Core/Guide.lua
 Core/View.lua
 Core/Stats.lua
 UI/Window.lua

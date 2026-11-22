@@ -1,4 +1,4 @@
-# Titan Gathered Forever: Discovery
+# Titan Gathered Discovery
 
 ## Summary
 
@@ -6,7 +6,7 @@ A data-collection companion for Titan Gathered Forever: it records what the WoW 
 
 ## Description
 
-Titan Gathered Forever: Discovery is a diagnostic tool for the owner of Titan Gathered Forever and for contributors who choose to help. It is not a player feature. It watches what the game client already shows (loot, NPCs, vendors, trainers, quests, zones, professions and recipes), keeps it, and compares it with the data of Titan Gathered Forever so that missing or different facts become visible. Nothing is sent anywhere: if you want to help, you hand the saved file over yourself.
+Titan Gathered Discovery is a diagnostic tool for the owner of Titan Gathered Forever and for contributors who choose to help. It is not a player feature. It watches what the game client already shows (loot, NPCs, vendors, trainers, quests, zones, professions and recipes), keeps it, and compares it with the data of Titan Gathered Forever so that missing or different facts become visible. Nothing is sent anywhere: if you want to help, you hand the saved file over yourself.
 
 ### Features
 
@@ -29,8 +29,9 @@ Requires **WoW Forever 1.60.1**, **Titan Panel** and the **Titan Gathered Foreve
 
 1. Install the module. It starts recording by itself at the first login and prints a notice that says what is recorded and what is not (`/tgfd` shows it again).
 2. Play as usual. `/tgfd status` shows what has been recorded, and `/tgfd stop` and `/tgfd start` pause and resume.
-3. Type `/tgfd compare` to compare with the Titan Gathered Forever data, then `/tgfd show` to see the result.
-4. To help the owner: `/tgfd export`, then `/reload`, then send `TitanGatheredForeverDiscoveryDB.lua` from `WTF/Account/<your account>/SavedVariables/`. The file contains only what the notice lists.
+3. Open the window (the minimap button menu, the Titan Panel entry or `/tgfd show`): the second tab, How it works, explains the module and how to hand data over.
+4. Type `/tgfd compare` to compare with the Titan Gathered Forever data, then `/tgfd show` to see the result.
+5. To help the owner: `/tgfd export`, then `/reload`, then send `TitanGatheredForever_Discovery.lua` from `WTF/Account/<your account>/SavedVariables/`. The file contains only what the notice lists.
 
 ### Notes and limitations
 

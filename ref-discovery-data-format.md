@@ -1,6 +1,6 @@
 # Discovery data format
 
-Reference for the saved table of Titan Gathered Forever: Discovery (folder TitanGatheredForever_Discovery, version 0.1.0). The table is TitanGatheredForeverDiscoveryDB in WTF/Account/<account>/SavedVariables/TitanGatheredForeverDiscoveryDB.lua. It is separate from the saved table of the core. See [the plan](plans/plan-discovery-module.md) for the design and [the contributor guide](book-discovery-contributors.md) for the steps.
+Reference for the saved table of Titan Gathered Discovery (folder TitanGatheredForever_Discovery, version 0.1.0). The table is TitanGatheredForeverDiscoveryDB in WTF/Account/<account>/SavedVariables/TitanGatheredForeverDiscoveryDB.lua. It is separate from the saved table of the core. See [the plan](plans/plan-discovery-module.md) for the design and [the contributor guide](book-discovery-contributors.md) for the steps.
 
 Everything below is an observation: a count with times and builds, not a verified fact. Nothing in it changes the catalogue by itself.
 

@@ -245,7 +245,7 @@ test('the Titan Panel plugin is a data source that opens the window and updates 
     local made
     _G.LibStub = { GetLibrary = function() return { NewDataObject = function(_, name, object) made = { name = name, object = object }; return object end } end }
     eq(ns.Stats.Initialize(), true)
-    eq(made.name, 'TitanGatheredForeverDiscovery'); eq(made.object.type, 'data source'); eq(made.object.label, 'Titan Gathered Forever: Discovery')
+    eq(made.name, 'TitanGatheredForeverDiscovery'); eq(made.object.type, 'data source'); eq(made.object.label, 'Titan Gathered Discovery')
     eq(made.object.text, 'off')
     local toggled = 0
     ns.Window.Toggle = function() toggled = toggled + 1 end
@@ -326,6 +326,43 @@ test('the filters of the window change the rows and a click on a row shows its d
     window.lines[3].OnClick(window.lines[3])
     has(plain(window.detail.text), 'Goods or lessons differ')
     window.search.OnTextChanged(window.search, true)
+end)
+
+test('the window has two tabs: the collected data and how the module works', function()
+    local ns = compared()
+    ns.Window.Show()
+    local window = ns.Window.window
+    eq(window.TitleText.text, 'Titan Gathered Discovery')
+    eq(window.page, 'data'); eq(window.pages.data.shown, true); eq(window.pages.guide.shown, false)
+    assert(window.tabButtons.data and window.tabButtons.guide, 'both tabs exist')
+    window.tabButtons.guide.OnClick()
+    eq(window.page, 'guide'); eq(window.pages.guide.shown, true); eq(window.pages.data.shown, false)
+    has(plain(window.guideText.text), 'What it records')
+    window.tabButtons.data.OnClick()
+    eq(window.page, 'data'); eq(window.pages.data.shown, true); eq(window.pages.guide.shown, false)
+    has(plain(window.lines[1].cells[3].text), 'Strange Herb')
+    ns.Window.Toggle(); ns.Window.Toggle()
+    eq(window.page, 'data')                                   -- the window opens on the data again
+end)
+
+test('the guide explains the module, the data, their use and how to hand them over', function()
+    local ns = load()
+    local text = plain(table.concat(ns.Guide.Lines(), '\n'))
+    for _, part in ipairs({ 'What it is', 'What it records', 'What it never records', 'How it works', 'What the data is used for',
+        'How to send the data', '/tgfd audit', '/tgfd export', '/reload', 'TitanGatheredForever_Discovery.lua', 'SavedVariables',
+        '/tgfd stop', '/tgfd compare', '/tgfd archive confirm', 'nothing is sent' }) do
+        has(text:lower(), part:lower())
+    end
+    assert(not text:find('DiscoveryDB.lua', 1, true), 'the file is named after the addon')
+    -- Without contact details the guide points to the project page, with them it names Discord and e-mail.
+    has(text, 'CurseForge')
+    ns.Guide.CONTACTS.discord, ns.Guide.CONTACTS.email = 'https://discord.gg/example', 'author@example.org'
+    local contact = plain(table.concat(ns.Guide.Lines(), '\n'))
+    has(contact, 'Discord'); has(contact, 'https://discord.gg/example'); has(contact, 'E-mail'); has(contact, 'author@example.org')
+    ns.Guide.CONTACTS.discord = nil
+    local only = plain(table.concat(ns.Guide.Lines(), '\n'))
+    lacks(only, 'discord.gg'); has(only, 'author@example.org')
+    ns.Guide.CONTACTS.email = nil
 end)
 
 test('without a comparison the window explains what to do instead of showing rows', function()

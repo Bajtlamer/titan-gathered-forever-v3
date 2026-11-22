@@ -24,7 +24,7 @@ function Stats.TooltipLines(db, runtime)
     local Text = ns.Text
     local saved = type(db.compare) == 'table' and db.compare or nil
     local lines = {
-        { left = Text.Value('Titan Gathered Forever: Discovery') },
+        { left = Text.Value('Titan Gathered Discovery') },
         { left = Text.Label('State'), right = Text.Value(Stats.Text(db, runtime)) },
     }
     for _, category in ipairs(ns.Database.CATEGORIES) do
@@ -70,7 +70,7 @@ function Stats.Initialize()
     local ldb = LibStub and LibStub.GetLibrary and LibStub:GetLibrary('LibDataBroker-1.1', true)
     if not ldb then return false end
     Stats.broker = ldb:NewDataObject('TitanGatheredForeverDiscovery', {
-        type = 'data source', label = 'Titan Gathered Forever: Discovery', text = Stats.Text(ns.db, ns.runtime),
+        type = 'data source', label = 'Titan Gathered Discovery', text = Stats.Text(ns.db, ns.runtime),
         icon = 'Interface\\AddOns\\TitanGatheredForever_Discovery\\Artwork\\AddonIcon',
         OnEnter = showTooltip,
         OnLeave = function() GameTooltip:Hide() end,

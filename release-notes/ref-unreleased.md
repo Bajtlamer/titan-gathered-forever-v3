@@ -4,7 +4,7 @@ Updated 2026-11-21. These changes describe source candidates since the latest pu
 
 ## Menu entries for modules, 0.5.144
 
-- The menu of the add-on (right click on the minimap button or on the Titan entry) can be extended by other modules with `ns.Titan.AddMenuExtension(function(root) ... end)`; a failing extension never breaks the menu. Titan Gathered Forever: Discovery uses it for "Discovery: collected data".
+- The menu of the add-on (right click on the minimap button or on the Titan entry) can be extended by other modules with `ns.Titan.AddMenuExtension(function(root) ... end)`; a failing extension never breaks the menu. Titan Gathered Forever: Discovery uses it for "Titan Gathered Discovery".
 
 ## Equipment repair costs, 0.5.143
 
