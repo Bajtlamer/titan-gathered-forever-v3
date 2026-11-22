@@ -336,6 +336,22 @@ test('the sales ledger starts with the add-on, keeps its saved sales and answers
     assert(found, 'the newest sale is printed')
 end)
 
+test('other modules can add entries to the menu of the add-on, and a failing one does not break it', function()
+    local s, ns = fixture(); s:Start()
+    local before = 0
+    s.broker.OnClick({}, 'RightButton')
+    for _ in pairs(s.menu.buttons) do before = before + 1 end
+    ns.Titan.AddMenuExtension(function(root) root:CreateButton('Module window', function() ns.opened = true end) end)
+    ns.Titan.AddMenuExtension(function() error('broken extension') end)
+    ns.Titan.AddMenuExtension(function(root) root:CreateButton('Second entry', function() end) end)
+    ns.Titan.AddMenuExtension('not a function')
+    s.broker.OnClick({}, 'RightButton')
+    assert(s.menu.buttons['Module window'], 'the entry of the module is in the menu')
+    assert(s.menu.buttons['Second entry'], 'a failing extension does not stop the next one')
+    assert(s.menu.buttons['Show status report'], 'the rest of the menu is still built')
+    s.menu.buttons['Module window'](); eq(ns.opened, true)
+end)
+
 test('a product outside the catalogue gets its auction price, the vendor comparison and nothing else', function()
     local s, ns = fixture(); s:Start()
     local tip = CreateFrame('GameTooltip')

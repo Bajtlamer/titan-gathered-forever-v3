@@ -6,8 +6,8 @@ Recorded 2026-11-06; updated 2026-11-08. This describes the development target a
 
 - Product: `wowf`, installed under `/Applications/World of Warcraft/_forever_/`.
 - Latest installation metadata: `1.60.1.70862`, read on 2026-11-07 from `.build.info`. The earlier observed build was `70790`.
-- Expected interface: `16001`, independently observed by WoWFScout on the earlier build. It was not reverified live on `70862` by this pass.
-- Client build date in the earlier Scout observation: `Nov 3 2026`.
+- Expected interface: `16001`, independently observed on the earlier build. It was not reverified live on `70862` by this pass.
+- Client build date in the earlier observation: `Nov 3 2026`.
 - Titan Panel: last inspected release 9.3.5. The current installed development candidate is 0.4.1-alpha; all 56 runtime files across fourteen addons were verified against source.
 - Test runtime: LuaJIT, using Lua 5.1 semantics. The machine's separate Lua 5.5 compiler is not the project validation target.
 
@@ -78,7 +78,7 @@ The Titan context menu includes `Debug mode`, disabled by default and saved acro
 
 ## Historical: Gathering recording diagnostics
 
-Version 0.3.4 refreshes loot-source metadata on `LOOT_OPENED` when the earlier `LOOT_READY` observation had no source, preserving already-taken flags. A regression reproduces the previous dropped herb; a collector-to-map test verifies the herb item icon and coordinates. The inspected local saved state has mapping/Herbalism enabled but no saved spots; Scout separately recorded Silverleaf loot in Mulgore. This establishes a recording report, but does not establish the exact live event order. `/tgf status` includes enabled map professions and the last recording stage. Debug mode additionally traces cast/loot/recording stages; it remains off by default.
+Version 0.3.4 refreshes loot-source metadata on `LOOT_OPENED` when the earlier `LOOT_READY` observation had no source, preserving already-taken flags. A regression reproduces the previous dropped herb; a collector-to-map test verifies the herb item icon and coordinates. The inspected local saved state has mapping/Herbalism enabled but no saved spots; a separate earlier observation recorded Silverleaf loot in Mulgore. This establishes a recording report, but does not establish the exact live event order. `/tgf status` includes enabled map professions and the last recording stage. Debug mode additionally traces cast/loot/recording stages; it remains off by default.
 
 ## Historical: Map rendering corrections in 0.3.5
 

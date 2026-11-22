@@ -108,6 +108,13 @@ function Titan.ClearSpotsMenu(owner, world)
     end)
 end
 
+-- Entries that other modules add to the menu (the minimap button and the Titan Panel entry share it): each is a
+-- function(root) that creates its buttons. A failing extension never breaks the menu.
+Titan.menuExtensions = {}
+function Titan.AddMenuExtension(extend)
+    if type(extend) == 'function' then Titan.menuExtensions[#Titan.menuExtensions + 1] = extend end
+end
+
 function Titan.Menu(owner)
     Titan.Hide()
     MenuUtil.CreateContextMenu(owner, function(_, root)
@@ -361,6 +368,7 @@ function Titan.Menu(owner)
         recording:CreateCheckbox('Ordinary loot sources', function() return ns.settings.historyProfessions.Loot ~= false end, function()
             ns.settings.historyProfessions.Loot = ns.settings.historyProfessions.Loot == false; ns.UpdateGathering()
         end)
+        for _, extend in ipairs(Titan.menuExtensions) do pcall(extend, root) end
         local diagnostics = root:CreateButton('Diagnostics')
         toggle(diagnostics, 'Debug mode', 'debugMode')
         ns.Style.MenuNote(diagnostics, 'Debug mode writes events to the debug log in the saved variables file. The file is written on /reload and logout.')

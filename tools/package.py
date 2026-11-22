@@ -15,6 +15,15 @@ def addon_names(root):
     return ['TitanGatheredForever'] + [row['folder'] for row in json.loads((root / 'catalogue/modules.json').read_text())]
 
 
+def standalone_modules(root):
+    """Hand-written modules that are released on their own and are not part of the published set or its collection."""
+    return json.loads((root / 'catalogue/standalone-modules.json').read_text())
+
+
+def standalone_names(root):
+    return [row['folder'] for row in standalone_modules(root)]
+
+
 def default_target(root, version, addon=None):
     if addon:
         return root / f'dist/modules/{addon}-{version}.zip'
@@ -23,9 +32,10 @@ def default_target(root, version, addon=None):
 
 def package(root, target, addons=None):
     allowed = addon_names(root)
+    standalone = standalone_names(root)
     paths = []  # (source path, archive name)
     for name in (allowed if addons is None else addons):
-        if name not in allowed:
+        if name not in allowed + standalone:
             raise ValueError(f'Unknown addon: {name}')
         addon = root / name
         manifest = addon / (name + '.toc')
@@ -40,6 +50,10 @@ def package(root, target, addons=None):
             if not path.resolve().is_relative_to(addon.resolve()) or not path.is_file():
                 raise ValueError(f'Invalid addon file: {entry}')
             paths.append((path, path.relative_to(root).as_posix()))
+        if name in standalone:
+            if not (root / 'LICENSE').is_file():
+                raise ValueError('Missing LICENSE at the repository root')
+            paths.append((root / 'LICENSE', f'{name}/LICENSE'))
         if name == 'TitanGatheredForever':
             for notice in ('LICENSE', 'NOTICE'):
                 source = root / notice
@@ -97,16 +111,54 @@ def stage_release(root, version, output=None):
     return target
 
 
+def stage_standalone_release(root, name, output=None):
+    """Build the upload directory of one standalone module: its ZIP, downloads.json and SHA256SUMS."""
+    rows = {row['folder']: row for row in standalone_modules(root)}
+    if name not in rows:
+        raise ValueError(f'Not a standalone module: {name}')
+    toc = (root / name / (name + '.toc')).read_text()
+    found = re.search(r'^## Version: ([0-9][a-zA-Z0-9.-]*)$', toc, re.M)
+    if not found:
+        raise ValueError(f'No version in {name}')
+    version = found.group(1)
+    target = output or root / 'dist/standalone' / f'{name}-{version}'
+    if target.is_symlink():
+        raise ValueError('Release directory must not be a symlink')
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix='.release-', dir=target.parent) as directory:
+        staged = Path(directory) / 'upload'
+        staged.mkdir()
+        archive = staged / f'{name}-{version}.zip'
+        package(root, archive, addons=[name])
+        record = {'id': name, 'label': rows[name]['label'], 'type': rows[name]['kind'], 'file': archive.name,
+                  'requires': ['Titan', 'TitanGatheredForever'], 'bytes': archive.stat().st_size,
+                  'sha256': hashlib.sha256(archive.read_bytes()).hexdigest()}
+        index = {'schema': 1, 'version': version, 'client': 'WoW Forever', 'interface': 16001, 'downloads': [record]}
+        (staged / 'downloads.json').write_text(json.dumps(index, indent=2) + '\n')
+        checksums = [hashlib.sha256(path.read_bytes()).hexdigest() + '  ' + path.name for path in sorted(staged.iterdir())]
+        (staged / 'SHA256SUMS').write_text('\n'.join(checksums) + '\n')
+        if target.exists():
+            shutil.rmtree(target)
+        staged.rename(target)
+    return target
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path)
     parser.add_argument('--addon', help='Package only this addon folder; otherwise also build separate downloads.')
+    parser.add_argument('--standalone', action='store_true',
+                        help='Build only the standalone modules (not part of the published set) into dist/standalone/.')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     spec = importlib.util.spec_from_file_location('generate_catalog', root / 'tools/generate_catalog.py')
     generator = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(generator)
     generator.generate(root, check=True)
+    if args.standalone:
+        for name in standalone_names(root):
+            print(stage_standalone_release(root, name))
+        raise SystemExit(0)
     toc = (root / 'TitanGatheredForever/TitanGatheredForever.toc').read_text()
     version = re.search(r'^## Version: ([a-zA-Z0-9.-]+)$', toc, re.M).group(1)
     target = args.output or default_target(root, version, args.addon)

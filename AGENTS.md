@@ -6,6 +6,7 @@ Titan Gathered Forever targets WoW Forever 1.60.1, interface 16001, with Titan P
 
 - TitanGatheredForever/ contains the shared runtime, English localization, generated metadata and required artwork. Its .toc loads Lua in the declared order.
 - Twelve profession addons and a separate Auction Items addon publish compact catalogue records. Use their matching TitanGatheredForever_* folder/manifest names and dependencies on Titan and the shared core.
+- TitanGatheredForever_Discovery is a standalone module with its own version line, listed in catalogue/standalone-modules.json and outside catalogue/modules.json. It is not part of the published collection or the fourteen ZIPs, and the shared-version rules below do not apply to it; build it with tools/package.py --standalone and install it with tools/install.py --standalone-only.
 - catalogue/, tools/, tests/, release-notes/ and the ref- and book- Markdown documents live at repository root; every plan- document lives in plans/. Runtime folders contain only manifest-loaded code and allowlisted artwork. Keep private archives, generated distributions, SavedVariables and temporary files out of Git.
 - Follow the user's document prefixes: plan-, ref-, book-, Codex-, budget-, bom- and tmp-. Every plan-* document lives in plans/ and nowhere else (not in the repository root); ref-, book- and release notes stay where they are. Temporary tmp-* files must be ignored and deleted after use. Avoid emoji, decorative glyphs and em dashes.
 

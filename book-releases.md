@@ -62,6 +62,16 @@ Every ZIP extracts addon folders directly under AddOns. Optional modules require
 
 On macOS, verify with `shasum -a 256 -c SHA256SUMS` from the upload directory. Linux CI uses `sha256sum --check SHA256SUMS`.
 
+## Release the Discovery module
+
+The Discovery module is released on its own and is not part of the collection or the fourteen ZIPs above. It has its own version line in its manifest (TitanGatheredForever_Discovery/TitanGatheredForever_Discovery.toc), listed in catalogue/standalone-modules.json.
+
+1. Increment its patch version for every completed update and add `release-notes/ref-discovery-<version>.md`. Update curseforge/ref-titan-gathered-forever-discovery.md and the README section.
+2. Run `python3 tools/check.py`, then `python3 tools/package.py --standalone`. The upload directory is `dist/standalone/TitanGatheredForever_Discovery-<version>/` with the ZIP, `downloads.json` and `SHA256SUMS`. Verify with `shasum -a 256 -c SHA256SUMS` from that directory.
+3. Install locally with `python3 tools/install.py --addons-dir <path> --standalone-only` (preview first, then `--apply`). Only the Discovery folder is added or replaced, with a backup of the replaced one; no other folder and no saved file is touched.
+4. The CI build creates the standalone package as a verification artifact (tgf-discovery-download); it does not publish it. Publishing the ZIP (GitHub or CurseForge) is a separate, explicit step, and the CurseForge project is separate from the core's projects.
+5. The icon and artwork come from artwork/v1/TitanGatheredForever_Discovery/, drawn by `python3 tools/generate_discovery_art.py` and packaged by `python3 tools/generate_brand_icons.py`.
+
 ## Publish on GitHub
 
 1. Commit the reviewed source on `main` and push it to `Bajtlamer/titan-gathered-forever-v3`.

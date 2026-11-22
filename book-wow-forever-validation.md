@@ -193,6 +193,20 @@ This gate is pending real-client execution. Use `/tgf export` and keep copied fi
 3. Fish supported materials and inspect history/source controls. Outdoor observations may create maps; instance catches may contribute to history but never instance map positions. Retain the earlier Fishing event-order gate.
 4. Collect exact-build recipe/profession/material evidence separately from membership. Preserve unresolved IDs and review associations rather than deleting by inference. Follow book-catalogue-reconciliation.md for provenance and regeneration.
 
+## Validate the Discovery module (0.1.0, standalone)
+
+Install with `python3 tools/install.py --addons-dir <path> --standalone-only --apply`, then restart WoW (a new folder needs a full restart). Enable Lua errors with `/console scriptErrors 1`. Record results separately from the automated checks.
+
+1. Addon list and Titan Panel: the module shows its own icon (a magnifying glass over a map) and the title Titan Gathered Discovery. Titan Panel offers a Discovery plugin that reads "off". No Lua error at login; the chat shows a one-line hint to type `/tgfd`.
+2. Notice: the first login after installing prints the notice and starts recording by itself (`/tgfd status` shows collecting and records after play; the plugin "Titan Gathered Discovery" shows the counts). `/tgfd` prints the notice again; `/tgfd stop` and `/tgfd start` pause and resume it, and a pause is kept after a reload. The window has two tabs: the collected data, and How it works (text, scrolling with the mouse wheel and the scroll bar, contact lines). It opens from the minimap button menu (right click, Titan Gathered Discovery) as well as with `/tgfd show`.
+3. Progress and lag: `/tgfd selftest` shows the progress window (look, phase text, bar, Cancel). Note the lag. Cancel with the button and with `/tgfd cancel`. Start it and enter combat, and start it and pass a loading screen: it must stop and say why.
+4. Passive collection: loot a creature and a node, open a vendor and a trainer, talk to a quest giver, change zones. `/tgfd status` counts should rise. Run `/tgfd audit`: it must report no private values with other players around.
+5. Comparison: `/tgfd compare` shows its phases and a summary. `/tgfd show` opens the window: filters, search, scrolling, row detail with prices as gold, silver and copper icons, the Mark reviewed button. The Titan Panel plugin and tooltip show the counts; left click opens the window. Note how long the comparison takes on the saved table you have.
+6. Scans: `/tgfd scan recipes` without a profession window refuses and says so; with the window open it reads the recipes (check that unlearned ones appear and what `GetAllRecipeIDs` returns). `/tgfd scan areas` reads the map IDs; note the highest map ID in use and whether the new Forever zones appear.
+7. Export: `/tgfd export`, then `/reload`, then open `WTF/Account/<account>/SavedVariables/TitanGatheredForever_Discovery.lua`: it must contain the export stamp. Run `python3 tools/read_discovery.py <file> --output tmp-discovery-report.json`: the stamp must read verified.
+8. Archive: with recording stopped, after the export and a reload, `/tgfd archive confirm` clears the data; before the reload or while recording it must refuse and say why.
+9. The assumption that a client recipe ID equals the catalogue spell ID: compare a few scanned recipes in the report with the catalogue.
+
 ## Faction-aware flight points, local candidate
 
 1. The updated 0.4.1-alpha candidate was installed on 2026-11-07, including this feature. Restart WoW to load it; close the client before subsequent replacements. Keep Titan Panel enabled and disable the previous addon generation.

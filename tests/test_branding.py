@@ -16,8 +16,10 @@ class BrandingTests(unittest.TestCase):
         current = re.search(r'^## Version: (.+)$', (CORE / (NAME + '.toc')).read_text(), re.M).group(1)
         for manifest in ROOT.glob('TitanGatheredForever*/*.toc'):
             version = re.search(r'^## Version: (.+)$', manifest.read_text(), re.M).group(1)
-            self.assertEqual(version, current)
             self.assertRegex(version, r'^\d+\.\d+\.\d+$')
+            # The Discovery module is not part of the published set and keeps its own version line.
+            if manifest.parent.name != 'TitanGatheredForever_Discovery':
+                self.assertEqual(version, current)
 
     def test_core_identity_and_all_optional_dependencies(self):
         self.assertTrue(CORE.is_dir())

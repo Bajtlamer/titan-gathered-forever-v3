@@ -59,15 +59,23 @@ commands = [
     [runtime, 'tests/profit.lua'],
     [runtime, 'tests/profit_browser.lua'],
     [runtime, 'tests/trainer_browser.lua'],
+    [runtime, 'tests/discovery.lua'],
+    [runtime, 'tests/discovery_collectors.lua'],
+    [runtime, 'tests/discovery_compare.lua'],
+    [runtime, 'tests/discovery_view.lua'],
+    [runtime, 'tests/discovery_scans.lua'],
+    [runtime, 'tests/discovery_export.lua'],
 ]
 for command in commands:
     subprocess.run(command, cwd=root, check=True, stdin=subprocess.DEVNULL)
+# Standalone modules are hand-written and not part of the published set (catalogue/modules.json).
 addons = ['TitanGatheredForever'] + [row['folder'] for row in json.loads((root / 'catalogue/modules.json').read_text())]
+addons += [row['folder'] for row in json.loads((root / 'catalogue/standalone-modules.json').read_text())]
 for addon in addons:
     toc = root / addon / (addon + '.toc')
     for line in toc.read_text().splitlines():
         if line.endswith('.lua'):
-            path = addon + '/' + line
+            path = addon + '/' + line.replace('\\', '/')
             subprocess.run([runtime, '-e', 'assert(loadfile(arg[1])); os.exit(0)', path], cwd=root, check=True,
                            stdin=subprocess.DEVNULL)
 print('PASS all shipped Lua files compile with Lua 5.1 semantics')

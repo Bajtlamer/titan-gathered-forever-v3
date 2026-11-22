@@ -2,6 +2,10 @@
 
 Updated 2026-11-21. These changes describe source candidates since the latest published versioned notes.
 
+## Menu entries for modules, 0.5.144
+
+- The menu of the add-on (right click on the minimap button or on the Titan entry) can be extended by other modules with `ns.Titan.AddMenuExtension(function(root) ... end)`; a failing extension never breaks the menu. Titan Gathered Forever: Discovery uses it for "Titan Gathered Discovery".
+
 ## Equipment repair costs, 0.5.143
 
 - What repairs cost is recorded for each character (a running total and the number of repairs) and shown in Economy as "Equipment repairs", next to the merchant buybacks, as spending. A repair is recognised at a merchant when the wallet falls by exactly the amount by which the cost of "repair all" (`GetRepairAllCost`) falls, which also covers a single repaired piece; a drop that does not match that (a purchase, for instance) is not a repair, and a client without the cost API records nothing. A repair paid from the guild bank costs the player nothing and is not counted. Repairs made before this version are not known.
@@ -124,6 +128,12 @@ Updated 2026-11-21. These changes describe source candidates since the latest pu
 - 0.5.118: the gains and unsold lines are two separate texts, 32 pixels from the left edge, with a gap between them (a large line spacing in one text made the coin icons rise); the Undercut row is at the same left edge (32 pixels), aligned with the lines above it, and the red warning has a little more room above the gains line.
 - (Replaced in 0.5.120: the window is no longer made taller; the rows are in a panel under it.)
 
+## Discovery module 0.1.0 (standalone, separate version line)
+
+- A new folder, TitanGatheredForever_Discovery, with its own version line (0.1.0). It is not part of the published collection and does not change the core, the profession modules or their versions. See [ref-discovery-0.1.0.md](ref-discovery-0.1.0.md) for the full text, [book-discovery-contributors.md](../book-discovery-contributors.md) and [ref-discovery-data-format.md](../ref-discovery-data-format.md).
+- Tooling: catalogue/standalone-modules.json lists such modules; tools/package.py --standalone builds its ZIP, index and checksums into dist/standalone/; tools/install.py --standalone-only installs only it; tools/generate_discovery_art.py draws its emblem and tools/generate_brand_icons.py packages the icon; tools/read_discovery.py is the offline reader. The version check of the manifests lets this module keep its own version.
+- CurseForge text: [curseforge/ref-titan-gathered-forever-discovery.md](../curseforge/ref-titan-gathered-forever-discovery.md). The CI build also builds the standalone package as a verification artifact; it does not publish it.
+
 ## Warning about the old folders, 0.5.108
 
 - The folders were renamed in 0.5.84 (TitanGatheredForeverV3 to TitanGatheredForever, and the modules). A player who unpacks a new download over an old installation has both sets: they share the saved table name TitanGatheredForeverV3DB and the exported namespace, and the new version does not read the old saved file. At login the core now checks whether any of the fourteen old folders is loaded and, if so, prints two chat lines: which folders, and to delete them and copy TitanGatheredForeverV3.lua to TitanGatheredForever.lua to keep the statistics. Nothing is printed when no old folder is loaded. The check cannot stop the start (pcall). The old folders cannot be removed by the add-on itself.
@@ -228,14 +238,14 @@ Updated 2026-11-21. These changes describe source candidates since the latest pu
 
 - Runtime folders/manifests and dependencies use TitanGatheredForever and TitanGatheredForever_*; texture paths, addon metadata lookups, generated publishers, packages and tests follow those names. The development directory is titan-gathered-forever. The previous exported namespace remains an alias and the saved table key remains TitanGatheredForeverV3DB.
 - The installer backs up and removes old runtime folders, copies previous account/character saved files to the new filenames without executing or changing their contents, and migrates addon enablement. It refuses conflicting saved state, requires a closed client for the real migration and rolls back runtime and state writes together on failure. Original saved files are retained.
-- All five projects have their own versioned artwork/ directory in their development root. Gathered's artwork/v1/ contains all fourteen of its addon designs; the other projects each keep their own design. PNG masters, 1024px logos, 400px avatars and 64px icons are preserved byte-for-byte and excluded from runtime ZIPs. Old artwork is retained in the source migration backup.
-- Development directories are titan-gathered-forever, titan-command-history, titan-approx-dps, target-ranger and wow-forever-scout. Scout gains a separate WoWForeverScout/ runtime folder and matching manifest, with its own saved-file migration in 0.1.2. No remote repositories, releases or CurseForge projects are renamed or published.
+- All four projects have their own versioned artwork/ directory in their development root. Gathered's artwork/v1/ contains all fourteen of its addon designs; the other projects each keep their own design. PNG masters, 1024px logos, 400px avatars and 64px icons are preserved byte-for-byte and excluded from runtime ZIPs. Old artwork is retained in the source migration backup.
+- Development directories are titan-gathered-forever, titan-command-history, titan-approx-dps and target-ranger. No remote repositories, releases or CurseForge projects are renamed or published.
 
 ## Official name and stable version, 0.5.83
 
 - The public product name is Titan Gathered Forever: manifests, Titan Panel, tooltips, status messages and window titles no longer display TG3 or TGF v3. The compact map button says Map spots. Internal folder names, dependencies, namespaces and SavedVariables remain compatible.
 - The user requested stable numeric versions for every addon. All fourteen Gathered manifests now use 0.5.83 without a beta suffix. Historical release notes and evidence retain their original version designations.
-- The complete artwork collection now covers all five local projects and eighteen addon emblems: Gathered's fourteen, Command History, Approx DPS, Target Ranger and WoWFScout. The three previously omitted projects have their own large PNG logos, 400px avatars, 64px previews and game textures. No website or CurseForge publication is implied.
+- The complete artwork collection now covers all four local projects and seventeen addon emblems: Gathered's fourteen, Command History, Approx DPS and Target Ranger. The previously omitted projects have their own large PNG logos, 400px avatars, 64px previews and game textures. No website or CurseForge publication is implied.
 
 ## Original addon artwork, 0.5.82-beta
 

@@ -37,6 +37,31 @@ class InstallTests(unittest.TestCase):
         saved.mkdir(parents=True)
         (saved / 'TitanGatheredForever.lua').write_text('saved data')
 
+    def test_the_standalone_module_installs_alone_and_leaves_everything_else_untouched(self):
+        self.existing()
+        name = 'TitanGatheredForever_Discovery'
+        before = snapshot(self.base)
+        preview = self.installer.install(ROOT, self.destination, names=[name])
+        self.assertEqual(preview['addons'], [name])
+        self.assertEqual(snapshot(self.base), before)
+        result = self.installer.install(ROOT, self.destination, apply=True, names=[name])
+        after = snapshot(self.base)
+        self.assertEqual({k: v for k, v in after.items() if not k.startswith('Interface/AddOns/' + name)
+                          and not k.startswith('Interface/.tgf-v3-backups')}, before)
+        self.assertTrue((self.destination / name / f'{name}.toc').is_file())
+        self.assertTrue((self.destination / name / 'Artwork/AddonIcon.tga').is_file())
+        self.assertEqual(result['state_files'], 0)
+        (self.destination / name / 'old.txt').write_text('edited')
+        again = self.installer.install(ROOT, self.destination, apply=True, names=[name])
+        self.assertEqual((again['backup'] / name / 'old.txt').read_text(), 'edited')
+        self.assertFalse((self.destination / name / 'old.txt').exists())
+
+    def test_only_listed_standalone_modules_may_be_installed_alone(self):
+        with self.assertRaises(ValueError):
+            self.installer.install(ROOT, self.destination, names=['TitanGatheredForever_Mining'])
+        with self.assertRaises(ValueError):
+            self.installer.install(ROOT, self.destination, names=['Titan'])
+
     def test_legacy_folders_saved_files_and_disabled_state_migrate_together(self):
         legacy = self.destination / 'TitanGatheredForeverV3'
         legacy.mkdir()

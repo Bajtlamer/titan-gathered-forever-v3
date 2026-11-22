@@ -46,6 +46,17 @@ jobs:
       - name: Verify staged download hashes
         working-directory: dist/releases/${{ steps.version.outputs.version }}
         run: sha256sum --check SHA256SUMS
+      - name: Build the standalone Discovery package
+        run: python3 tools/package.py --standalone
+      - name: Verify the standalone download hashes
+        run: |
+          for directory in dist/standalone/*/; do (cd "$directory" && sha256sum --check SHA256SUMS); done
+      - uses: actions/upload-artifact@v7
+        with:
+          name: tgf-discovery-download
+          path: dist/standalone/
+          if-no-files-found: error
+          compression-level: 0
       - uses: actions/upload-artifact@v7
         with:
           name: tgf-v3-downloads-${{ steps.version.outputs.version }}
