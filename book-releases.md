@@ -90,6 +90,8 @@ The ZIPs of `dist/releases/<version>/` go to the fourteen CurseForge projects (t
 3. `python3 tools/curseforge_upload.py upload --apply --game-version 17053` uploads them as release files with the changelog of `release-notes/ref-<version>.md` (the core) or a short note (modules), and marks the modules as requiring the core. Use `--only <folder>` to send one project. A file that has been sent is not sent again by the tool: check the project's file list first.
 4. The project descriptions are not part of the API; paste them from `curseforge/ref-*.md` on the author portal.
 
+The release 0.5.146 (tag v0.5.146, commit 6338d36) was published on 2026-11-23: the GitHub release holds nineteen assets (the seventeen of the workflow plus the Discovery 0.1.5 ZIP and its checksums), the fourteen CurseForge files are 9763653 to 9763667 (core 9763653), and the website serves the same bytes (website 1.4.1).
+
 0.5.143 was uploaded on 2026-11-22 (file IDs 9742259 core, 9742265 Alchemy, 9742270 to 9742282 the other twelve modules), and the release 0.5.144 the same day (fourteen files, byte-identical to the GitHub release v0.5.144); CurseForge shows a file after its own review. Titan Gathered Discovery has no CurseForge project and is attached to the GitHub release as a separate ZIP.
 
 ## Prepare the website
