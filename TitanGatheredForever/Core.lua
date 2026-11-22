@@ -194,6 +194,10 @@ local function start()
     TitanGatheredForeverV3DB = ns.db
     ns.Catalog.Rebuild(ns.settings)
     ns.inventory = ns.Inventory.New(inventoryAPI(build), ns.db)
+    local characterName = UnitName and UnitName('player')
+    if ns.IsPublic(characterName) and type(characterName) == 'string' and characterName ~= '' then
+        ns.db.characters[ns.characterID].economyName = characterName
+    end
     ns.gathering = ns.Gathering.New(gatheringAPI(), ns.db.gathering,
         function(kind)
             local module = ns.Catalog.modules[kind]

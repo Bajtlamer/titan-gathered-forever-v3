@@ -70,12 +70,14 @@ function History.Prices(db, realm, itemID, now)
 end
 
 -- Aggregate each basis over the quantities with that basis. Mail credit can include a returned deposit.
-function History.Sales(entries, realm, itemID, now)
+function History.Sales(entries, realm, itemID, now, character)
     local result = { sales = 0, knownUnits = 0, completeQuantity = true, pricedSales = 0, netSales = 0 }
     local totalPrice, pricedUnits, totalNet, netUnits = 0, 0, 0, 0
+    local daily = {}
     local first = now - SALES_DAYS * DAY
     for _, entry in ipairs(entries or {}) do
         if type(entry) == 'table' and entry.source == 'invoice' and entry.realm == realm and entry.itemID == itemID
+            and (character == nil or entry.character == character)
             and type(entry.soldAt) == 'number' and entry.soldAt >= first and entry.soldAt <= now then
             result.sales = result.sales + 1
             if positive(entry.received) then result.received = (result.received or 0) + entry.received end
@@ -93,6 +95,11 @@ function History.Sales(entries, realm, itemID, now)
                     totalNet = totalNet + net
                     netUnits = netUnits + entry.count
                     result.netSales = result.netSales + 1
+                    local day = math.floor(entry.soldAt / DAY)
+                    local bucket = daily[day] or { at = entry.soldAt, net = 0, units = 0 }
+                    daily[day] = bucket
+                    bucket.at = math.max(bucket.at, entry.soldAt)
+                    bucket.net, bucket.units = bucket.net + net, bucket.units + entry.count
                 end
             else
                 result.completeQuantity = false
@@ -104,6 +111,13 @@ function History.Sales(entries, realm, itemID, now)
     end
     if pricedUnits > 0 then result.average = totalPrice / pricedUnits end
     if netUnits > 0 then result.averageNet = totalNet / netUnits end
+    result.points = {}
+    for day = math.floor(first / DAY), math.floor(now / DAY) do
+        local bucket = daily[day]
+        if bucket then
+            result.points[#result.points + 1] = { at = bucket.at, price = bucket.net / bucket.units, units = bucket.units }
+        end
+    end
     return result
 end
 
@@ -130,8 +144,9 @@ end
 local function section(panel, y, title, days)
     box(panel, 12, y, WIDTH - 24, 22, 0.16, 0.09, 0.045, 0.7)
     box(panel, 12, y - 22, WIDTH - 24, 1, 0.55, 0.36, 0.17, 0.7)
-    text(panel, 'TOPLEFT', 16, y - 5, Style.Label(title), 'GameFontNormal')
+    local label = text(panel, 'TOPLEFT', 16, y - 5, Style.Label(title), 'GameFontNormal')
     if days then text(panel, 'TOPRIGHT', -16, y - 6, Style.Value(days) .. Style.Label(' days')) end
+    return label
 end
 
 local function row(panel, y, label)
@@ -151,9 +166,26 @@ local function createChart(panel)
     chart.start = text(panel, 'TOPLEFT', 14, -211)
     chart.finish = text(panel, 'TOPRIGHT', -14, -211)
     chart.lines, chart.dots = {}, {}
-    for i = 1, PRICE_DAYS do
-        chart.dots[i] = box(chart, 0, 0, 4, 4, 1, 0.8, 0.3, 1)
-        if i < PRICE_DAYS then
+    local function hideTooltip(dot)
+        if GameTooltip and GameTooltip:IsOwned(dot) then GameTooltip:Hide() end
+    end
+    for i = 1, SALES_DAYS + 1 do
+        local dot = CreateFrame('Frame', nil, chart)
+        dot:SetSize(8, 8)
+        box(dot, 2, -2, 4, 4, 1, 0.8, 0.3, 1)
+        dot:SetScript('OnEnter', function(self)
+            local point = self.point
+            if not point or not point.units then return end
+            GameTooltip:SetOwner(self, 'ANCHOR_TOP')
+            GameTooltip:AddLine(Style.Date(date('%d %b', point.at)))
+            GameTooltip:AddLine(money(point.price) .. Style.Label(' net / unit'))
+            GameTooltip:AddLine(Style.Value(point.units) .. Style.Label(' units sold'))
+            GameTooltip:Show()
+        end)
+        dot:SetScript('OnLeave', hideTooltip)
+        dot:SetScript('OnHide', hideTooltip)
+        chart.dots[i] = dot
+        if i <= SALES_DAYS then
             local line = chart:CreateLine(nil, 'ARTWORK')
             line:SetThickness(2)
             line:SetColorTexture(0.95, 0.68, 0.25, 1)
@@ -163,7 +195,7 @@ local function createChart(panel)
     return chart
 end
 
-local function drawChart(chart, points)
+local function drawChart(chart, points, salePoint)
     local trend = #points > 1
     for i, dot in ipairs(chart.dots) do dot:SetShown(trend and i <= #points) end
     for i, line in ipairs(chart.lines) do line:SetShown(i < #points) end
@@ -171,7 +203,9 @@ local function drawChart(chart, points)
     if not trend then
         chart.high:SetText(''); chart.low:SetText('')
         chart.start:SetText(''); chart.finish:SetText('')
-        chart.note:SetText(Style.Label(#points == 1 and 'One scan day recorded' or 'No scan prices in this period'))
+        local note = #points == 1 and 'One scan day recorded' or 'No scan prices in this period'
+        chart.note:SetText(salePoint and (Style.Label('One sale day, net / unit: ') .. money(salePoint.price))
+            or Style.Label(note))
         return
     end
     local first, last = points[1], points[#points]
@@ -184,6 +218,8 @@ local function drawChart(chart, points)
         local x = 90 + (WIDTH - 128) * (point.at - first.at) / (last.at - first.at)
         local y = high == low and -37 or -65 + 56 * (point.price - low) / (high - low)
         local dot = chart.dots[i]
+        dot.point = point
+        dot:EnableMouse(point.units ~= nil)
         dot:ClearAllPoints()
         dot:SetPoint('CENTER', chart, 'TOPLEFT', x, y)
         if previousX then
@@ -201,20 +237,26 @@ end
 
 local function render(view, itemID)
     local now, realm = time(), GetRealmName()
-    local points, latest = History.Prices(ns.db, realm, itemID, now)
-    local sales = History.Sales(ns.db.sales and ns.db.sales.entries, realm, itemID, now)
+    local scanPoints, latest = History.Prices(ns.db, realm, itemID, now)
+    -- Sales.DefaultAPI records this same name separately from the realm.
+    local character = UnitName('player')
+    local sales = History.Sales(character and ns.db.sales and ns.db.sales.entries, realm, itemID, now, character)
+    local ownTrend = #sales.points > 1
+    local points = ownTrend and sales.points or scanPoints
+    view.chartTitle:SetText(Style.Label(ownTrend and 'Your sales net / unit' or 'Scanned buyout / unit'))
+    view.chartPeriod:SetText(Style.Value(ownTrend and SALES_DAYS or PRICE_DAYS) .. Style.Label(' days'))
     view.marketUnit, view.soldNetUnit = latest and latest.price, sales.averageNet
     view.item:SetText(Style.Value(ns.ItemName(itemID)))
     view.price:SetText(money(latest and latest.price))
     view.scanDate:SetText(latest and (Style.Label('Scanned ') .. Style.Date(date('%d %b %H:%M', latest.at))) or '')
     local trend = ''
-    if #points > 1 then
+    if #points > 1 and points[1].price > 0 then
         local change = (points[#points].price / points[1].price - 1) * 100
         trend = Style.Label('Trend ') .. Style.Text(change > 0 and Style.green or change < 0 and Style.red or Style.white,
             string.format('%+.1f%%', change))
     end
     view.trend:SetText(trend)
-    drawChart(view.chart, points)
+    drawChart(view.chart, points, sales.points[1])
     local units = money(nil)
     if sales.sales == 0 then
         units = Style.Label('None recorded')
@@ -250,7 +292,9 @@ function History.UpdatePosting(sell, post, warning)
             local change = post.net / post.quantity - view.soldNetUnit
             local magnitude = math.floor(math.abs(change) + 0.5)
             local sign = magnitude > 0 and (change > 0 and Style.Text(Style.green, '+') or Style.Text(Style.red, '-')) or ''
-            lines[#lines + 1] = Style.Label('Net vs sales avg / unit: ') .. sign .. money(magnitude)
+            local percent = view.soldNetUnit > 0
+                and (' ' .. Style.Value(string.format('(%+.1f%%)', change / view.soldNetUnit * 100))) or ''
+            lines[#lines + 1] = Style.Label('Net vs sales avg / unit: ') .. sign .. money(magnitude) .. percent
         end
     end
     local count = 0
@@ -352,7 +396,8 @@ function History.Attach(frame)
         History.view.overlayRequested = not canDock(frame)
         History.Refresh()
     end)
-    section(panel, -66, 'Auction prices', PRICE_DAYS)
+    local chartTitle = section(panel, -66, 'Scanned buyout / unit')
+    local chartPeriod = text(panel, 'TOPRIGHT', -16, -72)
     section(panel, -228, 'Your sales', SALES_DAYS)
     section(panel, -371, 'Current listing')
     local posting = {}
@@ -363,6 +408,7 @@ function History.Attach(frame)
         frame = frame, forms = forms, panel = panel, toggle = toggle, hide = hide, item = item,
         price = row(panel, -96, 'Last scanned buyout / unit'),
         scanDate = text(panel, 'TOPLEFT', 16, -114),
+        chartTitle = chartTitle, chartPeriod = chartPeriod,
         trend = text(panel, 'TOPRIGHT', -16, -114),
         chart = createChart(panel),
         units = row(panel, -259, 'Units sold'),

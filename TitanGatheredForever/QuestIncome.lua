@@ -10,12 +10,12 @@ local function publicInteger(value)
     return ns.IsPublic(value) and integer(value)
 end
 
-function Quest.Total(store, realm)
+function Quest.Total(store, realm, character)
     local characters = type(store) == 'table' and store[realm]
     local copper, turnIns = 0, 0
     if type(characters) ~= 'table' then return end
-    for _, quests in pairs(characters) do
-        if type(quests) == 'table' then
+    for id, quests in pairs(characters) do
+        if (character == nil or id == character) and type(quests) == 'table' then
             for _, entry in pairs(quests) do
                 if type(entry) == 'table' and integer(entry.copper) and integer(entry.turnIns) then
                     copper, turnIns = copper + entry.copper, turnIns + entry.turnIns

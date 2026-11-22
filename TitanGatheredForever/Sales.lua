@@ -37,14 +37,15 @@ function Sales.Amounts(entry)
 end
 
 -- The overview includes all confirmed sales on this realm, including invoices whose item ID is unknown.
-function Sales.Totals(entries, realm)
+function Sales.Totals(entries, realm, character)
     local total = {
         invoices = 0, units = 0, unitCount = 0, gross = 0, grossCount = 0,
         net = 0, netCount = 0, fees = 0, deposits = 0, credit = 0, creditCount = 0,
     }
     if not realm then return total end
     for _, entry in ipairs(entries or {}) do
-        if type(entry) == 'table' and entry.source == 'invoice' and entry.realm == realm then
+        if type(entry) == 'table' and entry.source == 'invoice' and entry.realm == realm
+            and (character == nil or entry.character == character) then
             total.invoices = total.invoices + 1
             local count = copper(entry.count)
             if count and count == entry.count and count > 0 then

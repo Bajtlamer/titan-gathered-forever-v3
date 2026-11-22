@@ -471,6 +471,34 @@ test('Economy shows confirmed receipts for the empty Forever realm key and label
     ns.EconomyView.Refresh()
     eq(w.rows[4].income.text, ns.Style.Label('Unavailable'))
     eq(w.rows[5].income.text, ns.Style.Label('Unavailable'))
+    ns.characterID = 'player'
+    ns.db.characters = { player = { economyName = 'Seller' } }
+    ns.db.production = { characters = { alt = { name = 'Crafter - ' } } }
+    ns.db.vendorSales[''] = {
+        player = { sale = { [42] = { units = 2, copper = 25, stacks = 1 } } },
+        alt = { buyback = { [42] = { units = 1, copper = 11, stacks = 1 } }, repair = { copper = 13, count = 1 } },
+    }
+    ns.db.questIncome[''] = { alt = { [12] = { copper = 120, turnIns = 1 } } }
+    ns.db.lootIncome[''] = { player = { copper = 15, pickups = 1 }, alt = { copper = 18, pickups = 2 } }
+    ns.db.sales.entries = {
+        { realm = '', character = 'Seller', source = 'invoice', count = 1, bid = 100, fee = 5, deposit = 10, received = 105 },
+        { realm = '', character = 'Crafter', source = 'invoice', count = 2, bid = 200, fee = 10, deposit = 10, received = 200 },
+        { realm = '', character = 'Auctioneer', source = 'invoice', count = 1, bid = 100, fee = 5, deposit = 0, received = 95 },
+    }
+    ns.EconomyView.Refresh()
+    pick(w.characterPicker, 'This character')
+    eq(w.rows[5].income.text, ns.Style.Label('At least ') .. ns.Style.Value('135c'))
+    eq(w.invoiceCount.text, ns.Style.Value(1))
+    eq(w.vendorRepairs.text, ns.Style.Label('None recorded'))
+    pick(w.characterPicker, 'Crafter')
+    eq(w.rows[5].income.text, ns.Style.Label('At least ') .. ns.Style.Value('328c'))
+    eq(w.vendorRepairs.text, ns.Style.Value(1) .. ns.Style.Label(' repair for ') .. ns.Style.Value('13c'))
+    eq(w.vendorBuybacks.text, ns.Style.Value(1) .. ns.Style.Label(' unit for ') .. ns.Style.Value('11c'))
+    pick(w.characterPicker, 'Auctioneer (auction history)')
+    eq(w.rows[5].income.text, ns.Style.Label('At least ') .. ns.Style.Value('95c'))
+    pick(w.characterPicker, 'All characters')
+    eq(w.rows[5].income.text, ns.Style.Label('At least ') .. ns.Style.Value('558c'))
+    ns.characterID = nil
 end)
 test('profession statistics attach below the native window, preserve recipe counts and show scoped history',function()
     local base=CreateFrame

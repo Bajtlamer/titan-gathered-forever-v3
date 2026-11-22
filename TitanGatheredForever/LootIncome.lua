@@ -6,12 +6,13 @@ local function integer(value)
     return type(value) == 'number' and value >= 0 and value < math.huge and value == math.floor(value)
 end
 
-function Income.Total(store, realm)
+function Income.Total(store, realm, character)
     local records = type(store) == 'table' and store[realm]
     local total, pickups = 0, 0
     if type(records) == 'table' then
-        for _, entry in pairs(records) do
-            if type(entry) == 'table' and integer(entry.copper) and integer(entry.pickups) then
+        for id, entry in pairs(records) do
+            if (character == nil or id == character)
+                and type(entry) == 'table' and integer(entry.copper) and integer(entry.pickups) then
                 total, pickups = total + entry.copper, pickups + entry.pickups
             end
         end

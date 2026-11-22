@@ -7,6 +7,7 @@ local day = 86400
 local now = 20 * day + 3600
 _G.time, _G.date = function() return now end, os.date
 _G.GetRealmName = function() return 'Forever' end
+_G.UnitName = function() return 'Seller' end
 load('Style')
 load('AuctionScan')
 load('Economy')
@@ -52,7 +53,7 @@ eq(#points, 1); eq(latest.price, 7000)
 
 local function sale(age, count, buyout, itemID, realm)
     local fee = buyout and math.floor(buyout * 0.05)
-    return { soldAt = now - age * day, realm = realm or 'Forever', itemID = itemID or ore,
+    return { soldAt = now - age * day, realm = realm or 'Forever', itemID = itemID or ore, character = 'Seller',
         itemName = 'Copper Ore', received = buyout and buyout - fee + 20 or 98, count = count,
         bid = buyout, buyout = buyout, fee = fee, deposit = 20, source = buyout and 'invoice' or 'header' }
 end
@@ -70,6 +71,16 @@ summary = History.Sales({ sale(1, nil, 100) }, 'Forever', ore, now)
 eq(summary.knownUnits, 0); eq(summary.completeQuantity, false); eq(summary.average, nil)
 summary = History.Sales({ sale(1, 200) }, 'Forever', ore, now)
 eq(summary.sales, 0); eq(summary.received, nil)
+
+local otherSeller = sale(1, 1, 100)
+otherSeller.character = 'Alt'
+local unreconciled = sale(1, 1, 100)
+unreconciled.received = 1
+summary = History.Sales({ sale(2, 1, 100), sale(2, 3, 600), sale(1, 2, 600), otherSeller, unreconciled },
+    'Forever', ore, now, 'Seller')
+eq(#summary.points, 2)
+eq(summary.points[1].price, 166.25)
+eq(summary.points[2].price, 285)
 
 -- A real ledger pass carries the confirmed invoice values through to the selected item's comparison basis.
 local store = {}
@@ -156,6 +167,7 @@ item:SetItem(location(gear))
 assert(view.panel:IsVisible() and not view.toggle:IsVisible())
 eq(view.panel.anchor[1], 'TOPRIGHT')
 eq(view.item.text, ns.Style.Value('Test Gear'))
+eq(view.chartTitle.text, ns.Style.Label('Scanned buyout / unit'))
 assert(view.posting[1].text:find('Enter a buyout', 1, true))
 item:SetItem({ id = ore, rejected = true })
 eq(view.item.text, ns.Style.Value('Test Gear'))
@@ -170,6 +182,8 @@ commodity:SetItem(location(ore))
 assert(not view.panel:IsVisible() and view.toggle:IsVisible())
 view.toggle.scripts.OnClick()
 eq(view.item.text, ns.Style.Value('Copper Ore'))
+eq(view.chartTitle.text, ns.Style.Label('Your sales net / unit'))
+assert(view.trend.text:find('+100.0%', 1, true))
 assert(view.panel:IsVisible() and not view.toggle:IsVisible())
 assert(view.posting[1].text:find('1144c', 1, true))
 assert(view.posting[2].text:find('15c', 1, true))

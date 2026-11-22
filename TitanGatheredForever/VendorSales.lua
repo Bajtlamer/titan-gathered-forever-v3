@@ -180,13 +180,13 @@ local function sum(items)
     return units, copper, stacks
 end
 
-function Vendor.Totals(store, realm)
+function Vendor.Totals(store, realm, character)
     local total = { soldUnits = 0, soldCopper = 0, sales = 0, buybackUnits = 0, buybackCopper = 0, buybacks = 0,
         repairCopper = 0, repairs = 0 }
     local characters = type(store) == 'table' and store[realm]
     if type(characters) == 'table' then
-        for _, record in pairs(characters) do
-            if type(record) == 'table' then
+        for id, record in pairs(characters) do
+            if (character == nil or id == character) and type(record) == 'table' then
                 local units, copper, stacks = sum(record.sale)
                 total.soldUnits, total.soldCopper, total.sales =
                     total.soldUnits + units, total.soldCopper + copper, total.sales + stacks

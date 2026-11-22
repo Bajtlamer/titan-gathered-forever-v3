@@ -42,14 +42,74 @@ local function observed(value, known, invoices, format)
     return (known < invoices and Style.Label('At least ') or '') .. format(value)
 end
 
+local function characterName(db, id)
+    local inventory = db.characters and db.characters[id]
+    if inventory and inventory.economyName then return inventory.economyName end
+    for _, key in ipairs({ 'history', 'actions', 'production', 'pvp' }) do
+        local store = db[key]
+        local record = store and store.characters and store.characters[id]
+        if record and type(record.name) == 'string' then
+            local name = record.name:match('^(%S+) %- ') or record.name:match('^(%S+)$')
+            if name and name ~= id then return name end
+        end
+    end
+end
+
+local function characterChoices(db, realm)
+    local choices = { { value = false, label = 'All characters' } }
+    local scopes, ids, names = {}, {}, {}
+    for _, key in ipairs({ 'vendorSales', 'questIncome', 'lootIncome' }) do
+        local store = db[key]
+        for id in pairs(store and store[realm] or {}) do ids[id] = true end
+    end
+    if ns.characterID then ids[ns.characterID] = true end
+    local others = {}
+    for id in pairs(ids) do
+        local name = characterName(db, id)
+        if name then names[name] = names[name] == nil and id or false end
+        scopes[id] = { id = id, name = name or false }
+        local choice = { value = id, label = name or id }
+        if id == ns.characterID then
+            choice.label = 'This character'
+            choices[#choices + 1] = choice
+        else
+            others[#others + 1] = choice
+        end
+    end
+    for _, scope in pairs(scopes) do
+        if scope.name and names[scope.name] == false then scope.name = false end
+    end
+    for _, entry in ipairs(db.sales and db.sales.entries or {}) do
+        local name = type(entry) == 'table' and entry.character
+        if type(name) == 'string' and name ~= '' and entry.source == 'invoice' and entry.realm == realm and not names[name] then
+            local key = 'auction:' .. name
+            if not scopes[key] then
+                scopes[key] = { id = false, name = name }
+                others[#others + 1] = { value = key, label = name .. ' (auction history)' }
+            end
+        end
+    end
+    table.sort(others, function(a, b) return a.label < b.label end)
+    for _, choice in ipairs(others) do choices[#choices + 1] = choice end
+    return choices, scopes
+end
+
 function View.Refresh()
     local window = View.window
     if not window or not window:IsShown() then return end
     local realm = GetRealmName and GetRealmName()
-    local ledger = ns.db and ns.db.sales
-    local total = ns.Sales.Totals(ledger and ledger.entries, realm)
+    local db = ns.db or {}
+    local ledger = db.sales
+    window.choices, window.scopes = characterChoices(db, realm)
+    local scope = window.scopes[window.character]
+    if not scope then window.character = false end
+    local id, seller
+    if scope then id, seller = scope.id, scope.name end
+    window.scopeNote:SetText(Style.Label(scope and 'Recorded history for the selected character'
+        or 'Recorded history for all characters on this realm'))
+    local total = ns.Sales.Totals(ledger and ledger.entries, realm, seller)
     local vendors, auctions, quests, loot, combined = unpack(window.rows)
-    local merchant = ns.VendorSales.Totals(ns.db and ns.db.vendorSales, realm)
+    local merchant = ns.VendorSales.Totals(db.vendorSales, realm, id)
     vendors.units:SetText(merchant.sales > 0 and Style.Value(merchant.soldUnits) or Style.Label('Unavailable'))
     vendors.income:SetText(merchant.sales > 0 and money(merchant.soldCopper) or Style.Label('Unavailable'))
     vendors.coverage:SetText(Style.Label(merchant.sales > 0 and 'Verified merchant sales' or 'No verified merchant sales recorded'))
@@ -70,12 +130,12 @@ function View.Refresh()
     auctions.units:SetText(observed(total.units, total.unitCount, total.invoices, Style.Value))
     auctions.income:SetText(observed(total.net, total.netCount, total.invoices, money))
     auctions.coverage:SetText(Style.Label(coverage))
-    local reward, turnIns = ns.QuestIncome.Total(ns.db and ns.db.questIncome, realm)
+    local reward, turnIns = ns.QuestIncome.Total(db.questIncome, realm, id)
     quests.income:SetText(reward and money(reward) or Style.Label('Unavailable'))
     quests.coverage:SetText(turnIns and (Style.Value(turnIns)
         .. Style.Label(turnIns == 1 and ' verified turn-in' or ' verified turn-ins'))
         or Style.Label('No verified quest rewards recorded'))
-    local looted, pickups = ns.LootIncome.Total(ns.db and ns.db.lootIncome, realm)
+    local looted, pickups = ns.LootIncome.Total(db.lootIncome, realm, id)
     loot.income:SetText(looted and money(looted) or Style.Label('Unavailable'))
     loot.coverage:SetText(pickups and (Style.Value(pickups)
         .. Style.Label(pickups == 1 and ' verified coin pickup' or ' verified coin pickups'))
@@ -104,7 +164,14 @@ function View.Show()
         window:RegisterForDrag('LeftButton')
         ns.Nav.Frame(window, 'economy')
         window.TitleText:SetText('Titan Gathered Forever Economy')
-        text(window, 30, -49, 900, Style.Label('Recorded history for all characters on this realm'))
+        window.character = false
+        window.choices = {}
+        window.characterPicker = ns.Nav.Dropdown(window, 30, -42, 228, function() return window.choices end,
+            function() return window.character end, function(value)
+                window.character = value
+                View.Refresh()
+            end)
+        window.scopeNote = text(window, 274, -49, 636)
 
         band(window, -84, 28, 0.28)
         for _, column in ipairs(columns) do
@@ -136,4 +203,5 @@ function View.Show()
     ns.Nav.Activate('economy', window)
     window:Show()
     View.Refresh()
+    window.characterPicker.Sync()
 end
