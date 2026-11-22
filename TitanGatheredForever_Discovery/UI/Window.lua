@@ -9,8 +9,9 @@ ns.Window = Window
 local ROW_HEIGHT, ROW_WIDTH, WHEEL_STEP = 22, 910, 3
 local GUIDE_TOP, GUIDE_HEIGHT, GUIDE_LINE = -40, 520, 14       -- the text of the guide scrolls by lines of 14 pixels
 local TABS = { { 'data', 'Collected data' }, { 'guide', 'How it works' } }
-local columns = { { 'Category', 0, 95 }, { 'ID', 100, 75 }, { 'Name', 180, 360 }, { 'State', 545, 170 }, { 'Seen', 720, 50 },
-    { 'Last seen', 775, 100 } }
+-- The last column ends at the right edge of the list, the first one has room for "Vendors and trainers", the name takes the rest.
+local columns = { { 'Category', 0, 140 }, { 'ID', 145, 70 }, { 'Name', 220, 370 }, { 'State', 600, 150 }, { 'Seen', 755, 50 },
+    { 'Last seen', 810, 100 } }
 
 local function text(parent, font, x, y, width, single)
     local fontString = parent:CreateFontString(nil, 'OVERLAY', font)
