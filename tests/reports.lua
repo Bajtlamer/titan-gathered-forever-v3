@@ -482,11 +482,12 @@ test('Economy shows confirmed receipts for the empty Forever realm key and label
     ns.Nav.Open('economy')
     local w = ns.EconomyView.window
     eq(ns.Nav.Current(), 'economy')
-    eq(w.rows[1].units.text, ns.Style.Value(3))
+    eq(w.rows[1].count.text, ns.Style.Value(1))                          -- one merchant sale, whatever its stack
     eq(w.rows[1].income.text, ns.Style.Value('68c'))
     eq(w.vendorBuybacks.text, ns.Style.Value(2) .. ns.Style.Label(' units for ') .. ns.Style.Value('45c'))
     eq(w.vendorRepairs.text, ns.Style.Value(3) .. ns.Style.Label(' repairs for ') .. ns.Style.Value('96c'))
-    eq(w.rows[2].units.text, ns.Style.Label('At least ') .. ns.Style.Value(5))
+    eq(w.rows[2].count.text, ns.Style.Value(2))                          -- two confirmed auction sales, stacks do not matter
+    eq(w.columnLabels[2].text, ns.Style.Label('Sales'))
     eq(w.rows[2].income.text, ns.Style.Label('At least ') .. ns.Style.Value('950c'))
     eq(w.rows[3].income.text, ns.Style.Value('40c'))
     eq(w.rows[3].coverage.text, ns.Style.Value(2) .. ns.Style.Label(' verified turn-ins'))
@@ -499,7 +500,7 @@ test('Economy shows confirmed receipts for the empty Forever realm key and label
     ns.db.sales.entries[2].received = 485
     ns.db.sales.entries[2].count = 2
     ns.EconomyView.Refresh()
-    eq(w.rows[2].units.text, ns.Style.Value(7))
+    eq(w.rows[2].count.text, ns.Style.Value(2))
     eq(w.rows[2].income.text, ns.Style.Value('1425c'))
     eq(w.rows[5].income.text, ns.Style.Label('At least ') .. ns.Style.Value('1568c'))
     ns.Nav.Open('history')

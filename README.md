@@ -8,7 +8,7 @@ Website: [titan-gathered.com](https://www.titan-gathered.com/).
 
 ## Current version
 
-The current stable candidate is version `0.5.156` and targets **WoW Forever 1.60.1, interface 16001**, with Titan Panel installed separately. The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); the published versions are in [ref-0.5.156.md](release-notes/ref-0.5.156.md) and earlier notes. Other WoW editions are outside this project's scope.
+The current stable candidate is version `0.5.157` and targets **WoW Forever 1.60.1, interface 16001**, with Titan Panel installed separately. The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); the published versions are in [ref-0.5.156.md](release-notes/ref-0.5.156.md) and earlier notes. Other WoW editions are outside this project's scope.
 
 A separate, optional data-collection module, [Titan Gathered Discovery](#discovery-data-collection-module) 0.1.0, has its own version line and is released apart from this core; it is installed locally and awaits live acceptance.
 
@@ -17,7 +17,7 @@ Validation: all Python and Lua suites pass, plus Lua 5.1 compilation of every sh
 Implemented:
 
 - Profession-use information and current Bags and Bank counts in item tooltips, including recipe-material item tooltips. Total appears only when both locations contain the item. Supporting explanations use smaller text.
-- Titan summaries show bag/bank counts without a redundant total, joined with `/` (for example, `3/7`). Zero values and their separators are omitted when Display > Show items with zero counts is off. The panel caption is `Titan Gathered Forever - v0.5.156`. The order of the items inside each section is chosen in the right click menu, Display > Sort items: Item ID (default), Name, Most first or Fewest first (bags plus the bank when bank counts are shown; equal counts go by name).
+- Titan summaries show bag/bank counts without a redundant total, joined with `/` (for example, `3/7`). Zero values and their separators are omitted when Display > Show items with zero counts is off. The panel caption is `Titan Gathered Forever - v0.5.157`. The order of the items inside each section is chosen in the right click menu, Display > Sort items: Item ID (default), Name, Most first or Fewest first (bags plus the bank when bank counts are shown; equal counts go by name).
 - Titan uses gold for headings and profession menu labels. Learned profession names and ranks use colors based on current rank / current maximum: below 25% red, 25% to below 50% brown, 50% to below 75% yellow, and 75% or higher green. Material names retain item rarity colors.
 - World ore-vein tooltips use native object IDs matched to previously recorded mining sources. With History in item tooltips enabled, they show the current character's complete mining loot sample count and each observed drop's percentage, hits/samples and sampled quantity for that source, zone and instance context. Identified veins without matching samples show Unknown; unrecognized object IDs are left alone. These are personal observations, not server drop tables or counts of fully depleted veins.
 - Mining map and minimap hovers list observed ore, stone and gem drops with complete loot sample counts, hit/sample percentages and quantities, grouped by source and zone. Saved spot observations are distinct from completed casts and fully depleted veins; missing rate evidence displays Unknown.
