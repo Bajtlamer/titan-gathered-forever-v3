@@ -2,6 +2,10 @@
 
 Updated 2026-11-23. Versions up to 0.5.154 are published in release-notes/ref-0.5.154.md. These changes describe source candidates since the latest published versioned notes.
 
+## Scan prices for every item, 0.5.155
+
+- The auction scan kept only the reagents and the products of the installed professions, although the documentation says it keeps every item. An item outside them, for instance a ring with a random enchantment, had no scanned price, so the Market history in the Sell tab said "No scan prices in this period" even right after a scan. The scan now keeps the lowest buyout per unit and the number of auctions of every item (one packed number each outside the catalogue), so the Sell tab shows the scanned price and the 7 day trend of any item. The saved file grows with the number of different items on the realm. Run a scan once after updating: the earlier scan holds only the catalogue items.
+
 ## Weapon masters and the map menu, 0.5.154
 
 - The world map and the minimap show the weapon masters of your faction in the capitals: Woo Ping in Stormwind, Buliwyf Stonehand and Bixi Wobblebonk in Ironforge, Ilyenia Moonfire in Darnassus (Alliance), Hanashi and Sayoc in Orgrimmar, Ansekhwa in Thunder Bluff and Archibald in Undercity (Horde). The tooltip of a pin lists the weapon skills the master teaches and tells for each one whether you know it (the weapon and the word Known in green, found in the spell book, the skill lines or the skill list), can learn it (white), cannot use it with your class, or reach it only from level 20 (polearms). The price is shown only after you have opened that trainer once, from what the game reported; with no known price nothing is written. The places and skills come from the Warcraft Tavern guide for WoW Forever (the place of Woo Ping was also seen in the game); the shared shop coordinates of Buliwyf and Sayoc are those of their shop. They are switched off in the Titan menu (Trainers and recipe vendors, Show weapon masters) or in the map menu.
