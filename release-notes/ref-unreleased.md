@@ -4,7 +4,7 @@ Updated 2026-11-23. Versions up to 0.5.156 are published in release-notes/ref-0.
 
 ## Current listing shows profit and loss, 0.5.158
 
-- The Current listing of the Market history panel shows what matters for a posting and nothing else: "If sold, profit" (the net after the fee minus the cost of buying the units again; "If sold, you get" when no cost is known), "If unsold, loss" (the deposit) and "Break-even sales" (the share of auctions that must sell for the profit to cover the deposits lost on the others, counted against the cost). The comparisons with a vendor, with the last scan and with your earlier sales are gone.
+- The Current listing of the Market history panel shows what matters for a posting and nothing else: "If sold, you earn" (the price after the 5 percent fee; the deposit comes back), "If unsold, you lose" (the deposit) and "Break-even sales" (the share of auctions that must sell for the earnings to cover the deposits lost on the others). The comparisons with a vendor, with a cost, with the last scan and with your earlier sales are gone.
 
 ## Economy counts sales, 0.5.157
 
