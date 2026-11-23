@@ -54,6 +54,27 @@ function View.Sorted(rows)
     return result
 end
 
+-- Sorting by a header (after the first click; before it the order is the one of View.Sorted).
+local KINDS = { 'text', 'number', 'number', 'number', 'number', 'number', 'text' }
+function View.SortValue(row, column)
+    if column == 1 then return string.lower(tostring(ns.ItemName(row.itemID))) end
+    if column == 2 then return row.required end
+    if column == 3 then return row.bags end
+    if column == 4 then return row.bank end
+    if column == 5 then return row.missing end
+    if column == 6 then
+        local price = ns.AuctionScan and ns.AuctionScan.Price(row.itemID)
+        return price and price.min or nil
+    end
+    local where = View.Where(row, ns.characterID or (UnitGUID and UnitGUID('player')))
+    return string.lower((tostring(where):gsub('|c%x%x%x%x%x%x%x%x', ''):gsub('|r', '')))
+end
+function View.Tie(a, b)
+    local nameA, nameB = string.lower(tostring(ns.ItemName(a.itemID))), string.lower(tostring(ns.ItemName(b.itemID)))
+    if nameA ~= nameB then return nameA < nameB end
+    return a.itemID < b.itemID
+end
+
 -- One line that says whether the planned crafts can be done.
 function View.Headline(plan)
     local Style = ns.Style
@@ -218,6 +239,7 @@ function View.Refresh()
         w.scope:SetText('')
     else
         w.sorted = View.Sorted(plan.rows)
+        if w.sorter then w.sorter.Apply(w.sorted, View.SortValue, View.Tie) end
         w.summary:SetText(View.Headline(plan))
         w.counts:SetText(View.CountsLine(plan))
         w.scope:SetText(ns.Style.Label('Counting: ') .. ns.Style.Value(plan.scope))
@@ -303,7 +325,15 @@ function View.Show(recipeID, operations)
         w.note = text(w, 'GameFontNormalSmall', 15, -165, ROW_WIDTH)
         local header = CreateFrame('Frame', nil, w)
         header:SetSize(ROW_WIDTH, 20); header:SetPoint('TOPLEFT', w, 'TOPLEFT', 15, -(TOP - 20))
-        for _, column in ipairs(columns) do text(header, 'GameFontNormalSmall', column[2], 0, column[3]):SetText(column[1]) end
+        local headCells = {}
+        for index, column in ipairs(columns) do
+            headCells[index] = text(header, 'GameFontNormalSmall', column[2], 0, column[3])
+            headCells[index]:SetText(column[1])
+        end
+        if ns.ColumnSort then
+            w.sorter = ns.ColumnSort.Attach({ parent = header, cells = headCells, kinds = KINDS, key = 'crafting',
+                onChange = function() w.offset = 0; View.Refresh() end })
+        end
         for index = 1, ROWS do
             local row = CreateFrame('Button', nil, w)
             w.rows[index] = row

@@ -6,7 +6,7 @@ local function plain(text) return (tostring(text):gsub('|c%x%x%x%x%x%x%x%x', '')
 
 local function strip(text) return (tostring(text):gsub('<[^>]*>', '')) end
 local function newNs()
-    local ns = { IsPublic = function() return true end, characterID = 'C1', db = { recipeMakes = {}, knownRecipes = {} },
+    local ns = { IsPublic = function() return true end, characterID = 'C1', db = { recipeMakes = {}, knownRecipes = {} }, settings = {},
         Style = { gold = 'gold', gray = 'gray', green = 'green', white = 'white', red = 'red', orange = 'orange',
             Text = function(color, text) return '<' .. color .. '>' .. text .. '</>' end } }
     dofile('tests/style_stub.lua')(ns.Style)
@@ -27,6 +27,7 @@ local function newNs()
     assert(loadfile('TitanGatheredForever/Economy.lua'))('TitanGatheredForever', ns)
     assert(loadfile('TitanGatheredForever/Profit.lua'))('TitanGatheredForever', ns)
     assert(loadfile('TitanGatheredForever/Navigation.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever/ColumnSort.lua'))('TitanGatheredForever', ns)
     assert(loadfile('TitanGatheredForever/ProfitBrowser.lua'))('TitanGatheredForever', ns)
     return ns
 end
@@ -120,6 +121,39 @@ test('the window lists recipes, filters, searches and scrolls', function()
     ns.KnownRecipes.Record('C1', 'Alchemy', {}, 1, { 101 })
     B.mine = true; B.Refresh(); eq(B.total, 1); eq(B.window.lines[1].row.recipeID, 101)
     eq(B.RangeText(0, 0), 'No recipes'); eq(strip(B.RangeText(16, 40)), 'Showing 17-32 of 40'); eq(B.Clamp(99, 20), 4)
+end)
+
+test('a click on a header sorts the recipes by that column, nothing known goes last, and the order is saved', function()
+    local ns = newNs()
+    installFrames()
+    local B = ns.ProfitBrowser
+    B.Show()
+    assert(B.sorter, 'the header is sortable')
+    local function column(read) local out = {} for i = 1, B.total do out[i] = read(B.window.lines[i].row) end return out end
+    local function profit(row) return row.profit end
+    local function name(row) return row.name end
+    scriptsOf(B.sorter.buttons[8]).OnClick()                                     -- Profit per craft: highest first
+    local values = column(profit)
+    for i = 2, #values do
+        if values[i] ~= nil then assert(values[i - 1] ~= nil and values[i - 1] >= values[i], 'profit goes down') end
+    end
+    scriptsOf(B.sorter.buttons[8]).OnClick()                                     -- again: lowest first, unknown still last
+    values = column(profit)
+    local seenNil = false
+    for i = 1, #values do
+        if values[i] == nil then seenNil = true else
+            assert(not seenNil, 'a row with a known profit never follows one without')
+            if i > 1 and values[i - 1] ~= nil then assert(values[i - 1] <= values[i], 'profit goes up') end
+        end
+    end
+    scriptsOf(B.sorter.buttons[1]).OnClick()                                     -- Recipe: a to z
+    local names = column(name)
+    for i = 2, #names do assert(names[i - 1]:lower() <= names[i]:lower(), 'names go a to z') end
+    scriptsOf(B.sorter.buttons[1]).OnClick()
+    names = column(name)
+    for i = 2, #names do assert(names[i - 1]:lower() >= names[i]:lower(), 'names go z to a') end
+    eq(B.offset, 0)
+    eq(ns.settings.columnSort.profit.column, 1); eq(ns.settings.columnSort.profit.descending, true)
 end)
 
 test('the footer asks for a scan when there are no prices and says which professions were not read', function()

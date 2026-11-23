@@ -41,7 +41,7 @@ C_TradeSkillUI={GetRecipeInfo=function(id)if id==2536 then return{recipeID=id,na
  GetProfessionInfoByRecipeID=function()return{professionID=185}end,
  GetRecipeSchematic=function(id)return{recipeID=id,recipeType=1,isRecraft=false,reagentSlotSchematics=slots}end}
 ns.inventory={Get=function(_,id)return{bags=id-1000,bagsState='current',bank=10,bankState='cached',bankObservedAt=100}end}
-for _,file in ipairs({'Style.lua','History.lua','Crafting.lua','Navigation.lua','Reports.lua','CraftingView.lua','AuctionScan.lua','Economy.lua','Profit.lua'})do assert(loadfile('TitanGatheredForever/'..file))('Titan Gathered Forever',ns)end
+for _,file in ipairs({'Style.lua','History.lua','Crafting.lua','Navigation.lua','ColumnSort.lua','Reports.lua','CraftingView.lua','AuctionScan.lua','Economy.lua','Profit.lua'})do assert(loadfile('TitanGatheredForever/'..file))('Titan Gathered Forever',ns)end
 ns.Style.ItemName=function(id)return'Item '..id end
 ns.history=ns.History.New({})
 ns.history:Observe('a','A',{id='one',kind='Mining',source='123',mapID=4,at=100,complete=true,items={[1001]=1}})
@@ -63,6 +63,21 @@ test('reagents are sorted with the missing ones first and show need, bags, bank 
  assert(plain(w.counts.text):find('Ready 5',1,true))
  assert(w.summary.text:find(ns.Style.yellow,1,true))
  eq(ns.history:Total('a',1001),1)
+end)
+test('a click on a column header sorts the reagents, a second click reverses it, and the order is saved',function()
+ ns.CraftingView.Show(2536,3);local w=ns.CraftingView.window
+ assert(w.sorter,'the header is sortable')
+ eq(w.rows[1].data.itemID,1001)                                    -- before a click: problems first, as before
+ w.sorter.buttons[3].scripts.OnClick()                             -- Bags, a number: the most first
+ eq(w.rows[1].data.itemID,1007);eq(w.rows[2].data.itemID,1006);eq(w.rows[7].data.itemID,1001)
+ w.sorter.buttons[3].scripts.OnClick()                             -- again: the fewest first
+ eq(w.rows[1].data.itemID,1001);eq(w.rows[7].data.itemID,1007)
+ w.sorter.buttons[1].scripts.OnClick()                             -- Reagent, a text: a to z
+ eq(w.rows[1].data.itemID,1001);eq(w.rows[7].data.itemID,1007)
+ w.sorter.buttons[1].scripts.OnClick()
+ eq(w.rows[1].data.itemID,1007)
+ eq(ns.settings.columnSort.crafting.column,1);eq(ns.settings.columnSort.crafting.descending,true)
+ ns.settings.columnSort.crafting=nil;w.sorter.state=nil;w.sorter.Sync();ns.CraftingView.Refresh()
 end)
 test('sorting keeps problems first and orders by name inside a group',function()
  C_Item={GetItemInfo=function(id)return({[1]='Zeta',[2]='Alpha'})[id]end}

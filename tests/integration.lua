@@ -352,6 +352,20 @@ test('other modules can add entries to the menu of the add-on, and a failing one
     s.menu.buttons['Module window'](); eq(ns.opened, true)
 end)
 
+test('the Titan menu offers the four item orders and the choice is saved and applied', function()
+    local s, ns = fixture(); s:Start()
+    eq(ns.settings.titanSort, 'id'); eq(type(ns.settings.columnSort), 'table')
+    s.broker.OnClick({}, 'RightButton')
+    for _, label in ipairs({ 'Item ID', 'Name', 'Most first', 'Fewest first' }) do
+        assert(s.menu.radios[label], 'the menu has ' .. label)
+    end
+    assert(s.menu.radios['Item ID'].selected(), 'Item ID is the default')
+    s.menu.radios['Most first'].callback()
+    eq(ns.settings.titanSort, 'most')
+    s.broker.OnClick({}, 'RightButton')
+    assert(s.menu.radios['Most first'].selected()); assert(not s.menu.radios['Item ID'].selected())
+end)
+
 test('a product outside the catalogue gets its auction price, the vendor comparison and nothing else', function()
     local s, ns = fixture(); s:Start()
     local tip = CreateFrame('GameTooltip')

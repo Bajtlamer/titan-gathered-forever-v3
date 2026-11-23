@@ -7,6 +7,9 @@ function ns.Settings.Initialize(saved)
     local settings = saved.settings
     if type(settings.showZero) ~= 'boolean' then settings.showZero = false end
     if type(settings.showBank) ~= 'boolean' then settings.showBank = true end
+    if settings.titanSort ~= 'id' and settings.titanSort ~= 'name' and settings.titanSort ~= 'most'
+        and settings.titanSort ~= 'fewest' then settings.titanSort = 'id' end
+    if type(settings.columnSort) ~= 'table' then settings.columnSort = {} end
     if type(settings.debugMode) ~= 'boolean' then settings.debugMode = false end
     if type(settings.debugChat) ~= 'boolean' then settings.debugChat = false end
     if type(settings.showMinimapButton) ~= 'boolean' then settings.showMinimapButton = true end

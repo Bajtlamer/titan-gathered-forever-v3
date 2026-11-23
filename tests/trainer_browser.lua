@@ -88,6 +88,29 @@ test('the list shows status, search and the profession filter', function()
     eq(B.Cells({ npcID = 9, name = 'X', kind = 'Mining' })[4], 'Unknown')
 end)
 
+test('a click on a header sorts the trainers, a second click reverses it, and the order is saved', function()
+    local ns = newNs()
+    installFrames()
+    assert(loadfile('TitanGatheredForever/Navigation.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever/ColumnSort.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever/TrainerBrowser.lua'))('TitanGatheredForever', ns)
+    local B = ns.TrainerBrowser
+    B.Show()
+    assert(B.sorter, 'the header is sortable')
+    local function names() local out = {} for i = 1, B.total do out[i] = B.window.lines[i].row.name end return table.concat(out, ',') end
+    scriptsOf(B.sorter.buttons[4]).OnClick()                                  -- Coordinates, a number: the highest first
+    eq(names(), 'Another Alchemist,Mining Trainer,Alchemy Trainer')
+    scriptsOf(B.sorter.buttons[4]).OnClick()
+    eq(names(), 'Alchemy Trainer,Mining Trainer,Another Alchemist')
+    scriptsOf(B.sorter.buttons[1]).OnClick()                                  -- Trainer, a text: a to z
+    eq(names(), 'Alchemy Trainer,Another Alchemist,Mining Trainer')
+    scriptsOf(B.sorter.buttons[3]).OnClick()                                  -- Zone, a text
+    eq(B.window.lines[1].row.name, 'Another Alchemist')
+    B.kind = 'Alchemy'; B.Refresh()                                           -- the order survives a filter
+    eq(B.window.lines[1].row.name, 'Another Alchemist'); eq(B.total, 2)
+    eq(ns.settings.columnSort.trainers.column, 3); eq(ns.settings.columnSort.trainers.descending, false)
+end)
+
 test('clicking a row opens the map at the trainer and marks it', function()
     local ns = newNs()
     local tip = installFrames()
