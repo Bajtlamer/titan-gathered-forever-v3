@@ -2,6 +2,11 @@
 
 Updated 2026-11-23. Versions up to 0.5.154 are published in release-notes/ref-0.5.154.md. These changes describe source candidates since the latest published versioned notes.
 
+## Market history from your own sales, 0.5.156
+
+- The chart of the Market history panel is the player's own history. With one or more days of confirmed sales of the item it shows the net price per unit of each day (the best day in green) and the trend from two days. Without a sale it shows one point, the price of the last scan; there is no daily history of scans any more (it would make the saved file large) and the old one is deleted. Without a scan, or when the item is not in the last scan, a short text tells what to do or why.
+- The best sale of the item, the highest net price per unit the player ever got on the realm, is shown in the sales section with its date. It is kept in the saved data apart from the bounded sales ledger and counts only the player's own sales.
+
 ## Scan prices for every item, 0.5.155
 
 - The auction scan kept only the reagents and the products of the installed professions, although the documentation says it keeps every item. An item outside them, for instance a ring with a random enchantment, had no scanned price, so the Market history in the Sell tab said "No scan prices in this period" even right after a scan. The scan now keeps the lowest buyout per unit and the number of auctions of every item (one packed number each outside the catalogue), so the Sell tab shows the scanned price and the 7 day trend of any item. The saved file grows with the number of different items on the realm. Run a scan once after updating: the earlier scan holds only the catalogue items.

@@ -267,7 +267,7 @@ function Scan.DefaultAPI()
     api.Save = function(result)
         if not ns.db then return end
         local realm = GetRealmName and GetRealmName() or nil
-        if ns.AuctionHistory then ns.AuctionHistory.Archive(ns.db, result.at, realm) end
+        if ns.AuctionHistory then ns.AuctionHistory.DropArchive(ns.db) end
         ns.db.auction = { realm = realm, at = result.at, entries = result.entries,
             items = result.items, others = result.others, distinct = result.distinct }
     end

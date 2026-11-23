@@ -2,71 +2,36 @@ local _, ns = ...
 local History = {}
 ns.AuctionHistory = History
 
-local DAY, PRICE_DAYS, SALES_DAYS = 86400, 7, 30
-local WIDTH, POSTING_TOP, POSTING_STEP = 300, 399, 16
+local DAY, SALES_DAYS = 86400, 30
+local WIDTH, POSTING_TOP, POSTING_STEP = 300, 417, 16
 local Style = ns.Style
 
 local function positive(value)
     return type(value) == 'number' and value > 0 and value < math.huge and value == math.floor(value)
 end
 
--- The current scan also serves as today's observation. Archive it only when another scan replaces it.
-function History.Archive(db, now, currentRealm)
-    local realms = type(db.auctionHistory) == 'table' and db.auctionHistory or {}
-    db.auctionHistory = realms
-    local today = math.floor(now / DAY)
-    local first = today - PRICE_DAYS + 1
-    for realm, days in pairs(realms) do
-        for day in pairs(days) do
-            if day < first or day > today or (day == today and realm == currentRealm) then days[day] = nil end
-        end
-        if not next(days) then realms[realm] = nil end
-    end
-    local scan = db.auction
-    if type(scan) ~= 'table' or type(scan.realm) ~= 'string' or not positive(scan.at) or scan.at > now then return end
-    local day = math.floor(scan.at / DAY)
-    if day < first or (day == today and scan.realm == currentRealm) then return end
-    local days = realms[scan.realm] or {}
-    realms[scan.realm] = days
-    if days[day] and days[day].at >= scan.at then return end
-    local prices = {}
-    for itemID, packed in pairs(scan.others or {}) do
-        if positive(packed) then prices[itemID] = ns.AuctionScan.Unpack(packed) end
-    end
-    for itemID, entry in pairs(scan.items or {}) do
-        if type(entry) == 'table' and positive(entry.min) then prices[itemID] = entry.min end
-    end
-    days[day] = { at = scan.at, prices = prices }
+-- The scan is one snapshot, not a history: a daily record of every item on the realm would be a large saved file, and
+-- the trend of the Sell tab is the player's own (the sales in the mail). Records of the earlier versions are dropped.
+function History.DropArchive(db)
+    if type(db) == 'table' then db.auctionHistory = nil end
 end
 
-function History.Prices(db, realm, itemID, now)
-    local days = db.auctionHistory and db.auctionHistory[realm] or {}
-    local scan, currentPrice = db.auction
-    if type(scan) ~= 'table' or scan.realm ~= realm or not positive(scan.at) or scan.at > now then
-        scan = nil
-    else
-        local entry = scan.items and scan.items[itemID]
-        local packed = scan.others and scan.others[itemID]
-        currentPrice = type(entry) == 'table' and entry.min or (positive(packed) and ns.AuctionScan.Unpack(packed))
-    end
-    local today = math.floor(now / DAY)
-    local scanDay = scan and math.floor(scan.at / DAY)
-    local points, latest = {}
-    for day = today - PRICE_DAYS + 1, today do
-        local snapshot = days[day]
-        local at, price
-        if scanDay == day and (not snapshot or scan.at >= snapshot.at) then
-            at, price = scan.at, currentPrice
-        elseif snapshot and snapshot.at <= now then
-            at, price = snapshot.at, snapshot.prices[itemID]
-        end
-        if positive(price) then
-            latest = { at = at, price = price }
-            points[#points + 1] = latest
-        end
-    end
-    if not latest and positive(currentPrice) then latest = { at = scan.at, price = currentPrice } end
-    return points, latest
+-- The lowest buyout of an item in the last scan of this realm: { at, price }, or nil with the reason: 'noscan' (never
+-- scanned, or the scan is of another realm) and 'missing' (the scan does not hold the item).
+function History.ScanPrice(db, realm, itemID, now)
+    local scan = db and db.auction
+    if type(scan) ~= 'table' or scan.realm ~= realm or not positive(scan.at) or scan.at > now then return nil, 'noscan' end
+    local entry = scan.items and scan.items[itemID]
+    local packed = scan.others and scan.others[itemID]
+    local price = type(entry) == 'table' and entry.min or (positive(packed) and ns.AuctionScan.Unpack(packed))
+    if positive(price) then return { at = scan.at, price = price } end
+    return nil, 'missing'
+end
+
+-- The best sale of the player for an item on a realm: { price (net per unit), at, units }, or nil.
+function History.BestSale(store, realm, itemID)
+    local best = type(store) == 'table' and type(store.best) == 'table' and store.best[realm]
+    return best and best[itemID] or nil
 end
 
 -- Aggregate each basis over the quantities with that basis. Mail credit can include a returned deposit.
@@ -163,6 +128,7 @@ local function createChart(panel)
     chart.low = text(chart, 'TOPLEFT', 5, -59)
     chart.note = chart:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
     chart.note:SetPoint('CENTER')
+    chart.best = text(chart, 'TOPRIGHT', -5, -3)
     chart.start = text(panel, 'TOPLEFT', 14, -211)
     chart.finish = text(panel, 'TOPRIGHT', -14, -211)
     chart.lines, chart.dots = {}, {}
@@ -172,7 +138,7 @@ local function createChart(panel)
     for i = 1, SALES_DAYS + 1 do
         local dot = CreateFrame('Frame', nil, chart)
         dot:SetSize(8, 8)
-        box(dot, 2, -2, 4, 4, 1, 0.8, 0.3, 1)
+        dot.fill = box(dot, 2, -2, 4, 4, 1, 0.8, 0.3, 1)
         dot:SetScript('OnEnter', function(self)
             local point = self.point
             if not point or not point.units then return end
@@ -195,33 +161,40 @@ local function createChart(panel)
     return chart
 end
 
-local function drawChart(chart, points, salePoint)
-    local trend = #points > 1
-    for i, dot in ipairs(chart.dots) do dot:SetShown(trend and i <= #points) end
-    for i, line in ipairs(chart.lines) do line:SetShown(i < #points) end
-    chart.note:SetShown(not trend)
-    if not trend then
+-- points: the prices of the chart, oldest first. message: what to say when there is no point. The highest price of the
+-- player's own sales is marked (best = true): that is the day the item earned most per unit.
+local function drawChart(chart, points, message, best)
+    local count = #points
+    for i, dot in ipairs(chart.dots) do dot:SetShown(i <= count) end
+    for i, line in ipairs(chart.lines) do line:SetShown(i < count) end
+    chart.note:SetShown(count == 0)
+    chart.best:SetText('')
+    chart.start:SetText(''); chart.finish:SetText('')
+    if count == 0 then
         chart.high:SetText(''); chart.low:SetText('')
-        chart.start:SetText(''); chart.finish:SetText('')
-        local note = #points == 1 and 'One scan day recorded' or 'No scan prices in this period'
-        chart.note:SetText(salePoint and (Style.Label('One sale day, net / unit: ') .. money(salePoint.price))
-            or Style.Label(note))
+        chart.note:SetText(Style.Label(message or ''))
         return
     end
-    local first, last = points[1], points[#points]
+    local first, last = points[1], points[count]
     local high, low = first.price, first.price
-    for _, point in ipairs(points) do
+    local bestIndex = 1
+    for i, point in ipairs(points) do
         high, low = math.max(high, point.price), math.min(low, point.price)
+        if point.price > points[bestIndex].price then bestIndex = i end
     end
     local previousX, previousY
     for i, point in ipairs(points) do
-        local x = 90 + (WIDTH - 128) * (point.at - first.at) / (last.at - first.at)
+        local x = count == 1 and (WIDTH - 28) / 2 or 90 + (WIDTH - 128) * (point.at - first.at) / (last.at - first.at)
         local y = high == low and -37 or -65 + 56 * (point.price - low) / (high - low)
         local dot = chart.dots[i]
         dot.point = point
         dot:EnableMouse(point.units ~= nil)
         dot:ClearAllPoints()
         dot:SetPoint('CENTER', chart, 'TOPLEFT', x, y)
+        local marked = best and count > 1 and i == bestIndex
+        if dot.fill then
+            if marked then dot.fill:SetColorTexture(0.35, 1, 0.35, 1) else dot.fill:SetColorTexture(1, 0.8, 0.3, 1) end
+        end
         if previousX then
             local line = chart.lines[i - 1]
             line:SetStartPoint('TOPLEFT', chart, previousX, previousY)
@@ -231,32 +204,49 @@ local function drawChart(chart, points, salePoint)
     end
     chart.high:SetText(money(high))
     chart.low:SetText(high ~= low and money(low) or '')
-    chart.start:SetText(Style.Date(date('%d %b', first.at)))
-    chart.finish:SetText(Style.Date(date('%d %b', last.at)))
+    if count > 1 then
+        chart.start:SetText(Style.Date(date('%d %b', first.at)))
+        chart.finish:SetText(Style.Date(date('%d %b', last.at)))
+        if best then chart.best:SetText(Style.Label('Best ') .. Style.Date(date('%d %b', points[bestIndex].at))) end
+    else
+        chart.start:SetText(Style.Date(date('%d %b', first.at)))
+    end
 end
 
 local function render(view, itemID)
     local now, realm = time(), GetRealmName()
-    local scanPoints, latest = History.Prices(ns.db, realm, itemID, now)
+    local latest, reason = History.ScanPrice(ns.db, realm, itemID, now)
     -- Sales.DefaultAPI records this same name separately from the realm.
     local character = UnitName('player')
     local sales = History.Sales(character and ns.db.sales and ns.db.sales.entries, realm, itemID, now, character)
-    local ownTrend = #sales.points > 1
-    local points = ownTrend and sales.points or scanPoints
-    view.chartTitle:SetText(Style.Label(ownTrend and 'Your sales net / unit' or 'Scanned buyout / unit'))
-    view.chartPeriod:SetText(Style.Value(ownTrend and SALES_DAYS or PRICE_DAYS) .. Style.Label(' days'))
+    -- The player's own sales, even of one day, come first: that is the real experience with the item. Without them the
+    -- last scan gives one point, and without a scan the missing price is explained.
+    local own = #sales.points > 0
+    view.chartTitle:SetText(Style.Label(own and 'Your sales net / unit' or 'Last scan buyout / unit'))
+    view.chartPeriod:SetText(own and (Style.Value(SALES_DAYS) .. Style.Label(' days'))
+        or (latest and Style.Date(date('%d %b %H:%M', latest.at)) or ''))
     view.marketUnit, view.soldNetUnit = latest and latest.price, sales.averageNet
     view.item:SetText(Style.Value(ns.ItemName(itemID)))
     view.price:SetText(money(latest and latest.price))
     view.scanDate:SetText(latest and (Style.Label('Scanned ') .. Style.Date(date('%d %b %H:%M', latest.at))) or '')
+    local points, message = sales.points
+    if not own then
+        points = latest and { latest } or {}
+        message = reason == 'missing' and 'This item is not in the last scan.'
+            or 'No scan yet. Use Scan prices below the auction house.'
+    end
     local trend = ''
-    if #points > 1 and points[1].price > 0 then
+    if own and #points > 1 and points[1].price > 0 then
         local change = (points[#points].price / points[1].price - 1) * 100
         trend = Style.Label('Trend ') .. Style.Text(change > 0 and Style.green or change < 0 and Style.red or Style.white,
             string.format('%+.1f%%', change))
     end
     view.trend:SetText(trend)
-    drawChart(view.chart, points, sales.points[1])
+    drawChart(view.chart, points, message, own)
+    local store = ns.db.sales
+    if store then ns.Sales.UpdateBest(store, realm, itemID) end
+    local best = History.BestSale(store, realm, itemID)
+    view.best:SetText(best and (money(best.price) .. '   ' .. Style.Date(date('%d %b %Y', best.at))) or Style.Label('None recorded'))
     local units = money(nil)
     if sales.sales == 0 then
         units = Style.Label('None recorded')
@@ -396,10 +386,10 @@ function History.Attach(frame)
         History.view.overlayRequested = not canDock(frame)
         History.Refresh()
     end)
-    local chartTitle = section(panel, -66, 'Scanned buyout / unit')
+    local chartTitle = section(panel, -66, 'Last scan buyout / unit')
     local chartPeriod = text(panel, 'TOPRIGHT', -16, -72)
     section(panel, -228, 'Your sales', SALES_DAYS)
-    section(panel, -371, 'Current listing')
+    section(panel, -389, 'Current listing')
     local posting = {}
     for i = 1, 7 do
         posting[i] = text(panel, 'TOPLEFT', 16, -POSTING_TOP - (i - 1) * POSTING_STEP)
@@ -416,7 +406,8 @@ function History.Attach(frame)
         averageNet = row(panel, -295, 'Avg net / unit'),
         received = row(panel, -313, 'Mail credit (incl. deposits)'),
         last = row(panel, -331, 'Last sale (est. date)'),
-        salesNote = text(panel, 'TOPLEFT', 16, -349),
+        best = row(panel, -349, 'Best sale net / unit'),
+        salesNote = text(panel, 'TOPLEFT', 16, -367),
         posting = posting,
     }
     History.view = view
@@ -447,6 +438,7 @@ function History.Initialize()
     local listener = CreateFrame('Frame')
     listener:SetScript('OnEvent', function(_, event, itemID)
         if event == 'AUCTION_HOUSE_SHOW' then
+            History.DropArchive(ns.db)
             History.Attach(_G.AuctionHouseFrame)
         elseif History.view and History.view.itemID
             and (event == 'BAG_UPDATE_DELAYED' or itemID == History.view.itemID) then
