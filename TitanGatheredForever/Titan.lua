@@ -2,6 +2,19 @@ local _, ns = ...
 local Titan = { page = 1 }
 ns.Titan = Titan
 
+-- The orders of the material list. The groups (sections) stay together in every one of them; the order is inside a group.
+Titan.SORTS = {
+    { id = 'id', label = 'Item ID' },
+    { id = 'name', label = 'Name' },
+    { id = 'most', label = 'Most first' },
+    { id = 'fewest', label = 'Fewest first' },
+}
+
+-- What the list shows for an item: the bags, and the bank when the bank counts are switched on.
+local function shownCount(count)
+    return (count.bags or 0) + (ns.settings.showBank and (count.bank or 0) or 0)
+end
+
 function Titan.Rows()
     local rows = {}
     for _, itemID in ipairs(ns.Catalog.List(ns.settings)) do
@@ -11,8 +24,21 @@ function Titan.Rows()
                 group = ns.Catalog.Group(ns.Items[itemID], ns.settings) }
         end
     end
+    local mode = ns.settings.titanSort
+    local function name(row) return string.lower(tostring(ns.ItemName(row.itemID) or '')) end
     table.sort(rows, function(a, b)
         if a.group ~= b.group then return a.group < b.group end
+        if mode == 'most' or mode == 'fewest' then
+            local first, second = shownCount(a.count), shownCount(b.count)
+            if first ~= second then
+                if mode == 'most' then return first > second end
+                return first < second
+            end
+        end
+        if mode == 'name' or mode == 'most' or mode == 'fewest' then
+            local nameA, nameB = name(a), name(b)
+            if nameA ~= nameB then return nameA < nameB end
+        end
         return a.itemID < b.itemID
     end)
     return rows
@@ -145,6 +171,15 @@ function Titan.Menu(owner)
             ns.Nav.ResetPositions()
             ns.Print('Window positions reset: the windows open in the middle of the screen again.')
         end)
+        local sorting = display:CreateButton('Sort items')
+        for _, mode in ipairs(Titan.SORTS) do
+            sorting:CreateRadio(mode.label, function() return (ns.settings.titanSort or 'id') == mode.id end, function()
+                ns.settings.titanSort = mode.id
+                Titan.page = 1
+                Titan.Refresh()
+                ns.Print('Titan panel list order: ' .. mode.label .. '.')
+            end)
+        end
         display:CreateButton('Next summary page', function() ns.ChangeSummaryPage(1) end)
         display:CreateButton('Previous summary page', function() ns.ChangeSummaryPage(-1) end)
         local professions = root:CreateButton('Professions')

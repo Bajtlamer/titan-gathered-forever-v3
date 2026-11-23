@@ -276,6 +276,40 @@ local function gatheredKind(panel)
     return false
 end
 
+-- The arrow of a column name that sits inside the list (the header row of a profession in the Gathered view).
+local function placeArrow(line, cell, state)
+    if not line.CreateTexture then return end
+    local arrow = line.sortArrow
+    if not arrow then
+        arrow = line:CreateTexture(nil, 'OVERLAY')
+        if arrow.SetTexture then arrow:SetTexture('Interface\\Buttons\\UI-SortArrow') end
+        if arrow.SetSize then arrow:SetSize(9, 8) end
+        line.sortArrow = arrow
+    end
+    local label = cell[state.column]
+    if arrow.SetTexCoord then
+        if state.descending then arrow:SetTexCoord(0, 0.5625, 1, 0) else arrow:SetTexCoord(0, 0.5625, 0, 1) end
+    end
+    if arrow.ClearAllPoints then arrow:ClearAllPoints() end
+    local width = label.GetStringWidth and label:GetStringWidth()
+    if type(width) ~= 'number' then width = 0 end
+    if state.column == 1 then arrow:SetPoint('LEFT', label, 'LEFT', width + 4, 0)
+    else arrow:SetPoint('RIGHT', label, 'RIGHT', -(width + 4), 0) end
+    if arrow.Show then arrow:Show() end
+end
+
+-- The column under the mouse in a header row (1 when it cannot be told).
+local function columnAt(line)
+    if not (GetCursorPosition and line.GetEffectiveScale) then return 1 end
+    local x = GetCursorPosition() / line:GetEffectiveScale()
+    for column = COLUMNS, 2, -1 do
+        local cell = line.cells[column]
+        local left, right = cell.GetLeft and cell:GetLeft(), cell.GetRight and cell:GetRight()
+        if type(left) == 'number' and type(right) == 'number' and x >= left - 2 and x <= right + 2 then return column end
+    end
+    return 1
+end
+
 local function render(panel)
     local total = #(panel.data or {})
     local last = math.max(0, total - ROWS)
@@ -287,13 +321,20 @@ local function render(panel)
         line.data = row
         line:SetShown(row ~= nil)
         local cell = line.cells
+        if line.sortArrow and line.sortArrow.Hide then line.sortArrow:Hide() end
         if row and panel.view == 'materials' then
             cell[1]:SetText(Style.ItemName(row.itemID))
             cell[2]:SetText(''); cell[3]:SetText('')
             cell[4]:SetText(Style.Value(row.quantity))
         elseif row and panel.view == 'gathered' then
             for column = 2, COLUMNS do cell[column]:SetText('') end
-            if row.summary then
+            if row.header then
+                -- The column names of one profession: the rows under them are its items. A click sorts by a column.
+                cell[1]:SetPoint('RIGHT', line, 'RIGHT', -panel.nameRight, 0)
+                local heads = LAYOUTS.gathered.heads
+                for column = 1, COLUMNS do cell[column]:SetText(Style.Label(heads[column])) end
+                placeArrow(line, cell, panel.sorts.gathered)
+            elseif row.summary then
                 -- A line of text across the columns: the summary of a profession.
                 cell[1]:SetPoint('RIGHT', line, 'RIGHT', 0, 0)
                 cell[1]:SetText(row.gold and Style.Text(Style.gold, row.text) or row.text)
@@ -353,6 +394,55 @@ function View.SortRows(rows, view, state)
     end)
 end
 
+-- The Gathered view lists the items of each profession under its own summary. Any column sorts the items inside every
+-- profession (a row without a value is last); the first rows of a profession are still the most collected or the most
+-- valuable ones, because that is what the rows were limited to.
+local GATHERED_KINDS = { 'text', 'number', 'number', 'number', 'number', 'text' }
+local function gatheredValue(row, column)
+    if column == 1 then return string.lower(tostring(ns.ItemName and ns.ItemName(row.itemID) or row.itemID)) end
+    if column == 2 then return row.quantity end
+    if column == 3 then return row.share end
+    if column == 4 then return row.unit end
+    if column == 5 then return row.value end
+    return row.source and string.lower(tostring(row.source)) or nil
+end
+local function gatheredTie(a, b)
+    local nameA = string.lower(tostring(ns.ItemName and ns.ItemName(a.itemID) or a.itemID))
+    local nameB = string.lower(tostring(ns.ItemName and ns.ItemName(b.itemID) or b.itemID))
+    if nameA ~= nameB then return nameA < nameB end
+    return tostring(a.itemID) < tostring(b.itemID)
+end
+function View.SortGathered(rows, state)
+    if not (ns.ColumnSort and state) then return rows end
+    local result, run = {}, {}
+    local function flush()
+        ns.ColumnSort.Sort(run, gatheredValue, state, gatheredTie)
+        for _, row in ipairs(run) do result[#result + 1] = row end
+        run = {}
+    end
+    for _, row in ipairs(rows) do
+        if row.itemID then run[#run + 1] = row
+        else flush(); result[#result + 1] = row end
+    end
+    flush()
+    return result
+end
+
+-- The chosen order of a view is kept between sessions.
+local function saveSort(view, state)
+    if not ns.settings then return end
+    ns.settings.columnSort = ns.settings.columnSort or {}
+    ns.settings.columnSort['statistics_' .. view] = { column = state.column, descending = state.descending }
+end
+local function savedSort(view, default, kinds)
+    local saved = ns.settings and ns.settings.columnSort and ns.settings.columnSort['statistics_' .. view]
+    if type(saved) == 'table' and type(saved.column) == 'number' and kinds[saved.column]
+        and type(saved.descending) == 'boolean' then
+        return { column = saved.column, descending = saved.descending }
+    end
+    return default
+end
+
 local GATHERED_NOTE = 'Items from complete loot windows of the chosen gathering profession, valued at the better of the '
     .. 'vendor price and the auction price after the fee. A rate per hour uses only the active time that is measured, '
     .. 'with the items collected in that time. Click an item for its sources.'
@@ -383,7 +473,14 @@ local function refreshPanel(panel)
             -- The small gap under a summary is left out; the one between two professions stays.
             if not (row.spacer and row.small) then rows[#rows + 1] = row end
         end
-        panel.data = rows
+        -- Every profession is a table: its summary lines first, then the column names, then its items.
+        local tables, previous = {}, nil
+        for _, row in ipairs(rows) do
+            if row.itemID and not (previous and previous.itemID) then tables[#tables + 1] = { summary = true, header = true } end
+            tables[#tables + 1] = row
+            previous = row
+        end
+        panel.data = View.SortGathered(tables, panel.sorts.gathered)
         panel.note:SetText(Style.Label('Gathered items of ')
             .. Style.Value(kind and gatheringLabel(kind) or 'all gathering professions') .. Style.Label('.'))
         panel.coverage:SetText(Style.Label(GATHERED_NOTE))
@@ -415,9 +512,7 @@ local function refreshPanel(panel)
     panel.empty:SetText(message and Style.Label(message) or '')
     local state = panel.sorts[view]
     local arrow = panel.sortArrow
-    if arrow and arrow.SetTexCoord then
-        if view == 'gathered' and state.column ~= 2 and state.column ~= 5 then arrow:Hide(); arrow = nil end
-    end
+    if panel.header.SetShown then panel.header:SetShown(view ~= 'gathered') end
     if arrow and arrow.SetTexCoord then
         local label = panel.head[state.column]
         if state.descending then arrow:SetTexCoord(0, 0.5625, 1, 0) else arrow:SetTexCoord(0, 0.5625, 0, 1) end
@@ -525,8 +620,10 @@ local function createPanel(frame)
         panel.backgrounds[#panel.backgrounds + 1] = texture
     end
     panel.character, panel.kind, panel.offset, panel.view = ns.characterID, false, 0, 'attempts'
-    panel.sorts = { attempts = { column = 1, descending = false }, materials = { column = 4, descending = true },
-        gathered = { column = 2, descending = true } }
+    panel.sorts = {
+        attempts = savedSort('attempts', { column = 1, descending = false }, { 'text', 'number', 'number', 'number' }),
+        materials = savedSort('materials', { column = 4, descending = true }, { 'text', false, false, 'number' }),
+        gathered = savedSort('gathered', { column = 2, descending = true }, GATHERED_KINDS) }
 
     -- The view is chosen in a combo box on the row of the pickers (the portrait and the skill bar of the native window cover
     -- the top-left corner), like the other pickers.
@@ -568,24 +665,27 @@ local function createPanel(frame)
     header:SetHeight(18)
     panel.header = header
     panel.head = cells(header)
-    -- A header cell is a button: the click sorts by that column. In the Gathered view the order comes with the data
-    -- (the most items, or the most valuable), so only Quantity and Total value sort there.
+    -- A header cell is a button: the click sorts by that column. In the Gathered view the rows are limited to the most
+    -- collected (or the most valuable, when Total value is chosen) and are sorted inside each profession.
     panel.headButtons = {}
+    function panel.sortBy(index)
+        local view = panel.view
+        local state = panel.sorts[view]
+        if view == 'materials' and index ~= 1 and index ~= 4 then return end
+        if view == 'attempts' and index > 4 then return end
+        if state.column == index then state.descending = not state.descending
+        else
+            local kind = view == 'gathered' and GATHERED_KINDS[index] or (index == 1 and 'text' or 'number')
+            state.column, state.descending = index, kind == 'number'
+        end
+        saveSort(view, state)
+        panel.offset = 0
+        refreshPanel(panel)
+    end
     for index = 1, COLUMNS do
         local sortButton = CreateFrame('Button', nil, header)
         sortButton:SetAllPoints(panel.head[index])
-        sortButton:SetScript('OnClick', function()
-            local state = panel.sorts[panel.view]
-            if panel.view == 'gathered' then
-                if index ~= 2 and index ~= 5 then return end
-                state.column = index
-            elseif panel.view == 'materials' and index ~= 1 and index ~= 4 then return
-            elseif panel.view == 'attempts' and index > 4 then return
-            elseif state.column == index then state.descending = not state.descending
-            else state.column, state.descending = index, index ~= 1 end
-            panel.offset = 0
-            refreshPanel(panel)
-        end)
+        sortButton:SetScript('OnClick', function() panel.sortBy(index) end)
         panel.headButtons[index] = sortButton
     end
     if header.CreateTexture then
@@ -611,7 +711,8 @@ local function createPanel(frame)
             if not self.data then return end
             if panel.view == 'materials' then ns.Reports.ReagentDetails(self, self.data)
             elseif panel.view == 'gathered' then
-                if not self.data.summary then ns.Reports.ItemSources(self, self.data.itemID, panel.character or nil) end
+                if self.data.header then panel.sortBy(columnAt(self))
+                elseif not self.data.summary then ns.Reports.ItemSources(self, self.data.itemID, panel.character or nil) end
             elseif self.data.action then ns.Reports.ActionDetails(self, self.data.action)
             elseif self.data.craft then ns.Reports.ProductionDetails(self, self.data.craft) end
         end)

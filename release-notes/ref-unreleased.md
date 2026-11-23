@@ -2,6 +2,13 @@
 
 Updated 2026-11-23. Versions up to 0.5.146 are published in release-notes/ref-0.5.146.md. These changes describe source candidates since the latest published versioned notes.
 
+## Sorting by column, 0.5.147
+
+- Every window with columns sorts by a click on a column header: Recipe browser, Profit browser, Trainer browser, the recipe reagent planner, Lifetime materials, Observed chances (also grouped by item), Reagent use, and in the Statistics panel of the Professions window every column of the Attempts, Materials and Gathered items views. A text column starts from A to Z, a number column from the highest, a second click reverses it, an arrow marks the column and a row without a value is always last. Equal values keep a fixed order (name, then identity), so a list never jumps. The chosen order of each window is saved and restored. Until the first click each window keeps the order it had. The Economy window has no list to sort and the PvP Board is a fixed statement, so neither sorts.
+- In the Gathered items view the rows of each gathering profession are still limited to the most collected (or the most valuable, when Total value is chosen); the other columns sort those rows inside each profession.
+- The Titan panel list of materials can be ordered inside its sections: right click, Display > Sort items, Item ID (as before), Name, Most first or Fewest first. The count is bags plus bank (the bank only when bank counts are shown). The choice is saved.
+- The new file ColumnSort.lua needs one full restart of the game after the update.
+
 ## Menu entries for modules, 0.5.144
 
 - The menu of the add-on (right click on the minimap button or on the Titan entry) can be extended by other modules with `ns.Titan.AddMenuExtension(function(root) ... end)`; a failing extension never breaks the menu. Titan Gathered Forever: Discovery uses it for "Titan Gathered Discovery".

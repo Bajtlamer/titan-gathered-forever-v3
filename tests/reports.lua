@@ -49,7 +49,7 @@ ns.Style.MenuNote=function(root,value)return root:CreateTitle(value)end
 dofile('tests/style_stub.lua')(ns.Style)
 ns.Production={labels={Tailoring='Tailoring',FirstAid='First Aid'}}
 ns.Catalog.Modules=function()return{{id='Cooking',label='Cooking'}}end
-assert(loadfile('TitanGatheredForever/History.lua'))('Titan Gathered Forever',ns);assert(loadfile('TitanGatheredForever/Navigation.lua'))('Titan Gathered Forever',ns);assert(loadfile('TitanGatheredForever/Reports.lua'))('Titan Gathered Forever',ns)
+assert(loadfile('TitanGatheredForever/History.lua'))('Titan Gathered Forever',ns);assert(loadfile('TitanGatheredForever/Navigation.lua'))('Titan Gathered Forever',ns);assert(loadfile('TitanGatheredForever/ColumnSort.lua'))('Titan Gathered Forever',ns);ns.settings={};assert(loadfile('TitanGatheredForever/Reports.lua'))('Titan Gathered Forever',ns)
 ns.history=ns.History.New({})
 local function seed(char,id,item,qty)
  ns.history:Observe(char,char,{id=id,kind='Loot',source='123',mapID=1,x=.4,y=.6,at=100,complete=true,items={[item]=qty}})
@@ -253,6 +253,49 @@ test('search keeps matching names and clearing it restores the list',function()
  w.search.scripts.OnTextChanged({GetText=function()return ''end},true)
  assert(w.rows[5]:IsShown());eq(w.empty.text,'')
  ns.Reports.Rows=original
+end)
+test('a click on a column header sorts the chances, grouped or not, and a second click reverses it',function()
+ local original=ns.Reports.Rows
+ local rows={
+  {itemID=7,quantity=2,percent=50,hits=1,trials=2,kind='Mining',source='1',mapID=1},
+  {itemID=8,quantity=9,percent=10,hits=1,trials=10,kind='Loot',source='3',sourceName='Bear',mapID=1},
+  {itemID=9,quantity=4,percent=75,hits=3,trials=4,kind='Loot',source='4',sourceName='Wolf',mapID=1}}
+ ns.Reports.Rows=function(mode,...)if mode=='chances'then return rows end;return original(mode,...)end
+ ns.Reports.Show('chances');local w=ns.Reports.windows.chances
+ assert(w.sorter,'the header is sortable')
+ eq(w.rows[1].data.itemID,7)                                       -- before a click: the order of the data
+ w.sorter.buttons[4].scripts.OnClick()                             -- Items, a number: the most first
+ eq(w.rows[1].data.itemID,8);eq(w.rows[2].data.itemID,9);eq(w.rows[3].data.itemID,7)
+ w.sorter.buttons[4].scripts.OnClick()
+ eq(w.rows[1].data.itemID,7);eq(w.rows[3].data.itemID,8)
+ w.sorter.buttons[2].scripts.OnClick()                             -- Observed percent: the highest first
+ eq(w.rows[1].data.itemID,9);eq(w.rows[2].data.itemID,7);eq(w.rows[3].data.itemID,8)
+ w.sorter.buttons[1].scripts.OnClick()                             -- Material, a text: a to z
+ eq(w.rows[1].data.itemID,7);eq(w.rows[3].data.itemID,9)
+ pick(w.group,'Grouped by item')                                   -- the order holds when the list is grouped
+ eq(w.rows[1].data.itemID,7);eq(w.rows[3].data.itemID,9)
+ w.sorter.buttons[1].scripts.OnClick()
+ eq(w.rows[1].data.itemID,9);eq(w.rows[3].data.itemID,7)
+ eq(ns.settings.columnSort.reports_chances.column,1);eq(ns.settings.columnSort.reports_chances.descending,true)
+ pick(w.group,'All sources');w.sorter.state=nil;w.sorter.Sync();ns.settings.columnSort={};ns.Reports.Update(w)
+ ns.Reports.Rows=original
+end)
+test('the lifetime and reagent use lists sort by their columns',function()
+ local previous=ns.production
+ ns.production={ReagentUsage=function()
+  return {{itemID=159,quantity=100,leading='Tailoring',share=75,professions={Tailoring=75,FirstAid=25}},
+          {itemID=160,quantity=30,leading='FirstAid',share=90,professions={FirstAid=30}}},{coverageBegan=100,unsupportedCasts=0}
+ end,Rows=function()return{}end,Totals=function()return{}end}
+ ns.Reports.Show('reagentUsage');local w=ns.Reports.windows.reagentUsage
+ assert(w.sorter,'the header is sortable')
+ eq(w.rows[1].data.itemID,159)
+ w.sorter.buttons[4].scripts.OnClick()                             -- Share of tracked use: the highest first
+ eq(w.rows[1].data.itemID,160);eq(w.rows[2].data.itemID,159)
+ w.sorter.buttons[3].scripts.OnClick()                             -- Leading profession, a text: a to z (First Aid, Tailoring)
+ eq(w.rows[1].data.itemID,160)
+ w.sorter.state=nil;w.sorter.Sync();ns.settings.columnSort={};ns.Reports.Update(w);ns.production=previous
+ ns.Reports.Show('history');local h=ns.Reports.windows.history
+ assert(h.sorter,'the lifetime header is sortable');eq(h.sorter.buttons[4].scripts.OnClick,nil)   -- Chance and Hits/samples hold no value of a parent row
 end)
 test('chances can be grouped by item with expandable sources',function()
  local original=ns.Reports.Rows
@@ -655,19 +698,43 @@ test('profession statistics attach below the native window, preserve recipe coun
     ns.Reports.ItemSources=function(owner,itemID,character)ns.sourcesAsked={itemID,character}end
     view.panel.SetView('gathered')
     eq(view.panel.view,'gathered');eq(asked[#asked][2],nil,'all gathering professions at first');eq(asked[#asked][3],'quantity')
-    eq(#view.panel.data,5,'the small spacer is left out, the one between two professions stays')
-    eq(view.panel.lines[3].cells[1].text,'');assert(view.panel.lines[4].cells[1].text:find('Fishing',1,true))
+    eq(#view.panel.data,7,'the small spacer is left out, the one between two professions stays, each profession has its column names')
+    eq(view.panel.lines[4].cells[1].text,'');assert(view.panel.lines[5].cells[1].text:find('Fishing',1,true))
+    eq(view.panel.lines[2].cells[1].text,ns.Style.Label('Item'));eq(view.panel.lines[2].cells[5].text,ns.Style.Label('Total value'))
+    eq(view.panel.lines[6].cells[2].text,ns.Style.Label('Quantity'),'every profession repeats the column names')
     view.panel.SelectKind('Herbs');eq(asked[#asked][2],'Herbs')
     view.panel.SelectKind(false);eq(asked[#asked][2],nil)
     assert(view.panel.lines[1].cells[1].text:find('Herbalism',1,true))
-    eq(view.panel.lines[2].cells[1].text,'Item 3');eq(view.panel.lines[2].cells[2].text,ns.Style.Value(5))
-    eq(view.panel.lines[2].cells[3].text,ns.Style.Value('50.0%'));eq(view.panel.lines[2].cells[5].text,'500c')
+    eq(view.panel.lines[3].cells[1].text,'Item 3');eq(view.panel.lines[3].cells[2].text,ns.Style.Value(5))
+    eq(view.panel.lines[3].cells[3].text,ns.Style.Value('50.0%'));eq(view.panel.lines[3].cells[5].text,'500c')
     eq(view.panel.head[2].text,ns.Style.Label('Quantity'));eq(view.panel.head[5].text,ns.Style.Label('Total value'))
     eq(view.panel.head[6].text,ns.Style.Label('Best sale'))
     view.panel.headButtons[5].scripts.OnClick();eq(asked[#asked][3],'value')
     view.panel.headButtons[2].scripts.OnClick();eq(asked[#asked][3],'quantity')
-    local calls=#asked;view.panel.headButtons[1].scripts.OnClick();eq(#asked,calls)   -- names are not a sort of this view
-    view.panel.lines[2].scripts.OnClick(view.panel.lines[2]);eq(ns.sourcesAsked[1],3)
+    -- Every column of the Gathered view sorts the items inside each profession; a row without a value is always last.
+    ns.Yields={Available=function()return{'Herbs'}end,Rows=function(character,kind,sort)
+        asked[#asked+1]={character,kind,sort}
+        return {{summary=true,title=true,text='Herbalism',gold=true},{summary=true,spacer=true,small=true,text=''},
+            {itemID=3,quantity=5,share=50,unit=100,value=500,source='Peacebloom'},
+            {itemID=5,quantity=3,share=30,unit=300,value=900,source='Vendor'},
+            {itemID=6,quantity=2,share=20},
+            {summary=true,spacer=true,text=''},{summary=true,title=true,text='Fishing',gold=true},
+            {itemID=7,quantity=9,share=80,unit=5,value=45,source='Auction'},
+            {itemID=4,quantity=2,share=20,unit=50,value=100,source='Vendor'}}
+    end}
+    local function order()local ids={};for _,row in ipairs(view.panel.data)do if row.itemID then ids[#ids+1]=row.itemID end end;return table.concat(ids,',')end
+    view.panel.SetView('gathered');view.panel.sorts.gathered={column=2,descending=true};ns.settings.columnSort={}
+    view.panel.SetView('gathered');eq(order(),'3,5,6,7,4'..'')                     -- the order of the data: the quantity, as before
+    view.panel.headButtons[5].scripts.OnClick();eq(order(),'5,3,6,4,7')            -- Total value: the highest first, no value last, per profession
+    view.panel.headButtons[5].scripts.OnClick();eq(order(),'3,5,6,7,4')            -- again: the lowest first
+    view.panel.headButtons[1].scripts.OnClick();eq(order(),'3,5,6,4,7')            -- Item: a to z
+    view.panel.headButtons[4].scripts.OnClick();eq(order(),'5,3,6,4,7')            -- Unit value: the highest first, no price last
+    view.panel.headButtons[6].scripts.OnClick();eq(order(),'3,5,6,7,4')            -- Best sale, a text: a to z (Peacebloom, Vendor, none)
+    view.panel.headButtons[3].scripts.OnClick();eq(order(),'3,5,6,7,4')            -- Share, the highest first
+    eq(ns.settings.columnSort.statistics_gathered.column,3);eq(ns.settings.columnSort.statistics_gathered.descending,true)
+    view.panel.sorts.gathered={column=2,descending=true};ns.settings.columnSort={}
+    view.panel.lines[3].scripts.OnClick(view.panel.lines[3]);eq(ns.sourcesAsked[1],3)
+    ns.sourcesAsked=nil;view.panel.lines[2].scripts.OnClick(view.panel.lines[2]);eq(ns.sourcesAsked,nil,'the column names are not an item')
     local gatheredOptions=view.KindOptions(view.panel)
     eq(#gatheredOptions,2);eq(gatheredOptions[1].value,false);eq(gatheredOptions[1].label,'All gathering');eq(gatheredOptions[2].value,'Herbs')
     view.panel.SetView('attempts')

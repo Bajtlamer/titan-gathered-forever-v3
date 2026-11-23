@@ -16,6 +16,22 @@ function Browser.Cells(row)
         row.trainer and 'Trainer' or 'Vendor', where, row.price and ns.NpcSources.CoinIcons(row.price) or 'Unknown' }
 end
 
+-- Sorting by a header. The value of a row in a column: lower-case text, a number, or nil when the row has none (last).
+local KINDS = { 'text', 'text', 'number', 'text', 'text', 'number' }
+function Browser.SortValue(row, column)
+    if column == 1 then return string.lower(tostring(row.name)) end
+    if column == 2 then return string.lower(tostring(ns.NpcSources.Label(row.kind))) end
+    if column == 3 then return row.skill end
+    if column == 4 then return row.trainer and 'trainer' or 'vendor' end
+    if column == 5 then local first = row.sources and row.sources[1]; return first and string.lower(tostring(first.name)) or nil end
+    return row.price
+end
+function Browser.Tie(a, b)
+    local nameA, nameB = string.lower(tostring(a.name)), string.lower(tostring(b.name))
+    if nameA ~= nameB then return nameA < nameB end
+    return tostring(a.kind) < tostring(b.kind)
+end
+
 -- The first visible row (zero based), kept between 0 and the last position that still fills the window.
 function Browser.Clamp(offset, total)
     local last = math.max(0, total - ROWS)
@@ -101,6 +117,7 @@ function Browser.Refresh()
         end
         rows = kept
     end
+    if Browser.sorter then Browser.sorter.Apply(rows, Browser.SortValue, Browser.Tie) end
     Browser.total = #rows
     Browser.offset = Browser.Clamp(Browser.offset, Browser.total)
     w.filter.Sync()
@@ -169,7 +186,15 @@ function Browser.Show()
         end)
         local header = CreateFrame('Frame', nil, w)
         header:SetSize(ROW_WIDTH, 30); header:SetPoint('TOPLEFT', w, 'TOPLEFT', 15, -100)
-        for _, column in ipairs(columns) do text(header, 'GameFontNormalSmall', column[2], 0, column[3]):SetText(column[1]) end
+        local headCells = {}
+        for index, column in ipairs(columns) do
+            headCells[index] = text(header, 'GameFontNormalSmall', column[2], 0, column[3])
+            headCells[index]:SetText(column[1])
+        end
+        if ns.ColumnSort then
+            Browser.sorter = ns.ColumnSort.Attach({ parent = header, cells = headCells, kinds = KINDS, key = 'recipes',
+                onChange = function() Browser.offset = 0; Browser.Refresh() end })
+        end
         w.lines = {}
         for index = 1, ROWS do
             local line = CreateFrame('Button', nil, w)

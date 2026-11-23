@@ -1,6 +1,6 @@
 # Plan: sorting by column in every window with columns, and by count in the Titan panel
 
-Status: approved by the owner on 2026-11-24, in progress. Target version 0.5.147.
+Status: implemented on 2026-11-24 as version 0.5.147 (source, tests and local installation; not released). Differences from the first draft: the Reports sorting covers Lifetime materials, Observed chances and Reagent use (the PvP Board is a fixed statement; the old Profession actions and Crafting windows are replaced by the Statistics panel); the Statistics panel keeps its own header buttons (extended, with the saved order) instead of moving to the shared helper.
 
 ## Goal
 

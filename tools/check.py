@@ -16,6 +16,8 @@ commands = [
     [sys.executable, 'tools/generate_npc_seed.py', '--check'],
     [sys.executable, 'tools/generate_brand_icons.py', '--check'],
     [runtime, 'tests/run.lua'],
+    [runtime, 'tests/column_sort.lua'],
+    [runtime, 'tests/titan_sort.lua'],
     [runtime, 'tests/sales.lua'],
     [runtime, 'tests/integration.lua'],
     [runtime, 'tests/addon_loading.lua'],

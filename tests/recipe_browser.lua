@@ -236,6 +236,46 @@ test('the visible range reads naturally', function()
     eq(B.Clamp(-4, 40), 0); eq(B.Clamp(99, 40), 24); eq(B.Clamp(7.6, 40), 8); eq(B.Clamp(5, 10), 0)
 end)
 
+test('a click on a column header sorts the list, a second click reverses it, and the order is saved', function()
+    local ns = big()
+    ns.KnownRecipes.Record('C1', 'Alchemy', {}, 10)
+    installFrames()
+    assert(loadfile('TitanGatheredForever/Navigation.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever/ColumnSort.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever/RecipeBrowser.lua'))('TitanGatheredForever', ns)
+    local B = ns.RecipeBrowser
+    B.Show()
+    local w = B.window
+    eq(w.lines[1].row.name, 'Spell 01')                                    -- the order before any click is unchanged
+    assert(B.sorter, 'the header is sortable')
+    scriptsOf(B.sorter.buttons[3]).OnClick()                               -- Skill, a number: highest first
+    eq(w.lines[1].row.name, 'Spell 40'); eq(w.lines[2].row.name, 'Spell 39')
+    scriptsOf(B.sorter.buttons[3]).OnClick()                               -- again: lowest first
+    eq(w.lines[1].row.name, 'Spell 01')
+    scriptsOf(B.sorter.buttons[6]).OnClick()                               -- Price, a number: most expensive first
+    eq(w.lines[1].row.name, 'Spell 40')
+    scriptsOf(B.sorter.buttons[1]).OnClick()                               -- Recipe, a text: a to z
+    eq(w.lines[1].row.name, 'Spell 01'); eq(w.lines[16].row.name, 'Spell 16')
+    scriptsOf(B.sorter.buttons[1]).OnClick()
+    eq(w.lines[1].row.name, 'Spell 40')
+    eq(B.offset, 0)                                                        -- a click returns to the top
+    eq(ns.settings.columnSort.recipes.column, 1); eq(ns.settings.columnSort.recipes.descending, true)
+end)
+
+test('a saved order is applied when the window opens and a row without a value is last', function()
+    local ns = fresh()
+    ns.KnownRecipes.Record('C1', 'Alchemy', { 'Elixir of Minor Defense' }, 10)
+    ns.settings.columnSort = { recipes = { column = 3, descending = true } }
+    installFrames()
+    assert(loadfile('TitanGatheredForever/Navigation.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever/ColumnSort.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever/RecipeBrowser.lua'))('TitanGatheredForever', ns)
+    local B = ns.RecipeBrowser
+    B.Show()
+    eq(B.window.lines[1].row.name, 'Lesser Healing Potion')                -- skill 50
+    eq(B.window.lines[2].row.name, 'Elixir of Wisdom')                     -- no skill known: last, also when descending
+end)
+
 test('the list scrolls with the mouse wheel and a scroll bar instead of paging', function()
     local ns = big()
     ns.KnownRecipes.Record('C1', 'Alchemy', {}, 10)

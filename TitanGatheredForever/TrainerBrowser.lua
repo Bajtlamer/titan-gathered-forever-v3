@@ -20,6 +20,21 @@ function Browser.Cells(row)
         row.x and string.format('%.1f, %.1f', row.x, row.y) or 'Unknown', status }
 end
 
+-- Sorting by a header. Coordinates sort by x, then y; Status puts the visited trainers first (the newest visit on top).
+local KINDS = { 'text', 'text', 'text', 'number', 'number' }
+function Browser.SortValue(row, column)
+    if column == 1 then return string.lower(tostring(row.name)) end
+    if column == 2 then return string.lower(tostring(ns.NpcSources.Label(row.kind))) end
+    if column == 3 then return row.zone and string.lower(tostring(row.zone)) or nil end
+    if column == 4 then return row.x and (row.x * 1000 + (row.y or 0)) or nil end
+    return row.visited and (row.lastSeen or 1) or 0
+end
+function Browser.Tie(a, b)
+    local nameA, nameB = string.lower(tostring(a.name)), string.lower(tostring(b.name))
+    if nameA ~= nameB then return nameA < nameB end
+    return tostring(a.npcID) < tostring(b.npcID)
+end
+
 function Browser.Clamp(offset, total)
     local last = math.max(0, total - ROWS)
     return math.max(0, math.min(math.floor(offset + 0.5), last))
@@ -89,6 +104,7 @@ function Browser.Refresh()
         end
         rows = kept
     end
+    if Browser.sorter then Browser.sorter.Apply(rows, Browser.SortValue, Browser.Tie) end
     Browser.total = #rows
     Browser.offset = Browser.Clamp(Browser.offset, Browser.total)
     w.filter.Sync()
@@ -151,7 +167,15 @@ function Browser.Show()
         end)
         local header = CreateFrame('Frame', nil, w)
         header:SetSize(ROW_WIDTH, 30); header:SetPoint('TOPLEFT', w, 'TOPLEFT', 15, -100)
-        for _, column in ipairs(columns) do text(header, 'GameFontNormalSmall', column[2], 0, column[3]):SetText(column[1]) end
+        local headCells = {}
+        for index, column in ipairs(columns) do
+            headCells[index] = text(header, 'GameFontNormalSmall', column[2], 0, column[3])
+            headCells[index]:SetText(column[1])
+        end
+        if ns.ColumnSort then
+            Browser.sorter = ns.ColumnSort.Attach({ parent = header, cells = headCells, kinds = KINDS, key = 'trainers',
+                onChange = function() Browser.offset = 0; Browser.Refresh() end })
+        end
         w.lines = {}
         for index = 1, ROWS do
             local line = CreateFrame('Button', nil, w)

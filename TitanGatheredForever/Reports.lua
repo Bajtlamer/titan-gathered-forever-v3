@@ -341,6 +341,42 @@ function Reports.ActionDetails(owner,row)
         root:SetScrollMode(350)
     end)
 end
+-- Sorting by a header. Only the lists that are still opened as reports sort (history, chances, reagent use); PvP is a fixed
+-- statement and the old action and production windows are replaced by the Statistics panel. The value of a row in a column
+-- is lower-case text, a number or nil (no value, always last).
+local sortKinds={
+    history={'text','number','number',false,false},
+    chances={'text','number','number','number','text'},
+    reagentUsage={'text','number','text','number'},
+}
+function Reports.SortValue(window,row,column)
+    local mode=window.mode
+    local function name()return string.lower(tostring(ns.ItemName and ns.ItemName(row.itemID)or row.itemID))end
+    if column==1 then return name()end
+    if mode=='history'then
+        if column==2 then return row.quantity+(row.crafted or 0)end
+        return #(row.sources or{})
+    elseif mode=='chances'then
+        if row.sources and not row.percent then      -- a parent row of the grouped view
+            if column==4 then return row.quantity end
+            if column==5 then return #row.sources end
+            return nil
+        end
+        if column==2 then return row.percent end
+        if column==3 then return row.hits end
+        if column==4 then return row.quantity end
+        return string.lower(tostring(Reports.Source(row)))
+    end
+    if column==2 then return row.quantity end
+    if column==3 then return row.leading and string.lower(tostring(ns.Production.labels[row.leading]or row.leading))or nil end
+    return row.share
+end
+function Reports.SortTie(a,b)
+    local nameA=string.lower(tostring(ns.ItemName and ns.ItemName(a.itemID)or a.itemID))
+    local nameB=string.lower(tostring(ns.ItemName and ns.ItemName(b.itemID)or b.itemID))
+    if nameA~=nameB then return nameA<nameB end
+    return tostring(a.itemID)<tostring(b.itemID)
+end
 local function rowName(mode,row)
     if row.itemID then return ns.ItemName and ns.ItemName(row.itemID)or tostring(row.itemID)end
     if mode=='production'then return row.name or''end
@@ -397,6 +433,7 @@ function Reports.Update(window)
     else rows,metadata=Reports.Rows(window.mode,character,window.filter)end
     rows=Reports.Search(window.mode,rows,window.searchText)
     if window.mode=='chances' and window.grouped then rows=Reports.GroupByItem(rows)end
+    if window.sorter then window.sorter.Apply(rows,function(row,column)return Reports.SortValue(window,row,column)end,Reports.SortTie)end
     if window.mode=='reagentUsage'then
         local coverage=metadata.coverageBegan and ns.Style.Date(date and date('%Y-%m-%d',metadata.coverageBegan)or tostring(metadata.coverageBegan))or'unknown'
         window.note:SetText(string.format('Estimated from fixed required reagents per completed craft. Coverage since %s. Percent is share of this reagent\'s tracked use. Unsupported recipes are excluded%s',
@@ -537,6 +574,10 @@ function Reports.Show(mode)
         local header=CreateFrame('Frame',nil,w);header:SetSize(930,30);header:SetPoint('TOPLEFT',w,'TOPLEFT',15,-100)
         w.headers=cells(header,mode,'GameFontNormalSmall',0)
         for i,column in ipairs(layouts[mode])do w.headers[i]:SetText(column[1])end
+        if ns.ColumnSort and sortKinds[mode]then
+            w.sorter=ns.ColumnSort.Attach({parent=header,cells=w.headers,kinds=sortKinds[mode],key='reports_'..mode,
+                onChange=function()w.offset=0;Reports.Update(w)end})
+        end
         w.measure=CreateFrame('Frame',nil,w);w.measure.cells=cells(w.measure,mode,'GameFontHighlightSmall',0);w.measure:Hide()
         for i=1,ROWS do
             local row=CreateFrame('Button',nil,w);row:SetSize(930,22)

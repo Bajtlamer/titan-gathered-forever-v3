@@ -47,6 +47,25 @@ function Browser.Cells(row)
         product and product.best and (product.best == 'auction' and 'Auction' or 'Vendor') or unknown, profit }
 end
 
+-- Sorting by a header. The value of a row in a column: lower-case text, a number, or nil when the price is unknown (last).
+local KINDS = { 'text', 'text', 'number', 'number', 'number', 'number', 'text', 'number' }
+function Browser.SortValue(row, column)
+    local product = row.product
+    if column == 1 then return string.lower(tostring(row.name)) end
+    if column == 2 then return string.lower(tostring(ns.NpcSources.Label(row.kind))) end
+    if column == 3 then return product and (product.materials > 0 or product.unpriced == 0) and product.materials or nil end
+    if column == 4 then return product and product.auction and product.auction.net or nil end
+    if column == 5 then return product and product.auction and (product.auction.n or 0) or nil end
+    if column == 6 then return product and product.vendor or nil end
+    if column == 7 then return product and product.best or nil end
+    return row.profit
+end
+function Browser.Tie(a, b)
+    local nameA, nameB = string.lower(tostring(a.name)), string.lower(tostring(b.name))
+    if nameA ~= nameB then return nameA < nameB end
+    return tostring(a.recipeID) < tostring(b.recipeID)
+end
+
 function Browser.Clamp(offset, total)
     local last = math.max(0, total - ROWS)
     return math.max(0, math.min(math.floor(offset + 0.5), last))
@@ -128,6 +147,7 @@ function Browser.Refresh()
     if Browser.minAuctions == nil then Browser.minAuctions = Browser.THIN end
     Browser.rows, Browser.info = ns.Profit.Rows(ns.characterID, { mine = Browser.mine, kind = Browser.kind,
         search = Browser.searchText, minAuctions = Browser.minAuctions })
+    if Browser.sorter then Browser.sorter.Apply(Browser.rows, Browser.SortValue, Browser.Tie) end
     Browser.total = #Browser.rows
     Browser.offset = Browser.Clamp(Browser.offset, Browser.total)
     w.filter.Sync(); w.kindButton.Sync(); w.marketButton.Sync()
@@ -203,7 +223,15 @@ function Browser.Show()
         end)
         local header = CreateFrame('Frame', nil, w)
         header:SetSize(ROW_WIDTH, 30); header:SetPoint('TOPLEFT', w, 'TOPLEFT', 15, -100)
-        for _, column in ipairs(columns) do text(header, 'GameFontNormalSmall', column[2], 0, column[3]):SetText(column[1]) end
+        local headCells = {}
+        for index, column in ipairs(columns) do
+            headCells[index] = text(header, 'GameFontNormalSmall', column[2], 0, column[3])
+            headCells[index]:SetText(column[1])
+        end
+        if ns.ColumnSort then
+            Browser.sorter = ns.ColumnSort.Attach({ parent = header, cells = headCells, kinds = KINDS, key = 'profit',
+                onChange = function() Browser.offset = 0; Browser.Refresh() end })
+        end
         w.lines = {}
         for index = 1, ROWS do
             local line = CreateFrame('Button', nil, w)
