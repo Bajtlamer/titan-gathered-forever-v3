@@ -69,9 +69,9 @@ test('the tooltip tells what the player knows, what can be learned and what the 
     ns.WeaponMasters.FillTooltip(t, { kind = 'WeaponMaster', npcID = 11867 })
     local text = t:text()
     assert(text:find('Woo Ping', 1, true))
-    assert(text:find('Daggers | <green>Known', 1, true), text)
-    assert(text:find('One-Handed Swords | <white>Can learn', 1, true), text)
-    assert(text:find('Staves | <gray>Not for your class', 1, true), text)
+    assert(text:find('<green>Daggers</> | <green>Known</>', 1, true), text)
+    assert(text:find('<white>One-Handed Swords</> | <white>Can learn</>', 1, true), text)
+    assert(text:find('<gray>Staves</> | <gray>Not for your class</>', 1, true), text)
 end)
 
 test('a price is shown only when the game reported it at the trainer', function()
@@ -82,8 +82,8 @@ test('a price is shown only when the game reported it at the trainer', function(
     assert(ns.WeaponMasters.Observe(11867, { { name = 'Crossbows', cost = 1000 }, { name = 'Staves', cost = 1000 } }))
     t = tooltip()
     ns.WeaponMasters.FillTooltip(t, { kind = 'WeaponMaster', npcID = 11867 })
-    assert(t:text():find('Crossbows | <white>Can learn  1000c', 1, true), t:text())
-    assert(not t:text():find('Two-Handed Swords | <white>Can learn  ', 1, true))   -- no price known for this one
+    assert(t:text():find('<white>Crossbows</> | <white>Can learn  1000c</>', 1, true), t:text())
+    assert(not t:text():find('Two-Handed Swords</> | <white>Can learn  ', 1, true))   -- no price known for this one
 end)
 
 test('a trainer that is not a weapon master is not recorded', function()
@@ -96,11 +96,28 @@ test('polearms are locked below level 20 and the status stays unknown without th
     local ns = fresh({ class = 'WARRIOR', level = 10 })
     local t = tooltip()
     ns.WeaponMasters.FillTooltip(t, { kind = 'WeaponMaster', npcID = 11867 })
-    assert(t:text():find('Polearms | <gray>From level 20', 1, true), t:text())
+    assert(t:text():find('<gray>Polearms</> | <gray>From level 20</>', 1, true), t:text())
     GetNumSkillLines = nil
     t = tooltip()
     ns.WeaponMasters.FillTooltip(t, { kind = 'WeaponMaster', npcID = 11867 })
     assert(t:text():find('Daggers | ', 1, true) and not t:text():find('Unknown', 1, true), t:text())
+end)
+
+test('the skill of a weapon is found in the spell book or in the skill lines, not only in the skill list', function()
+    local ns = fresh({ class = 'WARRIOR' })
+    GetNumSkillLines = nil
+    IsPlayerSpell = function(id) return id == 202 end                     -- Two-Handed Swords
+    local t = tooltip()
+    ns.WeaponMasters.FillTooltip(t, { kind = 'WeaponMaster', npcID = 11867 })
+    assert(t:text():find('<green>Two-Handed Swords</> | <green>Known</>', 1, true), t:text())
+    assert(t:text():find('<white>Daggers</> | <white>Can learn</>', 1, true), 'a skill the spell book lacks can be learned')
+    IsPlayerSpell = nil
+    C_SkillInfo = { GetSkillLineInfoByID = function(id) if id == 173 then return { rank = 1, maxRank = 300 } end end }
+    t = tooltip()
+    ns.WeaponMasters.FillTooltip(t, { kind = 'WeaponMaster', npcID = 11867 })
+    assert(t:text():find('<green>Daggers</> | <green>Known</>', 1, true), t:text())
+    assert(ns.db.weaponProbe and ns.db.weaponProbe.line == true, 'what the client answered is kept for the saved file')
+    C_SkillInfo = nil
 end)
 
 for _, entry in ipairs(tests) do

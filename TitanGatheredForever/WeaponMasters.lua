@@ -9,20 +9,20 @@ ns.WeaponMasters = WeaponMasters
 
 -- id, the label shown, and the names the client may use for the skill line.
 local WEAPONS = {
-    { id = 'axe1', label = 'One-Handed Axes', names = { 'axes', 'one-handed axes' } },
-    { id = 'axe2', label = 'Two-Handed Axes', names = { 'two-handed axes' } },
-    { id = 'mace1', label = 'One-Handed Maces', names = { 'maces', 'one-handed maces' } },
-    { id = 'mace2', label = 'Two-Handed Maces', names = { 'two-handed maces' } },
-    { id = 'sword1', label = 'One-Handed Swords', names = { 'swords', 'one-handed swords' } },
-    { id = 'sword2', label = 'Two-Handed Swords', names = { 'two-handed swords' } },
-    { id = 'dagger', label = 'Daggers', names = { 'daggers' } },
-    { id = 'fist', label = 'Fist Weapons', names = { 'fist weapons' } },
-    { id = 'staff', label = 'Staves', names = { 'staves' } },
-    { id = 'polearm', label = 'Polearms', names = { 'polearms' } },
-    { id = 'bow', label = 'Bows', names = { 'bows' } },
-    { id = 'crossbow', label = 'Crossbows', names = { 'crossbows' } },
-    { id = 'gun', label = 'Guns', names = { 'guns' } },
-    { id = 'thrown', label = 'Thrown', names = { 'thrown', 'throwing weapons' } },
+    { id = 'axe1', spell = 196, skill = 44, label = 'One-Handed Axes', names = { 'axes', 'one-handed axes' } },
+    { id = 'axe2', spell = 197, skill = 172, label = 'Two-Handed Axes', names = { 'two-handed axes' } },
+    { id = 'mace1', spell = 198, skill = 54, label = 'One-Handed Maces', names = { 'maces', 'one-handed maces' } },
+    { id = 'mace2', spell = 199, skill = 160, label = 'Two-Handed Maces', names = { 'two-handed maces' } },
+    { id = 'sword1', spell = 201, skill = 43, label = 'One-Handed Swords', names = { 'swords', 'one-handed swords' } },
+    { id = 'sword2', spell = 202, skill = 55, label = 'Two-Handed Swords', names = { 'two-handed swords' } },
+    { id = 'dagger', spell = 1180, skill = 173, label = 'Daggers', names = { 'daggers' } },
+    { id = 'fist', spell = 15590, skill = 473, label = 'Fist Weapons', names = { 'fist weapons' } },
+    { id = 'staff', spell = 227, skill = 136, label = 'Staves', names = { 'staves' } },
+    { id = 'polearm', spell = 200, skill = 229, label = 'Polearms', names = { 'polearms' } },
+    { id = 'bow', spell = 264, skill = 45, label = 'Bows', names = { 'bows' } },
+    { id = 'crossbow', spell = 5011, skill = 226, label = 'Crossbows', names = { 'crossbows' } },
+    { id = 'gun', spell = 266, skill = 46, label = 'Guns', names = { 'guns' } },
+    { id = 'thrown', spell = 2567, skill = 176, label = 'Thrown', names = { 'thrown', 'throwing weapons' } },
 }
 WeaponMasters.weapons = WEAPONS
 local byId, byName = {}, {}
@@ -91,20 +91,43 @@ function WeaponMasters.List(mapID)
     return result
 end
 
--- The skill names the character has (lower case), or nil when the client gives no skill list.
+-- Which weapon skills the character has: id -> true or false, or nil when the client offers no way to tell. The skill is a
+-- spell of the spell book (the usual sign), a skill line with a rank, or a line of the skill list; any of them counts.
+-- What each way answered is kept in db.weaponProbe so a client that answers differently can be read from the saved file.
 local function knownSkills()
-    if type(GetNumSkillLines) ~= 'function' or type(GetSkillLineInfo) ~= 'function' then return nil end
-    local known = {}
-    for index = 1, GetNumSkillLines() do
-        local name, header = GetSkillLineInfo(index)
-        if type(name) == 'string' and not header then known[string.lower(name)] = true end
+    local spellApi = (C_SpellBook and C_SpellBook.IsSpellKnown) or IsPlayerSpell or IsSpellKnown
+    local lineApi = C_SkillInfo and C_SkillInfo.GetSkillLineInfoByID
+    local names
+    if type(GetNumSkillLines) == 'function' and type(GetSkillLineInfo) == 'function' then
+        names = {}
+        for index = 1, GetNumSkillLines() do
+            local name, header = GetSkillLineInfo(index)
+            if type(name) == 'string' and not header then names[string.lower(name)] = true end
+        end
+    end
+    if type(spellApi) ~= 'function' and type(lineApi) ~= 'function' and not names then return nil end
+    local known, probe = {}, { spell = type(spellApi) == 'function', line = type(lineApi) == 'function', list = names ~= nil, known = {} }
+    for _, weapon in ipairs(WEAPONS) do
+        local has = false
+        if type(spellApi) == 'function' then
+            local ok, result = pcall(spellApi, weapon.spell)
+            if ok and result == true then has = true end
+        end
+        if not has and type(lineApi) == 'function' then
+            local ok, info = pcall(lineApi, weapon.skill)
+            if ok and type(info) == 'table' and type(info.rank) == 'number' and info.rank > 0 then has = true end
+        end
+        if not has and names then
+            for _, name in ipairs(weapon.names) do if names[name] then has = true end end
+            if names[string.lower(weapon.label)] then has = true end
+        end
+        known[weapon.id] = has
+        if has then probe.known[#probe.known + 1] = weapon.id end
+    end
+    if ns.db then
+        ns.db.weaponProbe = probe
     end
     return known
-end
-
-local function isKnown(known, weapon)
-    for _, name in ipairs(weapon.names) do if known[name] then return true end end
-    return known[string.lower(weapon.label)] == true
 end
 
 -- The rows of a master: { label, status = 'known' | 'learn' | 'class' | 'level' | 'unknown', cost, level }.
@@ -121,7 +144,7 @@ function WeaponMasters.Rows(npcID)
         local weapon = byId[id]
         local row = { label = weapon.label, cost = saw and saw.services and saw.services[id] or nil }
         local needed = master.levels and master.levels[id]
-        if known and isKnown(known, weapon) then row.status = 'known'
+        if known and known[id] then row.status = 'known'
         elseif allowed and not allowed[id] then row.status = 'class'
         elseif needed and type(level) == 'number' and level < needed then row.status, row.level = 'level', needed
         elseif not known then row.status = 'unknown'
@@ -149,7 +172,11 @@ function WeaponMasters.FillTooltip(tooltip, node)
             local price = row.cost and ns.NpcSources and ns.NpcSources.CoinIcons(row.cost)
             right = Style.Text(Style.white, 'Can learn' .. (price and ('  ' .. price) or ''))
         end
-        tooltip:AddDoubleLine(row.label, right)
+        local left = row.label
+        if row.status == 'known' then left = Style.Text(Style.green, left)
+        elseif row.status == 'learn' then left = Style.Text(Style.white, left)
+        elseif row.status ~= 'unknown' then left = Style.Text(Style.gray, left) end
+        tooltip:AddDoubleLine(left, right)
         small()
     end
 end
