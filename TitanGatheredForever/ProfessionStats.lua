@@ -314,7 +314,7 @@ local function syncTabs(panel)
                 if type(width) ~= 'number' then width = 70 end
                 tab:SetSize(width + 24, 20)
                 tab:ClearAllPoints()
-                tab:SetPoint('TOPLEFT', panel, 'TOPLEFT', x, -72)
+                tab:SetPoint('TOPLEFT', panel, 'TOPLEFT', x, -68)
                 x = x + width + 28
                 if choice.value == current then tab.line:Show() else tab.line:Hide() end
                 tab:Show()
