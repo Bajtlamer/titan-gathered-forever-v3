@@ -199,19 +199,29 @@ function Undercut.InfoText(post)
     return head, profit, gain, loss, threshold
 end
 
--- The lines of the Current listing: what the player earns when the item sells (the net after the fee; the deposit comes
--- back), what that is against selling the same units to a vendor (left out when no vendor price is known), what a failed
--- auction loses (the deposit) and the share of auctions that must sell to cover those losses.
+-- The lines of the Current listing. When a sale does not beat the vendor, what the sale would bring is of no use (the
+-- player should go to the vendor), so only the comparison and the loss of a failed auction are shown. Otherwise: what the
+-- sale earns (the net after the fee; the deposit comes back), the comparison with the vendor when its price is known, what
+-- a failed auction loses (the deposit) and the number of units that must sell to cover the deposit.
 function Undercut.ListingLines(post)
     if not post then return '', '', '', '' end
     local Style, Coin = ns.Style, ns.Economy.Coin
-    local sold = Style.Label('If sold, you earn: ') .. Style.Value(Coin(post.net))
+    local worse = post.gain and post.gain <= 0
+    local sold = worse and '' or (Style.Label('If sold, you earn: ') .. Style.Value(Coin(post.net)))
     local vendor = post.gain and (Style.Label('Auction vs vendor: ') .. signed(post.gain)
-        .. (post.gain <= 0 and Style.Text(Style.red, ' Vendor pays more') or '')) or ''
+        .. (worse and Style.Text(Style.red, ' Vendor pays more') or '')) or ''
     local loss = post.loss and (Style.Label('If unsold, you lose: ') .. signed(-post.loss)) or ''
-    local threshold = post.neededNet
-        and (Style.Label('Break-even sales: ') .. Style.Value(string.format('%d%%', math.ceil(post.neededNet * 100 - 1e-9)))) or ''
-    return sold, vendor, loss, threshold
+    local cover = ''
+    if post.coverUnits and not worse then
+        if post.quantity == 1 then
+            cover = Style.Label('To cover the deposit: ') .. Style.Value('the item must sell')
+        elseif post.coverUnits >= post.quantity then
+            cover = Style.Label('Units to cover the deposit: ') .. Style.Value('all ' .. post.quantity)
+        else
+            cover = Style.Label('Units to cover the deposit: ') .. Style.Value(post.coverUnits .. ' of ' .. post.quantity)
+        end
+    end
+    return sold, vendor, loss, cover
 end
 
 local function readItemID(sell)

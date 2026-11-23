@@ -269,8 +269,8 @@ end
 function History.UpdatePosting(sell, post, warning)
     local view = History.view
     if not view or view.sell ~= sell or not view.panel:IsVisible() then return end
-    local sold, vendor, loss, threshold = ns.AuctionUndercut.ListingLines(post)
-    local lines = { sold, vendor, loss, threshold, post and warning or '' }
+    local sold, vendor, loss, cover = ns.AuctionUndercut.ListingLines(post)
+    local lines = { sold, vendor, loss, cover, post and warning or '' }
     if not post then lines[1] = Style.Label('Enter a buyout to estimate the result.') end
     local count = 0
     for _, line in ipairs(lines) do

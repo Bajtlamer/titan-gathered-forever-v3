@@ -145,21 +145,26 @@ test('the floor counts the fee: a price at the vendor price is lifted to the low
     f.undercut:Results(key, { { price = 110 } }); eq(f.set[3], 104)
 end)
 
-test('the listing shows what a sale earns, the comparison with the vendor and what a failed auction loses', function()
+test('the listing shows what a sale earns only when it beats the vendor, and the units that cover the deposit', function()
     local ns = load()
     local U, E = ns.AuctionUndercut, ns.Economy
-    local sold, vendor, loss, threshold = U.ListingLines(E.Posting(1000, 5, 120, 100, 300))
+    local sold, vendor, loss, cover = U.ListingLines(E.Posting(1000, 5, 120, 100, 300))
     eq(sold, '<gold>If sold, you earn: <white>4750c')
     eq(vendor, '<gold>Auction vs vendor: <green>+<white>4250c')
     eq(loss, '<gold>If unsold, you lose: <red>-<white>120c')
-    eq(threshold, '<gold>Break-even sales: <white>3%')
-    sold, vendor = U.ListingLines(E.Posting(100, 1, 40, 100))                              -- the vendor pays more
-    eq(sold, '<gold>If sold, you earn: <white>95c')
+    eq(cover, '<gold>Units to cover the deposit: <white>1 of 5')
+    sold, vendor, loss, cover = U.ListingLines(E.Posting(100, 1, 40, 100))                 -- the vendor pays more
+    eq(sold, ''); eq(cover, '')                                                            -- no earnings, no break-even
     eq(vendor, '<gold>Auction vs vendor: <red>-<white>5c<red> Vendor pays more')
-    sold, vendor, loss, threshold = U.ListingLines(E.Posting(1000, 1, nil, nil))           -- no vendor price, no deposit
-    eq(sold, '<gold>If sold, you earn: <white>950c'); eq(vendor, ''); eq(loss, ''); eq(threshold, '')
-    sold, vendor, loss, threshold = U.ListingLines(nil)
-    eq(sold, ''); eq(vendor, ''); eq(loss, ''); eq(threshold, '')
+    eq(loss, '<gold>If unsold, you lose: <red>-<white>40c')
+    sold, vendor, loss, cover = U.ListingLines(E.Posting(1000, 1, 50, 100))                -- one item: it must sell
+    eq(cover, '<gold>To cover the deposit: <white>the item must sell')
+    sold, vendor, loss, cover = U.ListingLines(E.Posting(1000, 3, 5000, 100))              -- the deposit needs all of them
+    eq(cover, '<gold>Units to cover the deposit: <white>all 3')
+    sold, vendor, loss, cover = U.ListingLines(E.Posting(1000, 1, nil, nil))               -- no vendor price, no deposit
+    eq(sold, '<gold>If sold, you earn: <white>950c'); eq(vendor, ''); eq(loss, ''); eq(cover, '')
+    sold, vendor, loss, cover = U.ListingLines(nil)
+    eq(sold, ''); eq(vendor, ''); eq(loss, ''); eq(cover, '')
 end)
 
 test('the narrow panel has separate lines for costs, vendor comparison, deposit and break-even', function()

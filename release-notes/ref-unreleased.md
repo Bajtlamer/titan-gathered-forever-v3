@@ -2,6 +2,11 @@
 
 Updated 2026-11-23. Versions up to 0.5.156 are published in release-notes/ref-0.5.156.md. These changes describe source candidates since the latest published versioned notes.
 
+## Current listing: units that cover the deposit, 0.5.160
+
+- When the price is at or below what a vendor pays, the Current listing no longer shows what the sale would bring: only the red "Vendor pays more" comparison and the loss of a failed auction remain.
+- The break-even percentage is replaced by the number of units that must sell for the gain over the vendor (the net, when no vendor price is known) to cover the deposit: "Units to cover the deposit: 3 of 20", "all 3", or "the item must sell" for a single item.
+
 ## Vendor comparison in the Current listing, 0.5.159
 
 - The Current listing shows again what the sale brings against selling the same units to a vendor ("Auction vs vendor", green when the auction pays more, red with "Vendor pays more" when the vendor does). It is left out for an item no vendor buys.
