@@ -95,7 +95,6 @@ function Yields.Rows(character, filter, sort)
                     second = second .. coin(timedValue / active * 3600) .. val(string.format(' and %d items', math.floor(timedQuantity / active * 3600 + 0.5)))
                     if timedUnpriced > 0 then second = second .. lab(' (some items have no price)') end
                 else second = second .. val('too little time measured yet') end
-                if date then second = second .. '     ' .. lab('Measured since: ') .. (ns.Style and ns.Style.Date(date('%Y-%m-%d', action.timedBegan)) or date('%Y-%m-%d', action.timedBegan)) end
             end
             if #list > 0 or (action.attempts or 0) > 0 then
                 if #rows > 0 then rows[#rows + 1] = { summary = true, spacer = true, kind = kind, text = '' } end

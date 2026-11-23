@@ -2,6 +2,10 @@
 
 Updated 2026-11-23. Versions up to 0.5.146 are published in release-notes/ref-0.5.146.md. These changes describe source candidates since the latest published versioned notes.
 
+## Shorter notes under the lists, 0.5.150
+
+- The texts under the Statistics lists are reduced so they fit: the explanation of a profession tab is gone (the tab shows two summary lines), the Overview and Attempts notes are one line, and the "Measured since" date is no longer shown in the profession summary.
+
 ## Notes under the lists, 0.5.149
 
 - In every view of the Statistics panel the extra texts are under the list, never between the header and the rows: the counts of Attempts, the summary lines of a profession (completed, items collected, worth, active time, rate per hour) and the explanations. A thin gold line separates them from the "Showing a-b of n" counter.
