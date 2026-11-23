@@ -5,7 +5,7 @@ ns.EconomyView = View
 local Style = ns.Style
 local columns = {
     { x = 30, width = 185, label = 'Source' },
-    { x = 220, width = 130, label = 'Units sold' },
+    { x = 220, width = 130, label = 'Sales' },
     { x = 365, width = 195, label = 'Income' },
     { x = 575, width = 360, label = 'Coverage' },
 }
@@ -110,7 +110,8 @@ function View.Refresh()
     local total = ns.Sales.Totals(ledger and ledger.entries, realm, seller)
     local vendors, auctions, quests, loot, combined = unpack(window.rows)
     local merchant = ns.VendorSales.Totals(db.vendorSales, realm, id)
-    vendors.units:SetText(merchant.sales > 0 and Style.Value(merchant.soldUnits) or Style.Label('Unavailable'))
+    -- A sale is what the player put up and sold, one stack or a hundred: the number of sales, not of items.
+    vendors.count:SetText(merchant.sales > 0 and Style.Value(merchant.sales) or Style.Label('Unavailable'))
     vendors.income:SetText(merchant.sales > 0 and money(merchant.soldCopper) or Style.Label('Unavailable'))
     vendors.coverage:SetText(Style.Label(merchant.sales > 0 and 'Verified merchant sales' or 'No verified merchant sales recorded'))
     window.vendorBuybacks:SetText(merchant.buybacks > 0 and (Style.Value(merchant.buybackUnits)
@@ -122,12 +123,12 @@ function View.Refresh()
     local coverage
     if total.invoices == 0 then
         coverage = 'No confirmed seller invoices recorded'
-    elseif total.unitCount < total.invoices or total.netCount < total.invoices then
-        coverage = 'Some invoices lack verified quantities or net amounts'
+    elseif total.netCount < total.invoices then
+        coverage = 'Some invoices lack verified net amounts'
     else
         coverage = 'Confirmed seller invoices'
     end
-    auctions.units:SetText(observed(total.units, total.unitCount, total.invoices, Style.Value))
+    auctions.count:SetText(total.invoices > 0 and Style.Value(total.invoices) or Style.Label('Unavailable'))
     auctions.income:SetText(observed(total.net, total.netCount, total.invoices, money))
     auctions.coverage:SetText(Style.Label(coverage))
     local reward, turnIns = ns.QuestIncome.Total(db.questIncome, realm, id)
@@ -174,8 +175,9 @@ function View.Show()
         window.scopeNote = text(window, 274, -49, 636)
 
         band(window, -84, 28, 0.28)
-        for _, column in ipairs(columns) do
-            text(window, column.x, -93, column.width, Style.Label(column.label))
+        window.columnLabels = {}
+        for index, column in ipairs(columns) do
+            window.columnLabels[index] = text(window, column.x, -93, column.width, Style.Label(column.label))
         end
         window.rows = {}
         for i, label in ipairs(sources) do
@@ -183,7 +185,7 @@ function View.Show()
             band(window, y, 34, i == #sources and 0.23 or (i % 2 == 1 and 0.12 or 0.16))
             text(window, columns[1].x, y - 13, columns[1].width, Style.Label(label))
             window.rows[i] = {
-                units = text(window, columns[2].x, y - 13, columns[2].width),
+                count = text(window, columns[2].x, y - 13, columns[2].width),
                 income = text(window, columns[3].x, y - 13, columns[3].width, Style.Label('Unavailable')),
                 coverage = text(window, columns[4].x, y - 13, columns[4].width),
             }

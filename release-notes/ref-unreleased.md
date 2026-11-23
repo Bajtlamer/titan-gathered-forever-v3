@@ -2,6 +2,10 @@
 
 Updated 2026-11-23. Versions up to 0.5.156 are published in release-notes/ref-0.5.156.md. These changes describe source candidates since the latest published versioned notes.
 
+## Economy counts sales, 0.5.157
+
+- The Sales column of Economy (it was Units sold) counts successful sales: every confirmed auction invoice is one sale, a single item or a stack of a hundred alike, and every sale of a stack or item to a merchant is one sale. The number of items stays in the Market history panel of the auction house (Units sold of the selected item). The coverage text of the auction row mentions only net amounts now.
+
 ## Market history from your own sales, 0.5.156
 
 - The chart of the Market history panel is the player's own history. With one or more days of confirmed sales of the item it shows the net price per unit of each day (the best day in green) and the trend from two days. Without a sale it shows one point, the price of the last scan; there is no daily history of scans any more (it would make the saved file large) and the old one is deleted. Without a scan, or when the item is not in the last scan, a short text tells what to do or why.
