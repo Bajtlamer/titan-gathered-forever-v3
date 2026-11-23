@@ -2,6 +2,10 @@
 
 Updated 2026-11-23. Versions up to 0.5.156 are published in release-notes/ref-0.5.156.md. These changes describe source candidates since the latest published versioned notes.
 
+## Warning for a cheap item, 0.5.161
+
+- When even a full sale gains less than the deposit (a very cheap item), the Current listing shows a red "Not worth the risk: the gain is less than the deposit" instead of the number of units that cover the deposit, because a failed auction would cost more than a sale can earn.
+
 ## Current listing: units that cover the deposit, 0.5.160
 
 - When the price is at or below what a vendor pays, the Current listing no longer shows what the sale would bring: only the red "Vendor pays more" comparison and the loss of a failed auction remain.

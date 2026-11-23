@@ -202,7 +202,8 @@ end
 -- The lines of the Current listing. When a sale does not beat the vendor, what the sale would bring is of no use (the
 -- player should go to the vendor), so only the comparison and the loss of a failed auction are shown. Otherwise: what the
 -- sale earns (the net after the fee; the deposit comes back), the comparison with the vendor when its price is known, what
--- a failed auction loses (the deposit) and the number of units that must sell to cover the deposit.
+-- a failed auction loses (the deposit) and the number of units that must sell to cover the deposit, or a red warning when
+-- even a full sale gains less than the deposit (a cheap item: the risk is larger than the reward).
 function Undercut.ListingLines(post)
     if not post then return '', '', '', '' end
     local Style, Coin = ns.Style, ns.Economy.Coin
@@ -213,7 +214,10 @@ function Undercut.ListingLines(post)
     local loss = post.loss and (Style.Label('If unsold, you lose: ') .. signed(-post.loss)) or ''
     local cover = ''
     if post.coverUnits and not worse then
-        if post.quantity == 1 then
+        if post.coverUnits > post.quantity then
+            -- Even when every unit sells the gain is smaller than the deposit that a failed auction loses.
+            cover = Style.Text(Style.red, 'Not worth the risk: the gain is less than the deposit')
+        elseif post.quantity == 1 then
             cover = Style.Label('To cover the deposit: ') .. Style.Value('the item must sell')
         elseif post.coverUnits >= post.quantity then
             cover = Style.Label('Units to cover the deposit: ') .. Style.Value('all ' .. post.quantity)
