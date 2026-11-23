@@ -90,6 +90,9 @@ test('a posting: net after the fee, the loss of an unsold auction and the share 
     eq(E.Posting(0, 1, 5, 5), nil); eq(E.Posting(nil, 1, 5, 5), nil)
     p = E.Posting(1000, 5, 120, 100, 300); eq(p.cost, 300); eq(p.profit, 4750 - 1500)     -- the cost counts for every unit
     p = E.Posting(1000, 5, 120, 100, nil); eq(p.profit, nil); eq(p.cost, nil)              -- an unknown cost stays unknown
+    -- The share of auctions that must sell for their net to cover the deposits lost on the others.
+    p = E.Posting(1000, 5, 120, 100); assert(math.abs(p.neededNet - 120 / (4750 + 120)) < 1e-9)
+    p = E.Posting(1000, 1, nil, 100); eq(p.neededNet, nil)                                 -- no deposit, nothing to say
     eq(E.Posting(10, 0, 1, 1).quantity, 1)                -- a missing quantity counts as one unit
 end)
 

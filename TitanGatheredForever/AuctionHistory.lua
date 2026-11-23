@@ -269,24 +269,9 @@ end
 function History.UpdatePosting(sell, post, warning)
     local view = History.view
     if not view or view.sell ~= sell or not view.panel:IsVisible() then return end
-    local _, profit, gain, loss, threshold = ns.AuctionUndercut.InfoText(post)
-    local lines = { profit, gain, loss, threshold, post and warning or '' }
-    if not post then
-        lines[1] = Style.Label('Enter a buyout to estimate the result.')
-    else
-        if view.marketUnit then
-            local change = (post.total / post.quantity / view.marketUnit - 1) * 100
-            lines[#lines + 1] = Style.Label('Buyout vs last scan: ') .. Style.Value(string.format('%+.1f%%', change))
-        end
-        if view.soldNetUnit then
-            local change = post.net / post.quantity - view.soldNetUnit
-            local magnitude = math.floor(math.abs(change) + 0.5)
-            local sign = magnitude > 0 and (change > 0 and Style.Text(Style.green, '+') or Style.Text(Style.red, '-')) or ''
-            local percent = view.soldNetUnit > 0
-                and (' ' .. Style.Value(string.format('(%+.1f%%)', change / view.soldNetUnit * 100))) or ''
-            lines[#lines + 1] = Style.Label('Net vs sales avg / unit: ') .. sign .. money(magnitude) .. percent
-        end
-    end
+    local sold, loss, threshold = ns.AuctionUndercut.ListingLines(post)
+    local lines = { sold, loss, threshold, post and warning or '' }
+    if not post then lines[1] = Style.Label('Enter a buyout to estimate the result.') end
     local count = 0
     for _, line in ipairs(lines) do
         if line ~= '' then

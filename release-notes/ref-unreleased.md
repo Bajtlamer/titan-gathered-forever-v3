@@ -2,6 +2,10 @@
 
 Updated 2026-11-23. Versions up to 0.5.156 are published in release-notes/ref-0.5.156.md. These changes describe source candidates since the latest published versioned notes.
 
+## Current listing shows profit and loss, 0.5.158
+
+- The Current listing of the Market history panel shows what matters for a posting and nothing else: "If sold, you earn" (the price after the 5 percent fee; the deposit comes back), "If unsold, you lose" (the deposit) and "Break-even sales" (the share of auctions that must sell for the earnings to cover the deposits lost on the others). The comparisons with a vendor, with a cost, with the last scan and with your earlier sales are gone.
+
 ## Economy counts sales, 0.5.157
 
 - The Sales column of Economy (it was Units sold) counts successful sales: every confirmed auction invoice is one sale, a single item or a stack of a hundred alike, and every sale of a stack or item to a merchant is one sale. The number of items stays in the Market history panel of the auction house (Units sold of the selected item). The coverage text of the auction row mentions only net amounts now.
