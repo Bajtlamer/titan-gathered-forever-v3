@@ -90,6 +90,8 @@ The ZIPs of `dist/releases/<version>/` go to the fourteen CurseForge projects (t
 3. `python3 tools/curseforge_upload.py upload --apply --game-version 17053` uploads them as release files with the changelog of `release-notes/ref-<version>.md` (the core) or a short note (modules), and marks the modules as requiring the core. Use `--only <folder>` to send one project. A file that has been sent is not sent again by the tool: check the project's file list first.
 4. The project descriptions are not part of the API; paste them from `curseforge/ref-*.md` on the author portal.
 
+The release 0.5.154 (tag v0.5.154) was published on 2026-11-23: the GitHub release holds the seventeen assets of the workflow, the fourteen CurseForge files were each uploaded once (file IDs 9779985 to 9780002, recorded in the upload ledger), and the website 1.4.3 serves the same bytes.
+
 The release 0.5.151 (tag v0.5.151, commit 448fc17) was published on 2026-11-23: the GitHub release holds the seventeen assets of the workflow, the fourteen CurseForge files were uploaded the same day (they show after review; the core upload command may have been sent twice by mistake, so check the project file list), and the website 1.4.2 serves the same bytes.
 
 The release 0.5.146 (tag v0.5.146, commit 6338d36) was published on 2026-11-23: the GitHub release holds nineteen assets (the seventeen of the workflow plus the Discovery 0.1.5 ZIP and its checksums), the fourteen CurseForge files are 9763653 to 9763667 (core 9763653), and the website serves the same bytes (website 1.4.1).
