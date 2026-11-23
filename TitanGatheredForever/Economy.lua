@@ -33,7 +33,8 @@ function Economy.Fee(total) return math.floor(total * Economy.CUT + 0.5) end
 --   gain     the net against selling the same units to a vendor (nil without a vendor price)
 --   profit   the net minus what the units cost (cost per unit, Economy.UnitCost: the cheapest known way to buy one
 --            again); nil without a cost. An unsold auction costs the deposit only, the item stays with the player
---   neededNet  the share of auctions that must sell for their net to cover the deposits lost on the others (nil without a deposit)
+--   coverUnits  the number of units that must sell for the gain over the vendor (the net without a vendor price) to cover
+--            the deposit; nil without a deposit or when a sale does not beat the vendor
 --   needed   the share of auctions (0 to 1) that must sell for posting to pay: deposit / (gain + deposit);
 --            nil when the gain or the deposit is unknown, and 'never' when a sale gains nothing over a vendor
 function Economy.Posting(price, quantity, deposit, vendor, cost)
@@ -49,8 +50,11 @@ function Economy.Posting(price, quantity, deposit, vendor, cost)
         if result.gain <= 0 then result.needed = 'never'
         else result.needed = deposit / (result.gain + deposit) end
     end
-    -- The share of auctions that must sell for what they earn (the net) to cover the deposits lost on the others.
-    if deposit and result.net > 0 then result.neededNet = deposit / (result.net + deposit) end
+    -- The units that must sell for the gain over the vendor (the net, when no vendor price is known) to cover the deposit.
+    if deposit then
+        local perUnit = (result.gain or result.net) / quantity
+        if perUnit > 0 then result.coverUnits = math.ceil(deposit / perUnit - 1e-9) end
+    end
     return result
 end
 
