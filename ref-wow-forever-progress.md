@@ -4,6 +4,8 @@ Updated 2026-11-20. Current continuation plan: [plans/plan-live-verification-and
 
 ## Current state
 
+Release 0.5.156 (2026-11-23): Market history from the player's own sales with a best sale, and a scan price for every item (0.5.155 and 0.5.156). Versioned notes: [release-notes/ref-0.5.156.md](release-notes/ref-0.5.156.md).
+
 Release 0.5.154 (2026-11-23): weapon masters on the map with a skill tooltip and a map menu with every display switch (0.5.152 to 0.5.154). Versioned notes: [release-notes/ref-0.5.154.md](release-notes/ref-0.5.154.md).
 
 Release 0.5.151 (2026-11-23): sorting by column in every window with columns, sorting of the Titan panel list, and tabs in the Gathered items view of Statistics (0.5.147 to 0.5.151). Versioned notes: [release-notes/ref-0.5.151.md](release-notes/ref-0.5.151.md).

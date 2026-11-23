@@ -1,6 +1,6 @@
 # Unreleased development updates
 
-Updated 2026-11-23. Versions up to 0.5.154 are published in release-notes/ref-0.5.154.md. These changes describe source candidates since the latest published versioned notes.
+Updated 2026-11-23. Versions up to 0.5.156 are published in release-notes/ref-0.5.156.md. These changes describe source candidates since the latest published versioned notes.
 
 ## Market history from your own sales, 0.5.156
 
