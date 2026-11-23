@@ -1,6 +1,6 @@
 # Unreleased development updates
 
-Updated 2026-11-23. Versions up to 0.5.151 are published in release-notes/ref-0.5.151.md. These changes describe source candidates since the latest published versioned notes.
+Updated 2026-11-23. Versions up to 0.5.154 are published in release-notes/ref-0.5.154.md. These changes describe source candidates since the latest published versioned notes.
 
 ## Weapon masters and the map menu, 0.5.154
 
