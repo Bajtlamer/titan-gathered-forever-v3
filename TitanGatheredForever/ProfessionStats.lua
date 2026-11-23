@@ -451,11 +451,8 @@ local function savedSort(view, default, kinds)
     return default
 end
 
-local GATHERED_NOTE = 'Items from complete loot windows of the chosen gathering profession, valued at the better of the '
-    .. 'vendor price and the auction price after the fee. A rate per hour uses only the active time that is measured, '
-    .. 'with the items collected in that time. Click an item for its sources.'
-local ATTEMPTS_NOTE = 'Completed % = completed / observed attempts, including unresolved attempts. Fishing completion means '
-    .. 'a catch window. Click a row for failed and interrupted attempts and for the other details.'
+local GATHERED_NOTE = 'Valued at the better of the vendor price and the auction price after the fee. Click an item for its sources.'
+local ATTEMPTS_NOTE = 'Completed % = completed / observed attempts. Click a row for details.'
 
 local function refreshPanel(panel)
     local character = panel.character or nil
@@ -492,7 +489,7 @@ local function refreshPanel(panel)
         panel.data = View.SortGathered(rows, panel.sorts.gathered)
         panel.note:SetText(table.concat(footer, '\n'))
         panel.gatheredTable = kind and true or false
-        panel.coverage:SetText(Style.Label(GATHERED_NOTE))
+        panel.coverage:SetText(kind and '' or Style.Label(GATHERED_NOTE))
     else
         panel.data = View.Rows(character, panel.kind or nil)
         View.SortRows(panel.data, 'attempts', panel.sorts.attempts)
@@ -501,7 +498,7 @@ local function refreshPanel(panel)
             attempts, completed = attempts + row.attempts, completed + row.completed
         end
         panel.note:SetText(Style.Value(attempts) .. Style.Label(' attempts, ') .. Style.Value(completed)
-            .. Style.Label(' completed. Click a row for details.'))
+            .. Style.Label(' completed.'))
         panel.coverage:SetText(Style.Label(ATTEMPTS_NOTE))
     end
     local heads = LAYOUTS[view].heads
