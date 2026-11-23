@@ -2,9 +2,13 @@
 
 Updated 2026-11-23. Versions up to 0.5.156 are published in release-notes/ref-0.5.156.md. These changes describe source candidates since the latest published versioned notes.
 
+## Vendor comparison in the Current listing, 0.5.159
+
+- The Current listing shows again what the sale brings against selling the same units to a vendor ("Auction vs vendor", green when the auction pays more, red with "Vendor pays more" when the vendor does). It is left out for an item no vendor buys.
+
 ## Current listing shows profit and loss, 0.5.158
 
-- The Current listing of the Market history panel shows what matters for a posting and nothing else: "If sold, you earn" (the price after the 5 percent fee; the deposit comes back), "If unsold, you lose" (the deposit) and "Break-even sales" (the share of auctions that must sell for the earnings to cover the deposits lost on the others). The comparisons with a vendor, with a cost, with the last scan and with your earlier sales are gone.
+- The Current listing of the Market history panel shows what matters for a posting and nothing else: "If sold, you earn" (the price after the 5 percent fee; the deposit comes back), "If unsold, you lose" (the deposit) and "Break-even sales" (the share of auctions that must sell for the earnings to cover the deposits lost on the others). The comparisons with a cost, with the last scan and with your earlier sales are gone.
 
 ## Economy counts sales, 0.5.157
 

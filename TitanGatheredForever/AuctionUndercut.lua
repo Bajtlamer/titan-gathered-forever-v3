@@ -200,16 +200,18 @@ function Undercut.InfoText(post)
 end
 
 -- The lines of the Current listing: what the player earns when the item sells (the net after the fee; the deposit comes
--- back), what a failed auction loses (the deposit) and the share of auctions that must sell to cover those losses.
--- Nothing is compared with other auctions, a vendor or a cost.
+-- back), what that is against selling the same units to a vendor (left out when no vendor price is known), what a failed
+-- auction loses (the deposit) and the share of auctions that must sell to cover those losses.
 function Undercut.ListingLines(post)
-    if not post then return '', '', '' end
+    if not post then return '', '', '', '' end
     local Style, Coin = ns.Style, ns.Economy.Coin
     local sold = Style.Label('If sold, you earn: ') .. Style.Value(Coin(post.net))
+    local vendor = post.gain and (Style.Label('Auction vs vendor: ') .. signed(post.gain)
+        .. (post.gain <= 0 and Style.Text(Style.red, ' Vendor pays more') or '')) or ''
     local loss = post.loss and (Style.Label('If unsold, you lose: ') .. signed(-post.loss)) or ''
     local threshold = post.neededNet
         and (Style.Label('Break-even sales: ') .. Style.Value(string.format('%d%%', math.ceil(post.neededNet * 100 - 1e-9)))) or ''
-    return sold, loss, threshold
+    return sold, vendor, loss, threshold
 end
 
 local function readItemID(sell)

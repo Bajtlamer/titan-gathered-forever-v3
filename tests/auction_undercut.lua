@@ -145,17 +145,21 @@ test('the floor counts the fee: a price at the vendor price is lifted to the low
     f.undercut:Results(key, { { price = 110 } }); eq(f.set[3], 104)
 end)
 
-test('the listing shows what a sale earns and what a failed auction loses, nothing compared with others', function()
+test('the listing shows what a sale earns, the comparison with the vendor and what a failed auction loses', function()
     local ns = load()
     local U, E = ns.AuctionUndercut, ns.Economy
-    local sold, loss, threshold = U.ListingLines(E.Posting(1000, 5, 120, 100, 300))
+    local sold, vendor, loss, threshold = U.ListingLines(E.Posting(1000, 5, 120, 100, 300))
     eq(sold, '<gold>If sold, you earn: <white>4750c')
+    eq(vendor, '<gold>Auction vs vendor: <green>+<white>4250c')
     eq(loss, '<gold>If unsold, you lose: <red>-<white>120c')
     eq(threshold, '<gold>Break-even sales: <white>3%')
-    sold, loss, threshold = U.ListingLines(E.Posting(1000, 1, nil, 100))                   -- no deposit known
-    eq(sold, '<gold>If sold, you earn: <white>950c'); eq(loss, ''); eq(threshold, '')
-    sold, loss, threshold = U.ListingLines(nil)
-    eq(sold, ''); eq(loss, ''); eq(threshold, '')
+    sold, vendor = U.ListingLines(E.Posting(100, 1, 40, 100))                              -- the vendor pays more
+    eq(sold, '<gold>If sold, you earn: <white>95c')
+    eq(vendor, '<gold>Auction vs vendor: <red>-<white>5c<red> Vendor pays more')
+    sold, vendor, loss, threshold = U.ListingLines(E.Posting(1000, 1, nil, nil))           -- no vendor price, no deposit
+    eq(sold, '<gold>If sold, you earn: <white>950c'); eq(vendor, ''); eq(loss, ''); eq(threshold, '')
+    sold, vendor, loss, threshold = U.ListingLines(nil)
+    eq(sold, ''); eq(vendor, ''); eq(loss, ''); eq(threshold, '')
 end)
 
 test('the narrow panel has separate lines for costs, vendor comparison, deposit and break-even', function()

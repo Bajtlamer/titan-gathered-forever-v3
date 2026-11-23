@@ -209,6 +209,7 @@ assert(view.trend.text:find('+100.0%', 1, true))
 local function has(part) for i = 1, #view.posting do if view.posting[i].shown ~= false and view.posting[i].text and view.posting[i].text:find(part, 1, true) then return true end end end
 assert(view.panel:IsVisible() and not view.toggle:IsVisible())
 assert(has('If sold, you earn') and has('1444c'), 'the net of 20 units at 76 after the 5 percent fee')
+assert(has('Auction vs vendor') and has('1144c'), 'the net of the sale against what the vendor pays for 20 units')
 assert(has('If unsold, you lose') and has('15c'), 'a failed auction loses the deposit')
 assert(not has('Gain vs vendor') and not has('last scan') and not has('sales avg'), 'no comparison with other auctions')
 assert(view.received.text:find('23905c', 1, true))
