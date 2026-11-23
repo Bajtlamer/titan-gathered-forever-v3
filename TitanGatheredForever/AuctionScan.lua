@@ -1,10 +1,9 @@
 local _, ns = ...
 -- Prices from the auction house. One full scan (C_AuctionHouse.ReplicateItems, answered with
--- REPLICATE_ITEM_LIST_UPDATE) is read in small steps and reduced to one lowest buyout per unit and item, for the items
--- of interest only: the reagents of the installed profession addons (they keep the quantity on offer and the number of
--- auctions as well) and the products of their recipes (stored in one number: lowest buyout and number of auctions).
--- The whole list has to be read, but nothing else is kept, so a player with one profession addon keeps the prices of
--- that profession only. Only buyout prices count, because a bid-only auction has no price that can be paid at once.
+-- REPLICATE_ITEM_LIST_UPDATE) is read in small steps and reduced to one lowest buyout per unit and item,
+-- for every item: the reagents of the installed profession addons keep the quantity on offer and the number of auctions
+-- as well, every other item is stored in one number (lowest buyout and number of auctions), so the Sell tab can show
+-- the scanned price of any item. Only buyout prices count, because a bid-only auction has no price that can be paid at once.
 -- The client allows a full scan about every 15 minutes, and a request goes through the throttled message system of
 -- the auction house, whose events are shown and logged.
 local Scan = {}
@@ -260,13 +259,15 @@ function Scan.DefaultAPI()
         local function number(value) return ns.IsPublic(value) and type(value) == 'number' and value or nil end
         return number(result[18]), number(result[4]), number(result[11])
     end
-    -- Items of interest: the reagents of the installed profession addons, and the products of their recipes.
+    -- The reagents of the installed profession addons keep a full record; every other item one packed number.
     api.Reagent = function(itemID) return ns.Catalog ~= nil and ns.Catalog.Get(itemID) ~= nil end
-    api.Keep = function(itemID) return api.Reagent(itemID) or (ns.Catalog ~= nil and ns.Catalog.IsProduct(itemID)) end
+    -- Every item with a buyout is priced: the Sell tab and its market history can offer any item the player owns. The
+    -- items outside the catalogue are packed into one number each, so the saved file stays small.
+    api.Keep = function(itemID) return type(itemID) == 'number' end
     api.Save = function(result)
         if not ns.db then return end
         local realm = GetRealmName and GetRealmName() or nil
-        if ns.AuctionHistory then ns.AuctionHistory.Archive(ns.db, result.at, realm) end
+        if ns.AuctionHistory then ns.AuctionHistory.DropArchive(ns.db) end
         ns.db.auction = { realm = realm, at = result.at, entries = result.entries,
             items = result.items, others = result.others, distinct = result.distinct }
     end

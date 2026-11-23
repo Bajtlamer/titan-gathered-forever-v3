@@ -246,7 +246,8 @@ test('the client list is read at the documented positions and hidden values are 
     local id2, count2 = api.Item(2); eq(id2, 2589); eq(count2, nil)
     eq(api.Count(), 2); eq(api.Reagent(2589), true); eq(api.Reagent(5), false)
     ns.Catalog.IsProduct = function(id) return id == 700 end
-    eq(api.Keep(2589), true); eq(api.Keep(700), true); eq(api.Keep(5), false)       -- reagents and products are of interest
+    eq(api.Keep(2589), true); eq(api.Keep(700), true); eq(api.Keep(5), true)        -- every item is priced: the Sell tab can offer any item
+    eq(api.Keep(nil), false)
     C_AuctionHouse = nil
 end)
 

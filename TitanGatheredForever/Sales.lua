@@ -36,6 +36,32 @@ function Sales.Amounts(entry)
     if reconciled(buyout) then return buyout, buyout - fee end
 end
 
+-- The best sale of an item: the highest net price per unit the player ever got on a realm (the player's own invoices
+-- only). It is kept in store.best, apart from the bounded ledger, so an old record is not lost when the ledger forgets.
+function Sales.NoteBest(store, entry)
+    if type(entry) ~= 'table' or type(entry.realm) ~= 'string' or type(entry.itemID) ~= 'number'
+        or type(entry.count) ~= 'number' or entry.count <= 0 then return end
+    local _, net = Sales.Amounts(entry)
+    if not net or net <= 0 then return end
+    local unit = net / entry.count
+    store.best = type(store.best) == 'table' and store.best or {}
+    local realm = store.best[entry.realm] or {}
+    store.best[entry.realm] = realm
+    local old = realm[entry.itemID]
+    if not old or unit > old.price then
+        realm[entry.itemID] = { price = unit, at = entry.soldAt, units = entry.count }
+    end
+end
+
+-- All entries of the ledger, or only those of one realm and item.
+function Sales.UpdateBest(store, realm, itemID)
+    for _, entry in ipairs(store.entries or {}) do
+        if type(entry) == 'table' and (not realm or entry.realm == realm) and (not itemID or entry.itemID == itemID) then
+            Sales.NoteBest(store, entry)
+        end
+    end
+end
+
 -- The overview includes all confirmed sales on this realm, including invoices whose item ID is unknown.
 function Sales.Totals(entries, realm, character)
     local total = {
@@ -222,6 +248,7 @@ function Sales:Consider(index, now, claimed)
         buyer = wanted.buyer, bid = wanted.bid, buyout = wanted.buyout, deposit = wanted.deposit, fee = wanted.fee }
     entries[#entries + 1] = entry
     claimed[entry] = true
+    Sales.NoteBest(self.store, entry)
     while #entries > Sales.MAX do table.remove(entries, 1) end
     self:Log({ result = 'recorded', subject = header.subject, sender = header.sender, money = received,
         days = header.days, invoice = raw(invoice) })

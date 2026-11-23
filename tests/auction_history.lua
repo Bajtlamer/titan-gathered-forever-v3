@@ -21,35 +21,34 @@ local function snapshot(at, minimum)
     return { at = at, items = { [ore] = { min = minimum } }, others = { [gear] = 22002 } }
 end
 
--- The live scan writer preserves a compatible previous snapshot and keeps the last result for each day.
-ns.db = { auction = snapshot(now - 2 * day, 8000) }
+-- The scan is one snapshot: the lowest buyout of the last scan. No daily history of scans is kept (it would be a large
+-- file), so a scan never writes an archive and an old one is dropped.
+ns.db = { auction = snapshot(now - 2 * day, 8000), auctionHistory = { Forever = { [18] = { at = 1, prices = {} } } } }
 ns.db.auction.realm = 'Forever'
 local scan = ns.AuctionScan.DefaultAPI()
-local points, latest = History.Prices(ns.db, 'Forever', ore, now)
-eq(#points, 1); eq(latest.price, 8000)
-scan.Save(snapshot(now - day - 200, 8600))
+local latest, reason = History.ScanPrice(ns.db, 'Forever', ore, now)
+eq(latest.price, 8000); eq(reason, nil)
+eq(History.ScanPrice(ns.db, 'Forever', gear, now).price, 22)                -- a packed item outside the catalogue
+latest, reason = History.ScanPrice(ns.db, 'Forever', 555, now)
+eq(latest, nil); eq(reason, 'missing')                                     -- scanned, but the item is not in the scan
+latest, reason = History.ScanPrice(ns.db, 'Another realm', ore, now)
+eq(latest, nil); eq(reason, 'noscan')                                      -- no scan of this realm
+latest, reason = History.ScanPrice({}, 'Forever', ore, now)
+eq(latest, nil); eq(reason, 'noscan')
 scan.Save(snapshot(now - day, 9000))
 scan.Save(snapshot(now, 9200))
-points, latest = History.Prices(ns.db, 'Forever', ore, now)
-eq(#points, 3); eq(points[1].price, 8000); eq(points[2].price, 9000); eq(latest.price, 9200)
-points = History.Prices(ns.db, 'Forever', gear, now)
-eq(points[1].price, 22)
-points, latest = History.Prices(ns.db, 'Another realm', ore, now)
-eq(#points, 0); eq(latest, nil)
-points, latest = History.Prices(ns.db, 'Forever', ore, now + 8 * day)
-eq(#points, 0); eq(latest.price, 9200)
-scan.Save(snapshot(now + 8 * day, 7500))
-assert(next(ns.db.auctionHistory) == nil, 'expired snapshots should be pruned from storage')
+eq(ns.db.auctionHistory, nil)                                              -- no archive of scans, the old one is dropped
+eq(History.ScanPrice(ns.db, 'Forever', ore, now).price, 9200)
 ns.AuctionScan.Clear()
-points, latest = History.Prices(ns.db, 'Forever', ore, now + 8 * day)
-eq(#points, 0); eq(latest, nil)
+latest, reason = History.ScanPrice(ns.db, 'Forever', ore, now)
+eq(latest, nil); eq(reason, 'noscan')
 
--- A newer scan without stock leaves a missing observation. It cannot become a zero-price point.
+-- A newer scan without stock leaves the item missing. It cannot become a zero-price point.
 ns.db = {}
 scan.Save(snapshot(now - day, 7000))
 scan.Save({ at = now, items = {}, others = {} })
-points, latest = History.Prices(ns.db, 'Forever', ore, now)
-eq(#points, 1); eq(latest.price, 7000)
+latest, reason = History.ScanPrice(ns.db, 'Forever', ore, now)
+eq(latest, nil); eq(reason, 'missing')
 
 local function sale(age, count, buyout, itemID, realm)
     local fee = buyout and math.floor(buyout * 0.05)
@@ -81,6 +80,24 @@ summary = History.Sales({ sale(2, 1, 100), sale(2, 3, 600), sale(1, 2, 600), oth
 eq(#summary.points, 2)
 eq(summary.points[1].price, 166.25)
 eq(summary.points[2].price, 285)
+
+-- The best sale of an item (the highest net price per unit the player ever got) is kept apart from the ledger, which is
+-- bounded, and covers every day, not only the last 30. Only the player's own sales count, never the auction house.
+local store2 = { entries = { sale(3, 10, 10000), sale(60, 1, 5000), sale(4, 30, 15000), sale(1, 2, 100, gear),
+    sale(2, 1, 9000, ore, 'Another realm') } }
+ns.Sales.UpdateBest(store2)
+local best = History.BestSale(store2, 'Forever', ore)
+eq(best.price, 4750); eq(best.units, 1); eq(best.at, now - 60 * day)
+eq(History.BestSale(store2, 'Another realm', ore).price, 8550)
+eq(History.BestSale(store2, 'Forever', 987654), nil)
+store2.entries = {}                                  -- the ledger forgets, the best sale does not
+eq(History.BestSale(store2, 'Forever', ore).price, 4750)
+store2.entries = { sale(1, 1, 20000) }               -- a better sale replaces it, a worse one never does
+ns.Sales.UpdateBest(store2, 'Forever', ore)
+eq(History.BestSale(store2, 'Forever', ore).price, 19000)
+store2.entries = { sale(1, 1, 100) }
+ns.Sales.UpdateBest(store2)
+eq(History.BestSale(store2, 'Forever', ore).price, 19000)
 
 -- A real ledger pass carries the confirmed invoice values through to the selected item's comparison basis.
 local store = {}
@@ -158,7 +175,8 @@ _G.C_Item = { GetItemID = function(location) return location.id end }
 ns.Economy.VendorSell = function() return 15 end
 ns.ItemName = function(id) return id == ore and 'Copper Ore' or 'Test Gear' end
 local function location(id) return { id = id, IsValid = function(self) return not self.invalid end } end
-ns.db.sales = { entries = entries }
+ns.db.sales = { entries = {} }                     -- no sale of anything at first
+ns.db.auction = nil                                -- and no scan yet
 local view = assert(History.Attach(ah))
 assert(not view.panel:IsVisible() and not view.toggle:IsVisible())
 item:Show()
@@ -167,7 +185,9 @@ item:SetItem(location(gear))
 assert(view.panel:IsVisible() and not view.toggle:IsVisible())
 eq(view.panel.anchor[1], 'TOPRIGHT')
 eq(view.item.text, ns.Style.Value('Test Gear'))
-eq(view.chartTitle.text, ns.Style.Label('Scanned buyout / unit'))
+eq(view.chartTitle.text, ns.Style.Label('Last scan buyout / unit'))
+assert(view.chart.note.text:find('No scan yet', 1, true), view.chart.note.text)                 -- never scanned
+assert(view.chart.note.shown ~= false)
 assert(view.posting[1].text:find('Enter a buyout', 1, true))
 item:SetItem({ id = ore, rejected = true })
 eq(view.item.text, ns.Style.Value('Test Gear'))
@@ -178,27 +198,30 @@ eq(view.toggle.anchor[4], -40)
 item:Hide()
 commodity:Show()
 commodity.price = 76
+ns.db.sales.entries = entries
+ns.db.auction = { realm = 'Forever', at = now, items = {}, others = { [gear] = 22002, [ore] = ns.AuctionScan.Pack(7000, 1) } }
 commodity:SetItem(location(ore))
 assert(not view.panel:IsVisible() and view.toggle:IsVisible())
 view.toggle.scripts.OnClick()
 eq(view.item.text, ns.Style.Value('Copper Ore'))
 eq(view.chartTitle.text, ns.Style.Label('Your sales net / unit'))
 assert(view.trend.text:find('+100.0%', 1, true))
+local function has(part) for i = 1, #view.posting do if view.posting[i].text and view.posting[i].text:find(part, 1, true) then return true end end end
 assert(view.panel:IsVisible() and not view.toggle:IsVisible())
-assert(view.posting[1].text:find('1144c', 1, true))
-assert(view.posting[2].text:find('15c', 1, true))
-assert(view.posting[3].text:find('2%', 1, true))
-assert(view.posting[4].text:find('-98.9%', 1, true))
-assert(view.posting[5].text:find('522c', 1, true))
+assert(has('1144c'))
+assert(has('15c'))
+assert(has('2%'))
+assert(has('-98.9%'))
+assert(has('522c'))
 assert(view.received.text:find('23905c', 1, true))
 assert(view.averageNet.text:find('594c', 1, true))
 commodity.price = 100
 History.UpdatePosting(commodity, ns.AuctionUndercut.Posting(commodity))
-assert(view.posting[1].text:find('1600c', 1, true))
+assert(has('1600c'))
 History.UpdatePosting(item, nil)
-assert(view.posting[1].text:find('1600c', 1, true), 'the hidden item form cannot replace the commodity figures')
+assert(has('1600c'), 'the hidden item form cannot replace the commodity figures')
 History.UpdatePosting(commodity, ns.AuctionUndercut.Posting(commodity), ns.Style.Label('Vendor floor applied'))
-assert(view.posting[4].text:find('Vendor floor applied', 1, true))
+assert(has('Vendor floor applied'))
 History.UpdatePosting(commodity, ns.AuctionUndercut.Posting(commodity))
 assert(not view.posting[4].text:find('Vendor floor applied', 1, true))
 commodity:SetItem(nil)
@@ -214,6 +237,33 @@ assert(not view.panel:IsVisible() and not view.toggle:IsVisible())
 commodity:SetItem(location(gear))
 assert(view.panel:IsVisible(), 'a native clear-and-replace must restore the open overlay')
 eq(view.item.text, ns.Style.Value('Test Gear'))
+-- No sale of the item: the last scan gives one point, and the missing data is explained in words.
+ns.db.sales.entries = {}
+ns.db.auction = { realm = 'Forever', at = now - 3600, items = {}, others = { [gear] = 22002 } }
+History.Refresh()
+eq(view.chartTitle.text, ns.Style.Label('Last scan buyout / unit'))
+eq(view.chart.dots[1].shown, true); eq(view.chart.dots[2].shown, false); eq(view.chart.note.shown, false)
+assert(view.chart.high.text:find('22c', 1, true), view.chart.high.text)
+eq(view.trend.text, '')
+ns.db.auction = { realm = 'Forever', at = now - 3600, items = {}, others = {} }
+History.Refresh()
+eq(view.chart.dots[1].shown, false); assert(view.chart.note.text:find('not in the last scan', 1, true), view.chart.note.text)
+ns.db.auction = nil
+History.Refresh()
+assert(view.chart.note.text:find('No scan yet', 1, true))
+ns.db.sales.entries = { sale(3, 10, 10000, gear), sale(60, 1, 5000, gear) }
+History.Refresh()
+assert(view.best.text:find('4750c', 1, true), view.best.text)                      -- the best sale, though older than 30 days
+ns.db.sales.entries = { sale(2, 5, 1000, gear) }
+History.Refresh()
+assert(view.best.text:find('4750c', 1, true), 'the best sale stays in the saved data after the ledger forgot it')
+ns.db.sales.best = nil
+ns.db.sales.entries = {}
+-- One day of sales is already the player's own history: one point, no trend.
+ns.db.sales.entries = { sale(2, 5, 1000, gear) }
+History.Refresh()
+eq(view.chartTitle.text, ns.Style.Label('Your sales net / unit'))
+eq(view.chart.dots[1].shown, true); eq(view.chart.dots[2].shown, false); eq(view.trend.text, '')
 ah.left = 360
 view.panel.scripts.OnUpdate(view.panel, 1)
 eq(view.panel.anchor[1], 'TOPRIGHT')
