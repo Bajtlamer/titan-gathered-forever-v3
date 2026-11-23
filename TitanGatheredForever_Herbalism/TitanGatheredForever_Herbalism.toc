@@ -1,7 +1,7 @@
 ## Interface: 16001
 ## Title: Titan Gathered Forever: Herbalism
 ## Notes: Optional Herbalism material catalogue for Titan Gathered Forever.
-## Version: 0.5.152
+## Version: 0.5.153
 ## IconTexture: Interface\AddOns\TitanGatheredForever_Herbalism\Artwork\AddonIcon
 ## Dependencies: Titan, TitanGatheredForever
 

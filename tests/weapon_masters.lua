@@ -78,7 +78,7 @@ test('a price is shown only when the game reported it at the trainer', function(
     local ns = fresh({ class = 'WARRIOR' })
     local t = tooltip()
     ns.WeaponMasters.FillTooltip(t, { kind = 'WeaponMaster', npcID = 11867 })
-    assert(not t:text():find('1000c', 1, true))
+    assert(not t:text():find('1000c', 1, true) and not t:text():find('rice', 1, true), 'no price, no word about prices')
     assert(ns.WeaponMasters.Observe(11867, { { name = 'Crossbows', cost = 1000 }, { name = 'Staves', cost = 1000 } }))
     t = tooltip()
     ns.WeaponMasters.FillTooltip(t, { kind = 'WeaponMaster', npcID = 11867 })
@@ -100,7 +100,7 @@ test('polearms are locked below level 20 and the status stays unknown without th
     GetNumSkillLines = nil
     t = tooltip()
     ns.WeaponMasters.FillTooltip(t, { kind = 'WeaponMaster', npcID = 11867 })
-    assert(t:text():find('Daggers | <white>Can learn', 1, true) or t:text():find('Daggers | <gray>Unknown', 1, true), t:text())
+    assert(t:text():find('Daggers | ', 1, true) and not t:text():find('Unknown', 1, true), t:text())
 end)
 
 for _, entry in ipairs(tests) do

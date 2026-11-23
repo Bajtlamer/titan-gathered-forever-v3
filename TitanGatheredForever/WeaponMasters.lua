@@ -144,7 +144,7 @@ function WeaponMasters.FillTooltip(tooltip, node)
         if row.status == 'known' then right = Style.Text(Style.green, 'Known')
         elseif row.status == 'class' then right = Style.Text(Style.gray, 'Not for your class')
         elseif row.status == 'level' then right = Style.Text(Style.gray, 'From level ' .. row.level)
-        elseif row.status == 'unknown' then right = Style.Text(Style.gray, 'Unknown')
+        elseif row.status == 'unknown' then right = ''
         else
             local price = row.cost and ns.NpcSources and ns.NpcSources.CoinIcons(row.cost)
             right = Style.Text(Style.white, 'Can learn' .. (price and ('  ' .. price) or ''))
@@ -152,10 +152,6 @@ function WeaponMasters.FillTooltip(tooltip, node)
         tooltip:AddDoubleLine(row.label, right)
         small()
     end
-    local saw = ns.db and ns.db.weaponMasters and ns.db.weaponMasters[node.npcID]
-    tooltip:AddLine(Style.Text(Style.gray, saw and 'Prices as the trainer showed them.'
-        or 'Place and skills from a guide. Open the trainer once to see the prices.'))
-    small()
 end
 
 -- Called with the services of a trainer window. Records the prices of a weapon master (and only of those).
