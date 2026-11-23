@@ -698,15 +698,17 @@ test('profession statistics attach below the native window, preserve recipe coun
     ns.Reports.ItemSources=function(owner,itemID,character)ns.sourcesAsked={itemID,character}end
     view.panel.SetView('gathered')
     eq(view.panel.view,'gathered');eq(asked[#asked][2],nil,'all gathering professions at first');eq(asked[#asked][3],'quantity')
-    eq(#view.panel.data,7,'the small spacer is left out, the one between two professions stays, each profession has its column names')
-    eq(view.panel.lines[4].cells[1].text,'');assert(view.panel.lines[5].cells[1].text:find('Fishing',1,true))
-    eq(view.panel.lines[2].cells[1].text,ns.Style.Label('Item'));eq(view.panel.lines[2].cells[5].text,ns.Style.Label('Total value'))
-    eq(view.panel.lines[6].cells[2].text,ns.Style.Label('Quantity'),'every profession repeats the column names')
-    view.panel.SelectKind('Herbs');eq(asked[#asked][2],'Herbs')
-    view.panel.SelectKind(false);eq(asked[#asked][2],nil)
+    eq(#view.panel.data,3,'the overview has the summaries only: no items and no small spacer');eq(view.panel.gatheredTable,false)
+    assert(view.panel.lines[1].cells[1].text:find('Herbalism',1,true));eq(view.panel.lines[2].cells[1].text,'')
+    assert(view.panel.lines[3].cells[1].text:find('Fishing',1,true))
+    eq(view.panel.tabs[1].label.text,ns.Style.Value('Overview'),'the overview tab is chosen');eq(view.panel.tabs[2].value,'Herbs')
+    view.panel.tabs[2].scripts.OnClick(view.panel.tabs[2]);eq(asked[#asked][2],'Herbs');eq(view.panel.gatheredTable,true)
+    eq(view.panel.tabs[2].label.text,ns.Style.Value('Herbalism'),'a tab of a profession shows its table under one header')
+    eq(#view.panel.data,5,'the small spacer is left out, the one between two professions stays')
+    view.panel.SelectKind(false);eq(asked[#asked][2],nil);view.panel.SelectKind('Herbs')
     assert(view.panel.lines[1].cells[1].text:find('Herbalism',1,true))
-    eq(view.panel.lines[3].cells[1].text,'Item 3');eq(view.panel.lines[3].cells[2].text,ns.Style.Value(5))
-    eq(view.panel.lines[3].cells[3].text,ns.Style.Value('50.0%'));eq(view.panel.lines[3].cells[5].text,'500c')
+    eq(view.panel.lines[2].cells[1].text,'Item 3');eq(view.panel.lines[2].cells[2].text,ns.Style.Value(5))
+    eq(view.panel.lines[2].cells[3].text,ns.Style.Value('50.0%'));eq(view.panel.lines[2].cells[5].text,'500c')
     eq(view.panel.head[2].text,ns.Style.Label('Quantity'));eq(view.panel.head[5].text,ns.Style.Label('Total value'))
     eq(view.panel.head[6].text,ns.Style.Label('Best sale'))
     view.panel.headButtons[5].scripts.OnClick();eq(asked[#asked][3],'value')
@@ -724,7 +726,7 @@ test('profession statistics attach below the native window, preserve recipe coun
     end}
     local function order()local ids={};for _,row in ipairs(view.panel.data)do if row.itemID then ids[#ids+1]=row.itemID end end;return table.concat(ids,',')end
     view.panel.SetView('gathered');view.panel.sorts.gathered={column=2,descending=true};ns.settings.columnSort={}
-    view.panel.SetView('gathered');eq(order(),'3,5,6,7,4'..'')                     -- the order of the data: the quantity, as before
+    view.panel.SelectKind('Herbs');eq(order(),'3,5,6,7,4'..'')                     -- the order of the data: the quantity, as before
     view.panel.headButtons[5].scripts.OnClick();eq(order(),'5,3,6,4,7')            -- Total value: the highest first, no value last, per profession
     view.panel.headButtons[5].scripts.OnClick();eq(order(),'3,5,6,7,4')            -- again: the lowest first
     view.panel.headButtons[1].scripts.OnClick();eq(order(),'3,5,6,4,7')            -- Item: a to z
@@ -733,8 +735,7 @@ test('profession statistics attach below the native window, preserve recipe coun
     view.panel.headButtons[3].scripts.OnClick();eq(order(),'3,5,6,7,4')            -- Share, the highest first
     eq(ns.settings.columnSort.statistics_gathered.column,3);eq(ns.settings.columnSort.statistics_gathered.descending,true)
     view.panel.sorts.gathered={column=2,descending=true};ns.settings.columnSort={}
-    view.panel.lines[3].scripts.OnClick(view.panel.lines[3]);eq(ns.sourcesAsked[1],3)
-    ns.sourcesAsked=nil;view.panel.lines[2].scripts.OnClick(view.panel.lines[2]);eq(ns.sourcesAsked,nil,'the column names are not an item')
+    view.panel.lines[2].scripts.OnClick(view.panel.lines[2]);eq(ns.sourcesAsked[1],3)
     local gatheredOptions=view.KindOptions(view.panel)
     eq(#gatheredOptions,2);eq(gatheredOptions[1].value,false);eq(gatheredOptions[1].label,'All gathering');eq(gatheredOptions[2].value,'Herbs')
     view.panel.SetView('attempts')

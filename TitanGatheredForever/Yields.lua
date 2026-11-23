@@ -105,7 +105,7 @@ function Yields.Rows(character, filter, sort)
                 rows[#rows + 1] = { summary = true, spacer = true, small = true, kind = kind, text = '' }
                 for index = 1, math.min(#list, Yields.LIMIT) do rows[#rows + 1] = list[index] end
                 if #list > Yields.LIMIT then
-                    rows[#rows + 1] = { summary = true, kind = kind, text = string.format('%d more items not shown.', #list - Yields.LIMIT) }
+                    rows[#rows + 1] = { summary = true, more = true, kind = kind, text = string.format('%d more items not shown.', #list - Yields.LIMIT) }
                 end
             end
         end
