@@ -159,8 +159,13 @@ test('the listing shows what a sale earns only when it beats the vendor, and the
     eq(loss, '<gold>If unsold, you lose: <red>-<white>40c')
     sold, vendor, loss, cover = U.ListingLines(E.Posting(1000, 1, 50, 100))                -- one item: it must sell
     eq(cover, '<gold>To cover the deposit: <white>the item must sell')
-    sold, vendor, loss, cover = U.ListingLines(E.Posting(1000, 3, 5000, 100))              -- the deposit needs all of them
+    sold, vendor, loss, cover = U.ListingLines(E.Posting(1000, 3, 2550, 100))              -- the deposit needs all of them
     eq(cover, '<gold>Units to cover the deposit: <white>all 3')
+    sold, vendor, loss, cover = U.ListingLines(E.Posting(1000, 3, 5000, 100))              -- even a full sale gains less than the deposit
+    eq(cover, '<red>Not worth the risk: the gain is less than the deposit')
+    eq(sold, '<gold>If sold, you earn: <white>2850c')                                       -- the sale itself still beats the vendor
+    sold, vendor, loss, cover = U.ListingLines(E.Posting(1000, 1, 5000, 100))              -- a single cheap item with a big deposit
+    eq(cover, '<red>Not worth the risk: the gain is less than the deposit')
     sold, vendor, loss, cover = U.ListingLines(E.Posting(1000, 1, nil, nil))               -- no vendor price, no deposit
     eq(sold, '<gold>If sold, you earn: <white>950c'); eq(vendor, ''); eq(loss, ''); eq(cover, '')
     sold, vendor, loss, cover = U.ListingLines(nil)
