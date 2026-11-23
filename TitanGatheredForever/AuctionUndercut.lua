@@ -199,6 +199,25 @@ function Undercut.InfoText(post)
     return head, profit, gain, loss, threshold
 end
 
+-- The three lines of the Current listing: what a sale earns after the cost (or what it brings when no cost is known),
+-- what a failed auction loses (the deposit) and the share of auctions that must sell for the profit to cover those
+-- losses. Nothing is compared with other auctions or with a vendor.
+function Undercut.ListingLines(post)
+    if not post then return '', '', '' end
+    local Style, Coin = ns.Style, ns.Economy.Coin
+    local sold = post.profit and (Style.Label('If sold, profit: ') .. signed(post.profit))
+        or (Style.Label('If sold, you get: ') .. Style.Value(Coin(post.net)))
+    local loss = post.loss and (Style.Label('If unsold, loss: ') .. signed(-post.loss)) or ''
+    local threshold = ''
+    if post.neededProfit == 'never' then
+        threshold = Style.Text(Style.red, 'A sale does not cover the cost')
+    elseif post.neededProfit then
+        threshold = Style.Label('Break-even sales: ')
+            .. Style.Value(string.format('%d%%', math.ceil(post.neededProfit * 100 - 1e-9)))
+    end
+    return sold, loss, threshold
+end
+
 local function readItemID(sell)
     local location = sell:GetItem()
     if ns.IsPublic(location) and location and location:IsValid() then

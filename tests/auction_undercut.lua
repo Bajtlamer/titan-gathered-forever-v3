@@ -145,6 +145,22 @@ test('the floor counts the fee: a price at the vendor price is lifted to the low
     f.undercut:Results(key, { { price = 110 } }); eq(f.set[3], 104)
 end)
 
+test('the listing shows what a sale earns after the cost and what a failed auction loses, nothing compared with others', function()
+    local ns = load()
+    local U, E = ns.AuctionUndercut, ns.Economy
+    local sold, loss, threshold = U.ListingLines(E.Posting(1000, 5, 120, 100, 300))
+    eq(sold, '<gold>If sold, profit: <green>+<white>3250c')
+    eq(loss, '<gold>If unsold, loss: <red>-<white>120c')
+    eq(threshold, '<gold>Break-even sales: <white>4%')
+    sold, loss, threshold = U.ListingLines(E.Posting(100, 1, 40, 100, 100))
+    eq(sold, '<gold>If sold, profit: <red>-<white>5c')
+    eq(threshold, '<red>A sale does not cover the cost')
+    sold, loss, threshold = U.ListingLines(E.Posting(1000, 1, nil, 100))                   -- no cost, no deposit
+    eq(sold, '<gold>If sold, you get: <white>950c'); eq(loss, ''); eq(threshold, '')
+    sold, loss, threshold = U.ListingLines(nil)
+    eq(sold, ''); eq(loss, ''); eq(threshold, '')
+end)
+
 test('the narrow panel has separate lines for costs, vendor comparison, deposit and break-even', function()
     local ns = load()
     local U, E = ns.AuctionUndercut, ns.Economy
