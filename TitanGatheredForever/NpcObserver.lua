@@ -148,6 +148,11 @@ function Obs:ReadTrainerNow(event)
             profession = kind
         end
     end
+    if not profession and ns.WeaponMasters and ns.WeaponMasters.Observe(npc.id, services) then
+        self:Log(event, 'weapon-master', { npc = npc.id, services = #services })
+        if ns.Map and ns.Map.Update then ns.Map.Update() end
+        return
+    end
     if not profession then -- class or non-profession trainer, or the client gave no skill requirement
         self:Log(event, 'no-profession', { npc = npc.id, services = #services, first = services[1].name })
         return

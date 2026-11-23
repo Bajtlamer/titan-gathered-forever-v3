@@ -136,6 +136,16 @@ test('the trainer of a profession whose addon is not installed is not recorded',
     eq(ns.db.npcs[3167].profession, 'Cooking')
 end)
 
+test('the window of a weapon master records the prices of the weapon skills and no profession', function()
+    local ns, observer = fresh({ Npc = function() return { id = 11867, name = 'Woo Ping', mapID = 1453, x = 0.64, y = 0.69 } end,
+        TrainerServices = function() return { { name = 'Crossbows', cost = 1000 }, { name = 'Staves', cost = 1000 } } end })
+    local seen
+    ns.WeaponMasters = { Observe = function(id, services) seen = { id, #services }; return true end }
+    observer:TrainerShown()
+    eq(seen[1], 11867); eq(seen[2], 2)
+    eq(ns.db.npcLog[#ns.db.npcLog].result, 'weapon-master'); eq(next(ns.db.npcs), nil)
+end)
+
 test('every trainer attempt is logged with the reason it did or did not record', function()
     local services = {}
     local npc = nil

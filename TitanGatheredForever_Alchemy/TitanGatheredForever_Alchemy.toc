@@ -1,7 +1,7 @@
 ## Interface: 16001
 ## Title: Titan Gathered Forever: Alchemy
 ## Notes: Optional Alchemy material catalogue for Titan Gathered Forever.
-## Version: 0.5.151
+## Version: 0.5.152
 ## IconTexture: Interface\AddOns\TitanGatheredForever_Alchemy\Artwork\AddonIcon
 ## Dependencies: Titan, TitanGatheredForever
 

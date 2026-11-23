@@ -153,7 +153,7 @@ local function fixture(interface, saved, noBroker, noModules)
     end }
     local ns = {}
     for _, path in ipairs({ 'Localization/enUS.lua', 'Style.lua', 'Data/Metadata.lua', 'Data/NpcSeed.lua', 'Catalog.lua',
-                            'Settings.lua', 'DebugLog.lua', 'Professions.lua', 'KnownRecipes.lua', 'Inventory.lua', 'Gathering.lua', 'History.lua', 'Actions.lua', 'PvP.lua', 'Production.lua', 'Crafting.lua', 'Export.lua', 'Observations.lua', 'Sources.lua', 'NpcSources.lua', 'NpcObserver.lua', 'PinStyle.lua', 'IconConfig.lua', 'FlightPaths.lua', 'Transport.lua', 'Map.lua', 'Minimap.lua',
+                            'Settings.lua', 'DebugLog.lua', 'Professions.lua', 'KnownRecipes.lua', 'Inventory.lua', 'Gathering.lua', 'History.lua', 'Actions.lua', 'PvP.lua', 'Production.lua', 'Crafting.lua', 'Export.lua', 'Observations.lua', 'Sources.lua', 'NpcSources.lua', 'WeaponMasters.lua', 'NpcObserver.lua', 'PinStyle.lua', 'IconConfig.lua', 'FlightPaths.lua', 'Transport.lua', 'Map.lua', 'Minimap.lua',
                             'Tooltips.lua', 'Reports.lua', 'CraftingView.lua', 'ProfessionButton.lua', 'ProfessionStats.lua', 'Movable.lua', 'AuctionScan.lua', 'AuctionUndercut.lua', 'Sales.lua', 'LegacyFolders.lua', 'Economy.lua', 'LootIncome.lua', 'VendorSales.lua', 'QuestIncome.lua', 'EconomyView.lua', 'AuctionHistory.lua', 'Yields.lua', 'RecipeBrowser.lua', 'MinimapButton.lua', 'Titan.lua', 'Core.lua' }) do
         assert(loadfile('TitanGatheredForever/' .. path))('TitanGatheredForever', ns)
     end
@@ -364,6 +364,26 @@ test('the Titan menu offers the four item orders and the choice is saved and app
     eq(ns.settings.titanSort, 'most')
     s.broker.OnClick({}, 'RightButton')
     assert(s.menu.radios['Most first'].selected()); assert(not s.menu.radios['Item ID'].selected())
+end)
+
+test('weapon masters can be switched off in the Titan menu and in the map menu, which holds every display switch', function()
+    local s, ns = fixture(); s:Start()
+    eq(ns.settings.mapWeaponMasters, true)
+    s.broker.OnClick({}, 'RightButton')
+    local entry = s.menu.checkboxes['Show weapon masters']
+    assert(entry and entry.selected(), 'the Titan menu has the switch, on by default')
+    entry.callback(); eq(ns.settings.mapWeaponMasters, false)
+    local world = { mapID = 1453, GetMapID = function(self) return self.mapID end }
+    ns.Titan.MapMenu({}, world)
+    local map = s.menu
+    for _, label in ipairs({ 'Gathering spots', 'Profession trainers', 'Recipe vendors', 'Weapon masters', 'Flight points', 'Boat and zeppelin routes' }) do
+        assert(map.checkboxes[label], 'the map menu has ' .. label)
+    end
+    assert(not map.checkboxes['Weapon masters'].selected(), 'the map menu shows the switch that was turned off')
+    map.checkboxes['Weapon masters'].callback(); eq(ns.settings.mapWeaponMasters, true)
+    assert(map.submenus['Clear saved spots'], 'deleting the saved spots is the last entry of the map menu')
+    assert(not map.buttons['Scan now (the auction house must be open)'] and not map.buttons['Show status report'],
+        'nothing that is not about the map')
 end)
 
 test('a product outside the catalogue gets its auction price, the vendor comparison and nothing else', function()

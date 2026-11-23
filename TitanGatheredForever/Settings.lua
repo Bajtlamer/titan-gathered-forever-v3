@@ -34,6 +34,7 @@ function ns.Settings.Initialize(saved)
     if type(settings.recordPvP) ~= 'boolean' then settings.recordPvP = true end
     if type(settings.mapTrainers) ~= 'boolean' then settings.mapTrainers = true end
     if type(settings.mapRecipeVendors) ~= 'boolean' then settings.mapRecipeVendors = true end
+    if type(settings.mapWeaponMasters) ~= 'boolean' then settings.mapWeaponMasters = true end
     if type(settings.recordNpcs) ~= 'boolean' then settings.recordNpcs = true end
     if type(settings.auctionAutoScan) ~= 'boolean' then settings.auctionAutoScan = false end
     if type(settings.auctionTooltips) ~= 'boolean' then settings.auctionTooltips = true end
@@ -92,6 +93,7 @@ function ns.Settings.Initialize(saved)
     if type(saved.flightVisits) ~= 'table' then saved.flightVisits = {} end
     if type(saved.pvp) ~= 'table' then saved.pvp = {} end
     if type(saved.npcs) ~= 'table' then saved.npcs = {} end
+    if type(saved.weaponMasters) ~= 'table' then saved.weaponMasters = {} end
     if type(saved.npcLog) ~= 'table' then saved.npcLog = {} end
     if type(saved.auctionLog) ~= 'table' then saved.auctionLog = {} end
     if type(saved.sales) ~= 'table' then saved.sales = {} end

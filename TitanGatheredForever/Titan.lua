@@ -99,37 +99,95 @@ function Titan.Refresh()
     if Titan.owner then Titan.Show(Titan.owner) end
 end
 
+-- The entries that delete the saved spots of the map that is open (the list of the map menu and the standalone menu).
+local function fillClearSpots(root, world)
+    local mapID = world:GetMapID()
+    root:CreateTitle(ns.Style.Text(ns.Style.gold, 'Clear saved Titan Gathered Forever spots'))
+    if not ns.IsPublic(mapID) or type(mapID) ~= 'number' or mapID <= 0 then
+        root:CreateTitle('No map selected.'); return
+    end
+    local info = C_Map and C_Map.GetMapInfo and C_Map.GetMapInfo(mapID)
+    local name = info and info.name or ('Map ' .. mapID)
+    root:CreateTitle(name)
+    ns.Style.MenuNote(root,'Only spots saved directly on this map are affected.')
+    for _, category in ipairs(ns.Sources.Categories(true)) do
+        local kind, label = category.id, category.label
+        local count = ns.gathering:Count(mapID, kind)
+        if count > 0 then
+            local confirmation = root:CreateButton(string.format('Clear %s spots (%d)', label, count))
+            confirmation:CreateTitle('Permanently delete these saved spots?')
+            confirmation:CreateTitle(name)
+            confirmation:CreateButton(string.format('Confirm: clear %d %s spots', count, label), function()
+                if world:GetMapID() ~= mapID then
+                    ns.Print('Map changed. Open Titan Gathered Forever spots again to choose the current map.'); return
+                end
+                if ns.observations then ns.observations:SuppressMap(mapID, kind) end
+                local removed = ns.gathering:Clear(mapID, kind)
+                ns.Map.Update(); ns.Minimap.Update()
+                ns.Print(string.format('Cleared %d %s spots from %s.', removed, label, name))
+            end)
+        else
+            root:CreateTitle(label .. ': 0 saved spots')
+        end
+    end
+end
+
 function Titan.ClearSpotsMenu(owner, world)
     if not ns.gathering then return end
-    local mapID = world:GetMapID()
+    MenuUtil.CreateContextMenu(owner, function(_, root) fillClearSpots(root, world) end)
+end
+
+-- The menu of the world map: every setting that decides what the map shows, a switch each, and the deletion of the
+-- saved spots at the end.
+function Titan.MapMenu(owner, world)
     MenuUtil.CreateContextMenu(owner, function(_, root)
-        root:CreateTitle(ns.Style.Text(ns.Style.gold, 'Clear saved Titan Gathered Forever spots'))
-        if not ns.IsPublic(mapID) or type(mapID) ~= 'number' or mapID <= 0 then
-            root:CreateTitle('No map selected.'); return
+        root:CreateTitle(ns.Style.Text(ns.Style.gold, 'Map options'))
+        local function redraw() ns.Map.Update(); ns.Minimap.Update() end
+        local function switch(parent, label, key, after)
+            parent:CreateCheckbox(label, function() return ns.settings[key] ~= false end, function()
+                ns.settings[key] = ns.settings[key] == false
+                local update = after or redraw
+                update()
+            end)
         end
-        local info = C_Map and C_Map.GetMapInfo and C_Map.GetMapInfo(mapID)
-        local name = info and info.name or ('Map ' .. mapID)
-        root:CreateTitle(name)
-        ns.Style.MenuNote(root,'Only spots saved directly on this map are affected.')
-        for _, category in ipairs(ns.Sources.Categories(true)) do
-            local kind, label = category.id, category.label
-            local count = ns.gathering:Count(mapID, kind)
-            if count > 0 then
-                local confirmation = root:CreateButton(string.format('Clear %s spots (%d)', label, count))
-                confirmation:CreateTitle('Permanently delete these saved spots?')
-                confirmation:CreateTitle(name)
-                confirmation:CreateButton(string.format('Confirm: clear %d %s spots', count, label), function()
-                    if world:GetMapID() ~= mapID then
-                        ns.Print('Map changed. Open Titan Gathered Forever spots again to choose the current map.'); return
-                    end
-                    if ns.observations then ns.observations:SuppressMap(mapID, kind) end
-                    local removed = ns.gathering:Clear(mapID, kind)
-                    ns.Map.Update(); ns.Minimap.Update()
-                    ns.Print(string.format('Cleared %d %s spots from %s.', removed, label, name))
-                end)
-            else
-                root:CreateTitle(label .. ': 0 saved spots')
+        local function plain(parent, label, key, after)
+            parent:CreateCheckbox(label, function() return ns.settings[key] end, function()
+                ns.settings[key] = not ns.settings[key]
+                local update = after or redraw
+                update()
+            end)
+        end
+        plain(root, 'Gathering spots', 'gatheringMap', function() ns.UpdateGathering() end)
+        if ns.settings.gatheringMap then
+            plain(root, 'On the world map', 'mapWorld', function() ns.UpdateGathering() end)
+            plain(root, 'On the minimap', 'mapMinimap', function() ns.UpdateGathering() end)
+            local spots = root:CreateButton('Gathering professions')
+            for _, category in ipairs(ns.Sources.Categories()) do
+                local kind = category.id
+                local key = ns.Sources.ToggleKey(kind)
+                if key then plain(spots, category.label, key, function() ns.UpdateGathering() end)
+                else
+                    spots:CreateCheckbox(category.label, function() return ns.settings.mapProfessions[kind] ~= false end,
+                        function() ns.settings.mapProfessions[kind] = ns.settings.mapProfessions[kind] == false; ns.UpdateGathering() end)
+                end
             end
+        end
+        switch(root, 'Profession trainers', 'mapTrainers')
+        switch(root, 'Recipe vendors', 'mapRecipeVendors')
+        switch(root, 'Weapon masters', 'mapWeaponMasters')
+        local professions = root:CreateButton('Trainer and vendor professions')
+        professions:SetScrollMode(300)
+        for _, kind in ipairs(ns.NpcSources.InstalledKinds(ns.NpcSources.Kinds)) do
+            local id = kind
+            professions:CreateCheckbox(ns.NpcSources.Label(id), function() return ns.settings.mapNpcProfessions[id] ~= false end,
+                function() ns.settings.mapNpcProfessions[id] = ns.settings.mapNpcProfessions[id] == false; redraw() end)
+        end
+        plain(root, 'Flight points', 'flightPoints', function() ns.FlightPaths.Update() end)
+        switch(root, 'Boat and zeppelin routes', 'transportRoutes', function() ns.Transport.Update() end)
+        root:CreateButton('Icon appearance...', function() ns.IconConfig.Show() end)
+        if ns.gathering then
+            local clear = root:CreateButton('Clear saved spots')
+            fillClearSpots(clear, world)
         end
     end)
 end
@@ -270,6 +328,9 @@ function Titan.Menu(owner)
         end)
         npcs:CreateCheckbox('Show recipe vendors', function() return ns.settings.mapRecipeVendors ~= false end, function()
             ns.settings.mapRecipeVendors = ns.settings.mapRecipeVendors == false; redrawNpcs()
+        end)
+        npcs:CreateCheckbox('Show weapon masters', function() return ns.settings.mapWeaponMasters ~= false end, function()
+            ns.settings.mapWeaponMasters = ns.settings.mapWeaponMasters == false; redrawNpcs()
         end)
         npcs:CreateCheckbox('Record trainers and vendors when I open their window', function() return ns.settings.recordNpcs ~= false end, function()
             ns.settings.recordNpcs = ns.settings.recordNpcs == false
