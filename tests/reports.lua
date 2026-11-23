@@ -690,25 +690,25 @@ test('profession statistics attach below the native window, preserve recipe coun
     local asked={}
     ns.Yields={Available=function()return{'Herbs'}end,Rows=function(character,kind,sort)
         asked[#asked+1]={character,kind,sort}
-        return {{summary=true,title=true,text='Herbalism',gold=true},{summary=true,spacer=true,small=true,text=''},
+        return {{summary=true,title=true,text='Herbalism',gold=true},{summary=true,text='Completed: 9'},{summary=true,spacer=true,small=true,text=''},
             {itemID=3,quantity=5,share=50,unit=100,value=500,source='Peacebloom'},
             {summary=true,spacer=true,text=''},{summary=true,title=true,text='Fishing',gold=true},
-            {itemID=4,quantity=2,share=100,unit=50,value=100,source='Vendor'}}
+            {itemID=4,quantity=2,share=100,unit=50,value=100,source='Vendor'},{summary=true,more=true,text='3 more items not shown.'}}
     end}
     ns.Reports.ItemSources=function(owner,itemID,character)ns.sourcesAsked={itemID,character}end
     view.panel.SetView('gathered')
     eq(view.panel.view,'gathered');eq(asked[#asked][2],nil,'all gathering professions at first');eq(asked[#asked][3],'quantity')
-    eq(#view.panel.data,3,'the overview has the summaries only: no items and no small spacer');eq(view.panel.gatheredTable,false)
-    assert(view.panel.lines[1].cells[1].text:find('Herbalism',1,true));eq(view.panel.lines[2].cells[1].text,'')
-    assert(view.panel.lines[3].cells[1].text:find('Fishing',1,true))
+    eq(#view.panel.data,4,'the overview has the summaries only: no items and no small spacer');eq(view.panel.gatheredTable,false)
+    assert(view.panel.lines[1].cells[1].text:find('Herbalism',1,true));eq(view.panel.lines[2].cells[1].text,'Completed: 9')
+    assert(view.panel.lines[4].cells[1].text:find('Fishing',1,true))
     eq(view.panel.tabs[1].label.text,ns.Style.Value('Overview'),'the overview tab is chosen');eq(view.panel.tabs[2].value,'Herbs')
     view.panel.tabs[2].scripts.OnClick(view.panel.tabs[2]);eq(asked[#asked][2],'Herbs');eq(view.panel.gatheredTable,true)
     eq(view.panel.tabs[2].label.text,ns.Style.Value('Herbalism'),'a tab of a profession shows its table under one header')
-    eq(#view.panel.data,5,'the small spacer is left out, the one between two professions stays')
+    eq(#view.panel.data,2,'a tab holds the items only; its summary lines and notes are texts under the table')
+    eq(view.panel.note.text,'Completed: 9\n3 more items not shown.')
     view.panel.SelectKind(false);eq(asked[#asked][2],nil);view.panel.SelectKind('Herbs')
-    assert(view.panel.lines[1].cells[1].text:find('Herbalism',1,true))
-    eq(view.panel.lines[2].cells[1].text,'Item 3');eq(view.panel.lines[2].cells[2].text,ns.Style.Value(5))
-    eq(view.panel.lines[2].cells[3].text,ns.Style.Value('50.0%'));eq(view.panel.lines[2].cells[5].text,'500c')
+    eq(view.panel.lines[1].cells[1].text,'Item 3');eq(view.panel.lines[1].cells[2].text,ns.Style.Value(5))
+    eq(view.panel.lines[1].cells[3].text,ns.Style.Value('50.0%'));eq(view.panel.lines[1].cells[5].text,'500c')
     eq(view.panel.head[2].text,ns.Style.Label('Quantity'));eq(view.panel.head[5].text,ns.Style.Label('Total value'))
     eq(view.panel.head[6].text,ns.Style.Label('Best sale'))
     view.panel.headButtons[5].scripts.OnClick();eq(asked[#asked][3],'value')
@@ -720,22 +720,21 @@ test('profession statistics attach below the native window, preserve recipe coun
             {itemID=3,quantity=5,share=50,unit=100,value=500,source='Peacebloom'},
             {itemID=5,quantity=3,share=30,unit=300,value=900,source='Vendor'},
             {itemID=6,quantity=2,share=20},
-            {summary=true,spacer=true,text=''},{summary=true,title=true,text='Fishing',gold=true},
             {itemID=7,quantity=9,share=80,unit=5,value=45,source='Auction'},
             {itemID=4,quantity=2,share=20,unit=50,value=100,source='Vendor'}}
     end}
     local function order()local ids={};for _,row in ipairs(view.panel.data)do if row.itemID then ids[#ids+1]=row.itemID end end;return table.concat(ids,',')end
     view.panel.SetView('gathered');view.panel.sorts.gathered={column=2,descending=true};ns.settings.columnSort={}
-    view.panel.SelectKind('Herbs');eq(order(),'3,5,6,7,4'..'')                     -- the order of the data: the quantity, as before
-    view.panel.headButtons[5].scripts.OnClick();eq(order(),'5,3,6,4,7')            -- Total value: the highest first, no value last, per profession
-    view.panel.headButtons[5].scripts.OnClick();eq(order(),'3,5,6,7,4')            -- again: the lowest first
-    view.panel.headButtons[1].scripts.OnClick();eq(order(),'3,5,6,4,7')            -- Item: a to z
-    view.panel.headButtons[4].scripts.OnClick();eq(order(),'5,3,6,4,7')            -- Unit value: the highest first, no price last
-    view.panel.headButtons[6].scripts.OnClick();eq(order(),'3,5,6,7,4')            -- Best sale, a text: a to z (Peacebloom, Vendor, none)
-    view.panel.headButtons[3].scripts.OnClick();eq(order(),'3,5,6,7,4')            -- Share, the highest first
+    view.panel.SelectKind('Herbs');eq(order(),'7,3,5,4,6')                     -- the order of the data: the quantity, as before
+    view.panel.headButtons[5].scripts.OnClick();eq(order(),'5,3,4,7,6')            -- Total value: the highest first, no value last, per profession
+    view.panel.headButtons[5].scripts.OnClick();eq(order(),'7,4,3,5,6')            -- again: the lowest first
+    view.panel.headButtons[1].scripts.OnClick();eq(order(),'3,4,5,6,7')            -- Item: a to z
+    view.panel.headButtons[4].scripts.OnClick();eq(order(),'5,3,4,7,6')            -- Unit value: the highest first, no price last
+    view.panel.headButtons[6].scripts.OnClick();eq(order(),'7,3,4,5,6')            -- Best sale, a text: a to z (Peacebloom, Vendor, none)
+    view.panel.headButtons[3].scripts.OnClick();eq(order(),'7,3,5,4,6')            -- Share, the highest first
     eq(ns.settings.columnSort.statistics_gathered.column,3);eq(ns.settings.columnSort.statistics_gathered.descending,true)
     view.panel.sorts.gathered={column=2,descending=true};ns.settings.columnSort={}
-    view.panel.lines[2].scripts.OnClick(view.panel.lines[2]);eq(ns.sourcesAsked[1],3)
+    view.panel.lines[1].scripts.OnClick(view.panel.lines[1]);eq(ns.sourcesAsked[1],7)
     local gatheredOptions=view.KindOptions(view.panel)
     eq(#gatheredOptions,2);eq(gatheredOptions[1].value,false);eq(gatheredOptions[1].label,'All gathering');eq(gatheredOptions[2].value,'Herbs')
     view.panel.SetView('attempts')

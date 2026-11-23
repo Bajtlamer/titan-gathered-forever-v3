@@ -477,13 +477,20 @@ local function refreshPanel(panel)
         local rows = {}
         local available = ns.Yields and ns.Yields.Available() or {}
         local sort = panel.sorts.gathered.column == 5 and 'value' or 'quantity'
+        local footer = {}
         for _, row in ipairs(#available > 0 and ns.Yields.Rows(character, kind or nil, sort) or {}) do
             -- The small gap under a summary is left out; the one between two professions stays.
-            -- The overview has the summaries only: the items are in the tab of each profession.
-            if not (row.spacer and row.small) and (kind or (row.summary and not row.more)) then rows[#rows + 1] = row end
+            if kind then
+                -- A tab of a profession is a table of its items; its summary lines are texts under the table.
+                if not row.summary then rows[#rows + 1] = row
+                elseif not (row.title or row.spacer) then footer[#footer + 1] = row.text end
+            elseif not (row.spacer and row.small) and row.summary and not row.more then
+                -- The overview has the summaries only: the items are in the tab of each profession.
+                rows[#rows + 1] = row
+            end
         end
         panel.data = View.SortGathered(rows, panel.sorts.gathered)
-        panel.note:SetText('')
+        panel.note:SetText(table.concat(footer, '\n'))
         panel.gatheredTable = kind and true or false
         panel.coverage:SetText(Style.Label(GATHERED_NOTE))
     else
@@ -662,7 +669,6 @@ local function createPanel(frame)
     end
     panel.characterPicker = ns.Nav.Dropdown(panel, 184, -40, 174, characterOptions, function() return panel.character end,
         function(value) panel.character, panel.offset = value, 0; refreshPanel(panel) end)
-    panel.note = anchoredText(panel, -76)
     local header = CreateFrame('Frame', nil, panel)
     header:SetPoint('TOPLEFT', panel, 'TOPLEFT', 12, -94)
     header:SetPoint('TOPRIGHT', panel, 'TOPRIGHT', -38, -94)
@@ -721,8 +727,21 @@ local function createPanel(frame)
         panel.lines[index] = line
     end
     panel.range = anchoredText(panel, TOP - ROWS * HEIGHT - 8)
-    panel.coverage = anchoredText(panel, TOP - ROWS * HEIGHT - 27)
+    -- Everything the list needs to say is under it: a gold line, then the notes of the view.
+    panel.rule = panel:CreateTexture(nil, 'ARTWORK')
+    panel.rule:SetColorTexture(1, 0.82, 0, 0.55)
+    panel.rule:SetHeight(1)
+    panel.rule:SetPoint('TOPLEFT', panel, 'TOPLEFT', 12, TOP - ROWS * HEIGHT - 27)
+    panel.rule:SetPoint('TOPRIGHT', panel, 'TOPRIGHT', -38, TOP - ROWS * HEIGHT - 27)
+    panel.note = anchoredText(panel, TOP - ROWS * HEIGHT - 35)
+    panel.note:SetWordWrap(true)
+    panel.coverage = anchoredText(panel, TOP - ROWS * HEIGHT - 35)
     panel.coverage:SetWordWrap(true)
+    if panel.coverage.ClearAllPoints then
+        panel.coverage:ClearAllPoints()
+        panel.coverage:SetPoint('TOPLEFT', panel.note, 'BOTTOMLEFT', 0, -6)
+        panel.coverage:SetPoint('TOPRIGHT', panel.note, 'BOTTOMRIGHT', 0, -6)
+    end
     local function wheel(delta) scrollTo(panel, panel.offset - delta * 3) end
     panel.slider = ns.Nav.Scrollbar(panel, 0, TOP, ROWS * HEIGHT, function(offset) scrollTo(panel, offset) end, wheel)
     panel.slider:ClearAllPoints()

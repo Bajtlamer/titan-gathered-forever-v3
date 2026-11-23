@@ -2,6 +2,10 @@
 
 Updated 2026-11-23. Versions up to 0.5.146 are published in release-notes/ref-0.5.146.md. These changes describe source candidates since the latest published versioned notes.
 
+## Notes under the lists, 0.5.149
+
+- In every view of the Statistics panel the extra texts are under the list, never between the header and the rows: the counts of Attempts, the summary lines of a profession (completed, items collected, worth, active time, rate per hour) and the explanations. A thin gold line separates them from the "Showing a-b of n" counter.
+
 ## Gathered items in tabs, 0.5.148
 
 - The Gathered items view of the Statistics panel has tabs under the pickers: Overview (the summary of every gathering profession: completed, items collected, worth, active time and rate per hour) and one tab for each installed gathering profession, which is one table of its items under one header. The profession picker is replaced by the tabs in this view.
