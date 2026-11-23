@@ -117,9 +117,9 @@ ns.Map.instance:Refresh(true)
 assert(skins[1].x == 500 and skins[2].x == 500, 'Repeated observations spread icons into a row')
 assert(ns.gathering.saved.maps[2][1].x == ns.gathering.saved.maps[2][2].x, 'Display separation moved saved observations')
 assert(map.clearButton and map.clearButton.parent == world)
-assert(map.clearButton.text == 'Map spots')
+assert(map.clearButton.text == 'Map options')
 local opened
-ns.Titan = { ClearSpotsMenu = function(owner, target) opened = {owner, target} end }
+ns.Titan = { MapMenu = function(owner, target) opened = {owner, target} end }
 map.clearButton.scripts.OnClick(map.clearButton)
 assert(opened[1] == map.clearButton and opened[2] == world)
 ns.settings.iconAppearance={world={size=28,shape='square',border=false}}

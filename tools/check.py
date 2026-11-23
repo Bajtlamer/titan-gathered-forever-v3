@@ -42,6 +42,7 @@ commands = [
     [runtime, 'tests/icon_config.lua'],
     [runtime, 'tests/minimap.lua'],
     [runtime, 'tests/npc_sources.lua'],
+    [runtime, 'tests/weapon_masters.lua'],
     [runtime, 'tests/debug_log.lua'],
     [runtime, 'tests/minimap_button.lua'],
     [runtime, 'tests/known_recipes.lua'],

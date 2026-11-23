@@ -66,7 +66,8 @@ end
 
 function Npc.Enabled()
     local settings = ns.settings or {}
-    return settings.mapTrainers ~= false or settings.mapRecipeVendors ~= false or Npc.HasHighlight()
+    return settings.mapTrainers ~= false or settings.mapRecipeVendors ~= false or (ns.WeaponMasters ~= nil and settings.mapWeaponMasters ~= false)
+        or Npc.HasHighlight()
 end
 
 function Npc.Coin(copper)
@@ -218,6 +219,9 @@ function Npc.List(mapID)
     for _, node in ipairs(Npc.Nodes(mapID)) do
         if Npc.Visible(node) then result[#result + 1] = node end
     end
+    if ns.WeaponMasters then
+        for _, node in ipairs(ns.WeaponMasters.List(mapID)) do result[#result + 1] = node end
+    end
     return result
 end
 
@@ -282,6 +286,7 @@ end
 -- Tooltip colours: gold is the NPC name, white the list entries, gray (and green when confirmed) the
 -- additional information. The header is separated from the list by a rule.
 function Npc.FillTooltip(tooltip, node)
+    if node.kind == 'WeaponMaster' and ns.WeaponMasters then return ns.WeaponMasters.FillTooltip(tooltip, node) end
     local record = Npc.Record(node.npcID)
     if not record then return end
     local Style = ns.Style
