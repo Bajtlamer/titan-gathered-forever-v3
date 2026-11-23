@@ -21,6 +21,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 API = 'https://wow.curseforge.com/api'
 ENV = ROOT.parent / 'curseforge' / '.env'
+LEDGER = ROOT.parent / 'curseforge' / 'ref-uploaded-files.json'   # every file the tool sent: a file under review is not visible in the API
 
 # Project IDs of ref-curseforge-project-ids.md. folder: (project id, slug)
 PROJECTS = {
@@ -57,6 +58,22 @@ def request(path, data=None, headers=None):
     except urllib.error.HTTPError as error:
         body = error.read().decode(errors='replace')[:400]
         raise SystemExit('HTTP %s from %s: %s' % (error.code, path, body))
+
+
+def already_sent(ledger, project, name):
+    try:
+        return name in json.loads(ledger.read_text()).get(str(project), {})
+    except (OSError, ValueError):
+        return False
+
+
+def record_sent(ledger, project, name, file_id):
+    try:
+        data = json.loads(ledger.read_text())
+    except (OSError, ValueError):
+        data = {}
+    data.setdefault(str(project), {})[name] = file_id
+    ledger.write_text(json.dumps(data, indent=2, sort_keys=True) + '\n')
 
 
 def version(root):
@@ -125,10 +142,14 @@ def main():
             metadata['relations'] = {'projects': [{'slug': 'titan-gathered-forever', 'type': 'requiredDependency'}]}
         size = files[folder].stat().st_size
         print('%s -> project %s (%s): %s, %d bytes, %s' % (folder, project, slug, files[folder].name, size, args.release_type))
-        if args.command == 'upload' and args.apply:
+        if args.command == 'upload' and args.apply and already_sent(LEDGER, project, files[folder].name):
+            print('   skipped: this file was already sent (see ref-uploaded-files.json in the curseforge folder)')
+        elif args.command == 'upload' and args.apply:
             body, content_type = multipart(metadata, files[folder])
             reply = request('/projects/%d/upload-file' % project, body, {'Content-Type': content_type})
-            print('   uploaded, file id', reply.get('id') if isinstance(reply, dict) else reply)
+            file_id = reply.get('id') if isinstance(reply, dict) else reply
+            record_sent(LEDGER, project, files[folder].name, file_id)
+            print('   uploaded, file id', file_id)
     if args.command == 'upload' and not args.apply:
         print('Nothing was uploaded: add --apply.')
 
