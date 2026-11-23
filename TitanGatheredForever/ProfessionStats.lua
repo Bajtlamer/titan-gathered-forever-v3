@@ -276,38 +276,53 @@ local function gatheredKind(panel)
     return false
 end
 
--- The arrow of a column name that sits inside the list (the header row of a profession in the Gathered view).
-local function placeArrow(line, cell, state)
-    if not line.CreateTexture then return end
-    local arrow = line.sortArrow
-    if not arrow then
-        arrow = line:CreateTexture(nil, 'OVERLAY')
-        if arrow.SetTexture then arrow:SetTexture('Interface\\Buttons\\UI-SortArrow') end
-        if arrow.SetSize then arrow:SetSize(9, 8) end
-        line.sortArrow = arrow
+-- The tabs of the Gathered view: the overview (the summary of every profession) and one tab for each gathering
+-- profession, which is a table of its items under one header. A tab is a value of panel.gatheredKind (false = overview).
+local function syncTabs(panel)
+    panel.tabs = panel.tabs or {}
+    local shown = panel.view == 'gathered'
+    local choices = {}
+    if shown then
+        choices[1] = { value = false, label = 'Overview' }
+        for _, kind in ipairs(ns.Yields and ns.Yields.Available() or {}) do
+            choices[#choices + 1] = { value = kind, label = gatheringLabel(kind) }
+        end
     end
-    local label = cell[state.column]
-    if arrow.SetTexCoord then
-        if state.descending then arrow:SetTexCoord(0, 0.5625, 1, 0) else arrow:SetTexCoord(0, 0.5625, 0, 1) end
+    local current = shown and gatheredKind(panel)
+    local x = 12
+    for index = 1, math.max(#choices, #panel.tabs) do
+        local choice, tab = choices[index], panel.tabs[index]
+        if choice and not tab then
+            tab = CreateFrame('Button', nil, panel)
+            tab.label = text(tab, 'GameFontNormal')
+            tab.label:SetJustifyH('CENTER')
+            tab.label:SetPoint('CENTER', tab, 'CENTER', 0, 0)
+            tab.line = tab:CreateTexture(nil, 'OVERLAY')
+            tab.line:SetColorTexture(1, 0.82, 0, 1)
+            tab.line:SetPoint('BOTTOMLEFT', tab, 'BOTTOMLEFT', 0, 0)
+            tab.line:SetPoint('BOTTOMRIGHT', tab, 'BOTTOMRIGHT', 0, 0)
+            tab.line:SetHeight(2)
+            tab:SetHighlightTexture('Interface\\QuestFrame\\UI-QuestTitleHighlight')
+            tab:SetScript('OnClick', function(self) panel.SelectKind(self.value) end)
+            panel.tabs[index] = tab
+        end
+        if tab then
+            if choice then
+                tab.value = choice.value
+                tab.label:SetText(choice.value == current and Style.Value(choice.label) or Style.Label(choice.label))
+                local width = tab.label.GetStringWidth and tab.label:GetStringWidth()
+                if type(width) ~= 'number' then width = 70 end
+                tab:SetSize(width + 24, 20)
+                tab:ClearAllPoints()
+                tab:SetPoint('TOPLEFT', panel, 'TOPLEFT', x, -72)
+                x = x + width + 28
+                if choice.value == current then tab.line:Show() else tab.line:Hide() end
+                tab:Show()
+            else
+                tab:Hide()
+            end
+        end
     end
-    if arrow.ClearAllPoints then arrow:ClearAllPoints() end
-    local width = label.GetStringWidth and label:GetStringWidth()
-    if type(width) ~= 'number' then width = 0 end
-    if state.column == 1 then arrow:SetPoint('LEFT', label, 'LEFT', width + 4, 0)
-    else arrow:SetPoint('RIGHT', label, 'RIGHT', -(width + 4), 0) end
-    if arrow.Show then arrow:Show() end
-end
-
--- The column under the mouse in a header row (1 when it cannot be told).
-local function columnAt(line)
-    if not (GetCursorPosition and line.GetEffectiveScale) then return 1 end
-    local x = GetCursorPosition() / line:GetEffectiveScale()
-    for column = COLUMNS, 2, -1 do
-        local cell = line.cells[column]
-        local left, right = cell.GetLeft and cell:GetLeft(), cell.GetRight and cell:GetRight()
-        if type(left) == 'number' and type(right) == 'number' and x >= left - 2 and x <= right + 2 then return column end
-    end
-    return 1
 end
 
 local function render(panel)
@@ -321,20 +336,13 @@ local function render(panel)
         line.data = row
         line:SetShown(row ~= nil)
         local cell = line.cells
-        if line.sortArrow and line.sortArrow.Hide then line.sortArrow:Hide() end
         if row and panel.view == 'materials' then
             cell[1]:SetText(Style.ItemName(row.itemID))
             cell[2]:SetText(''); cell[3]:SetText('')
             cell[4]:SetText(Style.Value(row.quantity))
         elseif row and panel.view == 'gathered' then
             for column = 2, COLUMNS do cell[column]:SetText('') end
-            if row.header then
-                -- The column names of one profession: the rows under them are its items. A click sorts by a column.
-                cell[1]:SetPoint('RIGHT', line, 'RIGHT', -panel.nameRight, 0)
-                local heads = LAYOUTS.gathered.heads
-                for column = 1, COLUMNS do cell[column]:SetText(Style.Label(heads[column])) end
-                placeArrow(line, cell, panel.sorts.gathered)
-            elseif row.summary then
+            if row.summary then
                 -- A line of text across the columns: the summary of a profession.
                 cell[1]:SetPoint('RIGHT', line, 'RIGHT', 0, 0)
                 cell[1]:SetText(row.gold and Style.Text(Style.gold, row.text) or row.text)
@@ -471,18 +479,12 @@ local function refreshPanel(panel)
         local sort = panel.sorts.gathered.column == 5 and 'value' or 'quantity'
         for _, row in ipairs(#available > 0 and ns.Yields.Rows(character, kind or nil, sort) or {}) do
             -- The small gap under a summary is left out; the one between two professions stays.
-            if not (row.spacer and row.small) then rows[#rows + 1] = row end
+            -- The overview has the summaries only: the items are in the tab of each profession.
+            if not (row.spacer and row.small) and (kind or (row.summary and not row.more)) then rows[#rows + 1] = row end
         end
-        -- Every profession is a table: its summary lines first, then the column names, then its items.
-        local tables, previous = {}, nil
-        for _, row in ipairs(rows) do
-            if row.itemID and not (previous and previous.itemID) then tables[#tables + 1] = { summary = true, header = true } end
-            tables[#tables + 1] = row
-            previous = row
-        end
-        panel.data = View.SortGathered(tables, panel.sorts.gathered)
-        panel.note:SetText(Style.Label('Gathered items of ')
-            .. Style.Value(kind and gatheringLabel(kind) or 'all gathering professions') .. Style.Label('.'))
+        panel.data = View.SortGathered(rows, panel.sorts.gathered)
+        panel.note:SetText('')
+        panel.gatheredTable = kind and true or false
         panel.coverage:SetText(Style.Label(GATHERED_NOTE))
     else
         panel.data = View.Rows(character, panel.kind or nil)
@@ -512,7 +514,9 @@ local function refreshPanel(panel)
     panel.empty:SetText(message and Style.Label(message) or '')
     local state = panel.sorts[view]
     local arrow = panel.sortArrow
-    if panel.header.SetShown then panel.header:SetShown(view ~= 'gathered') end
+    if panel.header.SetShown then panel.header:SetShown(view ~= 'gathered' or panel.gatheredTable == true) end
+    if panel.kindPicker and panel.kindPicker.SetShown then panel.kindPicker:SetShown(view ~= 'gathered') end
+    syncTabs(panel)
     if arrow and arrow.SetTexCoord then
         local label = panel.head[state.column]
         if state.descending then arrow:SetTexCoord(0, 0.5625, 1, 0) else arrow:SetTexCoord(0, 0.5625, 0, 1) end
@@ -679,7 +683,6 @@ local function createPanel(frame)
             state.column, state.descending = index, kind == 'number'
         end
         saveSort(view, state)
-        panel.offset = 0
         refreshPanel(panel)
     end
     for index = 1, COLUMNS do
@@ -711,8 +714,7 @@ local function createPanel(frame)
             if not self.data then return end
             if panel.view == 'materials' then ns.Reports.ReagentDetails(self, self.data)
             elseif panel.view == 'gathered' then
-                if self.data.header then panel.sortBy(columnAt(self))
-                elseif not self.data.summary then ns.Reports.ItemSources(self, self.data.itemID, panel.character or nil) end
+                if not self.data.summary then ns.Reports.ItemSources(self, self.data.itemID, panel.character or nil) end
             elseif self.data.action then ns.Reports.ActionDetails(self, self.data.action)
             elseif self.data.craft then ns.Reports.ProductionDetails(self, self.data.craft) end
         end)

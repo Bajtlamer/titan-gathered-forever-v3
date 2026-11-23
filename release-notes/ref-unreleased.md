@@ -2,6 +2,11 @@
 
 Updated 2026-11-23. Versions up to 0.5.146 are published in release-notes/ref-0.5.146.md. These changes describe source candidates since the latest published versioned notes.
 
+## Gathered items in tabs, 0.5.148
+
+- The Gathered items view of the Statistics panel has tabs under the pickers: Overview (the summary of every gathering profession: completed, items collected, worth, active time and rate per hour) and one tab for each installed gathering profession, which is one table of its items under one header. The profession picker is replaced by the tabs in this view.
+- A change of the order no longer scrolls a list back to its start.
+
 ## Sorting by column, 0.5.147
 
 - Every window with columns sorts by a click on a column header: Recipe browser, Profit browser, Trainer browser, the recipe reagent planner, Lifetime materials, Observed chances (also grouped by item), Reagent use, and in the Statistics panel of the Professions window every column of the Attempts, Materials and Gathered items views. A text column starts from A to Z, a number column from the highest, a second click reverses it, an arrow marks the column and a row without a value is always last. Equal values keep a fixed order (name, then identity), so a list never jumps. The chosen order of each window is saved and restored. Until the first click each window keeps the order it had. The Economy window has no list to sort and the PvP Board is a fixed statement, so neither sorts.
