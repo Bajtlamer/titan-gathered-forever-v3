@@ -158,8 +158,8 @@ test('harvesting reads a profession in steps, keeps the number made and records 
  ns.db=nil;eq(ns.Crafting.Harvest({1}),0)
  C_TradeSkillUI.GetRecipeSchematic=base;ns.Catalog.Book=nil
 end)
-test('disabled and missing modules cannot supply a recipe estimate',function()
- liveAPI();ns.settings.categories.Cooking=false;eq(ns.Crafting.Read(2536),nil)
+test('hidden professions are still read and missing modules cannot supply a recipe estimate',function()
+ liveAPI();ns.settings.categories.Cooking=false;assert(ns.Crafting.Read(2536))
  ns.settings.categories={};ns.Catalog.modules={};eq(ns.Crafting.Read(2536),nil)
 end)
 test('unknown protected wrong-identity or recraft metadata produces no plan',function()

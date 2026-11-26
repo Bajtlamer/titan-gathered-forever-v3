@@ -77,6 +77,14 @@ test('master and profession switches stop recording while preserving saved point
     s.disabledKind = 'Mining'; gather(c); eq(#c:List(1), 0)
     s.disabledKind = nil; eq(#c:List(1), 1)
 end)
+test('hidden map pins keep recording and reappear when shown again', function()
+    local c, s = fixture()
+    local hidden = true
+    c.visible = function(kind, itemID) return not hidden end
+    gather(c); s.position.x = 0.7; s.now = 110; gather(c)
+    eq(#c:List(1), 0); eq(#c.saved.maps[1], 2)
+    hidden = false; eq(#c:List(1), 2)
+end)
 test('map scopes, invalid positions and stale cast correlations are rejected', function()
     local c, s = fixture(); gather(c); eq(#c:List(2), 0)
     s.position = nil; gather(c); eq(#c:List(1), 1)

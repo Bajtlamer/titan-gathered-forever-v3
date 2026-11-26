@@ -376,11 +376,15 @@ test('weapon masters can be switched off in the Titan menu and in the map menu, 
     local world = { mapID = 1453, GetMapID = function(self) return self.mapID end }
     ns.Titan.MapMenu({}, world)
     local map = s.menu
-    for _, label in ipairs({ 'Gathering spots', 'Profession trainers', 'Recipe vendors', 'Weapon masters', 'Flight points', 'Boat and zeppelin routes' }) do
+    for _, label in ipairs({ 'Show gathering spots on the world map', 'Show gathering spots on the minimap', 'Show profession trainers',
+        'Show recipe vendors', 'Show weapon masters', 'Flight points', 'Boat and zeppelin routes' }) do
         assert(map.checkboxes[label], 'the map menu has ' .. label)
     end
-    assert(not map.checkboxes['Weapon masters'].selected(), 'the map menu shows the switch that was turned off')
-    map.checkboxes['Weapon masters'].callback(); eq(ns.settings.mapWeaponMasters, true)
+    for _, label in ipairs({ 'Gathering spots', 'On the world map', 'On the minimap' }) do
+        assert(not map.checkboxes[label], 'the old switch is gone: ' .. label)
+    end
+    assert(not map.checkboxes['Show weapon masters'].selected(), 'the map menu shows the switch that was turned off')
+    map.checkboxes['Show weapon masters'].callback(); eq(ns.settings.mapWeaponMasters, true)
     assert(map.submenus['Clear saved spots'], 'deleting the saved spots is the last entry of the map menu')
     assert(not map.buttons['Scan now (the auction house must be open)'] and not map.buttons['Show status report'],
         'nothing that is not about the map')
@@ -521,8 +525,7 @@ test('trainer and recipe vendor menu toggles update their settings and redraw pi
     eq(ns.settings.mapTrainers, true); eq(ns.settings.mapRecipeVendors, true)
     local alchemy = s.menu.checkboxes['Alchemy pins']
     eq(alchemy.selected(), true); alchemy.callback(); eq(ns.settings.mapNpcProfessions.Alchemy, false)
-    local record = s.menu.checkboxes['Record trainers and vendors when I open their window']
-    eq(record.selected(), true); record.callback(); eq(ns.settings.recordNpcs, false)
+    assert(not s.menu.checkboxes['Record trainers and vendors when I open their window'], 'collection has no switch')
 end)
 
 test('the minimap button can be hidden from the Display menu', function()
@@ -769,26 +772,40 @@ test('gathering runtime wires confirmed loot and disables recording through the 
     eq(#ns.gathering:List(1), 1)
     s.broker.OnClick({}, 'RightButton')
     assert(s.menu.checkboxes['Mining spots'])
-    s.menu.checkboxes['Enable gathering map'].callback()
-    eq(ns.settings.gatheringMap, false)
-    eq(ns.eventFrame.events.UNIT_SPELLCAST_SUCCEEDED, true) -- History remains active with map recording off.
-    eq(#ns.gathering:List(1), 0)
+    assert(not s.menu.checkboxes['Enable gathering map'], 'one switch per map replaces the master switch')
+    s.menu.checkboxes['Show gathering spots on the world map'].callback()
+    eq(ns.settings.showGatheringWorld, false); eq(ns.settings.showGatheringMinimap, true)
+    eq(ns.eventFrame.events.UNIT_SPELLCAST_SUCCEEDED, true) -- Collection never depends on map visibility.
+    eq(#ns.gathering:List(1), 1)                             -- Saved spots stay; the world map layer hides them.
     s.broker.OnClick({}, 'RightButton')
-    s.menu.checkboxes['Enable gathering map'].callback()
-    eq(#ns.gathering:List(1), 1)
+    s.menu.checkboxes['Show gathering spots on the world map'].callback()
+    eq(ns.settings.showGatheringWorld, true)
 end)
 
-test('world map and minimap visibility are independent saved preferences', function()
+test('world map and minimap gathering spots are independent saved preferences', function()
     local s, ns = fixture(); s:Start()
     s.broker.OnClick({}, 'RightButton')
-    eq(s.menu.checkboxes['World map icons'].selected(), true)
-    eq(s.menu.checkboxes['Minimap icons'].selected(), true)
-    s.menu.checkboxes['World map icons'].callback()
-    eq(ns.settings.mapWorld, false); eq(ns.settings.mapMinimap, true)
+    eq(s.menu.checkboxes['Show gathering spots on the world map'].selected(), true)
+    eq(s.menu.checkboxes['Show gathering spots on the minimap'].selected(), true)
+    s.menu.checkboxes['Show gathering spots on the world map'].callback()
+    eq(ns.settings.showGatheringWorld, false); eq(ns.settings.showGatheringMinimap, true)
     s, ns = fixture(nil, TitanGatheredForeverV3DB); s:Start()
-    eq(ns.settings.mapWorld, false); eq(ns.settings.mapMinimap, true)
-    s.broker.OnClick({}, 'RightButton'); s.menu.checkboxes['Minimap icons'].callback()
-    eq(ns.settings.mapMinimap, false); eq(ns.settings.gatheringMap, true)
+    eq(ns.settings.showGatheringWorld, false); eq(ns.settings.showGatheringMinimap, true)
+    s.broker.OnClick({}, 'RightButton'); s.menu.checkboxes['Show gathering spots on the minimap'].callback()
+    eq(ns.settings.showGatheringMinimap, false)
+end)
+test('older map switches carry over to the per-map gathering switches once', function()
+    local s, ns = fixture(); s:Start()
+    local saved = TitanGatheredForeverV3DB
+    saved.settings.showGatheringWorld, saved.settings.showGatheringMinimap = nil, nil
+    saved.settings.gatheringMap, saved.settings.mapWorld, saved.settings.mapMinimap = true, true, false
+    s, ns = fixture(nil, saved); s:Start()
+    eq(ns.settings.showGatheringWorld, true); eq(ns.settings.showGatheringMinimap, false)
+    saved = TitanGatheredForeverV3DB
+    saved.settings.showGatheringWorld, saved.settings.showGatheringMinimap = nil, nil
+    saved.settings.gatheringMap, saved.settings.mapMinimap = false, true
+    s, ns = fixture(nil, saved); s:Start()
+    eq(ns.settings.showGatheringWorld, false); eq(ns.settings.showGatheringMinimap, false)
 end)
 
 test('skinning-only addon records corpse materials and exposes persistent per-material map filters', function()
@@ -952,7 +969,7 @@ test('explicit status works with debug disabled while normal commands stay quiet
     assert(not s.message:find('/tgf refresh', 1, true), 'help must not list commands that need no parameter')
     local before = #s.messages
     SlashCmdList.TITANGATHEREDFOREVERV3('status')
-    eq(#s.messages, before + 4); assert(s.message:find('Gathering map:', 1, true))
+    eq(#s.messages, before + 4); assert(s.message:find('Gathering spots: world map', 1, true))
     ns.settings.debugMode = true
     before = #s.messages
     local logged = #ns.db.debugLog
@@ -972,8 +989,8 @@ test('configuration checkboxes are grouped in submenus', function()
     eq(s.menu.paths['Show bank counts'], 'Display')
     eq(s.menu.paths['Tailoring'], 'Professions')
     eq(s.menu.paths['Auction items'], 'Additional items')
-    eq(s.menu.paths['Enable gathering map'], 'Gathering map')
-    eq(s.menu.paths['World map icons'], 'Gathering map/Visibility')
+    eq(s.menu.paths['Show gathering spots on the world map'], 'Gathering map')
+    eq(s.menu.paths['Show gathering spots on the minimap'], 'Gathering map')
     eq(s.menu.paths['Mining spots'], 'Gathering map/Professions')
     eq(s.menu.paths[plain(ns.Style.ItemName(2770))], 'Gathering map/Map materials/Mining')
     eq(s.menu.paths['Debug mode'], 'Diagnostics')
@@ -1092,18 +1109,25 @@ test('rare gathering outputs appear in lifetime, recipe-style tooltips and mater
     ns.settings.historyTooltips=false;tip:ClearLines();s.post(tip,{id=1210})
     assert(not contains(tip.lines,'Lifetime obtained'))
 end)
-test('ordinary material sources map consuming professions and history persists with maps disabled', function()
+test('ordinary material sources map consuming professions and keep recording with maps hidden', function()
     local s, ns=fixture();s:Start()
+    local function seen(kind) local n=0;for _,node in ipairs(ns.db.gathering.maps[1])do if node.kind==kind then n=n+node.count end end;return n end
     local guid='Creature-0-1-2-3-123-55'
     s.loot={{itemID=2589,sources={guid,2}}}
     s:Event('LOOT_READY');s:Event('LOOT_SLOT_CLEARED',1);s:Event('LOOT_CLOSED')
     eq(ns.history:Total(UnitGUID('player'),2589),2)
     assert(ns.gathering:Count(1,'Tailoring')>0);assert(ns.gathering:Count(1,'FirstAid')>0)
-    ns.settings.gatheringMap=false;ns.UpdateGathering()
+    ns.settings.showGatheringWorld=false;ns.settings.showGatheringMinimap=false;ns.UpdateGathering()
     s.loot={{itemID=2589,sources={'Creature-0-1-2-3-123-56',1}}}
     s:Event('LOOT_READY');s:Event('LOOT_SLOT_CLEARED',1);s:Event('LOOT_CLOSED')
-    eq(ns.history:Total(UnitGUID('player'),2589),3);eq(ns.gathering:Count(1,'Tailoring'),1)
-    ns.settings.recordHistory=false;ns.settings.recordActions=false;ns.UpdateGathering();eq(ns.eventFrame.events.LOOT_READY,nil)
+    eq(ns.history:Total(UnitGUID('player'),2589),3);eq(seen('Tailoring'),2)
+    assert(#ns.gathering:List(1)>0) -- Saved spots stay; each map layer applies its own switch.
+    -- Old recording switches saved as off never stop collection.
+    ns.settings.recordHistory=false;ns.settings.recordActions=false;ns.UpdateGathering();assert(ns.eventFrame.events.LOOT_READY)
+    s.loot={{itemID=2589,sources={'Creature-0-1-2-3-123-57',1}}}
+    s:Event('LOOT_READY');s:Event('LOOT_SLOT_CLEARED',1);s:Event('LOOT_CLOSED')
+    eq(ns.history:Total(UnitGUID('player'),2589),4);eq(seen('Tailoring'),3)
+    ns.settings.showGatheringWorld=true;ns.settings.showGatheringMinimap=true;ns.UpdateGathering();assert(#ns.gathering:List(1)>0)
 end)
 test('fishing catches use a zone denominator and never include purchasing events',function()
     local s,ns=fixture()
@@ -1121,7 +1145,7 @@ test('fishing catches use a zone denominator and never include purchasing events
     s:Event('BAG_UPDATE_DELAYED');s:Flush();eq(ns.history:Total(UnitGUID('player'),6291),quantity)
 end)
 
-test('recording eligibility snapshots exclude disabled profession samples for rare known items',function()
+test('profession settings saved as off never exclude samples for rare known items',function()
     local s,ns=fixture()
     ns.Catalog.RegisterModule({id='Mining',label='Mining',kind='profession',items={[1210]={professions={},recipes={},uses={}}},recipes={}})
     s:Start();ns.settings.historyProfessions.Mining=false;ns.UpdateGathering()
@@ -1130,21 +1154,21 @@ test('recording eligibility snapshots exclude disabled profession samples for ra
     ns.settings.historyProfessions.Mining=true;ns.UpdateGathering()
     s.loot={{itemID=1210,quality=3,sources={'Creature-0-1-2-3-123-82',1}}}
     s:Event('LOOT_READY');s:Event('LOOT_SLOT_CLEARED',1);s:Event('LOOT_CLOSED')
-    eq(ns.history:Rates(UnitGUID('player'),1210)[1].trials,1)
+    eq(ns.history:Rates(UnitGUID('player'),1210)[1].trials,2)
 end)
 test('map visibility changes preserve an active history observation',function()
     local s,ns=fixture()
     ns.Catalog.RegisterModule({id='Mining',label='Mining',kind='profession',items={[2770]={professions={},recipes={},uses={}}},recipes={}})
     s:Start();s.loot={{itemID=2770,sources={'GameObject-0-1-2-3-1731-81',1}}}
     s:Event('UNIT_SPELLCAST_SUCCEEDED','player','mine',2575);s:Event('LOOT_READY')
-    ns.settings.mapWorld=false;ns.UpdateGathering()
+    ns.settings.showGatheringWorld=false;ns.UpdateGathering()
     s:Event('LOOT_SLOT_CLEARED',1);s:Event('LOOT_CLOSED')
     eq(ns.history:Total(UnitGUID('player'),2770),1)
 end)
 
 test('action recording works independently without changing loot history or maps',function()
     local s,ns=fixture();s:Start()
-    ns.settings.gatheringMap=false;ns.settings.recordHistory=false;ns.UpdateGathering()
+    ns.settings.showGatheringWorld=false;ns.settings.showGatheringMinimap=false;ns.settings.recordHistory=false;ns.UpdateGathering()
     s:Event('UNIT_SPELLCAST_START','player','d1',13262)
     s:Event('UNIT_SPELLCAST_STOP','player','d1',13262)
     s:Event('UNIT_SPELLCAST_SUCCEEDED','player','d1',13262)
@@ -1152,19 +1176,19 @@ test('action recording works independently without changing loot history or maps
     local r=ns.actions:Rows(UnitGUID('player'))[1];eq(r.attempts,1);eq(r.completed,1)
     eq(#ns.history:Totals(),0);eq(ns.gathering:Count(1,'Enchanting'),0)
     s.broker.OnClick({},'RightButton');assert(not s.menu.buttons['Profession actions'],'the actions window is part of Statistics now');assert(s.menu.buttons['Profession statistics'])
-    assert(s.menu.checkboxes['Record profession actions']);assert(s.menu.checkboxes['Record Disenchanting actions'])
-    s.menu.checkboxes['Record Disenchanting actions'].callback()
-    s:Event('UNIT_SPELLCAST_SUCCEEDED','player','d2',13262);eq(ns.actions:Rows()[1].attempts,1)
+    assert(not s.menu.checkboxes['Record profession actions']);assert(not s.menu.checkboxes['Record Disenchanting actions'])
+    ns.settings.recordActions=false;ns.settings.actionProfessions.Enchanting=false;ns.UpdateGathering()
+    s:Event('UNIT_SPELLCAST_SUCCEEDED','player','d2',13262);eq(ns.actions:Rows()[1].attempts,2)
 end)
-test('action recording pause seals late outcomes and world transitions leave gaps',function()
+test('old action switches keep pending outcomes and world transitions leave gaps',function()
     local s,ns=fixture();s:Start()
     s:Event('UNIT_SPELLCAST_START','player','d1',13262)
     ns.settings.recordActions=false;ns.UpdateGathering()
     ns.settings.recordActions=true;ns.UpdateGathering()
     s:Event('UNIT_SPELLCAST_SUCCEEDED','player','d1',13262)
-    eq(ns.actions:Rows()[1].completed,0);eq(ns.actions:Rows()[1].unresolved,1)
+    eq(ns.actions:Rows()[1].completed,1);eq(ns.actions:Rows()[1].unresolved,0)
     s:Event('UNIT_SPELLCAST_START','player','d2',13262);s:Event('PLAYER_LEAVING_WORLD')
-    s:Event('UNIT_SPELLCAST_SUCCEEDED','player','d2',13262);eq(ns.actions:Rows()[1].completed,0)
+    s:Event('UNIT_SPELLCAST_SUCCEEDED','player','d2',13262);eq(ns.actions:Rows()[1].completed,1)
 end)
 test('fishing channel stop and duplicate loot windows count one catch without taking loot',function()
     local s,ns=fixture()
@@ -1177,14 +1201,14 @@ test('fishing channel stop and duplicate loot windows count one catch without ta
     local r=ns.actions:Rows()[1];eq(r.attempts,1);eq(r.completed,1);eq(r.stopped,0)
     eq(#ns.history:Totals(),0);eq(#ns.history:Rates(),0)
 end)
-test('map and history toggles preserve pending actions and disabled modules record none',function()
+test('map and history toggles preserve pending actions and hidden professions keep recording',function()
     local s,ns=fixture();s:Start()
     s:Event('UNIT_SPELLCAST_START','player','d1',13262)
-    ns.settings.mapWorld=false;ns.settings.recordHistory=false;ns.UpdateGathering()
+    ns.settings.showGatheringWorld=false;ns.settings.recordHistory=false;ns.UpdateGathering()
     s:Event('UNIT_SPELLCAST_SUCCEEDED','player','d1',13262);eq(ns.actions:Rows()[1].completed,1)
     s:Event('UNIT_SPELLCAST_SUCCEEDED','player','notloaded',2575);eq(#ns.actions:Rows(),1)
     ns.settings.categories.Enchanting=false;ns.UpdateGathering()
-    s:Event('UNIT_SPELLCAST_SUCCEEDED','player','disabled',13262);eq(ns.actions:Rows()[1].attempts,1)
+    s:Event('UNIT_SPELLCAST_SUCCEEDED','player','hidden',13262);eq(ns.actions:Rows()[1].attempts,2)
 end)
 
 local function productionFixture()
@@ -1207,19 +1231,19 @@ test('dedicated production results enrich lifetime views without changing loot i
     local rows=ns.Reports.Rows('history',UnitGUID('player'),'Cooking');eq(#rows,1);eq(rows[1].crafted,2);eq(rows[1].quantity,0)
     s.broker.OnClick({},'RightButton');assert(s.menu.buttons['Profession statistics'])
     assert(not s.menu.buttons['Crafting and cooking'])
-    assert(s.menu.checkboxes['Record production']);assert(s.menu.checkboxes['Record Cooking production'])
+    assert(not s.menu.checkboxes['Record production']);assert(not s.menu.checkboxes['Record Cooking production'])
 end)
-test('production switches are independent and seal late results across recording gaps',function()
+test('old production switches never stop collecting results',function()
     local s,ns=productionFixture()
-    ns.settings.recordHistory=false;ns.settings.recordActions=false;ns.settings.gatheringMap=false;ns.UpdateGathering()
+    ns.settings.recordHistory=false;ns.settings.recordActions=false;ns.settings.showGatheringWorld=false;ns.settings.showGatheringMinimap=false;ns.UpdateGathering()
     s:Event('UNIT_SPELLCAST_START','player','first',2536);s:Event('UNIT_SPELLCAST_SUCCEEDED','player','first',2536)
     s:Event('TRADE_SKILL_ITEM_CRAFTED_RESULT',produced());eq(ns.production:Total(UnitGUID('player'),2680),2)
     s:Event('UNIT_SPELLCAST_START','player','paused',2536)
     ns.settings.productionProfessions.Cooking=false;ns.UpdateGathering()
     ns.settings.productionProfessions.Cooking=true;ns.UpdateGathering()
     s:Event('UNIT_SPELLCAST_SUCCEEDED','player','paused',2536)
-    s:Event('TRADE_SKILL_ITEM_CRAFTED_RESULT',produced(2));eq(ns.production:Total(UnitGUID('player'),2680),2)
-    ns.settings.recordProduction=false;ns.UpdateGathering();eq(ns.eventFrame.events.TRADE_SKILL_ITEM_CRAFTED_RESULT,nil)
+    s:Event('TRADE_SKILL_ITEM_CRAFTED_RESULT',produced(2));eq(ns.production:Total(UnitGUID('player'),2680),4)
+    ns.settings.recordProduction=false;ns.UpdateGathering();assert(ns.eventFrame.events.TRADE_SKILL_ITEM_CRAFTED_RESULT)
 end)
 test('unavailable protected and nonitem recipe metadata fail closed',function()
     local s,ns=productionFixture();eq(ns.Production.Recipe(2536).kind,'Cooking')
@@ -1237,7 +1261,7 @@ test('explicit recraft recipe metadata cannot be admitted as newly produced outp
 end)
 test('world changes seal production while ordinary display changes preserve it',function()
     local s,ns=productionFixture();s:Event('UNIT_SPELLCAST_START','player','cook',2536)
-    ns.settings.mapWorld=false;ns.settings.recordHistory=false;ns.UpdateGathering()
+    ns.settings.showGatheringWorld=false;ns.settings.recordHistory=false;ns.UpdateGathering()
     s:Event('TRADE_SKILL_ITEM_CRAFTED_RESULT',produced());s:Event('UNIT_SPELLCAST_SUCCEEDED','player','cook',2536)
     eq(ns.production:Total(UnitGUID('player'),2680),2)
     s:Event('UNIT_SPELLCAST_START','player','leave',2536);s:Event('PLAYER_LEAVING_WORLD')
@@ -1302,13 +1326,13 @@ test('flight points are independently enabled and persist with no profession mod
     s.broker.OnClick({},'RightButton')
     local option=s.menu.checkboxes['Show flight points'];assert(option,'Missing independent flight-points toggle')
     eq(s.menu.paths['Show flight points'],'Flight points')
-    local gathering=ns.settings.gatheringMap
-    option.callback();eq(ns.settings.flightPoints,false);eq(ns.settings.gatheringMap,gathering)
+    local gathering=ns.settings.showGatheringWorld
+    option.callback();eq(ns.settings.flightPoints,false);eq(ns.settings.showGatheringWorld,gathering)
     local saved=TitanGatheredForeverV3DB
     local again,loaded=fixture(nil,saved,false,true);again:Start();eq(loaded.settings.flightPoints,false)
-    loaded.settings.gatheringMap=false;again.broker.OnClick({},'RightButton')
+    loaded.settings.showGatheringWorld=false;again.broker.OnClick({},'RightButton')
     again.menu.checkboxes['Show flight points'].callback();eq(loaded.settings.flightPoints,true)
-    eq(loaded.settings.gatheringMap,false)
+    eq(loaded.settings.showGatheringWorld,false)
 end)
 
 test('icon appearance window is available from slash and menu and saves independently',function()
@@ -1397,24 +1421,23 @@ test('supporting tooltip lines use small fonts without shrinking item counts',fu
  s.broker.OnEnter({});local panel=ns.Titan.tooltip
  eq(_G[panel:GetName()..'TextLeft'..panel:NumLines()].font,'GameFontHighlightSmall')
 end)
-test('PvP history recording is independent persistent and preserves existing observations',function()
+test('PvP history recording is always on persistent and preserves existing observations',function()
  local s,ns=fixture();s:Start();s.broker.OnClick({},'RightButton')
- local toggle=s.menu.checkboxes['Record PvP lifetime history'];assert(toggle)
- eq(s.menu.paths['Record PvP lifetime history'],'History and sources');assert(toggle.selected())
+ assert(not s.menu.checkboxes['Record PvP lifetime history'],'collection has no switch')
  local honor='Enemy dies, honorable kill Rank: Private (Estimated Honor Points: 42)'
  s:Event('CHAT_MSG_COMBAT_HONOR_GAIN',honor)
  eq(ns.pvp:Snapshot(UnitGUID('player')).worldKills,1)
- toggle.callback();eq(ns.settings.recordPvP,false)
+ -- A saved recordPvP=false from an older version no longer stops collection.
+ ns.settings.recordPvP=false
  s.deathRecap={{{sourceName='Enemy',sourceFlags=0x00000440,overkill=3}}}
- s:Event('CHAT_MSG_COMBAT_HONOR_GAIN',honor);s:Event('PLAYER_DEAD')
- eq(ns.pvp:Snapshot(UnitGUID('player')).worldKills,1);eq(ns.pvp:Snapshot(UnitGUID('player')).deaths.total,0)
+ s:Event('CHAT_MSG_COMBAT_HONOR_GAIN',honor,'','','','','','','','','','second');s:Event('PLAYER_DEAD')
+ eq(ns.pvp:Snapshot(UnitGUID('player')).worldKills,2);eq(ns.pvp:Snapshot(UnitGUID('player')).deaths.total,1)
  eq(#ns.gathering.saved.maps[1],1)
  local again,loaded=fixture(16001,TitanGatheredForeverV3DB);again:Start()
- eq(loaded.settings.recordPvP,false);eq(loaded.pvp:Snapshot(UnitGUID('player')).worldKills,1)
- again.broker.OnClick({},'RightButton');again.menu.checkboxes['Record PvP lifetime history'].callback()
+ eq(loaded.pvp:Snapshot(UnitGUID('player')).worldKills,2)
  loaded.settings.recordHistory=false
  again:Event('CHAT_MSG_COMBAT_HONOR_GAIN',honor,'','','','','','','','','','resumed')
- eq(loaded.pvp:Snapshot(UnitGUID('player')).worldKills,2)
+ eq(loaded.pvp:Snapshot(UnitGUID('player')).worldKills,3)
 end)
 for _, entry in ipairs(tests) do
     local ok, err = pcall(entry[2])

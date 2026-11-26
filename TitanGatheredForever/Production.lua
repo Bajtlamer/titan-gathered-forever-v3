@@ -53,12 +53,11 @@ function Production.Recipe(recipeID)
 end
 function Production.Enabled(kind)
     local s=ns.settings
-    return s and s.recordProduction and Production.labels[kind]~=nil and ns.Catalog.modules[kind]~=nil
-        and s.categories[kind]~=false and s.productionProfessions[kind]~=false
+    return s~=nil and Production.labels[kind]~=nil and ns.Catalog.modules[kind]~=nil
 end
 function Production.SettingsChanged()
     local keys={};for kind in pairs(Production.labels)do keys[#keys+1]=kind end;table.sort(keys)
-    local parts={tostring(ns.settings.recordProduction)}
+    local parts={}
     for _,kind in ipairs(keys)do parts[#parts+1]=tostring(Production.Enabled(kind))end
     local signature=table.concat(parts,':')
     if Production.signature and signature~=Production.signature and ns.production then ns.production:Pause()end

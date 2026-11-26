@@ -31,7 +31,7 @@ CreateFrame = function(_, _, parent) return frame(parent) end
 date = function(_, timestamp) return tostring(timestamp) end
 C_Item = { GetItemIconByID = function(id) return id + 1000 end }
 GameTooltip = { SetOwner = function() end, AddLine = function() end, Show = function() end, Hide = function() end }
-local ns = { settings = { gatheringMap = true }, IsPublic = function() return true end,
+local ns = { settings = { showGatheringWorld = true }, IsPublic = function() return true end,
     Style = { Separator = function(tooltip) tooltip:AddLine(' ') end, ItemName = function(id) return 'Item ' .. id end } }
 dofile('tests/style_stub.lua')(ns.Style)
 assert(loadfile('TitanGatheredForever/PinStyle.lua'))('TitanGatheredForever', ns)
@@ -53,8 +53,8 @@ world.mapID = 1; map:Refresh(true); assert(map.pins[1].shown)
 local allocated = #frames
 map:Refresh(true); assert(#frames == allocated, 'Pins were not reused')
 canvas.width = 500; map:Refresh(); assert(map.pins[1].x == 200)
-ns.settings.gatheringMap = false; map:Refresh(true); assert(not map.pins[1].shown)
-ns.settings.gatheringMap = true; map:Refresh(true); assert(map.pins[1].shown)
+ns.settings.showGatheringWorld = false; map:Refresh(true); assert(not map.pins[1].shown)
+ns.settings.showGatheringWorld = true; map:Refresh(true); assert(map.pins[1].shown)
 world:Hide(); map:Refresh(true); assert(not map.pins[1].shown)
 world:Show(); canvas.width = 0
 local delayed = ns.Map.New(world, controller)
@@ -95,9 +95,9 @@ world.mapID = 2; ns.Map.instance:Refresh(true)
 local projected = ns.Map.instance.pins[1]
 assert(projected.shown, 'Parent map did not show the saved zone observation')
 assert(math.abs(projected.x - 300) < 0.001 and math.abs(projected.y + 240) < 0.001)
-ns.settings.mapWorld = false; ns.Map.instance:Refresh(true)
+ns.settings.showGatheringWorld = false; ns.Map.instance:Refresh(true)
 assert(not projected.shown, 'World map switch failed to hide projected icons')
-ns.settings.mapWorld = true; ns.Map.instance:Refresh(true); assert(projected.shown)
+ns.settings.showGatheringWorld = true; ns.Map.instance:Refresh(true); assert(projected.shown)
 local oldCanvas = canvas
 canvas = frame(); canvas.width, canvas.height, canvas.effectiveScale = oldCanvas.width, oldCanvas.height, oldCanvas.effectiveScale
 ns.Map.instance:Refresh()
@@ -149,11 +149,11 @@ assert(npcPin,'trainer pin was not rendered on the world map')
 assert(npcPin.x==.55*canvas.width,'trainer pin was not projected onto the canvas')
 npcPin.scripts.OnEnter(npcPin)
 assert(npcFilled==7,'trainer pin did not use the NPC tooltip')
-ns.settings.gatheringMap=false;map:Refresh(true)
+ns.settings.showGatheringWorld=false;map:Refresh(true)
 npcPin=nil
 for _,pin in ipairs(map.pins)do if pin.shown and pin.icon=='Interface\\Icons\\INV_Misc_Book_11'then npcPin=pin end end
 assert(npcPin,'NPC pins must not depend on the gathering map switch')
-ns.settings.gatheringMap=true;ns.NpcSources=nil;map:Refresh(true)
+ns.settings.showGatheringWorld=true;ns.NpcSources=nil;map:Refresh(true)
 -- Highlighted NPC pins get the gold ring; ordinary and gathering pins do not.
 local lit={}
 local realHighlight=ns.PinStyle.Highlight

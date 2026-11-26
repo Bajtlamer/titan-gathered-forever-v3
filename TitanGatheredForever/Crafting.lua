@@ -31,7 +31,7 @@ function Crafting.Read(recipeID)
     local profession=metadata(C_TradeSkillUI.GetProfessionInfoByRecipeID,recipeID)
     if not readable(profession,{'professionID','parentProfessionID'})then return end
     local kind=skillKinds[profession.parentProfessionID]or skillKinds[profession.professionID]
-    if not kind or not ns.Catalog.modules[kind]or ns.settings.categories[kind]==false then return end
+    if not kind or not ns.Catalog.modules[kind]then return end
     local schematic=metadata(C_TradeSkillUI.GetRecipeSchematic,recipeID,false)
     if not readable(schematic,{'recipeID','isRecraft','recipeType','reagentSlotSchematics'})or schematic.recipeID~=recipeID
         or schematic.isRecraft~=false or (schematic.recipeType~=1 and schematic.recipeType~=3)
@@ -53,6 +53,8 @@ function Crafting.Read(recipeID)
 end
 function Crafting.Plan(recipeID,operations)
     local recipe=Crafting.Read(recipeID)
+    -- Reading stays independent of settings; a hidden profession only hides its plan.
+    if recipe and ns.settings.categories[recipe.kind]==false then recipe=nil end
     if not recipe then return {rows={},issues={},error='Recipe unavailable, unsupported, or profession addon/category disabled.'}end
     return Crafting.Compute(recipe,ns.inventory,ns.settings.showBank,operations or 1)
 end
