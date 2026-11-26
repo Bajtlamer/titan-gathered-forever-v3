@@ -1,6 +1,6 @@
 # Unreleased development updates
 
-Updated 2026-11-26. Versions up to 0.5.161 are published in release-notes/ref-0.5.161.md. These changes describe source candidates since the latest published versioned notes.
+Updated 2026-11-26. Versions up to 0.5.164 are published in release-notes/ref-0.5.164.md. These changes describe source candidates since the latest published versioned notes.
 
 ## One gathering switch per map, 0.5.164
 
