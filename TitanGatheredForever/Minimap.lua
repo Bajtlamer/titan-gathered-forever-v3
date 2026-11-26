@@ -63,7 +63,7 @@ end
 
 function Mini:Refresh()
     local npcs = ns.NpcSources and ns.NpcSources.Enabled()
-    if not (ns.settings.gatheringMap or npcs) or ns.settings.mapMinimap == false then
+    if not (ns.settings.showGatheringMinimap or npcs) then
         self.overlay:Hide(); self:HidePins(); return
     end
     self.overlay:Show()
@@ -90,7 +90,7 @@ function Mini:Refresh()
     local clip = math.min(0.85, math.max(0, 1 - extent / math.min(halfWidth, halfHeight)))
     local cosine, sine, visible = math.cos(facing), math.sin(facing), 0
     local combined = {}
-    if ns.settings.gatheringMap then
+    if ns.settings.showGatheringMinimap then
         for _, node in ipairs(self.controller:List(mapID)) do combined[#combined + 1] = node end
     end
     if npcs then

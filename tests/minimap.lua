@@ -36,7 +36,7 @@ GetCVar = function() return state.rotate and '1' or '0' end
 GetPlayerFacing = function() return state.facing end
 C_Item = { GetItemIconByID = function(id) return id + 1000 end }
 GameTooltip = { SetOwner = function() end, AddLine = function() end, Show = function() end, Hide = function() end }
-local ns = { settings = { gatheringMap = true, mapMinimap = true }, IsPublic = function() return true end,
+local ns = { settings = { showGatheringMinimap = true, showGatheringWorld = true }, IsPublic = function() return true end,
     Catalog = { modules = { Herbs = {} } },
     Style = { Separator = function(tooltip) tooltip:AddLine(' ') end, ItemName = function(id) return 'Item ' .. id end } }
 local nodes = { { mapID = 1412, itemID = 765, kind = 'Herbs', x = 0.55, y = 0.5, count = 1 } }
@@ -68,12 +68,12 @@ test('distant spots, other zones and unavailable positions are hidden', function
     state.mapID = 1412; state.x = nil; map:Refresh(); assert(not map.pins[1].shown)
     state.x = 0.5
 end)
-test('master and minimap visibility switches hide icons without deleting saved spots', function()
+test('the minimap gathering switch hides icons without deleting saved spots', function()
     map:Refresh(); assert(map.pins[1].shown)
-    ns.settings.mapMinimap = false; map:Refresh(); assert(not map.pins[1].shown)
-    ns.settings.mapMinimap = true; ns.settings.gatheringMap = false
-    map:Refresh(); assert(not map.pins[1].shown)
-    ns.settings.gatheringMap = true; map:Refresh(); assert(map.pins[1].shown and #nodes == 1)
+    ns.settings.showGatheringMinimap = false; map:Refresh(); assert(not map.pins[1].shown)
+    ns.settings.showGatheringWorld = false; ns.settings.showGatheringMinimap = true
+    map:Refresh(); assert(map.pins[1].shown and #nodes == 1, 'the world map switch does not hide minimap spots')
+    ns.settings.showGatheringWorld = true
 end)
 test('hidden minimap and zero radius fail closed without stale icons', function()
     Minimap:Hide(); map:Refresh(); assert(not map.pins[1].shown)
@@ -154,10 +154,10 @@ test('trainer and recipe vendor pins use their own icons and tooltip',function()
     assert(icons['Interface\\Icons\\INV_Scroll_03'],'vendor pin missing')
     trainer.scripts.OnEnter(trainer)
     assert(filled==7,'npc tooltip not used')
-    ns.settings.gatheringMap=false
+    ns.settings.showGatheringMinimap=false
     ns.Minimap.instance:Refresh()
     assert(ns.Minimap.instance.visibleCount==2,'npc pins must not depend on the gathering map switch')
-    ns.settings.gatheringMap=true
+    ns.settings.showGatheringMinimap=true
     ns.NpcSources=nil
     ns.Minimap.instance:Refresh()
 end)

@@ -157,10 +157,9 @@ function Titan.MapMenu(owner, world)
                 update()
             end)
         end
-        plain(root, 'Gathering spots', 'gatheringMap', function() ns.UpdateGathering() end)
-        if ns.settings.gatheringMap then
-            plain(root, 'On the world map', 'mapWorld', function() ns.UpdateGathering() end)
-            plain(root, 'On the minimap', 'mapMinimap', function() ns.UpdateGathering() end)
+        plain(root, 'Show gathering spots on the world map', 'showGatheringWorld', function() ns.UpdateGathering() end)
+        plain(root, 'Show gathering spots on the minimap', 'showGatheringMinimap', function() ns.UpdateGathering() end)
+        do
             local spots = root:CreateButton('Gathering professions')
             for _, category in ipairs(ns.Sources.Categories()) do
                 local kind = category.id
@@ -172,9 +171,9 @@ function Titan.MapMenu(owner, world)
                 end
             end
         end
-        switch(root, 'Profession trainers', 'mapTrainers')
-        switch(root, 'Recipe vendors', 'mapRecipeVendors')
-        switch(root, 'Weapon masters', 'mapWeaponMasters')
+        switch(root, 'Show profession trainers', 'mapTrainers')
+        switch(root, 'Show recipe vendors', 'mapRecipeVendors')
+        switch(root, 'Show weapon masters', 'mapWeaponMasters')
         local professions = root:CreateButton('Trainer and vendor professions')
         professions:SetScrollMode(300)
         for _, kind in ipairs(ns.NpcSources.InstalledKinds(ns.NpcSources.Kinds)) do
@@ -332,9 +331,6 @@ function Titan.Menu(owner)
         npcs:CreateCheckbox('Show weapon masters', function() return ns.settings.mapWeaponMasters ~= false end, function()
             ns.settings.mapWeaponMasters = ns.settings.mapWeaponMasters == false; redrawNpcs()
         end)
-        npcs:CreateCheckbox('Record trainers and vendors when I open their window', function() return ns.settings.recordNpcs ~= false end, function()
-            ns.settings.recordNpcs = ns.settings.recordNpcs == false
-        end)
         local npcProfessions = npcs:CreateButton('Profession filter')
         npcProfessions:SetScrollMode(300)
         for _, kind in ipairs(ns.NpcSources.InstalledKinds(ns.NpcSources.Kinds)) do
@@ -357,11 +353,9 @@ function Titan.Menu(owner)
                 ns.UpdateGathering()
             end)
         end
-        mapToggle(gathering, 'Enable gathering map', 'gatheringMap')
-        if ns.settings.gatheringMap then
-            local visibility = gathering:CreateButton('Visibility')
-            mapToggle(visibility, 'World map icons', 'mapWorld')
-            mapToggle(visibility, 'Minimap icons', 'mapMinimap')
+        mapToggle(gathering, 'Show gathering spots on the world map', 'showGatheringWorld')
+        mapToggle(gathering, 'Show gathering spots on the minimap', 'showGatheringMinimap')
+        do
             local spots = gathering:CreateButton('Professions')
             for _, category in ipairs(ns.Sources.Categories()) do
                 local kind = category.id
@@ -414,56 +408,7 @@ function Titan.Menu(owner)
             if ns.Crafting.selectedID then ns.CraftingView.Show(ns.Crafting.selectedID,1)
             else ns.Print('Select a profession recipe or use /tgf recipe <recipeID> [operations].')end
         end)
-        reports:CreateDivider()
-        reports:CreateCheckbox('Record PvP lifetime history', function() return ns.settings.recordPvP end, function()
-            ns.settings.recordPvP = not ns.settings.recordPvP
-            ns.Reports.Refresh()
-        end)
-        reports:CreateCheckbox('Record lifetime history', function() return ns.settings.recordHistory end, function()
-            ns.settings.recordHistory = not ns.settings.recordHistory; ns.UpdateGathering()
-        end)
-        reports:CreateCheckbox('Record profession actions', function() return ns.settings.recordActions end, function()
-            ns.settings.recordActions = not ns.settings.recordActions; ns.UpdateGathering()
-        end)
-        reports:CreateCheckbox('Record production', function() return ns.settings.recordProduction end, function()
-            ns.settings.recordProduction = not ns.settings.recordProduction; ns.UpdateGathering()
-        end)
-        local production = reports:CreateButton('Production recording by profession')
-        for _, module in ipairs(modules) do
-            local kind=module.id
-            if ns.Production.labels[kind] then
-                production:CreateCheckbox('Record ' .. module.label .. ' production',
-                    function() return ns.settings.productionProfessions[kind] ~= false end, function()
-                        ns.settings.productionProfessions[kind] = ns.settings.productionProfessions[kind] == false
-                        ns.UpdateGathering()
-                    end)
-            end
-        end
-        local actions = reports:CreateButton('Action recording by profession')
-        for _, module in ipairs(modules) do
-            local kind=module.id
-            if ns.Actions.labels[kind] then
-                actions:CreateCheckbox('Record ' .. ns.Actions.labels[kind] .. ' actions',
-                    function() return ns.settings.actionProfessions[kind] ~= false end, function()
-                        ns.settings.actionProfessions[kind] = ns.settings.actionProfessions[kind] == false
-                        ns.UpdateGathering()
-                    end)
-            end
-        end
         toggle(display, 'History in item tooltips', 'historyTooltips')
-        toggle(reports, 'Include rare loot', 'recordRare')
-        local recording = reports:CreateButton('Recording by profession')
-        for _, module in ipairs(modules) do
-            if module.kind == 'profession' then
-                local kind = module.id
-                recording:CreateCheckbox('Record ' .. module.label, function() return ns.settings.historyProfessions[kind] ~= false end, function()
-                    ns.settings.historyProfessions[kind] = ns.settings.historyProfessions[kind] == false; ns.UpdateGathering()
-                end)
-            end
-        end
-        recording:CreateCheckbox('Ordinary loot sources', function() return ns.settings.historyProfessions.Loot ~= false end, function()
-            ns.settings.historyProfessions.Loot = ns.settings.historyProfessions.Loot == false; ns.UpdateGathering()
-        end)
         for _, extend in ipairs(Titan.menuExtensions) do pcall(extend, root) end
         local diagnostics = root:CreateButton('Diagnostics')
         toggle(diagnostics, 'Debug mode', 'debugMode')

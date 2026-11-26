@@ -4,6 +4,8 @@ Updated 2026-11-20. Current continuation plan: [plans/plan-live-verification-and
 
 ## Current state
 
+Release 0.5.164 (2026-11-26): data collection is always on and independent of every setting, hidden map spots keep being recorded, and the map menu has one gathering switch per map (0.5.162 to 0.5.164). Versioned notes: [release-notes/ref-0.5.164.md](release-notes/ref-0.5.164.md).
+
 Release 0.5.161 (2026-11-24): Economy counts sales, and the Current listing of the Sell tab shows the earnings, the vendor comparison, the loss of a failed auction, the units that cover the deposit and a warning for a cheap item (0.5.157 to 0.5.161). Versioned notes: [release-notes/ref-0.5.161.md](release-notes/ref-0.5.161.md).
 
 Release 0.5.156 (2026-11-23): Market history from the player's own sales with a best sale, and a scan price for every item (0.5.155 and 0.5.156). Versioned notes: [release-notes/ref-0.5.156.md](release-notes/ref-0.5.156.md).

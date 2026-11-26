@@ -1,6 +1,22 @@
 # Unreleased development updates
 
-Updated 2026-11-23. Versions up to 0.5.161 are published in release-notes/ref-0.5.161.md. These changes describe source candidates since the latest published versioned notes.
+Updated 2026-11-26. Versions up to 0.5.164 are published in release-notes/ref-0.5.164.md. These changes describe source candidates since the latest published versioned notes.
+
+## One gathering switch per map, 0.5.164
+
+- The three map switches Gathering spots (Enable gathering map in the Titan menu), On the world map (World map icons) and On the minimap (Minimap icons) are replaced by two that say what they do: Show gathering spots on the world map and Show gathering spots on the minimap. They are in the world map's Map options and in the Titan menu under Gathering map. The profession and material submenus are always available.
+- Trainer, recipe vendor and weapon master pins are no longer hidden by the world map or minimap switch; they follow only their own switches, now named Show profession trainers, Show recipe vendors and Show weapon masters in the map menu too.
+- The first load carries the old state over: a map shows gathering spots only if both the old Gathering spots switch and the old switch of that map were on. The old values stay in the settings unused.
+
+## Data collection is always on, 0.5.163
+
+- Nothing in the settings stops data collection any more: lifetime history, map spots, profession actions, production, PvP, rare loot and trainer and vendor windows are always recorded, and only disabling an addon in the AddOns list stops it. The recording switches are gone from the menus (Record lifetime history, Record profession actions, Record production and their per-profession menus, Record PvP lifetime history, Include rare loot, Record trainers and vendors when I open their window). Values saved by older versions stay in the settings and are ignored.
+- Turning a profession off in the Professions menu only hides it: its spots, actions, production and history keep being recorded and show again when it is turned back on. An open recipe plan of a hidden profession is still cleared.
+- Map spots are still not recorded inside instances; the statistics there are.
+
+## Hiding map spots keeps recording them, 0.5.162
+
+- The gathering map switches (Enable gathering map, the profession spot switches, the world map and minimap icons and the per-material visibility) only decide which spots are drawn. Gathering, fishing and loot spots are recorded while they are hidden and appear when they are shown again. Only turning a profession off in the Professions menu still stops recording its spots. The diagnostics line shows map visibility and recording separately.
 
 ## Warning for a cheap item, 0.5.161
 

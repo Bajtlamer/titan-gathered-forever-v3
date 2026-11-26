@@ -22,8 +22,22 @@ end
 function Sources.SetMaterialVisible(itemID,visible)
     ns.settings.mapItemVisibility[itemID] = visible == true
 end
+-- Collection never depends on a setting: every installed profession addon is
+-- recorded, and only disabling an addon stops its data. Settings and menus
+-- decide what is drawn or listed, never what is collected.
+function Sources.Known(itemID)
+    for _,m in ipairs(ns.Catalog.Modules())do if m.items[itemID]then return true end end
+    return false
+end
+-- Recording gate for map nodes.
+function Sources.Recordable(kind)
+    if not ns.settings or kind=='Enchanting'then return false end
+    if kind=='PvP'or kind=='Rare'then return true end
+    return ns.Catalog.modules[kind]~=nil
+end
+-- Drawing gate: whether a saved node is shown on the world map and minimap.
 function Sources.Enabled(kind,itemID)
-    local s=ns.settings;if not s or not s.gatheringMap or kind=='Enchanting'then return false end
+    local s=ns.settings;if not s or kind=='Enchanting'then return false end
     if kind=='PvP'then return s.mapPvP==true end
     if kind~='Rare'then
         if not ns.Catalog.modules[kind]or s.categories[kind]==false then return false end
@@ -44,20 +58,18 @@ function Sources.Items(kind)
     return result
 end
 function Sources.Track(kind)
-    local s=ns.settings
-    return s and s.recordHistory and s.historyProfessions[kind]~=false
-        and (kind=='Loot' or (ns.Catalog.modules[kind]~=nil and s.categories[kind]~=false))
+    return ns.settings~=nil and (kind=='Loot' or ns.Catalog.modules[kind]~=nil)
 end
 function Sources.Active(kind)
     if Sources.Track(kind)then return true end
     if kind=='Loot'then
-        for _,m in ipairs(Sources.Categories())do if m.id~='PvP'and Sources.Enabled(m.id)then return true end end
+        for _,m in ipairs(Sources.Categories())do if m.id~='PvP'and Sources.Recordable(m.id)then return true end end
         return false
     end
-    return Sources.Enabled(kind)
+    return Sources.Recordable(kind)
 end
 function Sources.Eligible(itemID,quality)
-    return ns.Catalog.Get(itemID)~=nil or (ns.settings.recordRare and type(quality)=='number'and quality>=3)
+    return Sources.Known(itemID) or (type(quality)=='number'and quality>=3)
 end
 -- Preserve the eligible-item set for each recording configuration so a newly
 -- enabled profession does not inherit samples collected while it was disabled.
@@ -65,24 +77,23 @@ function Sources.Policy()
     local selected, loaded, modules = {}, {}, ns.Catalog.Modules()
     for _,m in ipairs(modules)do
         loaded[#loaded+1]=m.id
-        if ns.settings.categories[m.id]~=false and ns.settings.historyProfessions[m.id]~=false then selected[#selected+1]=m.id end
+        selected[#selected+1]=m.id
     end
-    local key=table.concat(loaded,',')..'/'..table.concat(selected,',')..':'..tostring(ns.settings.recordRare)..':'..tostring(ns.DataMetadata.sourceSHA256)
+    local key=table.concat(loaded,',')..'/'..table.concat(selected,',')..':true:'..tostring(ns.DataMetadata.sourceSHA256)
     if not Sources.policy or Sources.policy.key~=key then
         local ids,known={},{}
         for _,m in ipairs(modules)do
             for id in pairs(m.items)do
-                known[id]=true
-                if ns.settings.categories[m.id]~=false and ns.settings.historyProfessions[m.id]~=false then ids[id]=true end
+                known[id]=true;ids[id]=true
             end
         end
-        Sources.policy={key=key,items=ids,knownItems=known,rare=ns.settings.recordRare}
+        Sources.policy={key=key,items=ids,knownItems=known,rare=true}
     end
     return Sources.policy
 end
 function Sources.SettingsChanged()
     if not ns.history then return end
-    local signature=Sources.Policy().key..':'..tostring(ns.settings.recordHistory)..':'..tostring(ns.settings.historyProfessions.Loot)
+    local signature=Sources.Policy().key
     if Sources.recordingSignature and Sources.recordingSignature~=signature then
         ns.history:InvalidatePending(ns.characterID or UnitGUID('player'))
         if ns.observations then ns.observations:Cancel()end
@@ -108,20 +119,7 @@ function Sources.Record(e)
     local character=ns.characterID or UnitGUID('player')
     if Sources.Track(e.kind)then
         local items={}
-        for id,qty in pairs(e.items)do
-            local include=e.kind~='Loot'
-            if not include then
-                local matched=false
-                for _,m in ipairs(ns.Catalog.Modules())do
-                    if m.items[id]then
-                        matched=true
-                        if ns.settings.categories[m.id]~=false and ns.settings.historyProfessions[m.id]~=false then include=true end
-                    end
-                end
-                if not matched and ns.settings.recordRare then include=true end
-            end
-            if include then items[id]=qty end
-        end
+        for id,qty in pairs(e.items)do items[id]=qty end
         local receipt={};for key,value in pairs(e)do receipt[key]=value end;receipt.items=items
         if e.kind=='Loot'then receipt.policy=Sources.Policy()end
         local name=UnitName and UnitName('player')or character
@@ -140,10 +138,10 @@ function Sources.Record(e)
                 local matched=false
                 for _,m in ipairs(Sources.Categories())do
                     local module=ns.Catalog.modules[m.id]
-                    if module and module.items[id]and Sources.Enabled(m.id)and not(e.suppressMaps and e.suppressMaps[m.id])then ns.gathering:Record(m.id,id,e);matched=true end
+                    if module and module.items[id]and Sources.Recordable(m.id)and not(e.suppressMaps and e.suppressMaps[m.id])then ns.gathering:Record(m.id,id,e);matched=true end
                 end
-                if not matched and not ns.Catalog.Get(id)and Sources.Enabled('Rare')and not(e.suppressMaps and e.suppressMaps.Rare)then ns.gathering:Record('Rare',id,e)end
-            elseif Sources.Enabled(e.kind)and (e.kind~='Mining'or id==miningItem)
+                if not matched and not Sources.Known(id)and Sources.Recordable('Rare')and not(e.suppressMaps and e.suppressMaps.Rare)then ns.gathering:Record('Rare',id,e)end
+            elseif Sources.Recordable(e.kind)and (e.kind~='Mining'or id==miningItem)
                 and not(e.suppressMaps and e.suppressMaps[e.kind])then ns.gathering:Record(e.kind,id,e)end
         end
     end

@@ -11,9 +11,13 @@ local function positionValid(p)
         and p.x >= 0 and p.x <= 1 and p.y >= 0 and p.y <= 1
 end
 
-function Gathering.New(api, saved, resources, enabled)
+-- enabled(kind) decides whether a gathering kind is recorded. visible(kind,
+-- itemID) only decides which saved nodes are drawn; hiding pins never stops
+-- recording, so nodes gathered while hidden appear once they are shown again.
+function Gathering.New(api, saved, resources, enabled, visible)
     if type(saved.maps) ~= 'table' then saved.maps = {} end
     return setmetatable({ api = api, saved = saved, resources = resources, enabled = enabled,
+                          visible = visible or enabled,
                           lastStatus = 'waiting for a gathering cast' }, Gathering)
 end
 
@@ -44,7 +48,7 @@ function Gathering:Cast(event, unit, castGUID, spellID)
         end
         return
     end
-    if not self.enabled(kind) then self.cast, self.loot = nil, nil; self:Status(kind .. ' mapping disabled'); return end
+    if not self.enabled(kind) then self.cast, self.loot = nil, nil; self:Status(kind .. ' profession addon not loaded'); return end
     if not self:CanRecord() then return end
     if event == 'UNIT_SPELLCAST_FAILED' or event == 'UNIT_SPELLCAST_INTERRUPTED' then
         if self.cast and self.cast.guid == castGUID then
@@ -101,7 +105,7 @@ function Gathering:Finalize()
     if not cast.succeeded then self:Status('loot closed; waiting for gathering spell success'); return end
     if not self:CanRecord() then return end
     self.cast, self.loot = nil, nil
-    if not self.enabled(cast.kind) then self:Status(cast.kind .. ' mapping disabled'); return end
+    if not self.enabled(cast.kind) then self:Status(cast.kind .. ' profession addon not loaded'); return end
     if self.api.Now() - cast.at > 15 then self:Status('gathering cast expired'); return end
     if not positionValid(cast.position) then self:Status('player map position unavailable'); return end
     local resources = self.resources(cast.kind) or {}
@@ -238,7 +242,7 @@ function Gathering:List(mapID)
         end
         -- Older candidates saved every mining drop. Prefer a recorded ore at
         -- that spot without deleting byproduct observations or guessing ore.
-        if not covered and validNode(node) and node.mapID == mapID and self.enabled(node.kind, node.itemID) then result[#result + 1] = node end
+        if not covered and validNode(node) and node.mapID == mapID and self.visible(node.kind, node.itemID) then result[#result + 1] = node end
         if #result == 500 then break end
     end
     return result

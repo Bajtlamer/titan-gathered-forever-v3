@@ -226,7 +226,7 @@ end
 
 function Obs.DefaultAPI()
     local api = {}
-    api.Enabled = function() return ns.settings and ns.settings.recordNpcs ~= false end
+    api.Enabled = function() return ns.settings ~= nil end
     api.Installed = function(kind) return not ns.Catalog or not ns.Catalog.Installed or ns.Catalog.Installed(kind) end
     api.Now = function() return time() end
     api.Changed = function()

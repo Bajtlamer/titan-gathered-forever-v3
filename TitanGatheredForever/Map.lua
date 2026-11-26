@@ -74,7 +74,7 @@ end
 
 function Map:Nodes(mapID)
     local result = {}
-    if ns.settings.gatheringMap then result = self:GatheringNodes(mapID) end
+    if ns.settings.showGatheringWorld then result = self:GatheringNodes(mapID) end
     if ns.NpcSources and ns.NpcSources.Enabled() then
         for _, node in ipairs(ns.NpcSources.List(mapID)) do result[#result + 1] = node end
     end
@@ -126,7 +126,7 @@ end
 
 function Map:Refresh(force)
     local npcs = ns.NpcSources and ns.NpcSources.Enabled()
-    if not (ns.settings.gatheringMap or npcs) or ns.settings.mapWorld == false or not self.world:IsShown() then self:Hide(); return end
+    if not (ns.settings.showGatheringWorld or npcs) or not self.world:IsShown() then self:Hide(); return end
     local mapID, canvas = self.world:GetMapID(), self.world:GetCanvas()
     if not mapID or not canvas then self:Hide(); return end
     local width, height = canvas:GetWidth(), canvas:GetHeight()

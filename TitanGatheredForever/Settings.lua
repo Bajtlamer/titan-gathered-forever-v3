@@ -31,6 +31,15 @@ function ns.Settings.Initialize(saved)
     for _, key in ipairs({ 'gatheringMap', 'mapMining', 'mapHerbs', 'mapSkinning', 'mapFishing', 'mapRare', 'mapPvP', 'mapWorld', 'mapMinimap' }) do
         if type(settings[key]) ~= 'boolean' then settings[key] = true end
     end
+    -- One switch per map for gathering spots. They replace gatheringMap (both
+    -- maps) and mapWorld/mapMinimap (every addon icon on one map), which are
+    -- kept unused for compatibility; the first load carries their state over.
+    if type(settings.showGatheringWorld) ~= 'boolean' then
+        settings.showGatheringWorld = settings.gatheringMap ~= false and settings.mapWorld ~= false
+    end
+    if type(settings.showGatheringMinimap) ~= 'boolean' then
+        settings.showGatheringMinimap = settings.gatheringMap ~= false and settings.mapMinimap ~= false
+    end
     if type(settings.recordPvP) ~= 'boolean' then settings.recordPvP = true end
     if type(settings.mapTrainers) ~= 'boolean' then settings.mapTrainers = true end
     if type(settings.mapRecipeVendors) ~= 'boolean' then settings.mapRecipeVendors = true end

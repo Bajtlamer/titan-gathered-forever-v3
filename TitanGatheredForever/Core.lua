@@ -102,7 +102,8 @@ local gatheringEvents = { 'UNIT_SPELLCAST_START', 'UNIT_SPELLCAST_SUCCEEDED', 'U
     'UNIT_SPELLCAST_INTERRUPTED', 'UNIT_SPELLCAST_STOP', 'UNIT_SPELLCAST_CHANNEL_START', 'UNIT_SPELLCAST_CHANNEL_STOP',
     'LOOT_READY', 'LOOT_OPENED', 'LOOT_SLOT_CLEARED', 'LOOT_CLOSED' }
 
-function ns.GatheringEnabled(kind, itemID) return ns.Sources.Enabled(kind, itemID) end
+function ns.GatheringEnabled(kind) return ns.Sources.Recordable(kind) end
+function ns.GatheringVisible(kind, itemID) return ns.Sources.Enabled(kind, itemID) end
 
 function ns.UpdateGathering()
     if not ns.gathering then return end
@@ -111,15 +112,9 @@ function ns.UpdateGathering()
     ns.Production.SettingsChanged()
     ns.gathering:Cancel()
     if ns.observations and ns.observations.cast and not ns.Sources.Active(ns.observations.cast.kind) then ns.observations:Cancel() end
-    local enabled = ns.settings.recordHistory or ns.settings.recordActions
-    for _, category in ipairs(ns.Sources.Categories()) do enabled = enabled or ns.Sources.Enabled(category.id) end
-    for _, event in ipairs(gatheringEvents) do
-        if enabled or (ns.settings.recordProduction and event:match('^UNIT_SPELLCAST_')) then
-            frame:RegisterEvent(event)
-        else frame:UnregisterEvent(event) end
-    end
-    if ns.settings.recordProduction then frame:RegisterEvent('TRADE_SKILL_ITEM_CRAFTED_RESULT')
-    else frame:UnregisterEvent('TRADE_SKILL_ITEM_CRAFTED_RESULT') end
+    -- Collection is always on; only disabling the addon stops it.
+    for _, event in ipairs(gatheringEvents) do frame:RegisterEvent(event) end
+    frame:RegisterEvent('TRADE_SKILL_ITEM_CRAFTED_RESULT')
     for _,event in ipairs({'CHAT_MSG_COMBAT_HONOR_GAIN','PLAYER_DEAD','PLAYER_PVP_KILLS_CHANGED','PLAYER_PVP_RANK_CHANGED'})do
         frame:RegisterEvent(event)
     end
@@ -202,7 +197,7 @@ local function start()
         function(kind)
             local module = ns.Catalog.modules[kind]
             return module and module.gatheringResources or {}
-        end, ns.GatheringEnabled)
+        end, ns.GatheringEnabled, ns.GatheringVisible)
     ns.history = ns.History.New(ns.db.history)
     ns.history:InvalidatePending(UnitGUID('player'))
     ns.actions = ns.Actions.New(ns.db.actions, {
@@ -344,10 +339,14 @@ local function start()
             if type(nodes) == 'table' then savedSpots = savedSpots + #nodes end
         end
         local world, mini = ns.Map.instance, ns.Minimap.instance
-        report('Gathering map: ' .. (ns.settings.gatheringMap and 'on' or 'off')
-            .. '; Herbalism ' .. (ns.GatheringEnabled('Herbs') and 'on' or 'off')
-            .. '; Mining ' .. (ns.GatheringEnabled('Mining') and 'on' or 'off')
-            .. '; Skinning ' .. (ns.GatheringEnabled('Skinning') and 'on' or 'off')
+        report('Gathering spots: world map ' .. (ns.settings.showGatheringWorld and 'shown' or 'hidden')
+            .. ', minimap ' .. (ns.settings.showGatheringMinimap and 'shown' or 'hidden')
+            .. '; Herbalism ' .. (ns.GatheringVisible('Herbs') and 'shown' or 'hidden')
+            .. '; Mining ' .. (ns.GatheringVisible('Mining') and 'shown' or 'hidden')
+            .. '; Skinning ' .. (ns.GatheringVisible('Skinning') and 'shown' or 'hidden')
+            .. '; recording Herbalism ' .. (ns.GatheringEnabled('Herbs') and 'on' or 'off')
+            .. ', Mining ' .. (ns.GatheringEnabled('Mining') and 'on' or 'off')
+            .. ', Skinning ' .. (ns.GatheringEnabled('Skinning') and 'on' or 'off')
             .. '; ' .. ns.gathering.lastStatus .. '; saved spots ' .. savedSpots
             .. '; world map ' .. (world and tostring(world.mapID or 'not opened') or 'not attached')
             .. ' / icons ' .. (world and world.visibleCount or 0)
@@ -439,7 +438,6 @@ frame:SetScript('OnEvent', function(_, event, ...)
     end
     if event=='TRADE_SKILL_DATA_SOURCE_CHANGING'or event=='TRADE_SKILL_CLOSE'or event=='PLAYER_LEAVING_WORLD'then ns.Crafting.Select(nil)end
     if event=='CHAT_MSG_COMBAT_HONOR_GAIN'then
-        if ns.settings.recordPvP == false then return end
         local args={...};local message=args[1]
         local inside,instanceType=IsInInstance()
         local position
@@ -455,7 +453,6 @@ frame:SetScript('OnEvent', function(_, event, ...)
         end
         ns.Reports.Refresh();return
     elseif event=='PLAYER_DEAD'then
-        if ns.settings.recordPvP == false then return end
         local recap=C_DeathRecap
         if recap and recap.GetRecapEvents then
             local ok,events=pcall(recap.GetRecapEvents)

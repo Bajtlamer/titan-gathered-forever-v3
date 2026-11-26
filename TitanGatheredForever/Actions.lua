@@ -29,11 +29,10 @@ function Actions:Pause()
 end
 function Actions.Enabled(kind)
     local s=ns.settings
-    return s and s.recordActions and Actions.labels[kind]~=nil and ns.Catalog.modules[kind]~=nil
-        and s.categories[kind]~=false and s.actionProfessions[kind]~=false
+    return s~=nil and Actions.labels[kind]~=nil and ns.Catalog.modules[kind]~=nil
 end
 function Actions.SettingsChanged()
-    local parts={tostring(ns.settings.recordActions)}
+    local parts={}
     for _,kind in ipairs({'Mining','Herbs','Skinning','Fishing','Enchanting'}) do
         parts[#parts+1]=tostring(Actions.Enabled(kind))
     end
