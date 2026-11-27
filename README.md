@@ -8,7 +8,7 @@ Website: [titan-gathered.com](https://www.titan-gathered.com/).
 
 ## Current version
 
-The current stable candidate is version `0.5.167` and targets **WoW Forever 1.60.1, interface 16001**, with Titan Panel installed separately. The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); the published versions are in [ref-0.5.167.md](release-notes/ref-0.5.167.md) and earlier notes. Other WoW editions are outside this project's scope.
+The current stable candidate is version `0.5.171` and targets **WoW Forever 1.60.1, interface 16001**, with Titan Panel installed separately. The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); the published versions are in [ref-0.5.171.md](release-notes/ref-0.5.171.md) and earlier notes. Other WoW editions are outside this project's scope.
 
 A separate, optional data-collection module, [Titan Gathered Discovery](#discovery-data-collection-module) 0.1.0, has its own version line and is released apart from this core; it is installed locally and awaits live acceptance.
 
@@ -173,7 +173,7 @@ The **Quests** view lists every quest a character accepted, turned in or abandon
 
 The character views: **Levels**: when each level was reached, the time logged in at it, the experience from kills, quests and other sources (exploration, gathering), and the kills, quests and deaths at that level. The level under way when recording began shows its time as a lower bound. **Deaths**: when, where, at which level, in which kind of place and what dealt the lethal blow (from the death recap, when the client gives it). **Reputation**: per faction, what was gained and lost in total, today and in the last seven days, found by comparing the standings whenever they change.
 
-Quest givers and rare creatures are also map pins, with their own switches (Show quest givers, Show rare creatures). No positions are recorded inside instances. Kills and quest acceptance are recorded since 0.5.165, the rest since 0.5.166; the main window and its tab strip shrink to fit a small screen or a large UI scale (0.5.167); older turn-ins keep their money but have no experience, zone or time.
+Quests in progress and rare creatures are also map pins, with their own switches (Show quests in progress, Show rare creatures). A quest giver gets the game's silver question mark with a small drop shadow only while the character has a quest from them in progress, at the place where it was accepted; the addon never draws the yellow exclamation mark, which the game keeps for quests that can still be taken. No positions are recorded inside instances. Kills and quest acceptance are recorded since 0.5.165, the rest since 0.5.166; the main window and its tab strip shrink to fit a small screen or a large UI scale (0.5.167); older turn-ins keep their money but have no experience, zone or time.
 
 ## Discovery data collection module
 

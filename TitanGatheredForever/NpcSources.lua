@@ -290,7 +290,7 @@ end
 -- additional information. The header is separated from the list by a rule.
 function Npc.FillTooltip(tooltip, node)
     if node.kind == 'WeaponMaster' and ns.WeaponMasters then return ns.WeaponMasters.FillTooltip(tooltip, node) end
-    if (node.kind == 'QuestGiver' or node.kind == 'RareCreature') and ns.JournalPins then return ns.JournalPins.FillTooltip(tooltip, node) end
+    if (node.kind == 'QuestGiver' or node.kind == 'QuestGiverPast' or node.kind == 'RareCreature') and ns.JournalPins then return ns.JournalPins.FillTooltip(tooltip, node) end
     local record = Npc.Record(node.npcID)
     if not record then return end
     local Style = ns.Style

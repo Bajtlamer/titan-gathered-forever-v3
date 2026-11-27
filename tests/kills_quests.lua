@@ -467,23 +467,47 @@ test('quest givers, the turn-in NPC and the items received are recorded', functi
     eq(rows[1].giver, 197); eq(rows[1].turnInName, 'Deputy Willem'); eq(rows[1].rewards[202], 1)
 end)
 
-test('quest givers and rare creatures are map pins that their switches hide', function()
+test('only givers of quests in progress get a pin, a round gray question mark, never the yellow exclamation mark', function()
     local ns = newNs()
     installFrames()
     loadViews(ns)
-    ns.db.questGivers = { Realm = { [197] = { name = 'Marshal McBride', mapID = 1429, x = 0.4, y = 0.6, quests = { [7] = true } } } }
+    ns.db.questGivers = { Realm = {
+        [197] = { name = 'Marshal McBride', mapID = 1429, x = 0.4, y = 0.6, quests = { [7] = true, [8] = true } },
+        [198] = { name = 'Done Giver', mapID = 1429, x = 0.3, y = 0.3, quests = { [9] = true } } } }
     ns.db.rares = { Realm = { [61] = { name = 'Thuros', sightings = 2, classification = 'rareelite',
         spots = { { mapID = 1429, x = 0.5, y = 0.5, at = 9, count = 2 }, { mapID = 12, x = 0.1, y = 0.1, at = 8 } } } } }
-    ns.db.questIncome = { Realm = { ['Player-1-AAA'] = { [7] = { copper = 0, turnIns = 1 } } } }
-    ns.NpcSources = { IsHighlighted = function() return false end }
+    ns.db.questIncome = { Realm = { ['Player-1-AAA'] = { [7] = { copper = 0, turnIns = 1 }, [9] = { copper = 0, turnIns = 1 } } } }
+    local onQuest = { [8] = true }
+    _G.C_QuestLog.IsOnQuest = function(id) return onQuest[id] == true end
+    local lit = {}
+    ns.NpcSources = { IsHighlighted = function(id) return lit[id] == true end }
     local nodes = ns.JournalPins.List(1429)
-    eq(#nodes, 2); eq(nodes[1].kind, 'QuestGiver'); eq(nodes[2].kind, 'RareCreature'); eq(nodes[2].count, 2)
+    eq(#nodes, 2); eq(nodes[1].kind, 'QuestGiver'); eq(nodes[1].npcID, 197); eq(nodes[2].kind, 'RareCreature')
+    eq(nodes[2].count, 2)
+    -- the gray question mark of the game, never its yellow exclamation mark
+    assert(loadfile('TitanGatheredForever/PinStyle.lua'))('TitanGatheredForever', ns)
+    local icon = ns.PinStyle.Icon(nil, 'QuestGiver')
+    assert(icon:find('IncompleteQuestIcon', 1, true)); assert(not icon:find('Available', 1, true))
     local tip = { lines = {} }
     function tip:AddLine(text) self.lines[#self.lines + 1] = strip(text) end
     function tip:AddDoubleLine(left, right) self.lines[#self.lines + 1] = strip(left) .. ' ' .. strip(right) end
     ns.Style.Note = function(t, text) t:AddLine(text) end
     ns.JournalPins.FillTooltip(tip, nodes[1])
-    eq(tip.lines[1], 'Marshal McBride'); eq(tip.lines[3], 'Wolves Across the Border Completed')
+    eq(tip.lines[1], 'Marshal McBride'); eq(tip.lines[3], 'Quest 8 In progress')     -- in progress first
+    eq(tip.lines[4], 'Wolves Across the Border Completed')
+    -- the quest is turned in: the pin goes away
+    onQuest[8] = nil
+    eq(#ns.JournalPins.List(1429), 1)
+    -- a giver shown from the Quests list keeps a pin, as a plain note
+    lit[198] = true
+    local shown = ns.JournalPins.List(1429)
+    eq(#shown, 2); eq(shown[1].kind, 'QuestGiverPast')
+    assert(not ns.PinStyle.Icon(nil, 'QuestGiverPast'):find('Quest', 1, true))
+    lit[198] = nil
+    -- without the quest log API the record decides
+    _G.C_QuestLog.IsOnQuest = nil
+    ns.db.questIncome.Realm['Player-1-AAA'][8] = { copper = 0, turnIns = 0, acceptedAt = 5 }
+    eq(ns.JournalPins.List(1429)[1].kind, 'QuestGiver')
     ns.settings.mapQuestGivers = false
     eq(#ns.JournalPins.List(1429), 1)
     ns.settings.mapRareCreatures = false
@@ -546,6 +570,30 @@ test('a window larger than the screen is scaled down to fit, tabs included; on a
     ns.Nav.FitToScreen(window)
     assert(scaled < 1 and scaled * ns.Nav.WIDTH <= 800 - 8 + 1e-6)
     assert(scaled * (ns.Nav.HEIGHT + ns.Nav.TAB_DEPTH) <= 600 - 8 + 1e-6)
+end)
+
+test('a quest pin is the silver question mark with a drop shadow; a reused pin hides the shadow', function()
+    local ns = newNs()
+    installFrames()
+    loadViews(ns)
+    assert(loadfile('TitanGatheredForever/PinStyle.lua'))('TitanGatheredForever', ns)
+    local function region()
+        local r = { shown = false }
+        function r:SetTexture(t) self.file = t end
+        function r:SetVertexColor(...) self.color = { ... } end
+        function r:ClearAllPoints() end
+        function r:SetPoint() end
+        function r:Show() self.shown = true end
+        function r:Hide() self.shown = false end
+        return r
+    end
+    local pin = { texture = region() }
+    function pin:CreateTexture() return region() end
+    ns.PinStyle.Badge(pin, 'QuestGiver')
+    local shadow = pin.tgfShadow
+    eq(shadow.shown, true); assert(shadow.file:find('IncompleteQuestIcon', 1, true)); eq(shadow.color[1], 0)
+    ns.PinStyle.Badge(pin, 'Trainer')
+    eq(shadow.shown, false)
 end)
 
 local failed = 0

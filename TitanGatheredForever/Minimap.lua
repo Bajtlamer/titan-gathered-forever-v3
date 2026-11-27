@@ -110,6 +110,7 @@ function Mini:Refresh()
             pin:ClearAllPoints()
             pin:SetPoint('CENTER', self.overlay, 'CENTER', px, py)
             pin.texture:SetTexture(ns.PinStyle.Icon(node.itemID, node.kind))
+            ns.PinStyle.Badge(pin, node.kind)
             pin:Show()
         end
     end
