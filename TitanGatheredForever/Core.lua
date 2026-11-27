@@ -305,7 +305,14 @@ local function start()
                             'TRADE_SKILL_DETAILS_UPDATE', 'TRADE_SKILL_CLOSE',
                             'TRAINER_SHOW', 'TRAINER_UPDATE', 'TRAINER_CLOSED',
                             'MERCHANT_SHOW', 'MERCHANT_UPDATE', 'MERCHANT_CLOSED', 'PLAYER_MONEY',
-                            'QUEST_TURNED_IN' }) do frame:RegisterEvent(event) end
+                            'QUEST_TURNED_IN', 'QUEST_ACCEPTED', 'QUEST_REMOVED', 'QUEST_DATA_LOAD_RESULT',
+                            'PARTY_KILL', 'PLAYER_XP_UPDATE', 'PLAYER_TARGET_CHANGED', 'UPDATE_MOUSEOVER_UNIT',
+                            'NAME_PLATE_UNIT_ADDED', 'PLAYER_LEVEL_UP', 'UPDATE_FACTION', 'QUEST_DETAIL',
+                            'QUEST_COMPLETE' }) do frame:RegisterEvent(event) end
+    ns.Kills.ReadExperience()
+    ns.Journal.Start()
+    pcall(ns.Journal.ScanFactions)
+    ns.QuestIncome.HookRewards()
     -- Shared by the right-click menu and the slash commands so each function has one implementation.
     function ns.ChangeSummaryPage(delta)
         ns.Titan.page = math.max(1, ns.Titan.page + delta)
@@ -325,7 +332,7 @@ local function start()
         ns.Print('NPC world axes swapped: ' .. tostring(ns.settings.npcAxisSwap))
         ns.NpcNearest()
     end
-    local help = 'Most functions are in the right-click menu of the Titan entry. Command with a parameter: /tgf recipe <recipeID> [operations]. /tgf sales lists the auction sales read from the mail.'
+    local help = 'Most functions are in the right-click menu of the Titan entry. Command with a parameter: /tgf recipe <recipeID> [operations]. /tgf sales lists the auction sales read from the mail. /tgf kills, /tgf quests and /tgf journal open the kill and quest logs and the journal.'
     function ns.ShowStatus(toChat)
         local report = toChat and ns.Print or ns.Debug
         local count = ns.inventory:Get(0)
@@ -407,6 +414,7 @@ local function start()
         if command == 'next' or command == 'prev' then ns.ChangeSummaryPage(command == 'next' and 1 or -1); return end
         if command == 'production' or command == 'actions' then ns.ProfessionStats.Open(); return end
         if command == 'history' or command == 'chances' or command == 'pvp' then ns.Reports.Show(command); return end
+        if command == 'kills' or command == 'quests' or command == 'journal' then ns.Nav.Open(command); return end
         if command == 'settings' then ns.Titan.Menu(UIParent); return end
         if command == 'sales' then ns.Sales.Report(); return end
         if command ~= 'status' and not ns.settings.debugMode then ns.Print(help); return end
@@ -427,10 +435,22 @@ frame:SetScript('OnEvent', function(_, event, ...)
     if not ns.inventory then return end
     ns.DebugLog.Event(event, ...)
     if event == 'QUEST_TURNED_IN' then
-        local questID, _, moneyReward = ...
-        ns.QuestIncome.TurnedIn(questID, moneyReward)
+        local questID, xpReward, moneyReward = ...
+        ns.QuestIncome.TurnedIn(questID, moneyReward, xpReward)
         return
     end
+    if event == 'QUEST_ACCEPTED' then ns.QuestIncome.Accepted((...)); return end
+    if event == 'QUEST_REMOVED' then ns.QuestIncome.Removed(...); return end
+    if event == 'QUEST_DATA_LOAD_RESULT' then if ns.QuestsView then ns.QuestsView.DataLoaded() end; return end
+    if event == 'PARTY_KILL' then ns.Kills.PartyKill(...); return end
+    if event == 'PLAYER_XP_UPDATE' then ns.Kills.ReadExperience(); return end
+    if event == 'PLAYER_TARGET_CHANGED' then ns.Kills.Remember('target'); return end
+    if event == 'UPDATE_MOUSEOVER_UNIT' then ns.Kills.Remember('mouseover'); return end
+    if event == 'NAME_PLATE_UNIT_ADDED' then ns.Kills.Remember((...)); return end
+    if event == 'PLAYER_LEVEL_UP' then ns.Journal.LevelUp((...)); return end
+    if event == 'UPDATE_FACTION' then pcall(ns.Journal.ScanFactions); return end
+    if event == 'QUEST_DETAIL' then ns.QuestIncome.Detail(); return end
+    if event == 'QUEST_COMPLETE' then ns.QuestIncome.Complete(); return end
     if event == 'MERCHANT_SHOW' or event == 'MERCHANT_UPDATE' or event == 'MERCHANT_CLOSED'
         or event == 'PLAYER_MONEY' or event == 'PLAYER_LEAVING_WORLD' then
         ns.VendorSales.Handle(event)
@@ -454,8 +474,11 @@ frame:SetScript('OnEvent', function(_, event, ...)
         ns.Reports.Refresh();return
     elseif event=='PLAYER_DEAD'then
         local recap=C_DeathRecap
+        local recapOK,recapEvents=false,nil
+        if recap and recap.GetRecapEvents then recapOK,recapEvents=pcall(recap.GetRecapEvents) end
+        ns.Journal.Died(recapOK and recapEvents or nil)
         if recap and recap.GetRecapEvents then
-            local ok,events=pcall(recap.GetRecapEvents)
+            local ok,events=recapOK,recapEvents
             if ok then
                 local _,instanceType=IsInInstance()
                 ns.pvpDeathSerial=(ns.pvpDeathSerial or 0)+1
@@ -489,6 +512,11 @@ frame:SetScript('OnEvent', function(_, event, ...)
         local fishing = IsFishingLoot and IsFishingLoot()
         if ns.IsPublic(fishing) and fishing == true then ns.actions:FishingLoot() end
         local _, fromItem = ...
+        local gatheringCast = ns.observations.cast and ns.observations.cast.kind
+        if not (ns.IsPublic(fishing) and fishing == true) and not gatheringCast then
+            local readOK, slots = pcall(ns.observations.api.Loot)
+            if readOK then ns.Kills.Loot(slots) end
+        end
         ns.observations:LootReady(event == 'LOOT_OPENED' and ns.IsPublic(fromItem) and fromItem == true); return
     elseif event == 'LOOT_SLOT_CLEARED' then
         local slot = ...
@@ -497,6 +525,9 @@ frame:SetScript('OnEvent', function(_, event, ...)
     elseif event == 'LOOT_CLOSED' then ns.observations:LootClosed(); return end
     if event == 'PLAYER_ENTERING_WORLD' or event == 'PLAYER_LEAVING_WORLD' then
         ns.gathering:Cancel(); ns.observations:Cancel(true); ns.actions:Pause(); ns.production:Pause()
+        ns.Kills.xp, ns.Kills.waiting, ns.Kills.gain = nil, {}, nil
+        if event == 'PLAYER_ENTERING_WORLD' then ns.Kills.ReadExperience(); ns.Journal.Start()
+        else ns.Journal.Stop() end
     end
     if event == 'BANKFRAME_OPENED' then
         bankAttempts, bankVisit = 0, bankVisit + 1

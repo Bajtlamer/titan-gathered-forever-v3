@@ -2,11 +2,13 @@ local _, ns = ...
 local PinStyle = {}
 ns.PinStyle = PinStyle
 local labels = { Mining = 'Titan Gathered Forever Mining spot', Herbs = 'Titan Gathered Forever Herbalism spot', Skinning = 'Titan Gathered Forever Skinning area', Fishing = 'Titan Gathered Forever Fishing spot', Rare = 'Titan Gathered Forever Rare loot', PvP = 'Titan Gathered Forever PvP kill spot',
-                Trainer = 'Titan Gathered Forever Profession trainer', WeaponMaster = 'Titan Gathered Forever Weapon master', RecipeVendor = 'Titan Gathered Forever Recipe vendor' }
+                Trainer = 'Titan Gathered Forever Profession trainer', WeaponMaster = 'Titan Gathered Forever Weapon master', RecipeVendor = 'Titan Gathered Forever Recipe vendor',
+                QuestGiver = 'Titan Gathered Forever Quest giver', RareCreature = 'Titan Gathered Forever Rare creature' }
 local historyNote = 'Source/zone observations, not a chance at this coordinate.'
 local icons = { Mining = 'Interface\\Icons\\Trade_Mining', Herbs = 'Interface\\Icons\\Trade_Herbalism',
                 Skinning = 'Interface\\Icons\\INV_Misc_Pelt_Wolf_01', PvP = 'Interface\\Icons\\INV_Sword_04',
-                Trainer = 'Interface\\Icons\\INV_Misc_Book_11', WeaponMaster = 'Interface\\Icons\\INV_Sword_27', RecipeVendor = 'Interface\\Icons\\INV_Scroll_03' }
+                Trainer = 'Interface\\Icons\\INV_Misc_Book_11', WeaponMaster = 'Interface\\Icons\\INV_Sword_27', RecipeVendor = 'Interface\\Icons\\INV_Scroll_03',
+                QuestGiver = 'Interface\\GossipFrame\\AvailableQuestIcon', RareCreature = 'Interface\\Icons\\INV_Misc_Head_Dragon_01' }
 
 function PinStyle.Label(kind) return labels[kind] or ('Titan Gathered Forever ' .. kind .. ' material source') end
 function PinStyle.Icon(itemID, kind)

@@ -120,6 +120,19 @@ Details in that repository's plans/plan-command-history.md. In short: arrow keys
 
 The checklist is in book-wow-forever-validation.md ("Validate the Discovery module"). Open live gates: the look of the progress window, overview window and Titan Panel plugin; the client calls behind the recipe, map, quest, trainer and zone collectors; the lag and runtime of `/tgfd compare`, the scans, the privacy check and the checksums on a large saved table; that the saved file carries the export stamp after /reload; that a client recipe ID equals the catalogue spell ID. Record the results in ref-wow-forever-progress.md separately from the automated checks.
 
+### 3.10b Kills, Quests and Journal tabs (0.5.165 and 0.5.166)
+
+- [ ] Kill a creature solo: the Kills tab shows it under Your kills with name, level, type and zone; with a pet landing the blow it is also yours; in a party a member's killing blow is a group kill.
+- [ ] One kill followed by an experience gain fills XP per kill; a pull of two or more leaves it Unknown; a quest turn-in is never counted as kill experience.
+- [ ] Kills in a dungeon: check whether PARTY_KILL GUIDs are secret there (counted as hidden in the footer) or readable.
+- [ ] Accept, turn in and abandon a quest: status, time taken, zone, experience and money; abandoning shows Abandoned or failed.
+- [ ] Quest names of older quests load after the list opens (QUEST_DATA_LOAD_RESULT redraws the list).
+- [ ] The nine tabs fit along the bottom of the window (0.5.167 merged Kills and Quests into the Journal tab); at a low resolution or a large UI scale the window and tabs are scaled down and stay on screen; the sort arrow sits after the header text.
+- [ ] Loot (0.5.166): a looted corpse adds money per loot and Drops rows; pickpocketing and skinning add nothing there.
+- [ ] A rare creature on the nameplates or as target appears in Rare creatures and as a pin; a click opens the map with the rings.
+- [ ] Accepting a quest from an NPC records the giver pin; the turn-in records the turn-in NPC and the chosen reward (GetQuestReward hook).
+- [ ] Journal: a level up records the reached date and the played time; a death records the killer from C_DeathRecap; a reputation gain appears under Reputation, also for a faction under a collapsed header.
+
 ### 3.11 Boat and zeppelin routes (0.5.69-beta, in progress)
 
 State: Transport.lua draws thin dashed arcs between docks, with anchor markers (Artwork/RouteAnchor.tga), for every player. Menu: Boat and zeppelin routes (Show routes on the map; Line style with Thickness Thin or Clear and Pattern Dashed, Dotted or Solid). Dock positions come from /tgf dock <name> (recorded, always wins) or are estimated from the flight point of the same town (Menethil Harbor, Southshore, Theramore, Feathermoon, Orgrimmar, Undercity, Grom'gol, Ratchet, Booty Bay). Recorded so far: Stormwind Harbour, Auberdine, Rut'theran Village.

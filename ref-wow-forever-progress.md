@@ -4,6 +4,10 @@ Updated 2026-11-20. Current continuation plan: [plans/plan-live-verification-and
 
 ## Current state
 
+Candidate 0.5.167 (2026-11-27, released the same day): Kills and Quests became views of the Journal tab (nine tabs), the window and tab strip scale down to fit the screen, and the sort arrow no longer covers left-aligned number headers. Candidate 0.5.166 (same day, superseded): loot per creature, rare creatures, quest givers and rewards, map pins for quest givers and rare creatures, and the Journal tab (levels, deaths with the killer from the death recap, reputation). Candidate 0.5.165 (same day, superseded): Kills and Quests tabs. Kills are counted from PARTY_KILL (the combat log is restricted on Forever), quests from QUEST_ACCEPTED, QUEST_TURNED_IN and QUEST_REMOVED. Automated checks pass; live verification of the kill events, experience attribution and quest name loading is open.
+
+Release 0.5.167 (2026-11-27): the Journal tab with kills, creature drops, rare creatures, quests, levels, deaths and reputation, map pins for quest givers and rare creatures, and windows that fit every screen (0.5.165 to 0.5.167). Versioned notes: [release-notes/ref-0.5.167.md](release-notes/ref-0.5.167.md).
+
 Release 0.5.164 (2026-11-26): data collection is always on and independent of every setting, hidden map spots keep being recorded, and the map menu has one gathering switch per map (0.5.162 to 0.5.164). Versioned notes: [release-notes/ref-0.5.164.md](release-notes/ref-0.5.164.md).
 
 Release 0.5.161 (2026-11-24): Economy counts sales, and the Current listing of the Sell tab shows the earnings, the vendor comparison, the loss of a failed auction, the units that cover the deposit and a warning for a cheap item (0.5.157 to 0.5.161). Versioned notes: [release-notes/ref-0.5.161.md](release-notes/ref-0.5.161.md).

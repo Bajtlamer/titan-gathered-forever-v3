@@ -154,7 +154,7 @@ local function fixture(interface, saved, noBroker, noModules)
     local ns = {}
     for _, path in ipairs({ 'Localization/enUS.lua', 'Style.lua', 'Data/Metadata.lua', 'Data/NpcSeed.lua', 'Catalog.lua',
                             'Settings.lua', 'DebugLog.lua', 'Professions.lua', 'KnownRecipes.lua', 'Inventory.lua', 'Gathering.lua', 'History.lua', 'Actions.lua', 'PvP.lua', 'Production.lua', 'Crafting.lua', 'Export.lua', 'Observations.lua', 'Sources.lua', 'NpcSources.lua', 'WeaponMasters.lua', 'NpcObserver.lua', 'PinStyle.lua', 'IconConfig.lua', 'FlightPaths.lua', 'Transport.lua', 'Map.lua', 'Minimap.lua',
-                            'Tooltips.lua', 'Reports.lua', 'CraftingView.lua', 'ProfessionButton.lua', 'ProfessionStats.lua', 'Movable.lua', 'AuctionScan.lua', 'AuctionUndercut.lua', 'Sales.lua', 'LegacyFolders.lua', 'Economy.lua', 'LootIncome.lua', 'VendorSales.lua', 'QuestIncome.lua', 'EconomyView.lua', 'AuctionHistory.lua', 'Yields.lua', 'RecipeBrowser.lua', 'MinimapButton.lua', 'Titan.lua', 'Core.lua' }) do
+                            'Tooltips.lua', 'Reports.lua', 'CraftingView.lua', 'ProfessionButton.lua', 'ProfessionStats.lua', 'Movable.lua', 'AuctionScan.lua', 'AuctionUndercut.lua', 'Sales.lua', 'LegacyFolders.lua', 'Economy.lua', 'LootIncome.lua', 'VendorSales.lua', 'QuestIncome.lua', 'Kills.lua', 'Journal.lua', 'EconomyView.lua', 'AuctionHistory.lua', 'Yields.lua', 'RecipeBrowser.lua', 'MinimapButton.lua', 'Titan.lua', 'Core.lua' }) do
         assert(loadfile('TitanGatheredForever/' .. path))('TitanGatheredForever', ns)
     end
     -- Keep integration scenarios small; the generated data is validated separately.
@@ -238,6 +238,9 @@ test('quest turn-ins on an empty realm key record the reward and exclude it from
     _G.C_MerchantFrame = { GetBuybackItemID = function() return 2589 end }
     s:Start()
     assert(ns.eventFrame.events.QUEST_TURNED_IN)
+    for _, event in ipairs({ 'QUEST_ACCEPTED', 'QUEST_REMOVED', 'PARTY_KILL', 'PLAYER_XP_UPDATE', 'NAME_PLATE_UNIT_ADDED' }) do
+        assert(ns.eventFrame.events[event], event)
+    end
     s:Event('MERCHANT_SHOW')
     count, balance = 1, 125
     s:Event('MERCHANT_UPDATE')
@@ -251,7 +254,7 @@ test('quest turn-ins on an empty realm key record the reward and exclude it from
     local copper, turnIns = ns.QuestIncome.Total(ns.db.questIncome, '')
     eq(copper, 50); eq(turnIns, 3)
     local entry = ns.db.questIncome[''][UnitGUID('player')][42]
-    eq(entry.copper, 50); eq(entry.turnIns, 2)
+    eq(entry.copper, 50); eq(entry.turnIns, 2); eq(entry.xp, 0); eq(entry.xpTurnIns, 2)
     eq(ns.QuestIncome.Total(ns.db.questIncome, 'Other realm'), nil)
     s:Event('MERCHANT_CLOSED')
     s:Event('MERCHANT_SHOW')
