@@ -8,7 +8,7 @@ Website: [titan-gathered.com](https://www.titan-gathered.com/).
 
 ## Current version
 
-The current stable candidate is version `0.5.164` and targets **WoW Forever 1.60.1, interface 16001**, with Titan Panel installed separately. The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); the published versions are in [ref-0.5.164.md](release-notes/ref-0.5.164.md) and earlier notes. Other WoW editions are outside this project's scope.
+The current stable candidate is version `0.5.167` and targets **WoW Forever 1.60.1, interface 16001**, with Titan Panel installed separately. The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); the published versions are in [ref-0.5.167.md](release-notes/ref-0.5.167.md) and earlier notes. Other WoW editions are outside this project's scope.
 
 A separate, optional data-collection module, [Titan Gathered Discovery](#discovery-data-collection-module) 0.1.0, has its own version line and is released apart from this core; it is installed locally and awaits live acceptance.
 
@@ -109,14 +109,14 @@ The tool changes the old `TitanGathered2ForeverDB` assignment to `TitanGatheredF
 
 ## Use TGF v3
 
-Right-click the Titan entry for Display, Professions, Additional items, Icon appearance, Flight points, Trainers and recipe vendors, Gathering map, History and sources, and Diagnostics settings. Data collection is always on: history, map spots, profession actions, production, PvP, rare loot and trainer and vendor windows are recorded whatever the settings say, and only disabling an addon in the AddOns list stops it. Settings only decide what is shown. Map spots are not recorded inside instances, but the statistics there are.
+Right-click the Titan entry for Display, Professions, Additional items, Icon appearance, Flight points, Trainers, vendors and other pins, Gathering map, History and sources, and Diagnostics settings. Data collection is always on: history, map spots, profession actions, production, PvP, rare loot and trainer and vendor windows are recorded whatever the settings say, and only disabling an addon in the AddOns list stops it. Settings only decide what is shown. Map spots are not recorded inside instances, but the statistics there are.
 
 Everything that needs no parameter is in the right-click menu of the Titan entry:
 
 - Display: Show minimap button, Next summary page and Previous summary page. The round minimap button opens the unlearned recipes window with a left click, the menu with a right click, and can be dragged around the minimap edge.
 - Icon appearance: the small icon appearance window.
-- Trainers and recipe vendors: map toggles, profession filter, Unlearned recipes, Trainers (list of trainers), and Pin placement (find the nearest pin, swap map axes if pins look mirrored).
-- History and sources: Lifetime materials, Observed chances, Profession statistics, Economy, PvP Board, Export statistics.
+- Trainers, vendors and other pins: map toggles (including quest givers and rare creatures), profession filter, Unlearned recipes, Trainers (list of trainers), and Pin placement (find the nearest pin, swap map axes if pins look mirrored).
+- History and sources: Lifetime materials, Observed chances, Profession statistics, Economy, Kills, Quests, Journal, PvP Board, Export statistics.
 - Diagnostics: Debug mode, Also show debug messages in chat, Clear debug log, Refresh inventory, Show status report and Show NPC recording log (why the last trainer or merchant windows did or did not record, with raw client answers). Debug mode writes important events (casts, loot, trainer and merchant windows, profession windows, bank and world changes, honor events), status messages and recording outcomes to a bounded debug log of the latest 1,000 lines. The log lives in the saved variables file, which the client writes on /reload and logout, so debug messages no longer fill the chat unless Also show debug messages in chat is on.
 
 A command is only needed when it takes a parameter:
@@ -162,6 +162,18 @@ Reagent quantities come from live client schematics on demand. The planner aggre
 Fixed single-item basic reagent slots are supported. Required alternatives, currency, variable quantities, protected data and unsupported slots leave the overall estimate unresolved; fixed rows may still be shown as a partial plan. Optional modifiers and finishing reagents are excluded. Recraft, gathering, salvage and dummy contexts are excluded. Ordinary enchantment recipes can be planned for their reagent requirements. Planning requires the recipe's loaded, enabled profession addon/category and does not load bulk recipe tables into the core.
 
 Each reagent links to personal acquisition evidence and recorded map positions. Source suggestions prioritize larger observed samples; they do not establish the best place to farm. Source/zone rates and saved positions are distinct: a zone-wide observed rate is not a probability at a particular coordinate, and an old position does not establish current resource availability. Native reagent tooltips add only a short per-operation deficit and material-limit summary for the selected recipe. Live recipe selection, slot availability and planner layout remain under validation.
+
+## Kills, quests and the journal
+
+Three tabs of the main window keep what the game shows only as a current value, or not at all. Each tab has combo boxes for its view and filters (the character, then a type or status), a search box (Escape clears it), sortable column headers and a scroll bar. `/tgf kills`, `/tgf quests` and `/tgf journal` open them.
+
+Kills, quests and the character's history share one tab, Journal, so the tab strip fits the window; a combo box picks the view (Levels, Quests, Creatures, Creature drops, Rare creatures, Deaths, Reputation), and Kills and Quests in the Titan menu or `/tgf kills` and `/tgf quests` open the Journal at those views. The kill views: **Creatures** counts the creatures each character killed, from the killing blows the game reports: yours (your pet included) and your group's (party and raid members), with the level range, type, experience per kill, money per looted corpse, the zone where it was killed most and the last kill; hover a row for the first kill, the loot and the zones. Experience per kill is measured only when exactly one kill met one experience gain, so a pull of several creatures leaves it unknown rather than split. The combat log is restricted on Forever and is not used; a kill whose identity the client hides is only counted in the footer. **Creature drops** lists what each creature had in its loot window the first time a corpse was opened, taken or not, with the chance per looted corpse; search it for an item to see what drops it. **Rare creatures** lists the rare and rare elite creatures any of your characters saw on the realm, with how often, where and when; a click shows the place on the map.
+
+The **Quests** view lists every quest a character accepted, turned in or abandoned: status, turn-ins, experience, money, the average time from accepting to turning in (time logged out included), the zone of the last turn-in and the last activity. The row tooltip adds the quest giver, the NPC it was turned in to and the items received with the chosen reward; a click shows the giver on the map. Quest names come from the game by quest ID and are not saved.
+
+The character views: **Levels**: when each level was reached, the time logged in at it, the experience from kills, quests and other sources (exploration, gathering), and the kills, quests and deaths at that level. The level under way when recording began shows its time as a lower bound. **Deaths**: when, where, at which level, in which kind of place and what dealt the lethal blow (from the death recap, when the client gives it). **Reputation**: per faction, what was gained and lost in total, today and in the last seven days, found by comparing the standings whenever they change.
+
+Quest givers and rare creatures are also map pins, with their own switches (Show quest givers, Show rare creatures). No positions are recorded inside instances. Kills and quest acceptance are recorded since 0.5.165, the rest since 0.5.166; the main window and its tab strip shrink to fit a small screen or a large UI scale (0.5.167); older turn-ins keep their money but have no experience, zone or time.
 
 ## Discovery data collection module
 

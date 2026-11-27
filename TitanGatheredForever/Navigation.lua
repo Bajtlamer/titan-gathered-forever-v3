@@ -16,9 +16,15 @@ Nav.tabs = {
     { id = 'reagentUsage', label = 'Reagent use' },
     { id = 'pvp', label = 'PvP Board' },
     { id = 'economy', label = 'Economy' },
+    { id = 'journal', label = 'Journal' },
 }
+-- List windows built by ListWindow.Create register themselves here by tab id. Kills and quests are views of the
+-- Journal tab (the strip ran out of room at eleven tabs); their ids still open the Journal at those views.
+Nav.views = Nav.views or {}
+Nav.aliases = { kills = { 'creatures', 'drops', 'rares' }, quests = { 'quests' } }
 
 local function windowOf(id)
+    if Nav.views[id] then return Nav.views[id].window end
     if id == 'recipes' then return ns.RecipeBrowser and ns.RecipeBrowser.window end
     if id == 'trainers' then return ns.TrainerBrowser and ns.TrainerBrowser.window end
     if id == 'profit' then return ns.ProfitBrowser and ns.ProfitBrowser.window end
@@ -27,7 +33,9 @@ local function windowOf(id)
 end
 
 function Nav.Open(id)
-    if id == 'recipes' then ns.RecipeBrowser.Show()
+    if Nav.aliases[id] and Nav.views.journal then Nav.views.journal.Show(Nav.aliases[id])
+    elseif Nav.views[id] then Nav.views[id].Show()
+    elseif id == 'recipes' then ns.RecipeBrowser.Show()
     elseif id == 'trainers' then ns.TrainerBrowser.Show()
     elseif id == 'profit' then ns.ProfitBrowser.Show()
     elseif id == 'economy' then ns.EconomyView.Show()
@@ -123,11 +131,42 @@ function Nav.Remember(window)
     Nav.SavePosition('nav', window)
 end
 
+-- The tab strip hangs below the window: keep it on screen too.
+Nav.TAB_DEPTH = 32
+
+-- A window and its tab strip larger than the screen (a small resolution or a large UI scale) are scaled down to
+-- fit, so nothing is cut off; on screens with room they keep their normal size.
+function Nav.FitToScreen(window)
+    if not (window and window.SetScale and UIParent and UIParent.GetWidth) then return end
+    local width, height = UIParent:GetWidth(), UIParent:GetHeight()
+    if type(width) ~= 'number' or type(height) ~= 'number' or width <= 0 or height <= 0 then return end
+    local scale = math.min(1, (width - 8) / Nav.WIDTH, (height - 8) / (Nav.HEIGHT + Nav.TAB_DEPTH))
+    if scale <= 0 then return end
+    if not window.GetScale or math.abs((window:GetScale() or 1) - scale) > 0.001 then window:SetScale(scale) end
+end
+
+local fitted = {}
 -- Dragging, size and the tab strip common to all tab windows.
 function Nav.Frame(window, id)
     window:SetSize(Nav.WIDTH, Nav.HEIGHT)
+    if window.SetClampRectInsets then window:SetClampRectInsets(0, 0, 0, -Nav.TAB_DEPTH) end
+    Nav.FitToScreen(window)
+    fitted[#fitted + 1] = window
+    if window.HookScript then window:HookScript('OnShow', function(self) Nav.FitToScreen(self) end) end
     Nav.Draggable(window, 'nav')
     Nav.Tabs(window, id)
+end
+
+-- A changed resolution or UI scale refits the windows already made.
+if CreateFrame then
+    local ok, watcher = pcall(CreateFrame, 'Frame')
+    if ok and watcher and watcher.RegisterEvent and watcher.SetScript then
+        pcall(watcher.RegisterEvent, watcher, 'DISPLAY_SIZE_CHANGED')
+        pcall(watcher.RegisterEvent, watcher, 'UI_SCALE_CHANGED')
+        watcher:SetScript('OnEvent', function()
+            for _, window in ipairs(fitted) do Nav.FitToScreen(window) end
+        end)
+    end
 end
 
 -- Classic panel tabs hanging below the window (PanelTabButtonTemplate); plain buttons inside the window when the
@@ -168,6 +207,20 @@ local function panelTabs(window, id)
             -- Still narrower than its own text: set the width directly.
             if width and b.GetWidth and b.SetWidth and (b:GetWidth() or 0) < width + 16 then b:SetWidth(width + 30) end
         end
+        -- The whole strip must stay under the window: when the names (another font or language) are wider than
+        -- the window, the strip is scaled down as one piece instead of running past the right edge.
+        local total = 0
+        for _, b in ipairs(window.Tabs) do total = total + ((b.GetWidth and b:GetWidth()) or 0) end
+        total = total - 16 * (#window.Tabs - 1)
+        local room = Nav.WIDTH - 30
+        local scale = (total > room and total > 0) and room / total or 1
+        for _, b in ipairs(window.Tabs) do if b.SetScale then b:SetScale(scale) end end
+        local first = window.Tabs[1]
+        if first and first.ClearAllPoints then
+            first:ClearAllPoints()
+            first:SetPoint('TOPLEFT', window, 'BOTTOMLEFT', 15 / scale, 2 / scale)
+        end
+        window.tabScale = scale
     end
     local function onShow()
         fit()

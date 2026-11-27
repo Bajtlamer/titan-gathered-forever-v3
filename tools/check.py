@@ -62,6 +62,7 @@ commands = [
     [runtime, 'tests/profit.lua'],
     [runtime, 'tests/profit_browser.lua'],
     [runtime, 'tests/trainer_browser.lua'],
+    [runtime, 'tests/kills_quests.lua'],
     [runtime, 'tests/discovery.lua'],
     [runtime, 'tests/discovery_collectors.lua'],
     [runtime, 'tests/discovery_compare.lua'],

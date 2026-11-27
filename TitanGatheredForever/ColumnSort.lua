@@ -63,7 +63,10 @@ function ColumnSort.Attach(options)
         if arrow.ClearAllPoints then arrow:ClearAllPoints() end
         local width = label.GetStringWidth and label:GetStringWidth()
         if type(width) ~= 'number' then width = 0 end
-        if kinds[state.column] == 'number' then arrow:SetPoint('RIGHT', label, 'RIGHT', -(width + 4), 0)
+        -- Before a right-aligned label, after any other: a left-aligned number header used to get the arrow drawn
+        -- over its own text ("Last activity").
+        local justify = label.GetJustifyH and label:GetJustifyH()
+        if justify == 'RIGHT' then arrow:SetPoint('RIGHT', label, 'RIGHT', -(width + 4), 0)
         else arrow:SetPoint('LEFT', label, 'LEFT', width + 4, 0) end
         if arrow.Show then arrow:Show() end
     end

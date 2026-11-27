@@ -44,6 +44,8 @@ function ns.Settings.Initialize(saved)
     if type(settings.mapTrainers) ~= 'boolean' then settings.mapTrainers = true end
     if type(settings.mapRecipeVendors) ~= 'boolean' then settings.mapRecipeVendors = true end
     if type(settings.mapWeaponMasters) ~= 'boolean' then settings.mapWeaponMasters = true end
+    if type(settings.mapQuestGivers) ~= 'boolean' then settings.mapQuestGivers = true end
+    if type(settings.mapRareCreatures) ~= 'boolean' then settings.mapRareCreatures = true end
     if type(settings.recordNpcs) ~= 'boolean' then settings.recordNpcs = true end
     if type(settings.auctionAutoScan) ~= 'boolean' then settings.auctionAutoScan = false end
     if type(settings.auctionTooltips) ~= 'boolean' then settings.auctionTooltips = true end

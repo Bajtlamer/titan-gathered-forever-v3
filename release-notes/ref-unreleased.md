@@ -1,6 +1,28 @@
 # Unreleased development updates
 
-Updated 2026-11-26. Versions up to 0.5.164 are published in release-notes/ref-0.5.164.md. These changes describe source candidates since the latest published versioned notes.
+Updated 2026-11-27. Versions up to 0.5.167 are published in release-notes/ref-0.5.167.md. These changes describe source candidates since the latest published versioned notes.
+
+## One Journal tab and windows that fit every screen, 0.5.167
+
+- Kills and Quests are no longer separate tabs: with eleven tabs the strip reached the right edge of the window. They are views of the Journal tab, chosen in its combo box together with Levels, Deaths and Reputation; one character choice serves every view, the creature type filter shows for the kill views and the status filter for quests. Kills and Quests in the Titan menu, `/tgf kills` and `/tgf quests` open the Journal at those views.
+- The tab strip of the main window never runs past the window: when the tab names are wider than the window (another font or language), the strip is scaled down as one piece.
+- The main window and its tabs are scaled down when the screen is smaller than the window (low resolution or a large UI scale), refitted after a resolution or UI scale change, and kept on screen including the tabs.
+- The sort arrow of a column header is drawn after the header text; on left-aligned number columns ("Last activity") it was drawn over the text.
+
+## Loot per creature, rare creatures, quest givers and the Journal tab, 0.5.166
+
+- Kills tab views, chosen in a combo box: Creatures (now with money per looted corpse and the loot in the row tooltip), Drops (every item a creature had in its loot window the first time it was opened, taken or not, with the chance per looted corpse and the average quantity) and Rare creatures (rare and rare elite creatures seen on the realm by any character, with times seen, kills, zone, coordinates and last sighting; a click shows it on the map). Pickpocketing a living creature is not counted as loot, and loot of gathering casts and fishing is left to the gathering statistics.
+- Quests: the NPC a quest was accepted from and its place, the NPC it was turned in to, and the items received with the chosen reward, in the row tooltip. A click on a quest shows its giver on the map.
+- New map pins: quest givers (where you accepted a quest from them) and rare creatures (where they came into view). Switches: Show quest givers and Show rare creatures in the world map's Map options and in the Titan menu under Trainers, vendors and other pins (renamed from Trainers and recipe vendors). No pins are recorded inside instances.
+- New Journal tab (History and sources > Journal, `/tgf journal`) with three views: Levels (when each level was reached, the time logged in at it, experience from kills, quests and other sources, kills, quests and deaths per level), Deaths (when, where, at which level, in which kind of place and what dealt the lethal blow, from the death recap) and Reputation (gained, lost, today, last 7 days and the number of gains per faction, found by comparing the standings whenever they change).
+- All views keep the same layout: combo boxes for the view and filters, a search box, sortable headers and a scroll bar.
+
+## Kills and Quests tabs, 0.5.165
+
+- New Kills tab in the main window (also History and sources > Kills in the Titan menu, and `/tgf kills`). It counts the creatures each character killed, from the killing blows the game reports with PARTY_KILL: your own and your pet's, and those of party and raid members as group kills. Each creature has its level range, type (normal, elite, rare, rare elite, boss), the experience per kill, the zone where it was killed most and the last kill date; the row tooltip adds the first kill and the zones. The combat log stays unused (it is restricted on Forever). A kill whose identity the client hides is counted as hidden in the footer, never guessed. Experience per kill is measured only when exactly one kill met one experience gain and no quest was turned in at that moment.
+- New Quests tab (History and sources > Quests, `/tgf quests`). Each quest the character accepted, turned in or abandoned, with status (Completed, In progress, Abandoned or failed), turn-ins, experience, money, the average time from accepting to turning in, the zone of the last turn-in and the last activity. Quest names are not saved: the game provides them by quest ID and the list asks for them when drawn. Turn-ins recorded before this version keep their money; their experience, zone and time stay unknown.
+- Both tabs follow the same layout: combo boxes for the character and the type or status, a search box (Escape clears it), sortable column headers, a scroll bar and the mouse wheel, without buttons or pages.
+- Recording is always on, like all other data.
 
 ## One gathering switch per map, 0.5.164
 
