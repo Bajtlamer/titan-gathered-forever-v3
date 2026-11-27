@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-27. Versions up to 0.5.171 are published in release-notes/ref-0.5.171.md. These changes describe source candidates since the latest published versioned notes.
+Updated 2026-11-27. Versions up to 0.5.172 are published in release-notes/ref-0.5.172.md. These changes describe source candidates since the latest published versioned notes.
+
+## No double question mark for a finished quest, 0.5.172
+
+- When the objectives of a quest were done, the game showed its own question mark at the turn-in and the addon's silver question mark stayed next to it. The addon pin now disappears as soon as the quest is ready to turn in (C_QuestLog.ReadyForTurnIn or IsComplete), and comes back if the quest counts as open again. The quest log is watched with QUEST_LOG_UPDATE; the pins are redrawn only when a quest entered, left or finished its objectives. The pin tooltip shows such a quest as Ready to turn in.
 
 ## Quest pin with a shadow, 0.5.169 to 0.5.171
 

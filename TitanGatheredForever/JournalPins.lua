@@ -46,15 +46,54 @@ function Pins.InProgress(questID)
     return type(entry) == 'table' and entry.acceptedAt ~= nil
 end
 
+-- A quest in the log whose objectives are done: the game marks its turn-in with its own question mark, so the addon
+-- draws none for it. Unknown (no answer from the client) counts as not done.
+function Pins.Ready(questID)
+    local api = C_QuestLog
+    if not api then return false end
+    for _, name in ipairs({ 'ReadyForTurnIn', 'IsComplete' }) do
+        if api[name] then
+            local ok, done = pcall(api[name], questID)
+            if ok and ns.IsPublic(done) and done == true then return true end
+        end
+    end
+    return false
+end
+
+-- In progress and not yet ready to turn in: the quests that get a pin.
+function Pins.Pending(questID) return Pins.InProgress(questID) and not Pins.Ready(questID) end
+
 local function openQuests(giver)
     local open = 0
     for questID in pairs(type(giver.quests) == 'table' and giver.quests or {}) do
-        if type(questID) == 'number' and Pins.InProgress(questID) then open = open + 1 end
+        if type(questID) == 'number' and Pins.Pending(questID) then open = open + 1 end
     end
     return open
 end
 
--- A quest giver gets a pin only while this character has a quest from them in progress: the game's silver question mark
+-- QUEST_LOG_UPDATE comes often: the pins are redrawn only when a quest of this character entered, left or finished
+-- its objectives since the last look.
+function Pins.LogChanged()
+    local realm = GetRealmName and GetRealmName()
+    local store = ns.db and ns.db.questIncome
+    local own = type(store) == 'table' and type(store[realm]) == 'table' and store[realm][ns.characterID]
+    local ids = {}
+    for questID, entry in pairs(type(own) == 'table' and own or {}) do
+        if type(questID) == 'number' and type(entry) == 'table' and entry.acceptedAt then ids[#ids + 1] = questID end
+    end
+    table.sort(ids)
+    local parts = {}
+    for _, questID in ipairs(ids) do parts[#parts + 1] = questID .. (Pins.Pending(questID) and 'p' or 'd') end
+    local signature = table.concat(parts, ',')
+    if signature ~= Pins.signature then
+        local first = Pins.signature == nil
+        Pins.signature = signature
+        if not first then Pins.Redraw() end
+    end
+end
+
+-- A quest giver gets a pin only while this character has a quest from them in progress with objectives still open
+-- (a finished quest has the game's own question mark at its turn-in): the game's silver question mark
 -- with a drop shadow (PinStyle.Badge). The yellow exclamation mark is the game's own sign of a quest that can be taken: the addon never
 -- draws it, because it cannot know which quests are still available. A giver shown from the Quests list
 -- (highlighted) whose quests are all done gets a plain note icon.
@@ -92,7 +131,7 @@ end
 local statusLabels = { completed = 'Completed', open = 'In progress', abandoned = 'Abandoned or failed' }
 
 local function questStatus(questID)
-    if Pins.InProgress(questID) then return statusLabels.open end
+    if Pins.InProgress(questID) then return Pins.Ready(questID) and 'Ready to turn in' or statusLabels.open end
     local realm = GetRealmName and GetRealmName()
     local store = ns.db and ns.db.questIncome
     local own = type(store) == 'table' and type(store[realm]) == 'table' and store[realm][ns.characterID]
@@ -113,7 +152,7 @@ function Pins.FillTooltip(tip, node)
         -- Quests in progress first, then the others, each by ID.
         local quests = {}
         for questID in pairs(type(giver.quests) == 'table' and giver.quests or {}) do
-            if type(questID) == 'number' then quests[#quests + 1] = { id = questID, open = Pins.InProgress(questID) } end
+            if type(questID) == 'number' then quests[#quests + 1] = { id = questID, open = Pins.Pending(questID) } end
         end
         table.sort(quests, function(a, b)
             if a.open ~= b.open then return a.open end

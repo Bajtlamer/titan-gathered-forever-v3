@@ -495,6 +495,18 @@ test('only givers of quests in progress get a pin, a round gray question mark, n
     ns.JournalPins.FillTooltip(tip, nodes[1])
     eq(tip.lines[1], 'Marshal McBride'); eq(tip.lines[3], 'Quest 8 In progress')     -- in progress first
     eq(tip.lines[4], 'Wolves Across the Border Completed')
+    -- objectives done: the game marks the turn-in itself, so the addon pin goes away
+    _G.C_QuestLog.IsComplete = function(id) return id == 8 end
+    eq(#ns.JournalPins.List(1429), 1)
+    local redraws = 0
+    ns.JournalPins.Redraw = function() redraws = redraws + 1 end
+    ns.db.questIncome.Realm['Player-1-AAA'][8] = { copper = 0, turnIns = 0, acceptedAt = 5 }
+    ns.JournalPins.LogChanged()                                      -- first look only remembers
+    ns.JournalPins.LogChanged(); eq(redraws, 0)                      -- nothing changed
+    _G.C_QuestLog.IsComplete = nil
+    ns.JournalPins.LogChanged(); eq(redraws, 1)                      -- the quest counts as open again
+    eq(#ns.JournalPins.List(1429), 2)
+    ns.db.questIncome.Realm['Player-1-AAA'][8] = nil
     -- the quest is turned in: the pin goes away
     onQuest[8] = nil
     eq(#ns.JournalPins.List(1429), 1)
