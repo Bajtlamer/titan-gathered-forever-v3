@@ -305,7 +305,7 @@ local function start()
                             'TRADE_SKILL_DETAILS_UPDATE', 'TRADE_SKILL_CLOSE',
                             'TRAINER_SHOW', 'TRAINER_UPDATE', 'TRAINER_CLOSED',
                             'MERCHANT_SHOW', 'MERCHANT_UPDATE', 'MERCHANT_CLOSED', 'PLAYER_MONEY',
-                            'QUEST_TURNED_IN', 'QUEST_ACCEPTED', 'QUEST_REMOVED', 'QUEST_DATA_LOAD_RESULT',
+                            'QUEST_TURNED_IN', 'QUEST_ACCEPTED', 'QUEST_REMOVED', 'QUEST_DATA_LOAD_RESULT', 'QUEST_LOG_UPDATE',
                             'PARTY_KILL', 'PLAYER_XP_UPDATE', 'PLAYER_TARGET_CHANGED', 'UPDATE_MOUSEOVER_UNIT',
                             'NAME_PLATE_UNIT_ADDED', 'PLAYER_LEVEL_UP', 'UPDATE_FACTION', 'QUEST_DETAIL',
                             'QUEST_COMPLETE' }) do frame:RegisterEvent(event) end
@@ -441,6 +441,7 @@ frame:SetScript('OnEvent', function(_, event, ...)
     end
     if event == 'QUEST_ACCEPTED' then ns.QuestIncome.Accepted((...)); return end
     if event == 'QUEST_REMOVED' then ns.QuestIncome.Removed(...); return end
+    if event == 'QUEST_LOG_UPDATE' then if ns.JournalPins then ns.JournalPins.LogChanged() end; return end
     if event == 'QUEST_DATA_LOAD_RESULT' then if ns.QuestsView then ns.QuestsView.DataLoaded() end; return end
     if event == 'PARTY_KILL' then ns.Kills.PartyKill(...); return end
     if event == 'PLAYER_XP_UPDATE' then ns.Kills.ReadExperience(); return end
