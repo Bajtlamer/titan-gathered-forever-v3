@@ -97,6 +97,7 @@ function Quest.TurnedIn(questID, copper, xp)
     end
     Quest.pendingReward = nil
     if ns.Journal then ns.Journal.Count('quests') end
+    if ns.JournalPins then ns.JournalPins.Redraw() end
     if ns.EconomyView then ns.EconomyView.Refresh() end
     if ns.QuestsView then ns.QuestsView.Refresh() end
 end
@@ -114,6 +115,7 @@ function Quest.Accepted(questID)
         Quest.RecordGiver(giver, questID)
     end
     Quest.pendingGiver = nil
+    if ns.JournalPins then ns.JournalPins.Redraw() end
     if ns.QuestsView then ns.QuestsView.Refresh() end
 end
 
@@ -121,6 +123,7 @@ end
 -- check waits a moment, and a quest that is still open then was abandoned (or failed).
 function Quest.Removed(questID, replay)
     if not publicInteger(questID) or questID == 0 or (ns.IsPublic(replay) and replay == true) then return end
+    if ns.JournalPins then ns.JournalPins.Redraw() end
     local quests = store()
     local entry = quests and quests[questID]
     if type(entry) ~= 'table' or not integer(entry.acceptedAt) then return end

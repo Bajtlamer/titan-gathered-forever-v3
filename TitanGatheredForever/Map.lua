@@ -156,6 +156,7 @@ function Map:Refresh(force)
         pin:ClearAllPoints()
         pin:SetPoint('CENTER', self.overlay, 'TOPLEFT', node.x * width, -node.y * height)
         pin.texture:SetTexture(ns.PinStyle.Icon(node.itemID, node.kind))
+        ns.PinStyle.Badge(pin, node.kind)
         pin:Show()
     end
     for index = #nodes + 1, #self.pins do self.pins[index]:Hide() end

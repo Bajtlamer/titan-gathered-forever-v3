@@ -1,6 +1,6 @@
 local _, ns = ...
--- Map pins from the journal: quest givers where a quest was accepted from them, and the places where rare creatures
--- were seen. They join the trainer and vendor pins (NpcSources.List) on the world map and the minimap. The switches
+-- Map pins from the journal: quest givers of quests in progress (gray question mark), at the place where the quest
+-- was accepted, and the places where rare creatures were seen. They join the trainer and vendor pins (NpcSources.List) on the world map and the minimap. The switches
 -- only hide them; recording goes on.
 local Pins = {}
 ns.JournalPins = Pins
@@ -12,6 +12,18 @@ local function realmStore(key)
     return type(own) == 'table' and own or {}
 end
 
+-- The quest log changed: redraw the pins once the client has updated it (a burst of events draws once).
+function Pins.Redraw()
+    if Pins.pending then return end
+    Pins.pending = true
+    local function draw()
+        Pins.pending = nil
+        if ns.Map and ns.Map.Update then pcall(ns.Map.Update) end
+        if ns.Minimap and ns.Minimap.Update then pcall(ns.Minimap.Update) end
+    end
+    if C_Timer and C_Timer.After then C_Timer.After(0.5, draw) else draw() end
+end
+
 function Pins.Enabled()
     local settings = ns.settings or {}
     return settings.mapQuestGivers ~= false or settings.mapRareCreatures ~= false
@@ -19,12 +31,44 @@ end
 
 local function highlighted(npcID) return ns.NpcSources and ns.NpcSources.IsHighlighted(npcID) end
 
+-- A quest of this character that is in the quest log now. The quest log answers when it can; otherwise the record
+-- (accepted and not yet turned in or abandoned) does.
+function Pins.InProgress(questID)
+    local api = C_QuestLog
+    if api and api.IsOnQuest then
+        local ok, on = pcall(api.IsOnQuest, questID)
+        if ok and ns.IsPublic(on) and type(on) == 'boolean' then return on end
+    end
+    local realm = GetRealmName and GetRealmName()
+    local store = ns.db and ns.db.questIncome
+    local own = type(store) == 'table' and type(store[realm]) == 'table' and store[realm][ns.characterID]
+    local entry = type(own) == 'table' and own[questID]
+    return type(entry) == 'table' and entry.acceptedAt ~= nil
+end
+
+local function openQuests(giver)
+    local open = 0
+    for questID in pairs(type(giver.quests) == 'table' and giver.quests or {}) do
+        if type(questID) == 'number' and Pins.InProgress(questID) then open = open + 1 end
+    end
+    return open
+end
+
+-- A quest giver gets a pin only while this character has a quest from them in progress: the game's silver question mark
+-- with a drop shadow (PinStyle.Badge). The yellow exclamation mark is the game's own sign of a quest that can be taken: the addon never
+-- draws it, because it cannot know which quests are still available. A giver shown from the Quests list
+-- (highlighted) whose quests are all done gets a plain note icon.
 function Pins.List(mapID)
     local result, settings = {}, ns.settings or {}
     for npcID, giver in pairs(realmStore('questGivers')) do
-        if type(giver) == 'table' and giver.mapID == mapID and type(giver.x) == 'number' and type(giver.y) == 'number'
-            and (settings.mapQuestGivers ~= false or highlighted(npcID)) then
-            result[#result + 1] = { kind = 'QuestGiver', npcID = npcID, mapID = mapID, x = giver.x, y = giver.y }
+        if type(giver) == 'table' and giver.mapID == mapID and type(giver.x) == 'number' and type(giver.y) == 'number' then
+            local open = openQuests(giver)
+            local kind
+            if open > 0 and (settings.mapQuestGivers ~= false or highlighted(npcID)) then kind = 'QuestGiver'
+            elseif highlighted(npcID) then kind = 'QuestGiverPast' end
+            if kind then
+                result[#result + 1] = { kind = kind, npcID = npcID, mapID = mapID, x = giver.x, y = giver.y, open = open }
+            end
         end
     end
     for npcID, rare in pairs(realmStore('rares')) do
@@ -48,12 +92,12 @@ end
 local statusLabels = { completed = 'Completed', open = 'In progress', abandoned = 'Abandoned or failed' }
 
 local function questStatus(questID)
+    if Pins.InProgress(questID) then return statusLabels.open end
     local realm = GetRealmName and GetRealmName()
     local store = ns.db and ns.db.questIncome
     local own = type(store) == 'table' and type(store[realm]) == 'table' and store[realm][ns.characterID]
     local entry = type(own) == 'table' and own[questID]
     if type(entry) ~= 'table' then return 'Not taken by this character' end
-    if entry.acceptedAt then return statusLabels.open end
     if (entry.turnIns or 0) > 0 then return statusLabels.completed end
     if (entry.abandons or 0) > 0 then return statusLabels.abandoned end
     return 'Unknown'
@@ -62,23 +106,28 @@ end
 function Pins.FillTooltip(tip, node)
     local Style = ns.Style
     local small = Style.Small or function() end
-    if node.kind == 'QuestGiver' then
+    if node.kind == 'QuestGiver' or node.kind == 'QuestGiverPast' then
         local giver = realmStore('questGivers')[node.npcID] or {}
         tip:AddLine(Style.Text(Style.gold, giver.name or ('Creature ' .. node.npcID)))
-        tip:AddLine(Style.Label('Quest giver'))
+        tip:AddLine(Style.Label(node.kind == 'QuestGiver' and 'Gave you a quest that is in progress' or 'Quest giver'))
+        -- Quests in progress first, then the others, each by ID.
         local quests = {}
         for questID in pairs(type(giver.quests) == 'table' and giver.quests or {}) do
-            if type(questID) == 'number' then quests[#quests + 1] = questID end
+            if type(questID) == 'number' then quests[#quests + 1] = { id = questID, open = Pins.InProgress(questID) } end
         end
-        table.sort(quests)
+        table.sort(quests, function(a, b)
+            if a.open ~= b.open then return a.open end
+            return a.id < b.id
+        end)
         for index = 1, math.min(10, #quests) do
-            local questID = quests[index]
+            local questID = quests[index].id
             local title = ns.QuestsView and ns.QuestsView.Title(questID) or ('Quest ' .. questID)
             tip:AddDoubleLine(Style.Value(title or ('Quest ' .. questID)), Style.Label(questStatus(questID)))
             small(tip)
         end
         if #quests > 10 then Style.Note(tip, Style.Label('And ') .. Style.Value(#quests - 10) .. Style.Label(' more.')) end
-        Style.Note(tip, Style.Label('Recorded where you accepted a quest from this character.'))
+        Style.Note(tip, Style.Label('Recorded where you accepted a quest from this character. Quests that can still be '
+            .. 'taken are shown by the game itself.'))
         return
     end
     local rare = realmStore('rares')[node.npcID] or {}

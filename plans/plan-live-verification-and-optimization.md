@@ -127,6 +127,7 @@ The checklist is in book-wow-forever-validation.md ("Validate the Discovery modu
 - [ ] Kills in a dungeon: check whether PARTY_KILL GUIDs are secret there (counted as hidden in the footer) or readable.
 - [ ] Accept, turn in and abandon a quest: status, time taken, zone, experience and money; abandoning shows Abandoned or failed.
 - [ ] Quest names of older quests load after the list opens (QUEST_DATA_LOAD_RESULT redraws the list).
+- [ ] Quest pins (0.5.168): no yellow exclamation mark from the addon on the map or minimap; a silver question mark with a drop shadow (0.5.171) only at givers of quests in the log, gone after the turn-in or abandon.
 - [ ] The nine tabs fit along the bottom of the window (0.5.167 merged Kills and Quests into the Journal tab); at a low resolution or a large UI scale the window and tabs are scaled down and stay on screen; the sort arrow sits after the header text.
 - [ ] Loot (0.5.166): a looted corpse adds money per loot and Drops rows; pickpocketing and skinning add nothing there.
 - [ ] A rare creature on the nameplates or as target appears in Rare creatures and as a pin; a click opens the map with the rings.

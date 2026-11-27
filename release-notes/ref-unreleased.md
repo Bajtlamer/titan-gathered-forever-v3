@@ -1,6 +1,16 @@
 # Unreleased development updates
 
-Updated 2026-11-27. Versions up to 0.5.167 are published in release-notes/ref-0.5.167.md. These changes describe source candidates since the latest published versioned notes.
+Updated 2026-11-27. Versions up to 0.5.171 are published in release-notes/ref-0.5.171.md. These changes describe source candidates since the latest published versioned notes.
+
+## Quest pin with a shadow, 0.5.169 to 0.5.171
+
+- The pin of a quest in progress is the game's silver question mark with a small drop shadow, so it reads on light maps. Two looks were tried and dropped: the question mark icon of the icon set (0.5.169, red on black on Forever) and a round badge on a dark disc with a ring (0.5.170).
+
+## Quest pins only for quests in progress, 0.5.168
+
+- Quest giver pins used the game's yellow exclamation mark, so every NPC a quest had ever been taken from looked like an available quest on the map and minimap. The pins now use the game's gray question mark and appear only while the character has a quest from that NPC in progress (checked with the quest log, C_QuestLog.IsOnQuest, and the record when the client gives no answer). They disappear when the quest is turned in or abandoned. The addon never draws the yellow exclamation mark: the game shows the quests that can still be taken.
+- The switch is renamed Show quests in progress (world map Map options and the Titan menu). A giver opened from the Quests list whose quests are all done is shown with a plain note icon.
+- The pin tooltip lists the quests in progress first.
 
 ## One Journal tab and windows that fit every screen, 0.5.167
 
