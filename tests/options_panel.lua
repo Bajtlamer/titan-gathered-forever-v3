@@ -60,7 +60,9 @@ ns = {
     MinimapButton = { Update = count('button') },
     NpcToggleAxes = function() ns.settings.npcAxisSwap = not ns.settings.npcAxisSwap end,
     ScheduleRefresh = count('refresh'),
+    IsPublic = function() return true end,
 }
+assert(loadfile('TitanGatheredForever/Settings.lua'))('TitanGatheredForever', ns)
 assert(loadfile('TitanGatheredForever/Navigation.lua'))('TitanGatheredForever', ns)
 assert(loadfile('TitanGatheredForever/OptionsPanel.lua'))('TitanGatheredForever', ns)
 local Options = ns.Options
@@ -112,11 +114,11 @@ test('one AddOns category with a page per subject, registered once', function()
     eq(registered.addon, 1)
     eq(#registered, #Options.PAGES)
     eq(registered.top, registered[1])
-    assert(registered[1].name:find('^Titan Gathered Forever'))
+    assert(registered[1].name:find('^|T.-|t Titan Gathered$'))
     for index = 2, #registered do eq(registered[index].parent, registered[1]) end
     local names = {}
     for index = 2, #registered do names[#names + 1] = registered[index].name end
-    eq(table.concat(names, ','), 'Titan Panel list,Professions,Map pins,Gathering spots,Map materials,Travel routes,Auction house,Diagnostics')
+    eq(table.concat(names, ','), 'Titan Panel list,Professions,Map pins,Gathering spots,Map materials,Travel routes,Auction house,Diagnostics,Backup')
 end)
 
 test('a page reads the settings when shown and a switch writes them with the same update as the menu', function()
@@ -204,6 +206,58 @@ test('Open shows the page asked for, or the first one', function()
     eq(opened[#opened], 'sub:Travel routes')
     Options.Open()
     eq(opened[#opened], 'root')
+end)
+
+test('Backup exports the settings as one text and imports them back', function()
+    local page = Options.pages.backup
+    page.frame:Show()
+    ns.settings.transportPattern = 'solid'
+    buttonFor(page, 'Export settings').scripts.OnClick()
+    local box = shown(page, 'input')[2]
+    local text = box:GetText()
+    assert(text:find('^TGF%-SETTINGS:1:'))
+    eq(page.text, text)
+    ns.settings.transportPattern = 'dashed'
+    box:SetText('garbage'); box.scripts.OnTextChanged(box, true)
+    buttonFor(page, 'Import settings').scripts.OnClick()
+    eq(ns.settings.transportPattern, 'dashed')
+    eq(page.reload, nil)
+    assert(page.status:find('not a Titan Gathered settings export'))
+    box:SetText(text); box.scripts.OnTextChanged(box, true)
+    local same = ns.settings
+    buttonFor(page, 'Import settings').scripts.OnClick()
+    eq(ns.settings, same)
+    eq(ns.settings.transportPattern, 'solid')
+    eq(page.reload, true)
+    buttonFor(page, 'Reload interface')
+    page.frame:Show()
+    eq(page.status, nil)
+end)
+
+test('Backup shows the folder of the saved data file for copying', function()
+    local page = Options.pages.backup
+    IsMacClient = function() return false end
+    GetCVar = function(name) if name == 'accountList' then return 'OTHER|!MEDYN|' end end
+    page.frame:Show()
+    local path = shown(page, 'input')[1]
+    eq(path:GetText(), 'C:\\Program Files (x86)\\World of Warcraft\\_forever_\\WTF\\Account\\MEDYN\\SavedVariables')
+    path:SetText('typed'); path.scripts.OnTextChanged(path, true)
+    eq(path:GetText(), 'C:\\Program Files (x86)\\World of Warcraft\\_forever_\\WTF\\Account\\MEDYN\\SavedVariables')
+    IsMacClient = function() return true end
+    GetCVar = function() error('protected') end
+    page.frame:Show()
+    eq(shown(page, 'input')[1]:GetText(), '/Applications/World of Warcraft/_forever_/WTF/Account/YOUR_ACCOUNT/SavedVariables')
+    IsMacClient, GetCVar = nil, nil
+end)
+
+test('a pasted text is only read as values and must be complete', function()
+    local text = ns.Settings.Export({ a = 1, b = 'x', c = { [5] = false } })
+    local value = ns.Settings.Decode(text)
+    eq(value.a, 1); eq(value.b, 'x'); eq(value.c[5], false)
+    eq(ns.Settings.Decode(text:sub(1, -2)), nil)
+    eq(ns.Settings.Decode(text .. '}'), nil)
+    eq(ns.Settings.Decode('TGF-SETTINGS:1:00000000:{}'), nil)
+    eq(ns.Settings.Decode(''), nil)
 end)
 
 print('PASS ' .. passed .. ' options panel checks')

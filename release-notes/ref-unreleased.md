@@ -2,6 +2,15 @@
 
 Updated 2026-11-28. Versions up to 0.5.172 are published in release-notes/ref-0.5.172.md. These changes describe source candidates since the latest published versioned notes.
 
+## Moving the saved data to another computer, 0.5.176
+
+- The Backup page starts with moving or backing up everything: it names the file (TitanGatheredForever.lua, plus TitanGatheredForever_Discovery.lua when Discovery is loaded), shows its folder in a box to copy (default install folder of Windows or macOS; the account folder from the account selected at login, YOUR_ACCOUNT when the client does not give it), tells how to open it in File Explorer or Finder, and lists the steps. It warns that the copied file replaces the data on the other computer. The settings export follows below it. The JSON statistics export is no longer linked from Backup: it is a split developer export, not a backup.
+
+## Settings backup and the Options name, 0.5.175
+
+- The Options entry is named Titan Gathered, with the addon icon before the name.
+- New Backup page: Export settings puts every setting in a text box as one text to copy; Import settings reads such a pasted text and replaces the settings, then offers Reload interface. The text is read by a small parser (never run as code) and carries a checksum, so a partial or changed copy is refused with a message. Statistics stay out of it: the game's text boxes hold about 32 KB and the saved data is a few MB, so the page explains how to move everything as the SavedVariables file, and links the JSON statistics export.
+
 ## Settings in the game Options, 0.5.174
 
 - The settings are also in the game Options window, AddOns tab, under Titan Gathered Forever, with a page per subject: General (minimap button, movable windows, window positions, icon appearance and buttons that open the windows), Titan Panel list, Professions, Map pins, Gathering spots, Map materials (a combo box picks the gathering profession), Travel routes, Auction house and Diagnostics. Each switch writes the same saved setting as the Titan Panel menu and runs the same update, and a page reads the settings again whenever it is shown, so the two never disagree. The Titan menu starts with Options..., and `/tgf settings` opens the Options page (the menu on a client without the Options window). New file OptionsPanel.lua: a full client restart is needed.

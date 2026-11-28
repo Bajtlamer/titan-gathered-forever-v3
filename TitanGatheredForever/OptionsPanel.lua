@@ -6,7 +6,7 @@ ns.Options = Options
 -- addons list theirs. Every switch writes the same saved setting as the Titan Panel menu and runs the same update,
 -- so the two always agree; a page reads the settings again each time it is shown.
 
-Options.TITLE = 'Titan Gathered Forever'
+Options.TITLE = 'Titan Gathered'
 local ICON = '|TInterface\\AddOns\\TitanGatheredForever\\Artwork\\AddonIcon:16:16:0:0|t'
 local LABEL_X, CONTROL_X, CHOICE_WIDTH, LABEL_WIDTH = 30, 380, 200, 330
 
@@ -27,6 +27,8 @@ local function note(text) return { kind = 'note', text = text } end
 local function button(label, run) return { kind = 'button', label = label, run = run } end
 local function check(label, get, set) return { kind = 'check', label = label, get = get, set = set } end
 local function choice(label, options, get, set) return { kind = 'choice', label = label, options = options, get = get, set = set } end
+-- A text box; without set it only shows its text for copying, and typing into it puts the text back.
+local function input(get, set, takesFocus) return { kind = 'input', get = get, set = set, takesFocus = takesFocus } end
 
 -- A switch that counts as on until it is turned off (a missing value is on), as most map switches.
 local function onUnlessOff(label, key, after)
@@ -131,6 +133,68 @@ local function sortOptions()
     local options = {}
     for _, mode in ipairs(ns.Titan.SORTS) do options[#options + 1] = { value = mode.id, label = mode.label } end
     return options
+end
+
+-- Where the game keeps the saved data of the addon. The game folder cannot be read by an addon, so it is the default
+-- install folder of the system; the account folder is the account selected at login (the CVar accountList marks it
+-- with !), when the client gives it.
+Options.FILE = 'TitanGatheredForever.lua'
+Options.DISCOVERY_FILE = 'TitanGatheredForever_Discovery.lua'
+function Options.AccountFolder()
+    local ok, list = pcall(function() return GetCVar and GetCVar('accountList') end)
+    if ok and ns.IsPublic(list) and type(list) == 'string' then
+        local name = list:match('!([^|]+)')
+        if name and name ~= '' then return name, true end
+    end
+    return 'YOUR_ACCOUNT', false
+end
+function Options.DataFolder()
+    local account, known = Options.AccountFolder()
+    local mac = IsMacClient and IsMacClient()
+    if mac then
+        return '/Applications/World of Warcraft/_forever_/WTF/Account/' .. account .. '/SavedVariables', known, true
+    end
+    return 'C:\\Program Files (x86)\\World of Warcraft\\_forever_\\WTF\\Account\\' .. account .. '\\SavedVariables', known, false
+end
+
+-- Moving everything to another computer, and the settings alone as one text. A text box holds what was exported or
+-- pasted; Import replaces the settings and asks for a reload, after which every module reads them again.
+local function backupRows(page)
+    local folder, known, mac = Options.DataFolder()
+    local rows = {
+        header('Move or back up everything'),
+        note('All statistics, map spots, the journal and the settings of every character of this account are in one file, ' .. Options.FILE .. ', in this folder (click the box, then copy with ' .. (mac and 'Cmd+C' or 'Ctrl+C') .. '):'),
+        input(function() return folder end, nil),
+        note(mac and 'In Finder press Cmd+Shift+G and paste the folder.' or 'Paste the folder into the address bar of File Explorer.'),
+    }
+    if not known then
+        rows[#rows + 1] = note('YOUR_ACCOUNT is the folder of your account in WTF\\Account (the game did not name it). If the game is installed elsewhere, start from its _forever_ folder.')
+    else
+        rows[#rows + 1] = note('If the game is installed elsewhere, start from its _forever_ folder.')
+    end
+    rows[#rows + 1] = note('1. Quit the game: it writes the file when you log out. 2. Copy ' .. Options.FILE .. ' to a USB stick, a cloud folder or your backup. 3. On the other computer quit the game, put the file into the same folder there and replace the old one. 4. Start the game.')
+    rows[#rows + 1] = note('The copied file replaces all addon data on the other computer, it does not merge. When you play on two computers, always carry the newest file over before you play, or the progress made on the other one is lost.')
+    if C_AddOns and C_AddOns.IsAddOnLoaded and C_AddOns.IsAddOnLoaded('TitanGatheredForever_Discovery') then
+        rows[#rows + 1] = note('Discovery keeps its own data in ' .. Options.DISCOVERY_FILE .. ' in the same folder: copy it too.')
+    end
+    rows[#rows + 1] = header('Settings only')
+    rows[#rows + 1] = note('To copy only the settings, for example to another account: Export settings puts them in the box as one text, select it and copy it. There, paste it into the box and click Import settings.')
+    rows[#rows + 1] = input(function() return page.text or '' end, function(text) page.text = text end, true)
+    rows[#rows + 1] = button('Export settings', function()
+        page.text = ns.Settings.Export(ns.settings)
+        page.status, page.reload, page.focus = 'Settings exported: copy the text in the box.', nil, true
+    end)
+    rows[#rows + 1] = button('Import settings', function()
+        local ok, reason = ns.Settings.Import(ns.settings, page.text)
+        if ok then
+            page.status, page.reload = 'Settings imported. Reload the interface so every window and map uses them.', true
+        else
+            page.status, page.reload = reason, nil
+        end
+    end)
+    if page.status then rows[#rows + 1] = note(page.status) end
+    if page.reload then rows[#rows + 1] = button('Reload interface', function() if ReloadUI then ReloadUI() end end) end
+    return rows
 end
 
 -- The pages in the order of the AddOns list. The first is the category itself; rows(page) returns its rows.
@@ -256,6 +320,7 @@ Options.PAGES = {
             button('Show NPC recording log', function() ns.NpcObserver.PrintLog() end),
         }
     end },
+    { id = 'backup', name = 'Backup', rows = backupRows },
 }
 
 -- Widgets are kept per kind and reused when a page is drawn again.
@@ -336,6 +401,25 @@ function Options.Draw(page)
             place(drop, content, CONTROL_X, y)
             drop.Sync()
             y = y - 34
+        elseif row.kind == 'input' then
+            local box = acquire(page, 'input', function()
+                local made = CreateFrame('EditBox', nil, content, 'InputBoxTemplate')
+                made:SetHeight(24); made:SetAutoFocus(false)
+                if made.SetMaxLetters then made:SetMaxLetters(0) end
+                made:SetScript('OnEscapePressed', function(self) self:ClearFocus() end)
+                made:SetScript('OnEditFocusGained', function(self) self:HighlightText() end)
+                made:SetScript('OnTextChanged', function(self, userInput)
+                    if not userInput or not self.row then return end
+                    if self.row.set then self.row.set(self:GetText()) else self:SetText(self.row.get()); self:HighlightText() end
+                end)
+                return made
+            end)
+            box.row = row
+            box:SetWidth(math.min(560, width - LABEL_X * 2))
+            place(box, content, LABEL_X + 6, y)
+            box:SetText(row.get())
+            if page.focus and row.takesFocus then page.focus = nil; box:SetFocus(); box:HighlightText() end
+            y = y - 34
         elseif row.kind == 'button' then
             local b = acquire(page, 'button', function()
                 local made = CreateFrame('Button', nil, content, 'UIPanelButtonTemplate')
@@ -382,6 +466,7 @@ local function buildPage(spec)
     frame:SetScript('OnShow', function()
         local width = scroll.GetWidth and scroll:GetWidth() or 0
         if width and width > 100 then page.width = width; content:SetWidth(width) end
+        page.status, page.reload, page.focus = nil, nil, nil
         Options.Draw(page)
     end)
     return page
@@ -396,7 +481,7 @@ function Options.Register()
         local page = buildPage(spec)
         Options.pages[spec.id] = page
         if index == 1 then
-            page.category = api.RegisterCanvasLayoutCategory(page.frame, Options.TITLE .. ' ' .. ICON)
+            page.category = api.RegisterCanvasLayoutCategory(page.frame, ICON .. ' ' .. Options.TITLE)
             Options.category = page.category
         elseif api.RegisterCanvasLayoutSubcategory then
             page.category = api.RegisterCanvasLayoutSubcategory(Options.category, page.frame, spec.name)
