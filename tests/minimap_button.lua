@@ -114,10 +114,10 @@ test('the tooltip shows the version, the installed modules with their state, Tit
     eq(lines[1], '<gold>Titan Gathered Forever</> | <ffffffff>v0.5.192</>')
     local text = table.concat(lines, '\n')
     -- the Auction house module keeps running when its Auction items group is hidden; a profession shows Switched off
-    -- every installed module has its icon and its version; the auction house and Discovery get a coin and a spyglass
-    assert(text:find('[Interface\\Icons\\INV_Misc_Coin_01]<ffffffff>Auction house</><gray> v0.5.192</> | <gray>Active</>', 1, true), text)
-    assert(text:find('[cooking]<ffffffff>Cooking</><gray> v0.5.192</> | <orange>Disabled</>', 1, true), text)
-    assert(text:find('[mining]<ffffffff>Mining</><gray> v0.5.192</> | <gray>Switched off</>', 1, true), text)
+    -- every module has its icon (a coin and a spyglass for the auction house and Discovery); only Discovery shows a version
+    assert(text:find('[Interface\\Icons\\INV_Misc_Coin_01]<ffffffff>Auction house</> | <gray>Active</>', 1, true), text)
+    assert(text:find('[cooking]<ffffffff>Cooking</> | <orange>Disabled</>', 1, true), text)
+    assert(text:find('[mining]<ffffffff>Mining</> | <gray>Switched off</>', 1, true), text)
     assert(text:find('[Interface\\Icons\\INV_Misc_Spyglass_02]<ffffffff>Discovery</><gray> v0.1.6</> | <gray>Active</>', 1, true), text)
     assert(not text:find('another version', 1, true), 'all modules match the core')
     assert(not text:find('Bagnon', 1, true))
@@ -158,7 +158,7 @@ test('the modules of the collection that are not installed are listed last as No
     button.scripts.OnEnter(button)
     local text = table.concat(lines, '\n')
     assert(text:find('[tailoring]<gray>Tailoring</> | <gray>Not installed</>', 1, true), text)
-    assert(text:find('[herbs]<ffffffff>Herbalism</><gray> v0.6.0</> | <gray>Switched off</>', 1, true), text)
+    assert(text:find('[herbs]<ffffffff>Herbalism</> | <gray>Switched off</>', 1, true), text)
     -- a module of another version than the core is shown in orange, with a line saying to update it
     assert(text:find('[mining]<ffffffff>Mining</><orange> v0.5.193</> | <green>Active</>', 1, true)
         or text:find('[mining]<ffffffff>Mining</><orange> v0.5.193</> | <gray>Active</>', 1, true), text)

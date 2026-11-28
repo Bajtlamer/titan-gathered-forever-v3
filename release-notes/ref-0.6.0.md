@@ -17,7 +17,7 @@ Version 0.6.0 is a milestone. Titan Gathered Forever no longer needs Titan Panel
 ## Added
 
 - The minimap button tooltip also lists the modules of the collection that are not installed, in gray as Not installed, after the installed ones, with a line saying where to get them (CurseForge or titan-gathered.com).
-- Every installed module in that list shows its version. A module of another version than the core is shown in orange with a line saying to update it, so an old module beside a new core stands out.
+- A module of another version than the core shows its version in orange, with a line saying to update it, so an old module beside a new core stands out. Matching modules show no version, because they are released with the core; Discovery keeps its own version.
 
 ## Fixed
 
