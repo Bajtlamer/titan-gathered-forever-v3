@@ -2,6 +2,10 @@
 
 Updated 2026-11-28. Versions up to 0.5.172 are published in release-notes/ref-0.5.172.md. These changes describe source candidates since the latest published versioned notes.
 
+## Item icons in the lists, 0.5.179
+
+- Style.ItemIcon, Style.SpellIcon and Style.ItemLabel put the icon before the name as inline texture text (14 px, border cropped, nothing when the client gives no icon). Used in My materials, Lifetime materials, Observed chances, Profession actions yields, Crafting profit (product), Unlearned recipes (vendor recipe item, else the trainer spell from the seed, else a scroll icon), Journal Creature drops, Statistics Materials and Gathered items, the reagent window, the auction history header and the Titan Panel list. Sort values and search keep the plain name. Release notes renamed to release-notes/ref-0.5.179.md.
+
 ## My materials tab, 0.5.178
 
 - New first tab of the main window, My materials (MaterialsView.lua, a ListWindow): the catalogue materials the character holds with bags, bank snapshot and total, a scope combo box (in bags or bank, or all catalogue materials), a group combo box, search, sortable columns and the item tooltip on hover; the footer sums the items and says how old the bank snapshot is. A second view, Learned professions, lists skill, share of the rank and primary or secondary. It refreshes with the bags. The minimap button is back to its short help on hover (the material list there, added in 0.5.177, is removed) and its left click opens My materials the first time; `/tgf materials` opens it. The Titan Panel entry keeps its list. Release notes renamed to release-notes/ref-0.5.178.md.

@@ -12,7 +12,10 @@ function Browser.Cells(row)
     local where = ns.Style.Text(ns.Style.green, first.name) .. (#row.sources > 1 and (' (+' .. (#row.sources - 1) .. ')') or '')
     -- A recipe the player lacks the skill for is red, so the ones that could be learned now stand out.
     local function paint(value) return row.canLearn == false and ns.Style.Text(ns.Style.red, value) or value end
-    return { paint(row.name), ns.NpcSources.Label(row.kind), paint(row.skill and tostring(row.skill) or 'Unknown'),
+    local icon = (row.itemID and ns.Style.ItemIcon(row.itemID)) or ''
+    if icon == '' and row.spellID then icon = ns.Style.SpellIcon(row.spellID) end
+    if icon == '' then icon = ns.Style.Icon('Interface\\Icons\\INV_Scroll_03') end
+    return { icon .. paint(row.name), ns.NpcSources.Label(row.kind), paint(row.skill and tostring(row.skill) or 'Unknown'),
         row.trainer and 'Trainer' or 'Vendor', where, row.price and ns.NpcSources.CoinIcons(row.price) or 'Unknown' }
 end
 

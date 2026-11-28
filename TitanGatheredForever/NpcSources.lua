@@ -529,7 +529,7 @@ function Npc.Unlearned(character, vendorOnly, kindFilter)
     local skills = Npc.Skills()
     local playerLevel = UnitLevel and UnitLevel('player')
     if type(playerLevel) ~= 'number' then playerLevel = nil end
-    local function add(npcID, npcName, kind, display, skill, price, role, rank)
+    local function add(npcID, npcName, kind, display, skill, price, role, rank, itemID, spellID)
         if not recipeKinds[kind] or (kindFilter and kind ~= kindFilter) or not installed(kind) then return end
         if not rank then
             local known = K and K.IsKnown(character, kind, display)
@@ -543,6 +543,9 @@ function Npc.Unlearned(character, vendorOnly, kindFilter)
             byKey[key] = row; rows[#rows + 1] = row
         end
         if role == 'Trainer' then row.trainer = true end
+        -- What the icon of the row shows: the recipe item of a vendor, else the spell a trainer teaches.
+        row.itemID = row.itemID or itemID
+        row.spellID = row.spellID or spellID
         if skill and (not row.skill or skill < row.skill) then row.skill = skill end
         if price and (not row.price or price < row.price) then row.price = price end
         row.sources[#row.sources + 1] = { npcID = npcID, name = npcName, role = role, price = price }
@@ -554,7 +557,7 @@ function Npc.Unlearned(character, vendorOnly, kindFilter)
         local record = Npc.Record(id)
         for _, row in ipairs(record.trainer or {}) do
             if not isRankSpell(row.name) then
-                add(id, record.name, record.profession, row.name, row.skill, row.cost, 'Trainer')
+                add(id, record.name, record.profession, row.name, row.skill, row.cost, 'Trainer', nil, nil, row.spellID)
             elseif skills and skills[record.profession] and type(row.skill) == 'number' and row.skill <= skills[record.profession]
                 and Npc.RankSpellKnown(record.profession, row.name) == false
                 and not (playerLevel and (Npc.RankLevel(row) or 0) > playerLevel) then
@@ -569,7 +572,7 @@ function Npc.Unlearned(character, vendorOnly, kindFilter)
             local wanted = recipeKinds[row.kind] and (not kindFilter or row.kind == kindFilter)
             local name = wanted and Npc.ItemRecipeName(row.itemID)
             if not wanted then -- not listed, nothing to load
-            elseif name then add(id, record.name, row.kind, name, row.skill, row.price, 'Vendor')
+            elseif name then add(id, record.name, row.kind, name, row.skill, row.price, 'Vendor', nil, row.itemID)
             else pending = pending + 1 end
         end
     end

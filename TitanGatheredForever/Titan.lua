@@ -74,7 +74,7 @@ function Titan.Show(owner)
         local row = rows[index]
         if row.group ~= group then ns.Style.Section(tooltip, row.group); group = row.group end
         local c = row.count
-        tooltip:AddDoubleLine(ns.Style.ItemName(row.itemID), ns.Tooltips.CountValues(c), 1, 1, 1, 1, 1, 1)
+        tooltip:AddDoubleLine(ns.Style.ItemLabel(row.itemID), ns.Tooltips.CountValues(c), 1, 1, 1, 1, 1, 1)
     end
     if #rows == 0 then tooltip:AddLine(ns.L.noItems, 1, 1, 1, true) end
     ns.Style.Separator(tooltip)

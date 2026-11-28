@@ -33,7 +33,7 @@ end
 local function count(value, field) return Style.Count(value, field) end
 
 function View.MaterialCells(row)
-    return { Style.ItemName(row.itemID), Style.Value(row.group), count(row.bags, 'bags'), count(row.bank, 'bank'),
+    return { Style.ItemLabel(row.itemID), Style.Value(row.group), count(row.bags, 'bags'), count(row.bank, 'bank'),
         count(row.total, 'total') }
 end
 

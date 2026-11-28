@@ -8,7 +8,7 @@ Website: [titan-gathered.com](https://www.titan-gathered.com/).
 
 ## Current version
 
-The current stable candidate is version `0.5.178` and targets **WoW Forever 1.60.1, interface 16001**. Titan Panel is optional: with it the addon is a Titan Panel plugin, without it the addon runs on its own (minimap button, world map button and the game Options). The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); the published versions are in [ref-0.5.172.md](release-notes/ref-0.5.172.md) and earlier notes. Other WoW editions are outside this project's scope.
+The current stable candidate is version `0.5.179` and targets **WoW Forever 1.60.1, interface 16001**. Titan Panel is optional: with it the addon is a Titan Panel plugin, without it the addon runs on its own (minimap button, world map button and the game Options). The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); the published versions are in [ref-0.5.172.md](release-notes/ref-0.5.172.md) and earlier notes. Other WoW editions are outside this project's scope.
 
 A separate, optional data-collection module, [Titan Gathered Discovery](#discovery-data-collection-module) 0.1.0, has its own version line and is released apart from this core; it is installed locally and awaits live acceptance.
 
@@ -112,6 +112,8 @@ The tool changes the old `TitanGathered2ForeverDB` assignment to `TitanGatheredF
 Right-click the minimap button (or the Titan Panel entry when Titan Panel is installed) for Display, Professions, Additional items, Icon appearance, Flight points, Trainers, vendors and other pins, Gathering map, History and sources, and Diagnostics settings. Data collection is always on: history, map spots, profession actions, production, PvP, rare loot and trainer and vendor windows are recorded whatever the settings say, and only disabling an addon in the AddOns list stops it. Settings only decide what is shown. Map spots are not recorded inside instances, but the statistics there are.
 
 My materials, the first tab of the main window (left click on the minimap button, `/tgf materials`), lists the materials of the installed professions that the character holds: bags, bank (the last snapshot) and total, with a scope choice (in bags or bank, or all catalogue materials), a group choice, search and sortable columns; a row shows the item tooltip. A second view, Learned professions, lists the skill of each profession. It is the same information as the list of the Titan Panel entry.
+
+Every list that names items shows the item's icon before the name (the recipe item or the trained spell in Unlearned recipes, the product in Crafting profit). Sorting and search use the name only.
 
 Without Titan Panel: the addon needs no other addon. The materials are in the My materials tab, the right-click menu of the minimap button is the same menu, and every setting is also in the game Options window. The panel entry is a LibDataBroker data source, so other panel displays that bring the library (ChocolateBar, Bazooka and similar) show it too. With the minimap button hidden and no panel display, the main window opens from Options (General > Main window) or `/tgf materials`.
 

@@ -92,4 +92,22 @@ test('without an inventory the list is empty instead of failing', function()
     ns.inventory = inventory
 end)
 
+test('list rows put the item icon before the name, with the border cropped', function()
+    local real = { IsPublic = function() return true end, ItemName = function(id) return 'Copper Ore' end }
+    C_Item = { GetItemIconByID = function(id) if id == 2770 then return 135232 end end,
+        GetItemInfo = function() return nil, nil, 1 end }
+    ITEM_QUALITY_COLORS = { [1] = { hex = '|cffffffff' } }
+    assert(loadfile('TitanGatheredForever/Style.lua'))('TitanGatheredForever', real)
+    local S = real.Style
+    eq(S.ItemIcon(2770), '|T135232:14:14:0:0:64:64:5:59:5:59|t ')
+    eq(S.ItemIcon(1), '')
+    eq(S.ItemIcon('x'), '')
+    assert(S.ItemLabel(2770):find('^|T135232:14:14:0:0:64:64:5:59:5:59|t |cffffffffCopper Ore'), S.ItemLabel(2770))
+    C_Spell = { GetSpellTexture = function() return 'Interface\\Icons\\Spell' end }
+    eq(S.SpellIcon(3273), '|TInterface\\Icons\\Spell:14:14:0:0:64:64:5:59:5:59|t ')
+    C_Spell = { GetSpellTexture = function() error('restricted') end }
+    eq(S.SpellIcon(3273), '')
+    C_Item, C_Spell, ITEM_QUALITY_COLORS = nil, nil, nil
+end)
+
 print('PASS ' .. passed .. ' my materials checks')

@@ -36,7 +36,7 @@ function Browser.Cells(row)
         count = n < Browser.THIN and Style.Text(Style.orange, label) or label
     end
     -- How many one craft makes, when it is not one: the profit is for the whole craft.
-    local name = Style.Text(paint, row.name)
+    local name = Style.ItemIcon(row.productID) .. Style.Text(paint, row.name)
     if product and product.quantity ~= 1 then
         name = name .. Style.Text(Style.gray, string.format(' x%s', product.quantity == math.floor(product.quantity)
             and product.quantity or string.format('%.1f', product.quantity)))

@@ -337,7 +337,7 @@ local function render(panel)
         line:SetShown(row ~= nil)
         local cell = line.cells
         if row and panel.view == 'materials' then
-            cell[1]:SetText(Style.ItemName(row.itemID))
+            cell[1]:SetText(Style.ItemLabel(row.itemID))
             local leading = row.leading and ns.Production.labels[row.leading]
             cell[2]:SetText(leading and Style.Value(leading) or Style.Label('Unknown'))
             cell[3]:SetText(type(row.share) == 'number' and Style.Value(string.format('%.1f%%', row.share)) or Style.Label('Unknown'))
@@ -350,7 +350,7 @@ local function render(panel)
                 cell[1]:SetText(row.gold and Style.Text(Style.gold, row.text) or row.text)
             else
                 cell[1]:SetPoint('RIGHT', line, 'RIGHT', -panel.nameRight, 0)
-                cell[1]:SetText(Style.ItemName(row.itemID))
+                cell[1]:SetText(Style.ItemLabel(row.itemID))
                 cell[2]:SetText(Style.Value(row.quantity))
                 cell[3]:SetText(Style.Value(string.format('%.1f%%', row.share)))
                 cell[4]:SetText(row.unit and ns.Economy.Coin(row.unit) or Style.Label('No price'))

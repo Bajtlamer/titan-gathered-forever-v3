@@ -59,7 +59,8 @@ local function line(tip, label, value)
 end
 local function percent(value) return string.format('%.1f%%', value * 100) end
 local function itemName(itemID)
-    return Style.ItemName and Style.ItemName(itemID) or Style.Value(ns.ItemName and ns.ItemName(itemID) or ('Item ' .. itemID))
+    local icon = Style.ItemIcon and Style.ItemIcon(itemID) or ''
+    return icon .. (Style.ItemName and Style.ItemName(itemID) or Style.Value(ns.ItemName and ns.ItemName(itemID) or ('Item ' .. itemID)))
 end
 local function plainItem(itemID)
     local name = ns.ItemName and ns.ItemName(itemID)

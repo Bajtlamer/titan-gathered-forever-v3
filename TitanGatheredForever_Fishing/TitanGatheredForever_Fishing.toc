@@ -1,7 +1,7 @@
 ## Interface: 16001
 ## Title: Titan Gathered Forever: Fishing
 ## Notes: Optional Fishing material catalogue for Titan Gathered Forever.
-## Version: 0.5.178
+## Version: 0.5.179
 ## IconTexture: Interface\AddOns\TitanGatheredForever_Fishing\Artwork\AddonIcon
 ## Dependencies: TitanGatheredForever
 

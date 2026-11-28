@@ -150,7 +150,7 @@ local function values(mode,row)
             row.matched,row.quantity,percent(row.bonusHits,row.bonusKnown),percent(row.multicraftHits,row.multicraftKnown)}
     elseif mode=='yield'then
         if row.summary then return {row.gold and ns.Style.Text and ns.Style.Text(ns.Style.gold,row.text)or row.text,'','','','',''}end
-        return {ns.Style.ItemName(row.itemID),row.quantity,string.format('%.1f%%',row.share),
+        return {ns.Style.ItemLabel(row.itemID),row.quantity,string.format('%.1f%%',row.share),
             row.unit and ns.Economy.Coin(row.unit)or'No price',row.value and ns.Economy.Coin(row.value)or'Unknown',row.source or''}
     elseif mode=='actions'then
         local began=ns.Style.Date(date and date('%Y-%m-%d %H:%M',row.began)or tostring(row.began))
@@ -161,9 +161,9 @@ local function values(mode,row)
             return {'',string.format('%.1f%%',rate.percent),string.format('%d / %d',rate.hits,rate.trials),rate.quantity,Reports.Source(rate)}
         elseif row.sources then
             local count=#row.sources
-            return {ns.Style.ItemName(row.itemID),'','',row.quantity,count..(count==1 and' source'or' sources')}
+            return {ns.Style.ItemLabel(row.itemID),'','',row.quantity,count..(count==1 and' source'or' sources')}
         end
-        return {ns.Style.ItemName(row.itemID),string.format('%.1f%%',row.percent),
+        return {ns.Style.ItemLabel(row.itemID),string.format('%.1f%%',row.percent),
             string.format('%d / %d',row.hits,row.trials),row.quantity,Reports.Source(row)}
     end
     if row.sourceRate then
@@ -171,7 +171,7 @@ local function values(mode,row)
         return {'','',Reports.Source(rate),string.format('%.1f%%',rate.percent),string.format('%d / %d',rate.hits,rate.trials)}
     end
     local count=#(row.sources or{})
-    return {ns.Style.ItemName(row.itemID),row.quantity+(row.crafted or 0),
+    return {ns.Style.ItemLabel(row.itemID),row.quantity+(row.crafted or 0),
         count>0 and(count..(count==1 and' source'or' sources'))or'Unknown','',''}
 end
 function Reports.ReagentDetails(owner,row)
