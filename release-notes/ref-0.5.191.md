@@ -1,6 +1,6 @@
-# Titan Gathered Forever 0.5.190
+# Titan Gathered Forever 0.5.191
 
-Update from 0.5.172. This text is the changelog for the website and the release page. Versions 0.5.173 to 0.5.189 were internal steps and are included here. New files were added and the manifests changed: fully restart WoW after updating, a reload is not enough.
+Update from 0.5.172. This text is the changelog for the website and the release page. Versions 0.5.173 to 0.5.190 were internal steps and are included here. New files were added and the manifests changed: fully restart WoW after updating, a reload is not enough.
 
 ## Added
 
@@ -21,7 +21,7 @@ Update from 0.5.172. This text is the changelog for the website and the release 
 
 ## Fixed
 
-- Escape after a click in a list that opened the world map closed the map and the list window together. The list window now steps aside while the map is open, so Escape closes the map only, and the list comes back with the same view, filters and scroll position. This holds for every list that opens the map (Journal, Unlearned recipes, Trainers, the sources of a material).
+- Escape after a click in a list that opened the world map closed the map and the list window together. Now Escape closes the map only. With the small map the list stays open beside it; with the full-screen map it steps aside and comes back with the same view, filters and scroll position when the map closes. This holds for every list that opens the map (Journal, Unlearned recipes, Trainers, the sources of a material).
 - A quest giver shown from Journal > Quests had a plain note icon on the map whatever the state of the quest. It now shows the mark of the quest that was clicked, as the list does: the yellow question mark when ready to turn in, the silver one in progress, a check when completed and a cross when abandoned; the pin tooltip says which.
 - The Reagent use tab of the main window showed the same estimate as Statistics > Materials in the professions window. The duplicate tab is removed; its columns are in Materials.
 - The search box of the professions Statistics ran past the right edge of the panel, over the profession buttons beside the window. It now stretches from the view combo box to the edge and fits any window width, and the three combo boxes are narrower to leave it room.

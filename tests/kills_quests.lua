@@ -203,7 +203,11 @@ local function installFrames()
             end
         end })
     end
-    _G.CreateFrame = function(_, _, _, template) local f = frame(template); f.TitleText = frame(); return f end
+    _G.CreateFrame = function(_, name, _, template)
+        local f = frame(template); f.TitleText = frame()
+        f.frameName = name; f.GetName = function(self) return self.frameName end
+        return f
+    end
     local tip = { lines = {} }
     function tip:SetOwner() self.lines = {} end
     function tip:AddLine(text) self.lines[#self.lines + 1] = text end
@@ -355,25 +359,39 @@ test('a quest of this character whose objectives are done is ready to turn in, w
     _G.C_QuestLog.ReadyForTurnIn = ready
 end)
 
-test('a list opens the map without closing itself: Escape closes the map and the same view comes back', function()
+test('a list opens the map so that Escape closes the map alone and the list stays or comes back', function()
     local ns = newNs()
     installFrames()
     loadViews(ns)
     ns.db.questIncome = { Realm = { ['Player-1-AAA'] = { [8] = { copper = 0, turnIns = 0, acceptedAt = 60, accepts = 1 } } } }
-    local hooks, opened = {}, {}
-    _G.WorldMapFrame = { shown = false, HookScript = function(self, event, fn) hooks[event] = fn end,
-        Show = function(self) self.shown = true end, SetMapID = function(self, id) opened[#opened + 1] = id end }
+    local hooks, opened, maximized = {}, {}, false
+    _G.WorldMapFrame = { HookScript = function(self, event, fn) hooks[event] = fn end, IsMaximized = function() return maximized end,
+        Show = function() end, SetMapID = function(self, id) opened[#opened + 1] = id end }
+    _G.UISpecialFrames = {}
     ns.Nav.Open('quests')
     local view = ns.Nav.views.journal
+    local name = view.window:GetName()
+    _G.UISpecialFrames = { 'OtherFrame', name }
+    local function escapable() for _, entry in ipairs(UISpecialFrames) do if entry == name then return true end end return false end
     ns.QuestsView.status = 'open'; view.Changed()
-    eq(view.window:IsShown(), true)
+    -- the small map: the list stays open beside it, out of the Escape list while the map is open
+    timers = {}
     ns.Nav.ShowMap(1429)
-    eq(opened[1], 1429)
-    eq(view.window:IsShown(), false)                                 -- out of the way: Escape closes the map only
-    hooks.OnHide()                                                   -- the map closes
-    eq(view.window:IsShown(), true); eq(view.mode, 'quests'); eq(ns.QuestsView.status, 'open')
-    hooks.OnHide()                                                   -- a later close of the map opens nothing
-    eq(ns.Nav.returnTo, nil)
+    eq(opened[1], 1429); eq(view.window:IsShown(), true); eq(escapable(), false)
+    hooks.OnHide()                                                   -- Escape closed the map
+    eq(escapable(), false)                                           -- not in the same keypress
+    eq(#timers, 1); timers[1]()
+    eq(escapable(), true); eq(view.window:IsShown(), true); eq(ns.QuestsView.status, 'open')
+    -- the full-screen map: the list steps aside and comes back one frame after the map closed
+    maximized, timers = true, {}
+    ns.Nav.ShowMap(1429)
+    eq(view.window:IsShown(), false); eq(escapable(), false)
+    hooks.OnHide()
+    eq(view.window:IsShown(), false)
+    timers[1]()
+    eq(view.window:IsShown(), true); eq(view.mode, 'quests'); eq(ns.QuestsView.status, 'open'); eq(escapable(), true)
+    -- a later close of the map opens nothing
+    hooks.OnHide(); eq(ns.Nav.returnTo, nil)
     ns.QuestsView.status = 'all'
     _G.WorldMapFrame = nil
 end)

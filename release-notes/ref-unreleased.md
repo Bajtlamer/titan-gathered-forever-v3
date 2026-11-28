@@ -2,6 +2,10 @@
 
 Updated 2026-11-28. Versions up to 0.5.172 are published in release-notes/ref-0.5.172.md. These changes describe source candidates since the latest published versioned notes.
 
+## Escape closes the map only, 0.5.191
+
+- Fixed: 0.5.190 reopened the list in the OnHide of the map, inside the same Escape, which then closed every window of UISpecialFrames, the reopened list included; and it hid the list also beside the small map. Nav.ShowMap now takes the list window out of UISpecialFrames while the map is open, hides it only when the map is maximized (WorldMapFrame:IsMaximized), and one frame after the map closed (C_Timer.After 0) puts it back into UISpecialFrames and reopens a hidden list.
+
 ## Map round trip, quest state pins and Turned in, 0.5.190
 
 - Fixed: Nav.ShowMap opens the world map for every list (ListWindow.ShowOnMap, Unlearned recipes, Trainers, NpcSources.ShowOnMap, the source menus of the reports). It hides the current tab window and reopens that tab from a WorldMapFrame OnHide hook, so Escape closes the map alone and the tab returns with its state; before, Escape closed the map and the list together.
