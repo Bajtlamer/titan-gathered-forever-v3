@@ -28,7 +28,7 @@ local function frame()
  function f:SetScript(k,fn)self.scripts[k]=fn end
  function f:SetText(v)self.text=v end
  function f:CreateFontString()return region()end
- function f:CreateTexture()local t={shown=true};for _,m in ipairs({'SetAllPoints','SetPoint','SetColorTexture','SetHeight'})do t[m]=function()end end;function t:Show()self.shown=true end;function t:Hide()self.shown=false end;return t end
+ function f:CreateTexture()local t={shown=true};for _,m in ipairs({'SetAllPoints','SetPoint','SetColorTexture','SetHeight','SetSize'})do t[m]=function()end end;function t:Show()self.shown=true end;function t:Hide()self.shown=false end;return t end
  function f:GetThumbTexture()return{SetSize=function()end}end
  function f:SetValue(v)self.value=v end
  function f:GetText()return self.text or ''end

@@ -300,6 +300,26 @@ function Nav.Dropdown(parent, x, y, width, options, get, set)
     return b
 end
 
+-- The divider of the game's Options window (the line under a page title) between the column headers and the rows: the Options_HorizontalDivider art at its own height, stretched to the width of the list. Without that art,
+-- a 1 px gold line at 55 %, the line under the list of the professions Statistics.
+Nav.DIVIDER_ATLAS = 'Options_HorizontalDivider'
+function Nav.Divider(parent, x, y, width)
+    local line = parent:CreateTexture(nil, 'ARTWORK')
+    local ok = line.SetAtlas and pcall(line.SetAtlas, line, Nav.DIVIDER_ATLAS, true)
+    if ok and (not line.GetAtlas or line:GetAtlas() == Nav.DIVIDER_ATLAS) then
+        local height = line.GetHeight and line:GetHeight()
+        if type(height) ~= 'number' or height <= 0 or height > 16 then height = 2 end
+        line:SetSize(width, height)
+        line:SetPoint('LEFT', parent, 'TOPLEFT', x, y)
+        line.atlas = true
+        return line
+    end
+    line:SetColorTexture(1, 0.82, 0, 0.55)
+    line:SetPoint('TOPLEFT', parent, 'TOPLEFT', x, y)
+    line:SetSize(width, 1)
+    return line
+end
+
 -- A vertical scroll bar. scrollTo(offset) receives the dragged position; wheel(delta) the mouse wheel over the bar.
 function Nav.Scrollbar(window, x, y, height, scrollTo, wheel)
     local slider = CreateFrame('Slider', nil, window)

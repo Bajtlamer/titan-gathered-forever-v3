@@ -202,7 +202,7 @@ function Browser.Show()
         for index = 1, ROWS do
             local line = CreateFrame('Button', nil, w)
             line:SetSize(ROW_WIDTH, ROW_HEIGHT)
-            line:SetPoint('TOPLEFT', w, 'TOPLEFT', 15, -132 - (index - 1) * ROW_HEIGHT)
+            line:SetPoint('TOPLEFT', w, 'TOPLEFT', 15, -140 - (index - 1) * ROW_HEIGHT)
             line.cells = {}
             for i, column in ipairs(columns) do line.cells[i] = text(line, 'GameFontHighlightSmall', column[2], 0, column[3]) end
             line:SetScript('OnClick', openMap)
@@ -223,7 +223,8 @@ function Browser.Show()
         -- Classic scrolling: the mouse wheel anywhere over the window, and a scroll bar on the right.
         w:EnableMouseWheel(true)
         w:SetScript('OnMouseWheel', function(_, delta) Browser.Scroll(-delta * WHEEL_STEP) end)
-        w.slider = ns.Nav.Scrollbar(w, 15 + ROW_WIDTH + 8, -132, ROWS * ROW_HEIGHT, function(value)
+        ns.Nav.Divider(w, 15, -125, ROW_WIDTH)  -- the line between the headers and the rows, as on every list tab
+        w.slider = ns.Nav.Scrollbar(w, 15 + ROW_WIDTH + 8, -140, ROWS * ROW_HEIGHT, function(value)
             Browser.ScrollTo(value)
         end, function(delta) Browser.Scroll(-delta * WHEEL_STEP) end)
         w.footer = text(w, 'GameFontNormalSmall', 15, -520, 930)

@@ -103,7 +103,7 @@ local layouts={
     yield={{'Item',0,420},{'Quantity',430,80},{'Share',520,70},{'Unit value',600,110},{'Total value',720,110},{'Best sale',840,90}},
 }
 local ACTIONS_NOTE='Fishing completion means a catch window; other completion means spell success. Stopped means no confirmed result; gaps are not reconstructed.'
-local contentTop,contentBottom=132,510
+local contentTop,contentBottom=140,510  -- the rows start below the line under the headers
 -- The Profession actions window has a second view that lists what was gathered and what it is worth.
 local function viewMode(window)
     return window.mode=='actions' and window.view and window.view~='summary' and 'yield' or window.mode
@@ -590,6 +590,7 @@ function Reports.Show(mode)
             end)
             row:SetScript('OnLeave',function()GameTooltip:Hide()end);w.rows[i]=row
         end
+        ns.Nav.Divider(w,15,-125,930)  -- the line between the headers and the rows, as on every list tab
         w.empty=text(w,'GameFontNormalSmall',15,-contentTop,930)
         w.rangeText=text(w,'GameFontNormalSmall',15,-525,930)
         w.slider=ns.Nav.Scrollbar(w,15+930+8,-contentTop,contentBottom-contentTop,function(value)Reports.ScrollTo(w,value)end,

@@ -1,6 +1,6 @@
-# Titan Gathered Forever 0.5.182
+# Titan Gathered Forever 0.5.188
 
-Update from 0.5.172. This text is the changelog for the website and the release page. Versions 0.5.173 to 0.5.181 were internal steps and are included here. New files were added and the manifests changed: fully restart WoW after updating, a reload is not enough.
+Update from 0.5.172. This text is the changelog for the website and the release page. Versions 0.5.173 to 0.5.187 were internal steps and are included here. New files were added and the manifests changed: fully restart WoW after updating, a reload is not enough.
 
 ## Added
 
@@ -14,6 +14,7 @@ Update from 0.5.172. This text is the changelog for the website and the release 
 ## Changed
 
 - Statistics > Materials has the leading profession of each material and its share of the use, both sortable. History and sources > Reagent use estimates in the menu opens it.
+- The list tabs of the main window have the divider of the game's Options window between the column headers and the rows: My materials, Unlearned recipes, Trainers, Lifetime materials, Observed chances, Crafting profit, PvP Board and Journal.
 - The main window has nine tabs: My materials is new and Reagent use is gone.
 - Without Titan Panel the addon no longer prints that Titan Panel is required.
 

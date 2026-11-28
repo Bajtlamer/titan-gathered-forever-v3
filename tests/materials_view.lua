@@ -26,6 +26,7 @@ local ns = {
     Nav = {},
     IsPublic = function() return true end,
 }
+assert(loadfile('TitanGatheredForever/Navigation.lua'))('TitanGatheredForever', ns)
 assert(loadfile('TitanGatheredForever/ListWindow.lua'))('TitanGatheredForever', ns)
 assert(loadfile('TitanGatheredForever/MaterialsView.lua'))('TitanGatheredForever', ns)
 local View = ns.MaterialsView
@@ -112,6 +113,29 @@ test('list rows put the item icon before the name, with the border cropped', fun
     eq(S.ProfessionIcon('Disenchanting'), S.ProfessionIcon('Enchanting'))
     eq(S.ProfessionIcon('Unknown'), '')
     C_Item, C_Spell, ITEM_QUALITY_COLORS = nil, nil, nil
+end)
+
+test('the tab draws the divider of the Options window between the headers and the rows', function()
+    eq(spec.divider, nil)   -- the line is drawn on every list tab unless a tab sets divider = false
+    local function texture(withAtlas, nativeHeight)
+        local t = { calls = {} }
+        if withAtlas then
+            function t:SetAtlas(name, useSize) self.atlasName, self.useSize = name, useSize end
+            function t:GetAtlas() return self.atlasName end
+            function t:GetHeight() return nativeHeight end
+        end
+        for _, m in ipairs({ 'SetPoint', 'SetSize', 'SetColorTexture' }) do t[m] = function(self, ...) self.calls[m] = { ... } end end
+        return t
+    end
+    -- the art keeps its own height (it was squeezed to a thick bar at 4 px in 0.5.183) and gets the list width
+    local art = ns.ListWindow.Divider({ CreateTexture = function() return texture(true, 3) end }, 15, -125, 910)
+    eq(art.atlasName, 'Options_HorizontalDivider'); eq(art.useSize, true)
+    eq(art.calls.SetSize[1], 910); eq(art.calls.SetSize[2], 3); eq(art.calls.SetPoint[5], -125)
+    eq(ns.ListWindow.Divider({ CreateTexture = function() return texture(true, 0) end }, 15, -125, 910).calls.SetSize[2], 2)
+    -- without the art: the 1 px gold line of the Statistics panel
+    local plain = ns.ListWindow.Divider({ CreateTexture = function() return texture(false) end }, 15, -125, 910)
+    local color = plain.calls.SetColorTexture
+    eq(color[1], 1); eq(color[2], 0.82); eq(color[4], 0.55); eq(plain.calls.SetSize[2], 1)
 end)
 
 print('PASS ' .. passed .. ' my materials checks')

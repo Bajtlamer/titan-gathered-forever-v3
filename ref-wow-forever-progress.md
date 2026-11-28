@@ -6,7 +6,19 @@ Updated 2026-11-20. Current continuation plan: [plans/plan-live-verification-and
 
 Candidate 0.5.167 (2026-11-27, released the same day): Kills and Quests became views of the Journal tab (nine tabs), the window and tab strip scale down to fit the screen, and the sort arrow no longer covers left-aligned number headers. Candidate 0.5.166 (same day, superseded): loot per creature, rare creatures, quest givers and rewards, map pins for quest givers and rare creatures, and the Journal tab (levels, deaths with the killer from the death recap, reputation). Candidate 0.5.165 (same day, superseded): Kills and Quests tabs. Kills are counted from PARTY_KILL (the combat log is restricted on Forever), quests from QUEST_ACCEPTED, QUEST_TURNED_IN and QUEST_REMOVED. Automated checks pass; live verification of the kill events, experience attribution and quest name loading is open.
 
-Candidate 0.5.182 (2026-11-28, source and local installation, not released): narrower Statistics combo boxes for a wider search box. Release notes prepared: release-notes/ref-0.5.182.md.
+Candidate 0.5.188 (2026-11-28, source and local installation, not released): the Options divider between headers and rows on every list tab (accepted on My materials).
+
+Candidate 0.5.187 (2026-11-28, source and local installation, not released): the My materials divider sits between the headers and the rows.
+
+Candidate 0.5.186 (2026-11-28, source and local installation, not released): the My materials divider is the Options window line at its own height.
+
+Candidate 0.5.185 (2026-11-28, source and local installation, not released): the gold line of My materials sits between the combo boxes and the headers.
+
+Candidate 0.5.184 (2026-11-28, source and local installation, not released): the line under the My materials headers is the thin gold line of Statistics, with more room around it.
+
+Candidate 0.5.183 (2026-11-28, source and local installation, not released): a golden divider under the headers of My materials, as a trial. Release notes moved on.
+
+Candidate 0.5.182 (2026-11-28, source and local installation, not released): narrower Statistics combo boxes for a wider search box. Release notes moved on.
 
 Candidate 0.5.181 (2026-11-28, source and local installation, not released): the Statistics search box stays inside the panel. Release notes moved on.
 

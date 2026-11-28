@@ -2,6 +2,30 @@
 
 Updated 2026-11-28. Versions up to 0.5.172 are published in release-notes/ref-0.5.172.md. These changes describe source candidates since the latest published versioned notes.
 
+## The Options divider on every list tab, 0.5.188
+
+- The owner accepted the look of 0.5.187. The line is Nav.Divider (moved from ListWindow): every ListWindow tab draws it unless its spec sets divider = false (Journal and My materials), and Unlearned recipes, Trainers and Crafting profit draw it at -125 with their rows, scroll bars and empty texts 8 px lower (-140); the reports (Lifetime materials, Observed chances, PvP Board) start their content at 140 instead of 132. The Crafting profit footer moves from -492 to -500 to stay clear of the last row. Economy keeps its banded table without the line.
+
+## The Options divider between the headers and the rows of My materials, 0.5.187 (trial)
+
+- The divider moves back between the column headers and the rows (centred at -125). The headers keep their original place under the combo boxes (-100) and the rows start 8 px lower (-140).
+
+## The Options window divider in My materials, 0.5.186 (trial)
+
+- The line between the combo boxes and the headers is the divider of the game's Options window (Options_HorizontalDivider) at the height of its art, stretched to the list width; 0.5.183 had forced it to 4 px, which made a thick bar. Without the art, the 1 px gold line of 0.5.185 stays.
+
+## Golden line between the combo boxes and the headers of My materials, 0.5.185 (trial)
+
+- The thin gold line moves up between the row of combo boxes and the column headers (at -97); on a tab with the line the headers and rows sit 6 px lower (headers -106, rows -138) instead of the rows 8 px lower.
+
+## Thin golden line under the headers of My materials, 0.5.184 (trial)
+
+- The divider of 0.5.183 (the Options window art) was a thick brown bar and sat on the rows. It is now the same line as under the list of the professions Statistics: 1 px of gold at 55 %, 12 px under the header text, and the rows start 8 px lower (at -140 instead of -132) on a tab with the line, with the scroll bar and the empty text moved alike.
+
+## Golden divider under the headers of My materials, 0.5.183 (trial)
+
+- ListWindow draws a thin golden line with depth between the column headers and the rows when a tab asks for it (spec.divider): the Options_HorizontalDivider art of the game's Options window, else a gold line over a dark shadow line. Only My materials uses it, as a trial before the other tabs. Release notes renamed to release-notes/ref-0.5.183.md.
+
 ## Narrower Statistics combo boxes, 0.5.182
 
 - The profession, character and view combo boxes of the professions Statistics are narrower (140, 140 and 128 px, 6 px apart instead of 164, 174 and 150), so the search box beside them is about 70 px wider. Release notes renamed to release-notes/ref-0.5.182.md.
