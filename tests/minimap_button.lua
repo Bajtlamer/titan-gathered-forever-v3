@@ -47,7 +47,9 @@ local function env(settings)
         AddDoubleLine = function(_, left, right) lines[#lines + 1] = left .. ' | ' .. right end,
         Hide = function() lines.shown = false end }
     local ns = { settings = settings or { showMinimapButton = true, minimapButtonAngle = 205 }, IsPublic = function() return true end,
-        Style = { gold = 'gold', gray = 'gray', Text = function(color, text) return '<' .. color .. '>' .. text .. '</>' end },
+        Style = { gold = 'gold', gray = 'gray', orange = 'orange', Text = function(color, text) return '<' .. color .. '>' .. text .. '</>' end,
+            Icon = function(texture) return '[' .. texture .. ']' end,
+            ProfessionIcon = function(id) return ({ Mining = '[mining]', Herbs = '[herbs]', Tailoring = '[tailoring]', Cooking = '[cooking]' })[id] or '' end },
         calls = { browser = 0 } }
     ns.Nav = { Toggle = function() ns.calls.browser = ns.calls.browser + 1 end }
     ns.Titan = { Menu = function(owner) ns.calls.menuOwner = owner end }
@@ -112,10 +114,12 @@ test('the tooltip shows the version, the installed modules with their state, Tit
     eq(lines[1], '<gold>Titan Gathered Forever</> | <ffffffff>v0.5.192</>')
     local text = table.concat(lines, '\n')
     -- the Auction house module keeps running when its Auction items group is hidden; a profession shows Switched off
-    assert(text:find('<ffffffff>Auction house</> | <gray>Active</>', 1, true), text)
-    assert(text:find('<ffffffff>Cooking</> | <gray>Disabled</>', 1, true), text)
-    assert(text:find('<ffffffff>Mining</> | <gray>Switched off</>', 1, true), text)
-    assert(text:find('<ffffffff>Discovery</><gray> v0.1.6</> | <gray>Active</>', 1, true), text)
+    -- every installed module has its icon and its version; the auction house and Discovery get a coin and a spyglass
+    assert(text:find('[Interface\\Icons\\INV_Misc_Coin_01]<ffffffff>Auction house</><gray> v0.5.192</> | <gray>Active</>', 1, true), text)
+    assert(text:find('[cooking]<ffffffff>Cooking</><gray> v0.5.192</> | <orange>Disabled</>', 1, true), text)
+    assert(text:find('[mining]<ffffffff>Mining</><gray> v0.5.192</> | <gray>Switched off</>', 1, true), text)
+    assert(text:find('[Interface\\Icons\\INV_Misc_Spyglass_02]<ffffffff>Discovery</><gray> v0.1.6</> | <gray>Active</>', 1, true), text)
+    assert(not text:find('another version', 1, true), 'all modules match the core')
     assert(not text:find('Bagnon', 1, true))
     local modules = ns.MinimapButton.Modules()
     eq(#modules, 4); eq(modules[4].label, 'Discovery')        -- by name, Discovery last
@@ -135,7 +139,7 @@ test('the modules of the collection that are not installed are listed last as No
         GetNumAddOns = function() return #addons end,
         GetAddOnInfo = function(index) return addons[index][1], addons[index][2] end,
         IsAddOnLoaded = function() return true end,
-        GetAddOnMetadata = function() return '0.6.0' end,
+        GetAddOnMetadata = function(name) return name == 'TitanGatheredForever_Mining' and '0.5.193' or '0.6.0' end,
     }
     ns.KnownModules = {
         { folder = 'TitanGatheredForever_AuctionItems', id = 'Auction', label = 'Auction house' },
@@ -153,8 +157,13 @@ test('the modules of the collection that are not installed are listed last as No
     local button = ns.MinimapButton.button
     button.scripts.OnEnter(button)
     local text = table.concat(lines, '\n')
-    assert(text:find('<gray>Tailoring</> | <gray>Not installed</>', 1, true), text)
-    assert(text:find('<ffffffff>Herbalism</> | <gray>Switched off</>', 1, true), text)
+    assert(text:find('[tailoring]<gray>Tailoring</> | <gray>Not installed</>', 1, true), text)
+    assert(text:find('[herbs]<ffffffff>Herbalism</><gray> v0.6.0</> | <gray>Switched off</>', 1, true), text)
+    -- a module of another version than the core is shown in orange, with a line saying to update it
+    assert(text:find('[mining]<ffffffff>Mining</><orange> v0.5.193</> | <green>Active</>', 1, true)
+        or text:find('[mining]<ffffffff>Mining</><orange> v0.5.193</> | <gray>Active</>', 1, true), text)
+    assert(text:find('another version than the core: update it', 1, true), text)
+    assert(text:find('[Interface\\Icons\\INV_Misc_Spyglass_02]<gray>Discovery</> | <gray>Not installed</>', 1, true), text)
     assert(text:find('Modules not installed: CurseForge or titan-gathered.com', 1, true), text)
     C_AddOns = nil
 end)

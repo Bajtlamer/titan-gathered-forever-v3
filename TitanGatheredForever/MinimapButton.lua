@@ -14,9 +14,10 @@ Button.HINTS = {
 
 -- The modules of the collection, from the game's addon list: each installed module with its state, Active (loaded and
 -- switched on), Switched off (loaded, hidden in the TGF settings) or Disabled (off in the AddOns list), and every module
--- of the collection that is not in the list as Not installed (ns.KnownModules, generated with the catalogue). Discovery
--- has its own version line, so its version is shown.
+-- of the collection that is not in the list as Not installed (ns.KnownModules, generated with the catalogue). Every
+-- installed module shows its version; Discovery has its own version line, the others share the core's.
 local PREFIX = 'TitanGatheredForever_'
+local FOLDER_IDS = { AuctionItems = 'Auction', Herbalism = 'Herbs' }   -- when the generated list is missing
 function Button.Modules()
     local api = C_AddOns
     if not api or not api.GetNumAddOns or not api.GetAddOnInfo then return {} end
@@ -34,7 +35,7 @@ function Button.Modules()
             local label = type(title) == 'string' and title:gsub('|c%x%x%x%x%x%x%x%x', ''):gsub('|r', '') or suffix
             label = label:gsub('^Titan Gathered Forever: ', ''):gsub('^Titan Gathered ', '')
             -- the settings key of the module (Herbs for the Herbalism folder), from the generated list
-            local row = { name = name, id = module and module.id or suffix, label = label, discovery = suffix == 'Discovery' }
+            local row = { name = name, id = module and module.id or FOLDER_IDS[suffix] or suffix, label = label, discovery = suffix == 'Discovery' }
             local okLoaded, isLoaded = false, nil
             if loaded then okLoaded, isLoaded = pcall(loaded, name) end
             if not okLoaded or isLoaded ~= true then row.state = 'disabled'
@@ -42,7 +43,7 @@ function Button.Modules()
             elseif not row.discovery and row.id ~= 'Auction' and ns.settings and type(ns.settings.categories) == 'table'
                 and ns.settings.categories[row.id] == false then row.state = 'off'
             else row.state = 'active' end
-            if row.discovery and api.GetAddOnMetadata then
+            if api.GetAddOnMetadata then
                 local okVersion, version = pcall(api.GetAddOnMetadata, name, 'Version')
                 if okVersion and type(version) == 'string' then row.version = version end
             end
@@ -64,6 +65,15 @@ function Button.Modules()
     return rows
 end
 
+-- The modules that are not professions get a game icon of their own: a coin for the auction house, a spyglass for Discovery.
+Button.MODULE_ICONS = { Auction = 'Interface\\Icons\\INV_Misc_Coin_01', Discovery = 'Interface\\Icons\\INV_Misc_Spyglass_02' }
+function Button.Icon(id)
+    local Style = ns.Style
+    local icon = Style.ProfessionIcon and Style.ProfessionIcon(id) or ''
+    if icon == '' and Button.MODULE_ICONS[id] and Style.Icon then icon = Style.Icon(Button.MODULE_ICONS[id]) end
+    return icon
+end
+
 local STATES = { active = { 'Active', 'green' }, off = { 'Switched off', 'gray' }, disabled = { 'Disabled', 'orange' },
     missing = { 'Not installed', 'gray' } }
 
@@ -82,16 +92,21 @@ function Button.Tooltip(tip)
     tip:AddLine(' ')
     tip:AddLine(Style.Text(Style.gold, 'Modules'))
     if #modules == 0 then tip:AddLine(Style.Text(Style.gray, 'No profession module installed.')) end
-    local missing = false
+    local missing, outdated = false, false
     for _, row in ipairs(modules) do
         local state = STATES[row.state]
-        local icon = Style.ProfessionIcon and Style.ProfessionIcon(row.id) or ''
+        local icon = Button.Icon(row.id)
         -- a module that is not installed is named in gray, so the installed ones stand out
         local color = row.state == 'missing' and Style.gray or (Style.white or 'ffffffff')
-        local label = icon .. Style.Text(color, row.label) .. (row.version and Style.Text(Style.gray, ' v' .. row.version) or '')
+        -- a profession or auction module of another version than the core is shown in orange: update it
+        local stale = row.version and not row.discovery and version ~= '' and row.version ~= version
+        local label = icon .. Style.Text(color, row.label)
+            .. (row.version and Style.Text(stale and (Style.orange or Style.gray) or Style.gray, ' v' .. row.version) or '')
+        outdated = outdated or stale
         tip:AddDoubleLine(label, Style.Text(Style[state[2]] or Style.gray, state[1]))
         missing = missing or row.state == 'missing'
     end
+    if outdated then tip:AddLine(Style.Text(Style.orange or Style.gray, 'A module in orange is of another version than the core: update it.')) end
     if missing then tip:AddLine(Style.Text(Style.gray, 'Modules not installed: CurseForge or titan-gathered.com')) end
     local panel = ns.Titan and ns.Titan.PanelState and ns.Titan.PanelState() or 'missing'
     local panelStates = { active = { 'Active', 'green' }, disabled = { 'Disabled', 'orange' }, missing = { 'Not installed', 'gray' } }
