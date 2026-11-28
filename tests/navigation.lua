@@ -70,7 +70,7 @@ test('tabs use the classic panel tab template and select the active tab', functi
     ns.RecipeBrowser, ns.Reports = nil, nil
     local window = frame()
     ns.Nav.Tabs(window, 'chances')
-    eq(numTabs, #ns.Nav.tabs); eq(selected, 4); eq(window.tabButtons.pvp.template, 'PanelTabButtonTemplate')
+    eq(numTabs, #ns.Nav.tabs); eq(selected, 5); eq(ns.Nav.tabs[1].id, 'materials'); eq(window.tabButtons.pvp.template, 'PanelTabButtonTemplate')
     eq(#window.Tabs, #ns.Nav.tabs); eq(window.Tabs[2].calls.SetID[1], 2)
     eq(window.tabButtons.economy.text, 'Economy')
     eq(window.tabButtons.production, nil)

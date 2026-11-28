@@ -204,11 +204,11 @@ end)
 test('the General page says where the material list is, with and without Titan Panel', function()
     ns.Titan.broker = nil
     ns.settings.showMinimapButton = true
-    assert(Options.ButtonNote().text:find('No Titan Panel is installed', 1, true))
+    assert(Options.ButtonNote().text:find('My materials tab', 1, true))
     ns.settings.showMinimapButton = false
-    assert(Options.ButtonNote().text:find('material list is not shown', 1, true))
+    assert(Options.ButtonNote().text:find('/tgf materials', 1, true))
     ns.Titan.broker = {}
-    assert(Options.ButtonNote().text:find('or the Titan Panel entry', 1, true))
+    assert(Options.ButtonNote().text:find('Titan Panel entry', 1, true))
     ns.Titan.broker, ns.settings.showMinimapButton = nil, true
 end)
 

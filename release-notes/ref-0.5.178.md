@@ -1,10 +1,11 @@
-# Titan Gathered Forever 0.5.177
+# Titan Gathered Forever 0.5.178
 
-Update from 0.5.172. This text is the changelog for the website and the release page. Versions 0.5.173 to 0.5.176 were internal steps and are included here. New files were added and the manifests changed: fully restart WoW after updating, a reload is not enough.
+Update from 0.5.172. This text is the changelog for the website and the release page. Versions 0.5.173 to 0.5.177 were internal steps and are included here. New files were added and the manifests changed: fully restart WoW after updating, a reload is not enough.
 
 ## Added
 
-- **Works without Titan Panel.** Titan Panel is now optional. With it, Titan Gathered Forever is a Titan Panel plugin as before. Without it, the addon runs on its own: pointing at the minimap button shows the material list (the mouse wheel turns its pages), the right click menu of the minimap button is the same menu as on the Titan Panel entry, the world map button keeps the map options, and every setting is in the game Options window. Other panel displays of the LibDataBroker library (ChocolateBar, Bazooka and similar) show the entry too. The profession modules need only the core.
+- **My materials tab.** The first tab of the main window lists the materials of your installed professions that the character holds, with bags, bank and total, a scope choice (in bags or bank, or all catalogue materials), a group choice, search and sortable columns; hover a row for the item tooltip. A second view lists the learned professions with their skill. It is the same information as the list of the Titan Panel entry, as one scrolling list without pages. A left click on the minimap button opens it, and `/tgf materials`.
+- **Works without Titan Panel.** Titan Panel is now optional. With it, Titan Gathered Forever is a Titan Panel plugin as before. Without it, the addon runs on its own: your materials are in the new My materials tab, the right click menu of the minimap button is the same menu as on the Titan Panel entry, the world map button keeps the map options, and every setting is in the game Options window. Other panel displays of the LibDataBroker library (ChocolateBar, Bazooka and similar) show the entry too. The profession modules need only the core.
 - **Settings in the game Options window.** Esc > Options > AddOns > Titan Gathered lists the settings on pages: General, Material list, Professions, Map pins, Gathering spots, Map materials, Travel routes, Auction house, Diagnostics and Backup. A change there is the same change as in the right click menu, which now starts with Options...; `/tgf settings` opens the page.
 - **Backup page.** It shows the folder and the file that hold all your data (statistics, map spots, journal and the settings of every character of the account) in a box to copy, with the steps to move it to another computer or keep a backup. All settings can also be exported as one text and imported on another account; the text is only read as values and a checksum refuses an incomplete copy.
 - **Search in Statistics.** Attempts and Materials in the professions Statistics have a search box (Escape clears it).
@@ -12,7 +13,7 @@ Update from 0.5.172. This text is the changelog for the website and the release 
 ## Changed
 
 - Statistics > Materials has the leading profession of each material and its share of the use, both sortable. History and sources > Reagent use estimates in the menu opens it.
-- The main window has eight tabs, which leaves room for later ones.
+- The main window has nine tabs: My materials is new and Reagent use is gone.
 - Without Titan Panel the addon no longer prints that Titan Panel is required.
 
 ## Fixed

@@ -8,6 +8,7 @@ ns.Nav = Nav
 Nav.WIDTH, Nav.HEIGHT = 985, 592
 Nav.TAB_Y = -558
 Nav.tabs = {
+    { id = 'materials', label = 'My materials' },
     { id = 'recipes', label = 'Unlearned recipes' },
     { id = 'trainers', label = 'Trainers' },
     { id = 'history', label = 'Lifetime materials' },
@@ -53,7 +54,7 @@ end
 -- Opens the last used tab, or closes the window when one is already open (the minimap button).
 function Nav.Toggle()
     local id, window = Nav.Current()
-    if id then window:Hide() else Nav.Open(Nav.last or 'recipes') end
+    if id then window:Hide() else Nav.Open(Nav.last or 'materials') end
 end
 
 -- Window positions are kept in the saved variables (windowPositions), one per window or group of windows, so a

@@ -159,16 +159,16 @@ end
 
 -- Moving everything to another computer, and the settings alone as one text. A text box holds what was exported or
 -- pasted; Import replaces the settings and asks for a reload, after which every module reads them again.
--- Without a panel entry (no Titan Panel or other data broker display) the minimap button is the only place of the
--- material list; hiding it is allowed, and this says what that means.
+-- Where the materials are: the My materials tab always, and the Titan Panel entry when a panel display exists. With
+-- no panel and the minimap button hidden, this says how the main window still opens.
 function Options.ButtonNote()
     if ns.Titan and ns.Titan.broker then
-        return note('Pointing at the minimap button or the Titan Panel entry shows the material list.')
+        return note('Your materials are in the My materials tab of the main window and in the list of the Titan Panel entry.')
     end
     if ns.settings.showMinimapButton == false then
-        return note('No Titan Panel (or other panel display) is installed, so with the minimap button hidden the material list is not shown. These Options and /tgf still work.')
+        return note('No Titan Panel (or other panel display) is installed and the minimap button is hidden: open the main window with the Main window button below or /tgf materials.')
     end
-    return note('No Titan Panel is installed: pointing at the minimap button shows the material list.')
+    return note('Your materials are in the My materials tab of the main window (left click on the minimap button).')
 end
 
 local function backupRows(page)
@@ -224,7 +224,7 @@ Options.PAGES = {
             end),
             button('Icon appearance...', opener(function() ns.IconConfig.Show() end)),
             header('Windows'),
-            button('Main window', opener(function() ns.Nav.Open(ns.Nav.last or 'recipes') end)),
+            button('Main window', opener(function() ns.Nav.Open(ns.Nav.last or 'materials') end)),
             button('Profession statistics', opener(function() ns.ProfessionStats.Open() end)),
             button('Journal', opener(function() ns.Nav.Open('journal') end)),
             button('Export statistics', opener(function() ns.ExportView.Show() end)),
@@ -232,7 +232,7 @@ Options.PAGES = {
     end },
     { id = 'titan', name = 'Material list', rows = function()
         return {
-            note('The list shown when you point at the minimap button or the Titan Panel entry, and what item tooltips add.'),
+            note('The list shown when you point at the Titan Panel entry, and what item tooltips add. The My materials tab of the main window lists the same materials.'),
             header('Material list'),
             listSetting(ns.L.showZero, 'showZero'),
             check('Show bank counts', function() return ns.settings.showBank == true end, function(value)

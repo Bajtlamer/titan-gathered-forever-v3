@@ -7,8 +7,9 @@ ns.MinimapButton = Button
 local DEFAULT_ANGLE, OFFSET = 205, 22
 
 Button.HINTS = {
-    'Left click: recipes and statistics. Right click: settings menu.',
-    'Drag: move around the minimap. Mouse wheel: next page.',
+    'Left click: your materials, recipes and statistics',
+    'Right click: settings menu',
+    'Drag: move around the minimap',
 }
 
 function Button.Position(angle, width, height)
@@ -69,24 +70,13 @@ function Button.Attach()
     button:SetScript('OnClick', function(self, which)
         if which == 'RightButton' then ns.Titan.Menu(self) else ns.Nav.Toggle() end
     end)
-    -- Pointing at the button shows the material list, as the panel entry does, so it works without Titan Panel.
     button:SetScript('OnEnter', function(self)
-        if ns.Titan and ns.Titan.Show and ns.inventory then ns.Titan.Show(self, 'ANCHOR_LEFT', Button.HINTS); return end
         GameTooltip:SetOwner(self, 'ANCHOR_LEFT')
         GameTooltip:AddLine(ns.Style.Text(ns.Style.gold, 'Titan Gathered Forever'))
         for _, hint in ipairs(Button.HINTS) do GameTooltip:AddLine(ns.Style.Text(ns.Style.gray, hint)) end
         GameTooltip:Show()
     end)
-    button:SetScript('OnLeave', function()
-        if ns.Titan and ns.Titan.Hide then ns.Titan.Hide() end
-        GameTooltip:Hide()
-    end)
-    if button.EnableMouseWheel then button:EnableMouseWheel(true) end
-    button:SetScript('OnMouseWheel', function(self, delta)
-        if not (ns.Titan and ns.Titan.owner == self) then return end
-        ns.Titan.page = math.max(1, (ns.Titan.page or 1) - delta)
-        ns.Titan.Show(self, 'ANCHOR_LEFT', Button.HINTS)
-    end)
+    button:SetScript('OnLeave', function() GameTooltip:Hide() end)
     button:SetScript('OnDragStart', function(self)
         self:SetScript('OnUpdate', function()
             local centerX, centerY = Minimap:GetCenter()

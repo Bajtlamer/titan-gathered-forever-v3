@@ -2,6 +2,10 @@
 
 Updated 2026-11-28. Versions up to 0.5.172 are published in release-notes/ref-0.5.172.md. These changes describe source candidates since the latest published versioned notes.
 
+## My materials tab, 0.5.178
+
+- New first tab of the main window, My materials (MaterialsView.lua, a ListWindow): the catalogue materials the character holds with bags, bank snapshot and total, a scope combo box (in bags or bank, or all catalogue materials), a group combo box, search, sortable columns and the item tooltip on hover; the footer sums the items and says how old the bank snapshot is. A second view, Learned professions, lists skill, share of the rank and primary or secondary. It refreshes with the bags. The minimap button is back to its short help on hover (the material list there, added in 0.5.177, is removed) and its left click opens My materials the first time; `/tgf materials` opens it. The Titan Panel entry keeps its list. Release notes renamed to release-notes/ref-0.5.178.md.
+
 ## Titan Panel optional and smaller Options text, 0.5.177 (Discovery 0.1.6)
 
 - Titan Panel is optional: the core manifest has OptionalDeps: Titan instead of Dependencies, and the thirteen modules and Discovery depend on the core only. Without a LibDataBroker display the panel entry is not created and nothing is printed (the old "requires Titan Panel" line is gone); the minimap button shows the material list when pointed at (the mouse wheel turns its pages, the hints are its footer), and its right click menu, the world map button and the Options window carry every setting. Any LibDataBroker display (Titan Panel, ChocolateBar, Bazooka) shows the entry. The General Options page says where the list is, also when the minimap button is hidden without a panel display. The Options page Titan Panel list is renamed Material list.
