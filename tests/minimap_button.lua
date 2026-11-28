@@ -115,14 +115,14 @@ test('the tooltip shows the version, the installed modules with their state, Tit
     local text = table.concat(lines, '\n')
     -- the Auction house module keeps running when its Auction items group is hidden; a profession shows Switched off
     -- every module has its icon (a coin and a spyglass for the auction house and Discovery); only Discovery shows a version
-    assert(text:find('[Interface\\Icons\\INV_Misc_Coin_01]<ffffffff>Auction house</> | <gray>Active</>', 1, true), text)
-    assert(text:find('[cooking]<ffffffff>Cooking</> | <orange>Disabled</>', 1, true), text)
-    assert(text:find('[mining]<ffffffff>Mining</> | <gray>Switched off</>', 1, true), text)
-    assert(text:find('[Interface\\Icons\\INV_Misc_Spyglass_02]<ffffffff>Discovery</><gray> v0.1.6</> | <gray>Active</>', 1, true), text)
+    assert(text:find('[Interface\\Icons\\INV_Misc_Coin_01]<ffffffff>Gathered Forever: Auction house</> | <gray>Active</>', 1, true), text)
+    assert(text:find('[cooking]<ffffffff>Gathered Forever: Cooking</> | <orange>Disabled</>', 1, true), text)
+    assert(text:find('[mining]<ffffffff>Gathered Forever: Mining</> | <gray>Switched off</>', 1, true), text)
+    assert(text:find('[Interface\\Icons\\INV_Misc_Spyglass_02]<ffffffff>Gathered Discovery</><gray> v0.1.6</> | <gray>Active</>', 1, true), text)
     assert(not text:find('another version', 1, true), 'all modules match the core')
     assert(not text:find('Bagnon', 1, true))
     local modules = ns.MinimapButton.Modules()
-    eq(#modules, 4); eq(modules[4].label, 'Discovery')        -- by name, Discovery last
+    eq(#modules, 4); eq(modules[4].label, 'Gathered Discovery')        -- by name, Discovery last
     assert(text:find('Titan Panel</> | <gray>Not installed</>', 1, true), text)
     assert(text:find('Left click', 1, true) and text:find('Right click', 1, true) and text:find('Drag', 1, true))
     button.scripts.OnLeave(button); eq(lines.shown, false)
@@ -153,18 +153,18 @@ test('the modules of the collection that are not installed are listed last as No
     local modules = ns.MinimapButton.Modules()
     local order = {}
     for _, row in ipairs(modules) do order[#order + 1] = row.label .. '=' .. row.state end
-    eq(table.concat(order, ','), 'Herbalism=off,Mining=active,Auction house=missing,Tailoring=missing,Discovery=missing')
+    eq(table.concat(order, ','), 'Gathered Forever: Herbalism=off,Gathered Forever: Mining=active,Gathered Forever: Auction house=missing,Gathered Forever: Tailoring=missing,Gathered Discovery=missing')
     ns.MinimapButton.Attach()
     local button = ns.MinimapButton.button
     button.scripts.OnEnter(button)
     local text = table.concat(lines, '\n')
-    assert(text:find('[tailoring]<gray>Tailoring</> | <red>Not installed</>', 1, true), text)
-    assert(text:find('[herbs]<ffffffff>Herbalism</> | <gray>Switched off</>', 1, true), text)
+    assert(text:find('[tailoring]<gray>Gathered Forever: Tailoring</> | <red>Not installed</>', 1, true), text)
+    assert(text:find('[herbs]<ffffffff>Gathered Forever: Herbalism</> | <gray>Switched off</>', 1, true), text)
     -- a module of another version than the core is shown in orange, with a line saying to update it
-    assert(text:find('[mining]<ffffffff>Mining</><orange> v0.5.193</> | <green>Active</>', 1, true)
-        or text:find('[mining]<ffffffff>Mining</><orange> v0.5.193</> | <gray>Active</>', 1, true), text)
+    assert(text:find('[mining]<ffffffff>Gathered Forever: Mining</><orange> v0.5.193</> | <green>Active</>', 1, true)
+        or text:find('[mining]<ffffffff>Gathered Forever: Mining</><orange> v0.5.193</> | <gray>Active</>', 1, true), text)
     assert(text:find('another version than the core: update it', 1, true), text)
-    assert(text:find('[Interface\\Icons\\INV_Misc_Spyglass_02]<gray>Discovery</> | <red>Not installed</>', 1, true), text)
+    assert(text:find('[Interface\\Icons\\INV_Misc_Spyglass_02]<gray>Gathered Discovery</> | <red>Not installed</>', 1, true), text)
     assert(text:find('Modules not installed: CurseForge or titan-gathered.com', 1, true), text)
     -- the list ends with Titan Panel, then the divider, then the notes and the click hints
     local function at(needle) for i, line in ipairs(lines) do if line:find(needle, 1, true) then return i end end end
