@@ -4,5 +4,7 @@
 ## Version: 0.6.0
 ## IconTexture: Interface\AddOns\TitanGatheredForever_Tailoring\Artwork\AddonIcon
 ## Dependencies: TitanGatheredForever
+## Category: Professions
+## Group: TitanGatheredForever
 
 Data.lua

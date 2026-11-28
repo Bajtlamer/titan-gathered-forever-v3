@@ -28,6 +28,7 @@ class BrandingTests(unittest.TestCase):
         self.assertIn('## SavedVariables: TitanGatheredForeverV3DB\n', toc)
         self.assertIn('## OptionalDeps: Titan\n', toc)
         self.assertNotIn('## Dependencies:', toc)
+        self.assertIn('## Category: Professions\n', toc)        # the AddOns list section of the whole family
         modules = json.loads((ROOT / 'catalogue/modules.json').read_text())
         self.assertEqual(len(modules), 13)
         for module in modules:
@@ -37,6 +38,8 @@ class BrandingTests(unittest.TestCase):
             self.assertIn('## Dependencies: ' + NAME + '\n', manifest)
             self.assertNotIn('Titan,', manifest)
             self.assertIn('## Title: ' + TITLE + ': ', manifest)
+            # every module folds under the core in the AddOns list
+            self.assertIn('## Category: Professions\n## Group: ' + NAME + '\n', manifest)
 
     def test_runtime_has_no_old_brand(self):
         old = 'Titan' + 'Gathered2'

@@ -458,7 +458,8 @@ def generate(root, check=False):
             f'## Notes: {extra.get("notes", "Optional " + module["label"] + " material catalogue for Titan Gathered Forever.")}\n'
             f'## Version: {VERSION}\n'
             f'## IconTexture: Interface\\AddOns\\{folder}\\Artwork\\AddonIcon\n'
-            '## Dependencies: TitanGatheredForever\n\nData.lua\n' + ''.join(f + '\n' for f in extra.get('files', [])))
+            # Category and Group fold every module under the core in the AddOns list, in its Professions section
+            '## Dependencies: TitanGatheredForever\n## Category: Professions\n## Group: TitanGatheredForever\n\nData.lua\n' + ''.join(f + '\n' for f in extra.get('files', [])))
         module_index.append({key: module[key] for key in ['id', 'label', 'kind', 'folder']} |
                             {'itemCount': len(module['items']), 'recipeCount': len(module['recipes']),
                              'bookCount': len(module.get('book', {}))})

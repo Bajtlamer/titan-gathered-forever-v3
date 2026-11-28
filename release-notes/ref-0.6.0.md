@@ -19,6 +19,8 @@ Version 0.6.0 is a milestone. Titan Gathered Forever no longer needs Titan Panel
 - The minimap button tooltip also lists the modules of the collection that are not installed, named in gray with a red Not installed, after the installed ones, with a line saying where to get them (CurseForge or titan-gathered.com).
 - A module of another version than the core shows its version in orange, with a line saying to update it, so an old module beside a new core stands out. Matching modules show no version, because they are released with the core; Discovery shows its version in its own window title.
 
+- In the AddOns list the modules fold under Titan Gathered Forever, and the whole family sits in the Professions section, like other addons with modules.
+
 ## Fixed
 
 - The minimap button tooltip showed the Auction module as Switched off when the Auction items group was hidden in the material list, although the module kept running. Hiding the group now only hides the group.

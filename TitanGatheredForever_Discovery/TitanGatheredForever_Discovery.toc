@@ -6,6 +6,8 @@
 ## Author: Titan Gathered Forever contributors
 ## Dependencies: TitanGatheredForever
 ## OptionalDeps: Titan
+## Category: Professions
+## Group: TitanGatheredForever
 ## SavedVariables: TitanGatheredForeverDiscoveryDB
 
 Core/Text.lua

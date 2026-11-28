@@ -5,6 +5,7 @@
 ## IconTexture: Interface\AddOns\TitanGatheredForever\Artwork\AddonIcon
 ## Author: Titan Gathered Forever contributors
 ## OptionalDeps: Titan
+## Category: Professions
 ## SavedVariables: TitanGatheredForeverV3DB
 
 Localization/enUS.lua
