@@ -23,6 +23,7 @@ Version 0.6.0 is a milestone. Titan Gathered Forever no longer needs Titan Panel
 
 - The minimap button tooltip showed the Auction module as Switched off when the Auction items group was hidden in the material list, although the module kept running. Hiding the group now only hides the group.
 - The minimap button tooltip never showed Herbalism as Switched off when it was hidden in the settings, because the folder name (Herbalism) differs from its settings key (Herbs).
+- The Auction house and Discovery lines of the minimap button tooltip had no icon; they now show a coin and a spyglass.
 
 ## Upgrading
 
