@@ -73,9 +73,10 @@ function Button.Tooltip(tip)
         local label = icon .. Style.Text(Style.white or 'ffffffff', row.label) .. (row.version and Style.Text(Style.gray, ' v' .. row.version) or '')
         tip:AddDoubleLine(label, Style.Text(Style[state[2]] or Style.gray, state[1]))
     end
-    local panel = ns.Titan and ns.Titan.broker
-    tip:AddDoubleLine(Style.Text(Style.gold, 'Titan Panel'),
-        Style.Text(panel and (Style.green or Style.gray) or Style.gray, panel and 'Plugin active' or 'Not installed'))
+    local panel = ns.Titan and ns.Titan.PanelState and ns.Titan.PanelState() or 'missing'
+    local panelStates = { active = { 'Active', 'green' }, disabled = { 'Disabled', 'orange' }, missing = { 'Not installed', 'gray' } }
+    local shown = panelStates[panel] or panelStates.missing
+    tip:AddDoubleLine(Style.Text(Style.gold, 'Titan Panel'), Style.Text(Style[shown[2]] or Style.gray, shown[1]))
     tip:AddLine(' ')
     for _, hint in ipairs(Button.HINTS) do tip:AddLine(Style.Text(Style.gray, hint)) end
 end

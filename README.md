@@ -8,7 +8,7 @@ Website: [titan-gathered.com](https://www.titan-gathered.com/).
 
 ## Current version
 
-The current stable candidate is version `0.5.192` and targets **WoW Forever 1.60.1, interface 16001**. Titan Panel is optional: with it the addon is a Titan Panel plugin, without it the addon runs on its own (minimap button, world map button and the game Options). The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); the published versions are in [ref-0.5.172.md](release-notes/ref-0.5.172.md) and earlier notes. Other WoW editions are outside this project's scope.
+The current stable candidate is version `0.5.193` and targets **WoW Forever 1.60.1, interface 16001**. Titan Panel is optional: with it the addon is a Titan Panel plugin, without it the addon runs on its own (minimap button, world map button and the game Options). The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); the published versions are in [ref-0.5.172.md](release-notes/ref-0.5.172.md) and earlier notes. Other WoW editions are outside this project's scope.
 
 A separate, optional data-collection module, [Titan Gathered Discovery](#discovery-data-collection-module) 0.1.0, has its own version line and is released apart from this core; it is installed locally and awaits live acceptance.
 
@@ -121,7 +121,7 @@ The same settings are in the game Options window (Esc > Options > AddOns > Titan
 
 Everything that needs no parameter is in the right-click menu of the minimap button or the Titan Panel entry (called the Titan menu below):
 
-- Display: Show minimap button, Next summary page and Previous summary page. The round minimap button shows the version, the installed modules with their state (Active, Switched off, Disabled) and the Titan Panel plugin when pointed at, opens the main window with a left click (My materials the first time) and the menu with a right click, and can be dragged around the minimap edge.
+- Display: Show minimap button, Next summary page and Previous summary page. The round minimap button shows the version, the installed modules with their state (Active, Switched off, Disabled) and whether Titan Panel is active, disabled or not installed when pointed at, opens the main window with a left click (My materials the first time) and the menu with a right click, and can be dragged around the minimap edge.
 - Icon appearance: the small icon appearance window.
 - Trainers, vendors and other pins: map toggles (including quest givers and rare creatures), profession filter, Unlearned recipes, Trainers (list of trainers), and Pin placement (find the nearest pin, swap map axes if pins look mirrored).
 - History and sources: Lifetime materials, Observed chances, Profession statistics, Economy, Kills, Quests, Journal, PvP Board, Export statistics.

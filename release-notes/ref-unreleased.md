@@ -2,6 +2,10 @@
 
 Updated 2026-11-28. Versions up to 0.5.172 are published in release-notes/ref-0.5.172.md. These changes describe source candidates since the latest published versioned notes.
 
+## Titan Panel state from the addon list, 0.5.193
+
+- Fixed: the minimap tooltip and the General Options note took the panel entry (ns.Titan.broker) for Titan Panel, but the entry needs only LibDataBroker, which Bagnon (BagBrother/libs) loads too; with Titan Panel disabled the tooltip said Plugin active. Titan.PanelState reads the Titan addon: active (IsAddOnLoaded), disabled (listed by GetAddOnInfo but not loaded) or missing. The tooltip shows Active, Disabled or Not installed.
+
 ## Minimap button overview, 0.5.192
 
 - The minimap button tooltip (MinimapButton.Tooltip) shows the core version, the installed TitanGatheredForever_* addons from the game's addon list (C_AddOns.GetNumAddOns, GetAddOnInfo, IsAddOnLoaded) with their profession icon and state: Active, Switched off (settings.categories) or Disabled (not loaded), Discovery last with its version; then the Titan Panel plugin state and the click hints.

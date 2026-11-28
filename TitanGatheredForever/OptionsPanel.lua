@@ -162,7 +162,7 @@ end
 -- Where the materials are: the My materials tab always, and the Titan Panel entry when a panel display exists. With
 -- no panel and the minimap button hidden, this says how the main window still opens.
 function Options.ButtonNote()
-    if ns.Titan and ns.Titan.broker then
+    if ns.Titan and ns.Titan.PanelState and ns.Titan.PanelState() == 'active' then
         return note('Your materials are in the My materials tab of the main window and in the list of the Titan Panel entry.')
     end
     if ns.settings.showMinimapButton == false then

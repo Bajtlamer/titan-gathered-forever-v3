@@ -440,6 +440,26 @@ function Titan.Menu(owner)
     end)
 end
 
+-- Titan Panel itself in the game's addon list: 'active' (loaded), 'disabled' (installed, switched off in the AddOns
+-- list) or 'missing'. The panel entry below needs only the LibDataBroker library, which other addons (Bagnon and
+-- others) bring too, so the entry existing does not mean Titan Panel is there.
+function Titan.PanelState()
+    local api = C_AddOns
+    local loaded = api and api.IsAddOnLoaded or IsAddOnLoaded
+    if loaded then
+        local ok, value = pcall(loaded, 'Titan')
+        if ok and value == true then return 'active' end
+    end
+    if api and api.GetNumAddOns and api.GetAddOnInfo then
+        local ok, count = pcall(api.GetNumAddOns)
+        for index = 1, ok and type(count) == 'number' and count or 0 do
+            local okInfo, name = pcall(api.GetAddOnInfo, index)
+            if okInfo and name == 'Titan' then return 'disabled' end
+        end
+    end
+    return 'missing'
+end
+
 -- The panel entry. Titan Panel shows it, and so does any other display of the LibDataBroker library (ChocolateBar,
 -- Bazooka and others) that is installed. Without one the addon runs alone; the list is the My materials tab.
 function Titan.Initialize()

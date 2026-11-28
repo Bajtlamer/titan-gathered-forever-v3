@@ -124,6 +124,25 @@ test('the tooltip shows the version, the installed modules with their state, Tit
     C_AddOns = nil
 end)
 
+test('the Titan Panel line reads the Titan Panel addon itself, not the panel entry', function()
+    local addons = { { 'Titan', true } }
+    C_AddOns = {
+        GetNumAddOns = function() return #addons end,
+        GetAddOnInfo = function(index) return addons[index][1] end,
+        IsAddOnLoaded = function(name) for _, a in ipairs(addons) do if a[1] == name then return a[2] end end return false end,
+    }
+    local ns = {}
+    _G.LibStub = nil
+    ns.Debug = function() end
+    assert(loadfile('TitanGatheredForever/Titan.lua'))('TitanGatheredForever', ns)
+    eq(ns.Titan.PanelState(), 'active')
+    addons[1][2] = false
+    eq(ns.Titan.PanelState(), 'disabled')                 -- installed, off in the AddOns list (Bagnon may still bring the library)
+    addons = {}
+    eq(ns.Titan.PanelState(), 'missing')
+    C_AddOns = nil
+end)
+
 test('dragging moves the button around the edge and saves the angle', function()
     local ns = env()
     ns.MinimapButton.Attach()

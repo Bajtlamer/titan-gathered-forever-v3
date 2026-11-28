@@ -207,9 +207,13 @@ test('the General page says where the material list is, with and without Titan P
     assert(Options.ButtonNote().text:find('My materials tab', 1, true))
     ns.settings.showMinimapButton = false
     assert(Options.ButtonNote().text:find('/tgf materials', 1, true))
+    -- a panel entry made with another addon's LibDataBroker (Bagnon) is not Titan Panel
     ns.Titan.broker = {}
+    ns.Titan.PanelState = function() return 'disabled' end
+    assert(Options.ButtonNote().text:find('/tgf materials', 1, true))
+    ns.Titan.PanelState = function() return 'active' end
     assert(Options.ButtonNote().text:find('Titan Panel entry', 1, true))
-    ns.Titan.broker, ns.settings.showMinimapButton = nil, true
+    ns.Titan.broker, ns.Titan.PanelState, ns.settings.showMinimapButton = nil, nil, true
 end)
 
 test('Open shows the page asked for, or the first one', function()
