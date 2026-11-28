@@ -1,7 +1,7 @@
 ## Interface: 16001
 ## Title: Titan Gathered Forever: Enchanting
 ## Notes: Optional Enchanting material catalogue for Titan Gathered Forever.
-## Version: 0.5.179
+## Version: 0.5.180
 ## IconTexture: Interface\AddOns\TitanGatheredForever_Enchanting\Artwork\AddonIcon
 ## Dependencies: TitanGatheredForever
 

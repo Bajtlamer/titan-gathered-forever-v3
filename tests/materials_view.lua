@@ -107,6 +107,10 @@ test('list rows put the item icon before the name, with the border cropped', fun
     eq(S.SpellIcon(3273), '|TInterface\\Icons\\Spell:14:14:0:0:64:64:5:59:5:59|t ')
     C_Spell = { GetSpellTexture = function() error('restricted') end }
     eq(S.SpellIcon(3273), '')
+    eq(S.ProfessionIcon('Mining'), '|TInterface\\Icons\\Trade_Mining:14:14:0:0:64:64:5:59:5:59|t ')
+    eq(S.ProfessionIcon('Herbalism'), S.ProfessionIcon('Herbs'))
+    eq(S.ProfessionIcon('Disenchanting'), S.ProfessionIcon('Enchanting'))
+    eq(S.ProfessionIcon('Unknown'), '')
     C_Item, C_Spell, ITEM_QUALITY_COLORS = nil, nil, nil
 end)
 

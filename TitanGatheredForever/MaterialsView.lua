@@ -73,14 +73,14 @@ end
 function View.ProfessionRows()
     local rows = {}
     for _, skill in ipairs(ns.Professions.Rows()) do
-        rows[#rows + 1] = { name = skill.name, rank = skill.rank, maxRank = skill.maxRank, secondary = skill.secondary,
+        rows[#rows + 1] = { name = skill.name, kind = skill.kind, rank = skill.rank, maxRank = skill.maxRank, secondary = skill.secondary,
             share = skill.maxRank > 0 and skill.rank / skill.maxRank or 0 }
     end
     return rows
 end
 
 function View.ProfessionCells(row)
-    return { Style.Text(Style.SkillColor(row.rank, row.maxRank), row.name), Style.Skill(row.rank, row.maxRank),
+    return { Style.ProfessionIcon(row.kind) .. Style.Text(Style.SkillColor(row.rank, row.maxRank), row.name), Style.Skill(row.rank, row.maxRank),
         Style.Value(string.format('%d%%', math.floor(row.share * 100 + 0.5))),
         Style.Value(row.secondary and 'Secondary' or 'Primary') }
 end

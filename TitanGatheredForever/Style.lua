@@ -88,6 +88,23 @@ function Style.SpellIcon(spellID, size)
     return ok and Style.Icon(icon, size) or ''
 end
 
+-- The icon of a profession (the kinds of the catalogue, the actions and the NPC sources), for profession columns
+-- and the trainers, who have no icon of their own.
+Style.PROFESSION_ICONS = {
+    Alchemy = 'Interface\\Icons\\Trade_Alchemy', Blacksmithing = 'Interface\\Icons\\Trade_BlackSmithing',
+    Cooking = 'Interface\\Icons\\INV_Misc_Food_15', Enchanting = 'Interface\\Icons\\Trade_Engraving',
+    Engineering = 'Interface\\Icons\\Trade_Engineering', FirstAid = 'Interface\\Icons\\Spell_Holy_SealOfSacrifice',
+    Fishing = 'Interface\\Icons\\Trade_Fishing', Herbs = 'Interface\\Icons\\Trade_Herbalism',
+    Leatherworking = 'Interface\\Icons\\Trade_LeatherWorking', Mining = 'Interface\\Icons\\Trade_Mining',
+    Skinning = 'Interface\\Icons\\INV_Misc_Pelt_Wolf_01', Tailoring = 'Interface\\Icons\\Trade_Tailoring',
+    WeaponMaster = 'Interface\\Icons\\INV_Sword_27',
+}
+local professionAliases = { Herbalism = 'Herbs', ['First Aid'] = 'FirstAid', Disenchanting = 'Enchanting' }
+function Style.ProfessionIcon(kind, size)
+    local icon = Style.PROFESSION_ICONS[professionAliases[kind] or kind]
+    return icon and Style.Icon(icon, size) or ''
+end
+
 function Style.ItemLabel(itemID)
     return Style.ItemIcon(itemID) .. Style.ItemName(itemID)
 end

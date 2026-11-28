@@ -309,7 +309,8 @@ local function syncTabs(panel)
         if tab then
             if choice then
                 tab.value = choice.value
-                tab.label:SetText(choice.value == current and Style.Value(choice.label) or Style.Label(choice.label))
+                local icon = choice.value and Style.ProfessionIcon and Style.ProfessionIcon(choice.value) or ''
+                tab.label:SetText(icon .. (choice.value == current and Style.Value(choice.label) or Style.Label(choice.label)))
                 local width = tab.label.GetStringWidth and tab.label:GetStringWidth()
                 if type(width) ~= 'number' then width = 70 end
                 tab:SetSize(width + 24, 20)
@@ -347,7 +348,8 @@ local function render(panel)
             if row.summary then
                 -- A line of text across the columns: the summary of a profession.
                 cell[1]:SetPoint('RIGHT', line, 'RIGHT', 0, 0)
-                cell[1]:SetText(row.gold and Style.Text(Style.gold, row.text) or row.text)
+                local icon = row.title and Style.ProfessionIcon and Style.ProfessionIcon(row.kind) or ''
+                cell[1]:SetText(icon .. (row.gold and Style.Text(Style.gold, row.text) or row.text))
             else
                 cell[1]:SetPoint('RIGHT', line, 'RIGHT', -panel.nameRight, 0)
                 cell[1]:SetText(Style.ItemLabel(row.itemID))
@@ -358,7 +360,10 @@ local function render(panel)
                 cell[6]:SetText(Style.Value(row.source or ''))
             end
         elseif row then
-            cell[1]:SetText(Style.Value(row.name)
+            local icon = row.action and Style.ProfessionIcon(row.action.kind)
+                or (row.craft and row.craft.itemID and Style.ItemIcon(row.craft.itemID)) or ''
+            if icon == '' and type(row.id) == 'number' then icon = Style.SpellIcon(row.id) end
+            cell[1]:SetText(icon .. Style.Value(row.name)
                 .. (row.action and row.action.kind ~= 'Enchanting' and Style.Label(' (gathering)') or ''))
             cell[2]:SetText(Style.Value(row.attempts))
             cell[3]:SetText(Style.Value(row.completed))

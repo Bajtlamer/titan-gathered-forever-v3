@@ -2,6 +2,10 @@
 
 Updated 2026-11-28. Versions up to 0.5.172 are published in release-notes/ref-0.5.172.md. These changes describe source candidates since the latest published versioned notes.
 
+## Icons in Statistics > Attempts and profession icons, 0.5.180
+
+- Statistics > Attempts shows the crafted item (else the recipe spell) or the gathering profession icon, which 0.5.179 missed. Style.ProfessionIcon gives each profession a game icon (Trade_* and similar, weapon masters a sword): the trainers of the Trainers tab, the Profession columns of Unlearned recipes and Crafting profit, the profession tabs and headings of Statistics > Gathered items, Learned professions and the Titan Panel list. Release notes renamed to release-notes/ref-0.5.180.md.
+
 ## Item icons in the lists, 0.5.179
 
 - Style.ItemIcon, Style.SpellIcon and Style.ItemLabel put the icon before the name as inline texture text (14 px, border cropped, nothing when the client gives no icon). Used in My materials, Lifetime materials, Observed chances, Profession actions yields, Crafting profit (product), Unlearned recipes (vendor recipe item, else the trainer spell from the seed, else a scroll icon), Journal Creature drops, Statistics Materials and Gathered items, the reagent window, the auction history header and the Titan Panel list. Sort values and search keep the plain name. Release notes renamed to release-notes/ref-0.5.179.md.

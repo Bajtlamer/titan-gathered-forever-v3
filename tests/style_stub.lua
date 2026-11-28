@@ -10,6 +10,7 @@ return function(Style)
     Style.Icon = Style.Icon or function() return '' end
     Style.ItemIcon = Style.ItemIcon or function() return '' end
     Style.SpellIcon = Style.SpellIcon or function() return '' end
+    Style.ProfessionIcon = Style.ProfessionIcon or function() return '' end
     Style.ItemLabel = Style.ItemLabel or function(id)
         return Style.ItemIcon(id) .. (Style.ItemName and Style.ItemName(id) or Style.Value('Item ' .. id))
     end

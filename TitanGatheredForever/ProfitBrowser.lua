@@ -41,7 +41,7 @@ function Browser.Cells(row)
         name = name .. Style.Text(Style.gray, string.format(' x%s', product.quantity == math.floor(product.quantity)
             and product.quantity or string.format('%.1f', product.quantity)))
     end
-    return { name, ns.NpcSources.Label(row.kind), materials,
+    return { name, Style.ProfessionIcon(row.kind) .. ns.NpcSources.Label(row.kind), materials,
         product and product.auction and coin(product.auction.net) or unknown, count,
         product and product.vendor and coin(product.vendor) or unknown,
         product and product.best and (product.best == 'auction' and 'Auction' or 'Vendor') or unknown, profit }

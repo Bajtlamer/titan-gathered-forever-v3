@@ -60,7 +60,7 @@ function Titan.Show(owner)
     if #skills > 0 then
         tooltip:AddLine(ns.Style.Text(ns.Style.gold, 'Learned professions'))
         for _, skill in ipairs(skills) do
-            tooltip:AddDoubleLine(ns.Style.Text(ns.Style.SkillColor(skill.rank, skill.maxRank), skill.name), ns.Style.Skill(skill.rank, skill.maxRank))
+            tooltip:AddDoubleLine(ns.Style.ProfessionIcon(skill.kind) .. ns.Style.Text(ns.Style.SkillColor(skill.rank, skill.maxRank), skill.name), ns.Style.Skill(skill.rank, skill.maxRank))
         end
         ns.Style.Separator(tooltip)
     end
