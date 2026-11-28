@@ -8,7 +8,7 @@ Website: [titan-gathered.com](https://www.titan-gathered.com/).
 
 ## Current version
 
-The current stable candidate is version `0.5.193` and targets **WoW Forever 1.60.1, interface 16001**. Titan Panel is optional: with it the addon is a Titan Panel plugin, without it the addon runs on its own (minimap button, world map button and the game Options). The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); the published versions are in [ref-0.5.172.md](release-notes/ref-0.5.172.md) and earlier notes. Other WoW editions are outside this project's scope.
+The current stable candidate is version `0.6.0` and targets **WoW Forever 1.60.1, interface 16001**. Titan Panel is optional: with it the addon is a Titan Panel plugin, without it the addon runs on its own (minimap button, world map button and the game Options). The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); the published versions are in [ref-0.5.193.md](release-notes/ref-0.5.193.md) and earlier notes. Version 0.6.0 is a milestone: Titan Panel became optional in 0.5.177 to 0.5.193, and 0.6.0 moves every auction house feature into the optional Auction house module. Other WoW editions are outside this project's scope.
 
 A separate, optional data-collection module, [Titan Gathered Discovery](#discovery-data-collection-module) 0.1.0, has its own version line and is released apart from this core; it is installed locally and awaits live acceptance.
 
@@ -33,7 +33,7 @@ Implemented:
 - schema-versioned JSON statistics export with current/combined selection, identity opt-in and a manual copy window. Large snapshots use numbered parts and a local reconstruction tool.
 - faction-aware world-map flight points, including undiscovered routes. Markers retain native artwork and use green for confirmed flight-master visits, amber for client-reported undiscovered nodes and gray for unconfirmed discovery. Only opening the taxi map at the current master confirms that node for the current character; previously visited nodes require a new observed visit. Map-wide false discovery flags do not confirm discovery. The Flight points menu contains its visibility switch.
 - Small icon appearance window: Titan menu > Icon appearance. Configure world-map materials, minimap materials and flight points independently: 12–40 px, circular crop or full image, and an optional thin gold outline. Preview before Apply; Cancel discards edits.
-- Independent profession addons, optional Auction Items and a shared core.
+- Independent profession addons, the optional Auction house module and a shared core.
 - Original coordinated artwork for the core, all twelve professions and Auction Items. Each addon has its own packaged AddOns-list icon; the core also uses its new emblem on Titan Panel and the minimap. Large PNG logos and 400px avatars for CurseForge are in [artwork/v1](artwork/v1), grouped by addon. Each other project keeps its own designs in its own root artwork/ directory. Actual client rendering requires a full restart and live confirmation.
 - The four projects together have eighteen emblems; Discovery's is drawn procedurally by `tools/generate_discovery_art.py` instead of an image model. Titan Command History, Titan Approx DPS and Target Ranger each keep their artwork in their own development root. [The inventory](artwork/index.json) records the stable versions and included addons; the artwork prompts are in [prompts.json](artwork/v1/prompts.json).
 
@@ -85,7 +85,9 @@ AddOns/
   TitanGatheredForever_Skinning/      # Optional
 ```
 
-Available modules: Alchemy, Blacksmithing, Cooking, Enchanting, Engineering, First Aid, Fishing, Herbalism, Leatherworking, Mining, Skinning and Tailoring. Auction Items is an additional optional module. Disabled modules do not load their catalogue tables.
+Available modules: Alchemy, Blacksmithing, Cooking, Enchanting, Engineering, First Aid, Fishing, Herbalism, Leatherworking, Mining, Skinning and Tailoring. Auction house (folder TitanGatheredForever_AuctionItems) is an additional optional module. Disabled modules do not load their catalogue tables.
+
+Auction house module: since 0.6.0 every auction feature loads with this module and not with the core: the price scan, auction prices in item tooltips, the Sell tab undercut, Market history and the sales ledger read from the mailbox (`/tgf sales`), together with the Auction items catalogue. Disabling it in the AddOns list switches all of them off. The core keeps working without it: the Crafting profit tab and the reagent window use what a vendor pays and say that auction prices need the module, the Economy tab shows the auction row as needing the module, and the Auction house page in Options and the Auction prices entry of the menu say where the features went; the chat says it once after the update. The scanned prices and the recorded sales stay in the core's saved file, so enabling the module again brings them back. Hiding the Auction items group in the material list only hides that group; the module stays active.
 
 Install the renamed folders and disable the previous-generation addon folders. Do not enable both generations together. Enable the new Titan broker entry if Titan still displays the previous one.
 
@@ -230,7 +232,7 @@ See [AGENTS.md](AGENTS.md) for current repository conventions and automatic loca
 Every release must provide:
 
 - One full collection ZIP.
-- Fourteen independent ZIPs: the core, twelve profession modules and Auction Items.
+- Fourteen independent ZIPs: the core, twelve profession modules and the Auction house module.
 - A download index with version, dependencies, filenames, sizes and SHA-256 hashes.
 - Checksums for the downloadable archives.
 

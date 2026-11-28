@@ -11,7 +11,7 @@ local function load(extra)
     ns.Economy.Coin = function(c) return c .. 'c' end
     ns.Economy.VendorSell = function() return 100 end
     for key, value in pairs(extra or {}) do ns[key] = value end
-    assert(loadfile('TitanGatheredForever/AuctionUndercut.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever_AuctionItems/AuctionUndercut.lua'))('TitanGatheredForever', ns)
     return ns
 end
 

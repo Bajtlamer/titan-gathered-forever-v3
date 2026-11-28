@@ -1,8 +1,12 @@
 ## Interface: 16001
-## Title: Titan Gathered Forever: Auction items
-## Notes: Optional Auction items material catalogue for Titan Gathered Forever.
-## Version: 0.5.193
+## Title: Titan Gathered Forever: Auction house
+## Notes: Optional auction house module for Titan Gathered Forever: price scans, the Sell tab undercut, posting history, auction sales and the Auction items catalogue.
+## Version: 0.6.0
 ## IconTexture: Interface\AddOns\TitanGatheredForever_AuctionItems\Artwork\AddonIcon
 ## Dependencies: TitanGatheredForever
 
 Data.lua
+AuctionScan.lua
+AuctionUndercut.lua
+AuctionHistory.lua
+Sales.lua

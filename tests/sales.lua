@@ -10,7 +10,7 @@ local function load()
     ns.Style = {}
     assert(loadfile('tests/style_stub.lua'))()(ns.Style)
     ns.Economy = { Coin = function(copper) return copper .. 'c' end }
-    assert(loadfile('TitanGatheredForever/Sales.lua'))('TitanGatheredForever', ns)
+    assert(loadfile('TitanGatheredForever_AuctionItems/Sales.lua'))('TitanGatheredForever', ns)
     return ns
 end
 

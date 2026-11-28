@@ -107,7 +107,10 @@ function View.Refresh()
     if scope then id, seller = scope.id, scope.name end
     window.scopeNote:SetText(Style.Label(scope and 'Recorded history for the selected character'
         or 'Recorded history for all characters on this realm'))
-    local total = ns.Sales.Totals(ledger and ledger.entries, realm, seller)
+    -- Without the Auction house module the sales are not read: the auction row says so and counts nothing.
+    local total = ns.Sales and ns.Sales.Totals(ledger and ledger.entries, realm, seller)
+        or { invoices = 0, units = 0, unitCount = 0, gross = 0, grossCount = 0, net = 0, netCount = 0, fees = 0,
+             deposits = 0, credit = 0, creditCount = 0 }
     local vendors, auctions, quests, loot, combined = unpack(window.rows)
     local merchant = ns.VendorSales.Totals(db.vendorSales, realm, id)
     -- A sale is what the player put up and sold, one stack or a hundred: the number of sales, not of items.
@@ -121,7 +124,9 @@ function View.Refresh()
         .. Style.Label(merchant.repairs == 1 and ' repair for ' or ' repairs for ') .. money(merchant.repairCopper))
         or Style.Label('None recorded'))
     local coverage
-    if total.invoices == 0 then
+    if not ns.Sales then
+        coverage = 'Needs the Auction house module'
+    elseif total.invoices == 0 then
         coverage = 'No confirmed seller invoices recorded'
     elseif total.netCount < total.invoices then
         coverage = 'Some invoices lack verified net amounts'

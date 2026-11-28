@@ -33,7 +33,8 @@ function Button.Modules()
             local okLoaded, isLoaded = false, nil
             if loaded then okLoaded, isLoaded = pcall(loaded, name) end
             if not okLoaded or isLoaded ~= true then row.state = 'disabled'
-            elseif not row.discovery and ns.settings and type(ns.settings.categories) == 'table'
+            -- Hiding the Auction items group only hides the material list group: the Auction house features keep running.
+            elseif not row.discovery and suffix ~= 'AuctionItems' and ns.settings and type(ns.settings.categories) == 'table'
                 and ns.settings.categories[row.id] == false then row.state = 'off'
             else row.state = 'active' end
             if row.discovery and api.GetAddOnMetadata then

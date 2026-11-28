@@ -93,7 +93,7 @@ test('the tooltip shows the version, the installed modules with their state, Tit
     local addons = {
         { 'TitanGatheredForever', 'Titan Gathered Forever', true },
         { 'TitanGatheredForever_Mining', 'Titan Gathered Forever: Mining', true },
-        { 'TitanGatheredForever_AuctionItems', 'Titan Gathered Forever: Auction items', true },
+        { 'TitanGatheredForever_AuctionItems', 'Titan Gathered Forever: Auction house', true },
         { 'TitanGatheredForever_Cooking', 'Titan Gathered Forever: Cooking', false },
         { 'TitanGatheredForever_Discovery', 'Titan Gathered Discovery', true },
         { 'Bagnon', 'Bagnon', true },
@@ -104,16 +104,17 @@ test('the tooltip shows the version, the installed modules with their state, Tit
         IsAddOnLoaded = function(name) for _, a in ipairs(addons) do if a[1] == name then return a[3] end end end,
         GetAddOnMetadata = function(name) return name == 'TitanGatheredForever_Discovery' and '0.1.6' or '0.5.192' end,
     }
-    ns.settings.categories = { Auction = false }
+    ns.settings.categories = { Auction = false, Mining = false }   -- hiding a group in the material list
     ns.MinimapButton.Attach()
     local button = ns.MinimapButton.button
     button.scripts.OnEnter(button)
     eq(lines.owner, button); eq(lines.shown, true)
     eq(lines[1], '<gold>Titan Gathered Forever</> | <ffffffff>v0.5.192</>')
     local text = table.concat(lines, '\n')
-    assert(text:find('<ffffffff>Auction items</> | <gray>Switched off</>', 1, true), text)
+    -- the Auction house module keeps running when its Auction items group is hidden; a profession shows Switched off
+    assert(text:find('<ffffffff>Auction house</> | <gray>Active</>', 1, true), text)
     assert(text:find('<ffffffff>Cooking</> | <gray>Disabled</>', 1, true), text)
-    assert(text:find('<ffffffff>Mining</> | <gray>Active</>', 1, true), text)
+    assert(text:find('<ffffffff>Mining</> | <gray>Switched off</>', 1, true), text)
     assert(text:find('<ffffffff>Discovery</><gray> v0.1.6</> | <gray>Active</>', 1, true), text)
     assert(not text:find('Bagnon', 1, true))
     local modules = ns.MinimapButton.Modules()

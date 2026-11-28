@@ -2,6 +2,15 @@
 
 Updated 2026-11-28. Versions up to 0.5.193 are published in release-notes/ref-0.5.193.md (Discovery 0.1.6 in release-notes/ref-discovery-0.1.6.md); the sections below up to 0.5.193 are its history. These changes describe source candidates since the latest published versioned notes.
 
+## Auction house module, 0.6.0
+
+- Milestone version requested by the owner: 0.6.0 instead of 0.5.194, for Titan Panel becoming optional (0.5.177 to 0.5.193) and this split.
+- AuctionScan.lua, AuctionUndercut.lua, AuctionHistory.lua and Sales.lua moved from the core into TitanGatheredForever_AuctionItems, retitled Titan Gathered Forever: Auction house. Each starts with `local ns = TitanGatheredForever or select(2, ...)`, so it attaches to the core namespace in the game and to the passed table in tests. The generator writes the manifest from MODULE_EXTRAS (title, notes, extra files after Data.lua); the catalogue label stays Auction items.
+- The core guards every use: Core start (Initialize calls), `/tgf sales`, the Auction house Options page (one note), the Auction prices menu entry, the Economy auction row (Needs the Auction house module), the Crafting profit footer and the reagent window profit line. Tooltips, Reports, CraftingView and Economy were already guarded.
+- ns.AuctionModuleNotice prints once per account (db.auctionModuleNotice) at login when the module is missing or disabled, so a player who updated only the core learns where the features went.
+- The minimap tooltip no longer shows the module as Switched off when the Auction items group is hidden in the material list.
+- Data (db.auction, db.sales, mailLog, auctionLog, auctionUndercutLog and the auction settings) stays in the core SavedVariables, so disabling the module keeps it.
+
 ## Titan Panel state from the addon list, 0.5.193
 
 - Fixed: the minimap tooltip and the General Options note took the panel entry (ns.Titan.broker) for Titan Panel, but the entry needs only LibDataBroker, which Bagnon (BagBrother/libs) loads too; with Titan Panel disabled the tooltip said Plugin active. Titan.PanelState reads the Titan addon: active (IsAddOnLoaded), disabled (listed by GetAddOnInfo but not loaded) or missing. The tooltip shows Active, Disabled or Not installed.

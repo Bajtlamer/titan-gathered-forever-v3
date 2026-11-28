@@ -1,4 +1,6 @@
-local _, ns = ...
+-- Part of the Auction house module (TitanGatheredForever_AuctionItems): it runs on the shared core namespace, so
+-- switching the module off in the AddOns list switches the auction features off and keeps the saved data.
+local ns = TitanGatheredForever or select(2, ...)
 local History = {}
 ns.AuctionHistory = History
 

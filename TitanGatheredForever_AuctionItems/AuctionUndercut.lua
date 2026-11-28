@@ -1,4 +1,6 @@
-local _, ns = ...
+-- Part of the Auction house module (TitanGatheredForever_AuctionItems): it runs on the shared core namespace, so
+-- switching the module off in the AddOns list switches the auction features off and keeps the saved data.
+local ns = TitanGatheredForever or select(2, ...)
 -- Fills the Buyout price of a new auction in the Sell tab of the auction house: the lowest existing buyout of the same
 -- item minus a percentage chosen in a combo box (2, 5, 10 or 15 percent). The search is live, one query
 -- per selected item (plans/plan-auction-undercut.md). Pure logic is behind a replaceable api table; the client wiring

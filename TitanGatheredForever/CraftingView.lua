@@ -203,7 +203,8 @@ function View.ProductLines(plan)
                 Style.Text(paint, (total >= 0 and '+' or '-') .. Coin(math.abs(total))))
         end
     elseif not product.unitValue then
-        profit = Style.Text(Style.gray, 'Scan the auction house to see what this craft is worth.')
+        profit = Style.Text(Style.gray, ns.AuctionScan and 'Scan the auction house to see what this craft is worth.'
+            or 'Auction prices need the Auction house module to show what this craft is worth.')
     elseif product.partial then
         profit = Style.Text(Style.gray, 'Only part of the recipe can be priced, so no profit is shown.')
     else
