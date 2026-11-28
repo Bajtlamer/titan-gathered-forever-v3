@@ -2,6 +2,24 @@
 
 Updated 2026-11-28. Versions up to 0.5.193 are published in release-notes/ref-0.5.193.md (Discovery 0.1.6 in release-notes/ref-discovery-0.1.6.md); the sections below up to 0.5.193 are its history. These changes describe source candidates since the latest published versioned notes.
 
+## Auction house module, 0.6.0
+
+- Milestone version requested by the owner: 0.6.0 instead of 0.5.194, for Titan Panel becoming optional (0.5.177 to 0.5.193) and this split.
+- AuctionScan.lua, AuctionUndercut.lua, AuctionHistory.lua and Sales.lua moved from the core into TitanGatheredForever_AuctionItems, retitled Titan Gathered Forever: Auction house. Each starts with `local ns = TitanGatheredForever or select(2, ...)`, so it attaches to the core namespace in the game and to the passed table in tests. The generator writes the manifest from MODULE_EXTRAS (title, notes, extra files after Data.lua); the catalogue label stays Auction items.
+- The core guards every use: Core start (Initialize calls), `/tgf sales`, the Auction house Options page (one note), the Auction prices menu entry, the Economy auction row (Needs the Auction house module), the Crafting profit footer and the reagent window profit line. Tooltips, Reports, CraftingView and Economy were already guarded.
+- ns.AuctionModuleNotice prints once per account (db.auctionModuleNotice) at login when the module is missing or disabled, so a player who updated only the core learns where the features went.
+- The generator writes ns.KnownModules (folder, settings id, label, standalone) into Data/Metadata.lua from the catalogue modules and catalogue/standalone-modules.json. MinimapButton.Modules adds every known folder missing from the addon list as state 'missing' (Not installed, gray, listed last with a hint line) and takes the settings id from that list, which fixes Herbalism (id Herbs) never showing Switched off.
+- MinimapButton: a module other than Discovery shows its version (GetAddOnMetadata Version) only when it differs from the core's, in orange with an update line; Discovery always shows its own. Button.Icon gives Auction a coin (INV_Misc_Coin_01) and Discovery a spyglass (INV_Misc_Spyglass_02); FOLDER_IDS maps AuctionItems and Herbalism when ns.KnownModules is missing.
+- Not installed is red (Disabled stays orange). Style.Separator draws a line after the Titan Panel row; the notes (other version, where to get missing modules) and the click hints follow it.
+- Module names in the tooltip are the addon title without the leading Titan (Gathered Forever: Alchemy; Discovery as Gathered Forever: Discovery); missing ones are built the same way from ns.KnownModules.
+- Discovery's version is no longer in the minimap list; Discovery 0.1.7 puts it in its window title (ns.env.moduleVersion).
+- tools/install.py --skip FOLDER (repeatable) leaves a module folder untouched: not installed, replaced or removed. The core cannot be skipped.
+- Discovery 0.1.8 is named Titan Gathered Forever: Discovery everywhere in the game (toc Title, window, LDB label, menu entry, guide, consent and command texts); the LDB object name TitanGatheredForeverDiscovery is unchanged, so Titan Panel keeps the plugin's place.
+- Manifests: the core has `## Category: Professions`; every module (generated, and Discovery) has `## Category: Professions` and `## Group: TitanGatheredForever`, which the 1.60.1 AddOns list uses to fold modules under their parent (as Bagnon does with BagBrother). Needs a full client restart.
+- Live finding: with OptionalDeps: Titan the AddOns list nested the core under Titan Panel (User Interface), and the modules, whose group parent was itself nested, stayed loose at the top level. OptionalDeps: Titan is removed from the core and Discovery; Titan Panel registers the LDB object through LibDataBroker_DataObjectCreated whenever it is created, and Titan still loads first by folder order.
+- The minimap tooltip no longer shows the module as Switched off when the Auction items group is hidden in the material list.
+- Data (db.auction, db.sales, mailLog, auctionLog, auctionUndercutLog and the auction settings) stays in the core SavedVariables, so disabling the module keeps it.
+
 ## Titan Panel state from the addon list, 0.5.193
 
 - Fixed: the minimap tooltip and the General Options note took the panel entry (ns.Titan.broker) for Titan Panel, but the entry needs only LibDataBroker, which Bagnon (BagBrother/libs) loads too; with Titan Panel disabled the tooltip said Plugin active. Titan.PanelState reads the Titan addon: active (IsAddOnLoaded), disabled (listed by GetAddOnInfo but not loaded) or missing. The tooltip shows Active, Disabled or Not installed.

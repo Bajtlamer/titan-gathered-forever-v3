@@ -1,4 +1,6 @@
-local _, ns = ...
+-- Part of the Auction house module (TitanGatheredForever_AuctionItems): it runs on the shared core namespace, so
+-- switching the module off in the AddOns list switches the auction features off and keeps the saved data.
+local ns = TitanGatheredForever or select(2, ...)
 -- Prices from the auction house. One full scan (C_AuctionHouse.ReplicateItems, answered with
 -- REPLICATE_ITEM_LIST_UPDATE) is read in small steps and reduced to one lowest buyout per unit and item,
 -- for every item: the reagents of the installed profession addons keep the quantity on offer and the number of auctions

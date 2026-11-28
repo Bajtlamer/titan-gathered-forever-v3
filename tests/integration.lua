@@ -7,7 +7,7 @@ local function contains(lines, needle)
     return false
 end
 
-local function fixture(interface, saved, noBroker, noModules)
+local function fixture(interface, saved, noBroker, noModules, noAuction)
     local state = { timers = {}, frames = {}, requested = {}, clock = 100, menu = nil, deathRecap = nil,
                     itemNames = { [2589] = 'Localized Cloth', [765] = 'Localized Herb' },
                     slots = {}, tabs = { { ID = 6 } }, bankReads = 0, skills = {},
@@ -154,8 +154,14 @@ local function fixture(interface, saved, noBroker, noModules)
     local ns = {}
     for _, path in ipairs({ 'Localization/enUS.lua', 'Style.lua', 'Data/Metadata.lua', 'Data/NpcSeed.lua', 'Catalog.lua',
                             'Settings.lua', 'DebugLog.lua', 'Professions.lua', 'KnownRecipes.lua', 'Inventory.lua', 'Gathering.lua', 'History.lua', 'Actions.lua', 'PvP.lua', 'Production.lua', 'Crafting.lua', 'Export.lua', 'Observations.lua', 'Sources.lua', 'NpcSources.lua', 'WeaponMasters.lua', 'NpcObserver.lua', 'PinStyle.lua', 'IconConfig.lua', 'FlightPaths.lua', 'Transport.lua', 'Map.lua', 'Minimap.lua',
-                            'Tooltips.lua', 'Reports.lua', 'CraftingView.lua', 'ProfessionButton.lua', 'ProfessionStats.lua', 'Movable.lua', 'AuctionScan.lua', 'AuctionUndercut.lua', 'Sales.lua', 'LegacyFolders.lua', 'Economy.lua', 'LootIncome.lua', 'VendorSales.lua', 'QuestIncome.lua', 'Kills.lua', 'Journal.lua', 'EconomyView.lua', 'AuctionHistory.lua', 'Yields.lua', 'RecipeBrowser.lua', 'MinimapButton.lua', 'Titan.lua', 'OptionsPanel.lua', 'Core.lua' }) do
+                            'Tooltips.lua', 'Reports.lua', 'CraftingView.lua', 'ProfessionButton.lua', 'ProfessionStats.lua', 'Movable.lua', 'LegacyFolders.lua', 'Economy.lua', 'LootIncome.lua', 'VendorSales.lua', 'QuestIncome.lua', 'Kills.lua', 'Journal.lua', 'EconomyView.lua', 'Yields.lua', 'RecipeBrowser.lua', 'MinimapButton.lua', 'Titan.lua', 'OptionsPanel.lua', 'Core.lua' }) do
         assert(loadfile('TitanGatheredForever/' .. path))('TitanGatheredForever', ns)
+    end
+    -- The Auction house module loads after the core and attaches to its global namespace, as in the game.
+    if not noAuction then
+        for _, path in ipairs({ 'AuctionScan.lua', 'AuctionUndercut.lua', 'AuctionHistory.lua', 'Sales.lua' }) do
+            assert(loadfile('TitanGatheredForever_AuctionItems/' .. path))('TitanGatheredForever_AuctionItems', {})
+        end
     end
     -- Keep integration scenarios small; the generated data is validated separately.
     local function module(id, label, items, recipes, kind)
@@ -340,6 +346,36 @@ test('the sales ledger starts with the add-on, keeps its saved sales and answers
     local found = false
     for _, message in ipairs(nextState.messages) do if tostring(message):find('Linen Cloth', 1, true) then found = true end end
     assert(found, 'the newest sale is printed')
+end)
+
+test('without the Auction house module the core starts, keeps the auction data and says where the features went', function()
+    local s, ns = fixture(nil, nil, false, false, true); s:Start()
+    eq(ns.AuctionScan, nil); eq(ns.Sales, nil)
+    ns.db.auction = { at = time() - 60, entries = 1, items = { [2589] = { min = 1250, qty = 40, n = 5 } } }
+    ns.db.sales = { entries = { { itemName = 'Linen Cloth', count = 20, received = 3800, soldAt = 86400 } } }
+    local tip = CreateFrame('GameTooltip')
+    s.post(tip, { id = 2589 }); assert(not contains(tip.lines, 'Auction:'), 'no auction price without the module')
+    SlashCmdList.TITANGATHEREDFOREVERV3('sales')
+    assert(tostring(s.messages[#s.messages]):find('Auction house module', 1, true), tostring(s.messages[#s.messages]))
+    s.broker.OnClick({}, 'RightButton')
+    assert(contains(s.menu.titles, 'Needs the Auction house module'), 'the auction submenu points to the module')
+    assert(not s.menu.buttons['Auction prices/Scan now (the auction house must be open)'])
+    local page
+    for _, spec in ipairs(ns.Options.PAGES) do if spec.id == 'auction' then page = spec end end
+    local rows = page.rows()
+    eq(#rows, 1); eq(rows[1].kind, 'note')
+    -- the chat says once where the features went, and not again at the next login
+    local notices = 0
+    for _, message in ipairs(s.messages) do if tostring(message):find('moved to the Auction house module', 1, true) then notices = notices + 1 end end
+    eq(notices, 1); eq(ns.db.auctionModuleNotice, true)
+    eq(ns.AuctionModuleNotice(), false)
+    -- the saved data is untouched: with the module back the prices and sales are there
+    local saved = TitanGatheredForeverV3DB
+    local nextState, nextNS = fixture(nil, saved); nextState:Start()
+    eq(#nextNS.db.sales.entries, 1); eq(nextNS.db.auction.items[2589].min, 1250)
+    for _, message in ipairs(nextState.messages) do
+        assert(not tostring(message):find('moved to the Auction house module', 1, true), 'no notice with the module')
+    end
 end)
 
 test('other modules can add entries to the menu of the add-on, and a failing one does not break it', function()

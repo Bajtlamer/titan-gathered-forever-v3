@@ -445,7 +445,7 @@ test('Economy shows confirmed receipts for the empty Forever realm key and label
             buyback = { [40] = { units = 2, copper = 45, stacks = 1 } },
             repair = { copper = 96, count = 3 },
         } } }, questIncome = { [''] = { player = { [12] = { copper = 40, turnIns = 2 } } } } }
-    assert(loadfile('TitanGatheredForever/Sales.lua'))('Titan Gathered Forever', ns)
+    assert(loadfile('TitanGatheredForever_AuctionItems/Sales.lua'))('Titan Gathered Forever', ns)
     assert(loadfile('TitanGatheredForever/LootIncome.lua'))('Titan Gathered Forever', ns)
     assert(loadfile('TitanGatheredForever/VendorSales.lua'))('Titan Gathered Forever', ns)
     assert(loadfile('TitanGatheredForever/QuestIncome.lua'))('Titan Gathered Forever', ns)
@@ -516,6 +516,15 @@ test('Economy shows confirmed receipts for the empty Forever realm key and label
     eq(w.rows[5].income.text, ns.Style.Label('At least ') .. ns.Style.Value('95c'))
     pick(w.characterPicker, 'All characters')
     eq(w.rows[5].income.text, ns.Style.Label('At least ') .. ns.Style.Value('558c'))
+    -- without the Auction house module the auction row says so and the other incomes still count
+    local sales = ns.Sales
+    ns.Sales = nil
+    ns.EconomyView.Refresh()
+    eq(w.rows[2].count.text, ns.Style.Label('Unavailable'))
+    eq(w.rows[2].coverage.text, ns.Style.Label('Needs the Auction house module'))
+    eq(w.invoiceCount.text, ns.Style.Value(0))
+    eq(w.rows[5].income.text, ns.Style.Label('At least ') .. ns.Style.Value('178c'))
+    ns.Sales = sales
     ns.characterID = nil
 end)
 test('profession statistics attach below the native window, preserve recipe counts and show scoped history',function()

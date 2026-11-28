@@ -1,5 +1,9 @@
 local ns = { settings = {}, IsPublic = function() return true end }
-local function load(name) assert(loadfile('TitanGatheredForever/' .. name .. '.lua'))('TitanGatheredForever', ns) end
+local MODULE = { AuctionScan = true, Sales = true, AuctionUndercut = true, AuctionHistory = true }
+local function load(name)
+    local folder = MODULE[name] and 'TitanGatheredForever_AuctionItems/' or 'TitanGatheredForever/'
+    assert(loadfile(folder .. name .. '.lua'))('TitanGatheredForever', ns)
+end
 local function eq(actual, expected)
     assert(actual == expected, 'expected ' .. tostring(expected) .. ', got ' .. tostring(actual))
 end

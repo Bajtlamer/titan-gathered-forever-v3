@@ -126,7 +126,7 @@ class PackageTests(unittest.TestCase):
                     self.assertIn('## Dependencies: TitanGatheredForever\n', module_toc)
                 manifest = archive.read('TitanGatheredForever/TitanGatheredForever.toc').decode()
                 self.assertIn('## Interface: 16001', manifest)
-                self.assertIn('## OptionalDeps: Titan', manifest)
+                self.assertNotIn('## OptionalDeps:', manifest)   # no tie to Titan Panel: the AddOns list hung the core under it
                 self.assertNotIn('## Dependencies:', manifest)
                 self.assertIn('## SavedVariables: TitanGatheredForeverV3DB', manifest)
                 for line in manifest.splitlines():

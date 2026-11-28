@@ -301,6 +301,7 @@ Options.PAGES = {
         }
     end },
     { id = 'auction', name = 'Auction house', rows = function()
+        if not ns.AuctionScan then return { note(ns.AUCTION_MODULE_MISSING) } end
         return {
             note(ns.AuctionScan.Status()),
             header('Prices'),

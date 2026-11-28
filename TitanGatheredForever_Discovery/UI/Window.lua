@@ -44,7 +44,9 @@ local function build()
     w:SetPoint('CENTER', UIParent, 'CENTER', 0, 0)
     w:SetClampedToScreen(true); w:SetMovable(true); w:EnableMouse(true); w:RegisterForDrag('LeftButton')
     Nav.Draggable(w, 'discovery')
-    w.TitleText:SetText('Titan Gathered Discovery')
+    -- the module has its own version line, so its version is in the title (the minimap button list does not show it)
+    local version = ns.env and ns.env.moduleVersion
+    w.TitleText:SetText('Titan Gathered Forever: Discovery' .. (version and version ~= 'unknown' and (' v' .. version) or ''))
     -- Two pages over the same area, one for each tab.
     local data, guide = CreateFrame('Frame', nil, w), CreateFrame('Frame', nil, w)
     data:SetAllPoints(w); guide:SetAllPoints(w)

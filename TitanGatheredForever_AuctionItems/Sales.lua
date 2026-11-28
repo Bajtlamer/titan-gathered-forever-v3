@@ -1,4 +1,6 @@
-local _, ns = ...
+-- Part of the Auction house module (TitanGatheredForever_AuctionItems): it runs on the shared core namespace, so
+-- switching the module off in the AddOns list switches the auction features off and keeps the saved data.
+local ns = TitanGatheredForever or select(2, ...)
 -- Sales ledger: what the auction house really paid. A sold auction arrives as a mail with the proceeds; the inbox is read
 -- whenever it changes and every sale mail that holds money is recorded once in ns.db.sales.entries (item, stack size,
 -- money received, and the price, deposit, fee and buyer when the invoice is readable). Nothing is changed in the mailbox

@@ -178,6 +178,16 @@ local function gatheringAPI()
     }
 end
 
+-- Once per account: since 0.6.0 the auction features come with the Auction house module, so a player who updated
+-- only the core is told once in chat where they went. The flag is kept, so the line does not come back at every login.
+function ns.AuctionModuleNotice()
+    if ns.AuctionScan or not ns.db or ns.db.auctionModuleNotice then return false end
+    ns.db.auctionModuleNotice = true
+    ns.Print(ns.Style.Label('The auction house features moved to the Auction house module (Titan Gathered Forever: Auction house). ')
+        .. ns.Style.Label('Install it or enable it in the AddOns list to use them; your scanned prices and sales are kept.'))
+    return true
+end
+
 local function start()
     if ns.inventory or ns.disabled then return end
     local version, build, _, interface = GetBuildInfo()
@@ -290,13 +300,16 @@ local function start()
     ns.ProfessionButton.Initialize()
     ns.ProfessionStats.Initialize()
     ns.Movable.Initialize()
-    ns.AuctionScan.Initialize()
-    ns.AuctionUndercut.Initialize()
-    ns.AuctionHistory.Initialize()
+    -- The auction features come with the Auction house module (TitanGatheredForever_AuctionItems); without it they are absent.
+    if ns.AuctionScan then ns.AuctionScan.Initialize() end
+    if ns.AuctionUndercut then ns.AuctionUndercut.Initialize() end
+    if ns.AuctionHistory then ns.AuctionHistory.Initialize() end
     ns.LootIncome.Initialize()
     ns.VendorSales.Initialize()
-    local salesOK, salesError = pcall(ns.Sales.Initialize)          -- reading the mailbox must never stop the start
-    if not salesOK then ns.Debug('Sales ledger not started: ' .. tostring(salesError)) end
+    if ns.Sales then
+        local salesOK, salesError = pcall(ns.Sales.Initialize)      -- reading the mailbox must never stop the start
+        if not salesOK then ns.Debug('Sales ledger not started: ' .. tostring(salesError)) end
+    end
     ns.Titan.Initialize()
     ns.MinimapButton.Attach()
     for _, event in ipairs({ 'BAG_UPDATE_DELAYED', 'BANKFRAME_OPENED', 'BANKFRAME_CLOSED',
@@ -333,7 +346,7 @@ local function start()
         ns.Print('NPC world axes swapped: ' .. tostring(ns.settings.npcAxisSwap))
         ns.NpcNearest()
     end
-    local help = 'Most functions are in the right-click menu of the minimap button (or the Titan Panel entry) and in Esc > Options > AddOns > Titan Gathered. Command with a parameter: /tgf recipe <recipeID> [operations]. /tgf sales lists the auction sales read from the mail. /tgf kills, /tgf quests and /tgf journal open the kill and quest logs and the journal.'
+    local help = 'Most functions are in the right-click menu of the minimap button (or the Titan Panel entry) and in Esc > Options > AddOns > Titan Gathered. Command with a parameter: /tgf recipe <recipeID> [operations]. /tgf sales lists the auction sales read from the mail (Auction house module). /tgf kills, /tgf quests and /tgf journal open the kill and quest logs and the journal.'
     function ns.ShowStatus(toChat)
         local report = toChat and ns.Print or ns.Debug
         local count = ns.inventory:Get(0)
@@ -420,12 +433,16 @@ local function start()
             if not (ns.Options and ns.Options.Open()) then ns.Titan.Menu(UIParent) end
             return
         end
-        if command == 'sales' then ns.Sales.Report(); return end
+        if command == 'sales' then
+            if ns.Sales then ns.Sales.Report() else ns.Print(ns.AUCTION_MODULE_MISSING) end
+            return
+        end
         if command ~= 'status' and not ns.settings.debugMode then ns.Print(help); return end
         ns.ShowStatus(command == 'status')
     end
     SLASH_TITANGATHEREDFOREVERV31 = '/tgf'
     pcall(ns.Legacy.Check)          -- a warning about old folders must never stop the start
+    ns.AuctionModuleNotice()
     pcall(ns.Options.Register)      -- the Options window entry is optional: a failure keeps the addon working
     ns.ScheduleRefresh()
 end

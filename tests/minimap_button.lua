@@ -47,7 +47,9 @@ local function env(settings)
         AddDoubleLine = function(_, left, right) lines[#lines + 1] = left .. ' | ' .. right end,
         Hide = function() lines.shown = false end }
     local ns = { settings = settings or { showMinimapButton = true, minimapButtonAngle = 205 }, IsPublic = function() return true end,
-        Style = { gold = 'gold', gray = 'gray', Text = function(color, text) return '<' .. color .. '>' .. text .. '</>' end },
+        Style = { gold = 'gold', gray = 'gray', orange = 'orange', red = 'red', Text = function(color, text) return '<' .. color .. '>' .. text .. '</>' end,
+            Icon = function(texture) return '[' .. texture .. ']' end,
+            ProfessionIcon = function(id) return ({ Mining = '[mining]', Herbs = '[herbs]', Tailoring = '[tailoring]', Cooking = '[cooking]' })[id] or '' end },
         calls = { browser = 0 } }
     ns.Nav = { Toggle = function() ns.calls.browser = ns.calls.browser + 1 end }
     ns.Titan = { Menu = function(owner) ns.calls.menuOwner = owner end }
@@ -93,9 +95,9 @@ test('the tooltip shows the version, the installed modules with their state, Tit
     local addons = {
         { 'TitanGatheredForever', 'Titan Gathered Forever', true },
         { 'TitanGatheredForever_Mining', 'Titan Gathered Forever: Mining', true },
-        { 'TitanGatheredForever_AuctionItems', 'Titan Gathered Forever: Auction items', true },
+        { 'TitanGatheredForever_AuctionItems', 'Titan Gathered Forever: Auction house', true },
         { 'TitanGatheredForever_Cooking', 'Titan Gathered Forever: Cooking', false },
-        { 'TitanGatheredForever_Discovery', 'Titan Gathered Discovery', true },
+        { 'TitanGatheredForever_Discovery', 'Titan Gathered Forever: Discovery', true },
         { 'Bagnon', 'Bagnon', true },
     }
     C_AddOns = {
@@ -104,23 +106,71 @@ test('the tooltip shows the version, the installed modules with their state, Tit
         IsAddOnLoaded = function(name) for _, a in ipairs(addons) do if a[1] == name then return a[3] end end end,
         GetAddOnMetadata = function(name) return name == 'TitanGatheredForever_Discovery' and '0.1.6' or '0.5.192' end,
     }
-    ns.settings.categories = { Auction = false }
+    ns.settings.categories = { Auction = false, Mining = false }   -- hiding a group in the material list
     ns.MinimapButton.Attach()
     local button = ns.MinimapButton.button
     button.scripts.OnEnter(button)
     eq(lines.owner, button); eq(lines.shown, true)
     eq(lines[1], '<gold>Titan Gathered Forever</> | <ffffffff>v0.5.192</>')
     local text = table.concat(lines, '\n')
-    assert(text:find('<ffffffff>Auction items</> | <gray>Switched off</>', 1, true), text)
-    assert(text:find('<ffffffff>Cooking</> | <gray>Disabled</>', 1, true), text)
-    assert(text:find('<ffffffff>Mining</> | <gray>Active</>', 1, true), text)
-    assert(text:find('<ffffffff>Discovery</><gray> v0.1.6</> | <gray>Active</>', 1, true), text)
+    -- the Auction house module keeps running when its Auction items group is hidden; a profession shows Switched off
+    -- every module has its icon (a coin and a spyglass for the auction house and Discovery); only Discovery shows a version
+    assert(text:find('[Interface\\Icons\\INV_Misc_Coin_01]<ffffffff>Gathered Forever: Auction house</> | <gray>Active</>', 1, true), text)
+    assert(text:find('[cooking]<ffffffff>Gathered Forever: Cooking</> | <orange>Disabled</>', 1, true), text)
+    assert(text:find('[mining]<ffffffff>Gathered Forever: Mining</> | <gray>Switched off</>', 1, true), text)
+    assert(text:find('[Interface\\Icons\\INV_Misc_Spyglass_02]<ffffffff>Gathered Forever: Discovery</> | <gray>Active</>', 1, true), text)
+    assert(not text:find('another version', 1, true), 'all modules match the core')
     assert(not text:find('Bagnon', 1, true))
     local modules = ns.MinimapButton.Modules()
-    eq(#modules, 4); eq(modules[4].label, 'Discovery')        -- by name, Discovery last
+    eq(#modules, 4); eq(modules[4].label, 'Gathered Forever: Discovery')        -- by name, Discovery last
     assert(text:find('Titan Panel</> | <gray>Not installed</>', 1, true), text)
     assert(text:find('Left click', 1, true) and text:find('Right click', 1, true) and text:find('Drag', 1, true))
     button.scripts.OnLeave(button); eq(lines.shown, false)
+    C_AddOns = nil
+end)
+
+test('the modules of the collection that are not installed are listed last as Not installed', function()
+    local ns, lines = env()
+    local addons = {
+        { 'TitanGatheredForever_Herbalism', 'Titan Gathered Forever: Herbalism', true },
+        { 'TitanGatheredForever_Mining', 'Titan Gathered Forever: Mining', true },
+    }
+    C_AddOns = {
+        GetNumAddOns = function() return #addons end,
+        GetAddOnInfo = function(index) return addons[index][1], addons[index][2] end,
+        IsAddOnLoaded = function() return true end,
+        GetAddOnMetadata = function(name) return name == 'TitanGatheredForever_Mining' and '0.5.193' or '0.6.0' end,
+    }
+    ns.KnownModules = {
+        { folder = 'TitanGatheredForever_AuctionItems', id = 'Auction', label = 'Auction house' },
+        { folder = 'TitanGatheredForever_Herbalism', id = 'Herbs', label = 'Herbalism' },
+        { folder = 'TitanGatheredForever_Mining', id = 'Mining', label = 'Mining' },
+        { folder = 'TitanGatheredForever_Tailoring', id = 'Tailoring', label = 'Tailoring' },
+        { folder = 'TitanGatheredForever_Discovery', id = 'Discovery', label = 'Discovery', standalone = true },
+    }
+    ns.settings.categories = { Herbs = false }       -- the settings key of the Herbalism folder is Herbs
+    ns.Style.Separator = function(tip) tip:AddLine('<divider>') end
+    local modules = ns.MinimapButton.Modules()
+    local order = {}
+    for _, row in ipairs(modules) do order[#order + 1] = row.label .. '=' .. row.state end
+    eq(table.concat(order, ','), 'Gathered Forever: Herbalism=off,Gathered Forever: Mining=active,Gathered Forever: Auction house=missing,Gathered Forever: Tailoring=missing,Gathered Forever: Discovery=missing')
+    ns.MinimapButton.Attach()
+    local button = ns.MinimapButton.button
+    button.scripts.OnEnter(button)
+    local text = table.concat(lines, '\n')
+    assert(text:find('[tailoring]<gray>Gathered Forever: Tailoring</> | <red>Not installed</>', 1, true), text)
+    assert(text:find('[herbs]<ffffffff>Gathered Forever: Herbalism</> | <gray>Switched off</>', 1, true), text)
+    -- a module of another version than the core is shown in orange, with a line saying to update it
+    assert(text:find('[mining]<ffffffff>Gathered Forever: Mining</><orange> v0.5.193</> | <green>Active</>', 1, true)
+        or text:find('[mining]<ffffffff>Gathered Forever: Mining</><orange> v0.5.193</> | <gray>Active</>', 1, true), text)
+    assert(text:find('another version than the core: update it', 1, true), text)
+    assert(text:find('[Interface\\Icons\\INV_Misc_Spyglass_02]<gray>Gathered Forever: Discovery</> | <red>Not installed</>', 1, true), text)
+    assert(text:find('Modules not installed: CurseForge or titan-gathered.com', 1, true), text)
+    -- the list ends with Titan Panel, then the divider, then the notes and the click hints
+    local function at(needle) for i, line in ipairs(lines) do if line:find(needle, 1, true) then return i end end end
+    local panel, divider, note, hint = at('Titan Panel'), at('<divider>'), at('Modules not installed'), at('Left click')
+    assert(panel and divider and note and hint, text)
+    assert(panel < divider and divider < note and note < hint, text)
     C_AddOns = nil
 end)
 

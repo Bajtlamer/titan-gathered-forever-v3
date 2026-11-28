@@ -313,20 +313,24 @@ function Titan.Menu(owner)
             end)
         end
         local auction = root:CreateButton('Auction prices')
-        auction:CreateTitle(ns.AuctionScan.Status())
-        auction:CreateButton('Scan now (the auction house must be open)', function() ns.AuctionScan.Run() end)
-        auction:CreateCheckbox('Scan when the auction house opens (at most every 30 minutes)', function() return ns.settings.auctionAutoScan == true end, function()
-            ns.settings.auctionAutoScan = ns.settings.auctionAutoScan ~= true
-        end)
-        auction:CreateCheckbox('Show auction prices in item tooltips', function() return ns.settings.auctionTooltips ~= false end, function()
-            ns.settings.auctionTooltips = ns.settings.auctionTooltips == false
-        end)
-        auction:CreateCheckbox('Fill Buyout in the Sell tab (lowest price minus a percentage)', function() return ns.settings.auctionUndercutEnabled ~= false end, function()
-            ns.settings.auctionUndercutEnabled = ns.settings.auctionUndercutEnabled == false
-        end)
-        auction:CreateButton('Clear scanned prices', function()
-            ns.AuctionScan.Clear(); if ns.CraftingView then ns.CraftingView.Refresh() end
-        end)
+        if not ns.AuctionScan then
+            auction:CreateTitle('Needs the Auction house module')
+        else
+            auction:CreateTitle(ns.AuctionScan.Status())
+            auction:CreateButton('Scan now (the auction house must be open)', function() ns.AuctionScan.Run() end)
+            auction:CreateCheckbox('Scan when the auction house opens (at most every 30 minutes)', function() return ns.settings.auctionAutoScan == true end, function()
+                ns.settings.auctionAutoScan = ns.settings.auctionAutoScan ~= true
+            end)
+            auction:CreateCheckbox('Show auction prices in item tooltips', function() return ns.settings.auctionTooltips ~= false end, function()
+                ns.settings.auctionTooltips = ns.settings.auctionTooltips == false
+            end)
+            auction:CreateCheckbox('Fill Buyout in the Sell tab (lowest price minus a percentage)', function() return ns.settings.auctionUndercutEnabled ~= false end, function()
+                ns.settings.auctionUndercutEnabled = ns.settings.auctionUndercutEnabled == false
+            end)
+            auction:CreateButton('Clear scanned prices', function()
+                ns.AuctionScan.Clear(); if ns.CraftingView then ns.CraftingView.Refresh() end
+            end)
+        end
         local npcs = root:CreateButton('Trainers, vendors and other pins')
         local function redrawNpcs() ns.Map.Update(); ns.Minimap.Update() end
         npcs:CreateCheckbox('Show profession trainers', function() return ns.settings.mapTrainers ~= false end, function()

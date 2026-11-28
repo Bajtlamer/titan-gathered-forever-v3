@@ -173,6 +173,8 @@ test('the footer asks for a scan when there are no prices and says which profess
     ns.KnownRecipes.Record('C1', 'Alchemy', {}, 1, { 101 }); ns.KnownRecipes.Record('C1', 'FirstAid', {}, 1, {})
     B.Refresh()
     assert(not strip(text):find('No auction prices yet', 1, true)); assert(not strip(text):find('Not read yet', 1, true))
+    local scan = ns.AuctionScan; ns.AuctionScan = nil; B.Refresh()                          -- without the Auction house module
+    assert(strip(text):find('Auction prices need the Auction house module', 1, true)); ns.AuctionScan = scan; B.Refresh()
     assert(strip(text):find('1 of 1 recipes could be priced, 1 of them earn a profit.', 1, true)); assert(strip(text):find('* assumes one item per craft', 1, true))
     ns.db.recipeMakes[101] = { 1, 1 }; ns.db.recipeExtra = nil; B.Refresh()                  -- the number made is known: no star, no note
     assert(not strip(text):find('* assumes one item per craft', 1, true))

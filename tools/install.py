@@ -29,7 +29,7 @@ def legacy_for(root, names):
     return legacy_names(names) if names == packager.addon_names(root) else {}
 
 
-def validate(root, destination, names=None):
+def validate(root, destination, names=None, skip=()):
     root = Path(root).resolve()
     destination = Path(destination).expanduser()
     if destination.is_symlink():
@@ -42,6 +42,15 @@ def validate(root, destination, names=None):
         raise ValueError('Source and AddOns destination must not overlap')
     if names is None:
         names = packager.addon_names(root)
+        # --skip leaves installed modules alone (for example one deleted on purpose to test the core without it)
+        unknown = set(skip) - set(names)
+        if unknown:
+            raise ValueError(f'Unknown module to skip: {", ".join(sorted(unknown))}')
+        if 'TitanGatheredForever' in skip:
+            raise ValueError('The core cannot be skipped')
+        names = [name for name in names if name not in skip]
+    elif skip:
+        raise ValueError('--skip applies to the whole set, not to standalone modules')
     elif not names or not set(names) <= set(packager.standalone_names(root)):
         raise ValueError('Only standalone modules can be installed on their own')
     names = list(names)
@@ -57,11 +66,13 @@ def validate(root, destination, names=None):
     return root, destination, names
 
 
-def install(root, destination, apply=False, names=None):
+def install(root, destination, apply=False, names=None, skip=()):
     """Return the preview, or install with retained backups and failure rollback.
 
-    names=None installs the whole published set; a list of standalone modules installs only those and touches nothing else."""
-    root, destination, names = validate(root, destination, names)
+    names=None installs the whole published set; a list of standalone modules installs only those and touches nothing else.
+    skip lists folders of the whole set to leave untouched (not installed, not replaced, not removed)."""
+    requested = names
+    root, destination, names = validate(root, destination, names, skip)
     legacy = legacy_for(root, names)
     selection = None if names == packager.addon_names(root) else names
     if apply and any((destination / name).exists() for name in legacy):
@@ -89,7 +100,7 @@ def install(root, destination, apply=False, names=None):
             with zipfile.ZipFile(archive) as bundle:
                 bundle.extractall(candidate)
             # Validate again after staging, before replacing any installed folders.
-            validate(root, destination, names if selection else None)
+            validate(root, destination, requested, skip)
             backups = destination.parent / '.tgf-v3-backups'
             backups.mkdir(exist_ok=True)
             backup = Path(tempfile.mkdtemp(prefix='candidate-', dir=backups))
@@ -127,13 +138,15 @@ def main():
     parser.add_argument('--addons-dir', type=Path, required=True,
                         help='Existing Forever client Interface/AddOns directory')
     parser.add_argument('--apply', action='store_true', help='Install; default is preview only')
+    parser.add_argument('--skip', action='append', default=[], metavar='FOLDER',
+                        help='Leave this module folder untouched (repeatable), for example TitanGatheredForever_AuctionItems')
     parser.add_argument('--standalone-only', action='store_true',
                         help='Install only the standalone modules (Discovery) and leave every other folder untouched')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     try:
         names = packager.standalone_names(root) if args.standalone_only else None
-        result = install(root, args.addons_dir, apply=args.apply, names=names)
+        result = install(root, args.addons_dir, apply=args.apply, names=names, skip=args.skip)
     except (ValueError, OSError, RuntimeError) as error:
         parser.exit(1, f'Installation failed: {error}\n')
     print(('Installed' if args.apply else 'Preview') + f': {result["destination"]}')

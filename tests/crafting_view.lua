@@ -41,7 +41,7 @@ C_TradeSkillUI={GetRecipeInfo=function(id)if id==2536 then return{recipeID=id,na
  GetProfessionInfoByRecipeID=function()return{professionID=185}end,
  GetRecipeSchematic=function(id)return{recipeID=id,recipeType=1,isRecraft=false,reagentSlotSchematics=slots}end}
 ns.inventory={Get=function(_,id)return{bags=id-1000,bagsState='current',bank=10,bankState='cached',bankObservedAt=100}end}
-for _,file in ipairs({'Style.lua','History.lua','Crafting.lua','Navigation.lua','ColumnSort.lua','Reports.lua','CraftingView.lua','AuctionScan.lua','Economy.lua','Profit.lua'})do assert(loadfile('TitanGatheredForever/'..file))('Titan Gathered Forever',ns)end
+for _,file in ipairs({'Style.lua','History.lua','Crafting.lua','Navigation.lua','ColumnSort.lua','Reports.lua','CraftingView.lua','../TitanGatheredForever_AuctionItems/AuctionScan.lua','Economy.lua','Profit.lua'})do assert(loadfile('TitanGatheredForever/'..file))('Titan Gathered Forever',ns)end
 ns.Style.ItemName=function(id)return'Item '..id end
 ns.history=ns.History.New({})
 ns.history:Observe('a','A',{id='one',kind='Mining',source='123',mapID=4,at=100,complete=true,items={[1001]=1}})

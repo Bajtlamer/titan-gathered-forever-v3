@@ -107,7 +107,9 @@ local function footer(info, rows, scanned)
     if #ns.Profit.Kinds() == 0 then
         notes[#notes + 1] = 'No profession addon with recipes is installed (or all are switched off): there is nothing to list.'
     end
-    if not scanned then notes[#notes + 1] = 'No auction prices yet: scan the auction house (button below its window).' end
+    if not ns.AuctionScan then
+        notes[#notes + 1] = 'Auction prices need the Auction house module: only what a vendor pays is used.'
+    elseif not scanned then notes[#notes + 1] = 'No auction prices yet: scan the auction house (button below its window).' end
     if Browser.mine and #info.unread > 0 then
         local names = {}
         for _, kind in ipairs(info.unread) do names[#names + 1] = ns.NpcSources.Label(kind) end
