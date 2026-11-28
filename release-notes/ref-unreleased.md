@@ -2,6 +2,10 @@
 
 Updated 2026-11-28. Versions up to 0.5.172 are published in release-notes/ref-0.5.172.md. These changes describe source candidates since the latest published versioned notes.
 
+## Narrower Statistics combo boxes, 0.5.182
+
+- The profession, character and view combo boxes of the professions Statistics are narrower (140, 140 and 128 px, 6 px apart instead of 164, 174 and 150), so the search box beside them is about 70 px wider. Release notes renamed to release-notes/ref-0.5.182.md.
+
 ## Statistics search box inside the panel, 0.5.181
 
 - Fixed: the search box of the professions Statistics (0.5.173) was placed at fixed coordinates and ran past the right edge of the panel, over the profession buttons beside the game window. It is now anchored between the view combo box and the right edge of the panel, with its label to its left. Release notes renamed to release-notes/ref-0.5.181.md.

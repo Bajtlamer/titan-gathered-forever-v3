@@ -603,7 +603,9 @@ test('profession statistics attach below the native window, preserve recipe coun
     -- The views are chosen in a combo box on the row of the pickers (the portrait and the skill bar of the native window
     -- cover the top-left corner of the panel), like the other pickers.
     local viewPicker=view.panel.viewPicker
-    eq(viewPicker.point[5],-40);assert(viewPicker.point[4]>=360,'right of the pickers')
+    eq(viewPicker.point[5],-40);eq(viewPicker.point[4],304,'right of the pickers')
+    -- the pickers are narrow enough to leave the search box room: profession 12+140, character 158+140, view 304+128
+    eq(view.panel.kindPicker.point[4],12);eq(view.panel.characterPicker.point[4],158)
     local viewOptions=view.panel.ViewOptions()
     eq(#viewOptions,3);eq(viewOptions[1].value,'attempts');eq(viewOptions[1].label,'Attempts')
     eq(viewOptions[2].label,'Materials');eq(viewOptions[3].value,'gathered');eq(viewOptions[3].label,'Gathered items')

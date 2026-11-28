@@ -1,6 +1,6 @@
-# Titan Gathered Forever 0.5.181
+# Titan Gathered Forever 0.5.182
 
-Update from 0.5.172. This text is the changelog for the website and the release page. Versions 0.5.173 to 0.5.180 were internal steps and are included here. New files were added and the manifests changed: fully restart WoW after updating, a reload is not enough.
+Update from 0.5.172. This text is the changelog for the website and the release page. Versions 0.5.173 to 0.5.181 were internal steps and are included here. New files were added and the manifests changed: fully restart WoW after updating, a reload is not enough.
 
 ## Added
 
@@ -20,7 +20,7 @@ Update from 0.5.172. This text is the changelog for the website and the release 
 ## Fixed
 
 - The Reagent use tab of the main window showed the same estimate as Statistics > Materials in the professions window. The duplicate tab is removed; its columns are in Materials.
-- The search box of the professions Statistics ran past the right edge of the panel, over the profession buttons beside the window. It now stretches from the view combo box to the edge and fits any window width.
+- The search box of the professions Statistics ran past the right edge of the panel, over the profession buttons beside the window. It now stretches from the view combo box to the edge and fits any window width, and the three combo boxes are narrower to leave it room.
 
 ## Upgrading
 

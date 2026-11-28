@@ -675,14 +675,14 @@ local function createPanel(frame)
         return { { value = 'attempts', label = 'Attempts' }, { value = 'materials', label = 'Materials' },
             { value = 'gathered', label = 'Gathered items' } }
     end
-    panel.viewPicker = ns.Nav.Dropdown(panel, 372, -40, 150, panel.ViewOptions, function() return panel.view end, setView)
+    panel.viewPicker = ns.Nav.Dropdown(panel, 304, -40, 128, panel.ViewOptions, function() return panel.view end, setView)
     -- A search box beside the pickers (Escape clears it), for the Attempts and Materials lists.
     -- The box stretches from beside the view picker to the right edge of the panel, whose width follows the
     -- game's professions window, so it never runs past the edge.
     local search = CreateFrame('EditBox', nil, panel, 'InputBoxTemplate')
     panel.search = search
     search:SetHeight(22)
-    search:SetPoint('TOPLEFT', panel.viewPicker, 'TOPRIGHT', 62, -1)
+    search:SetPoint('TOPLEFT', panel.viewPicker, 'TOPRIGHT', 58, -1)
     search:SetPoint('TOPRIGHT', panel, 'TOPRIGHT', -18, -41)
     search:SetAutoFocus(false)
     panel.searchLabel = text(panel, 'GameFontNormalSmall')
@@ -701,7 +701,7 @@ local function createPanel(frame)
     local back = button(panel, 'Back', 62, function() panel:Hide() end)
     back:SetPoint('TOPRIGHT', panel, 'TOPRIGHT', -12, -10)
 
-    panel.kindPicker = ns.Nav.Dropdown(panel, 12, -40, 164, function() return View.KindOptions(panel) end,
+    panel.kindPicker = ns.Nav.Dropdown(panel, 12, -40, 140, function() return View.KindOptions(panel) end,
         function() if panel.view == 'gathered' then return gatheredKind(panel) end return panel.kind end,
         function(value)
             if panel.view == 'gathered' then panel.gatheredKind = value else panel.kind = value end
@@ -714,7 +714,7 @@ local function createPanel(frame)
         panel.kindPicker.Sync()
         refreshPanel(panel)
     end
-    panel.characterPicker = ns.Nav.Dropdown(panel, 184, -40, 174, characterOptions, function() return panel.character end,
+    panel.characterPicker = ns.Nav.Dropdown(panel, 158, -40, 140, characterOptions, function() return panel.character end,
         function(value) panel.character, panel.offset = value, 0; refreshPanel(panel) end)
     local header = CreateFrame('Frame', nil, panel)
     header:SetPoint('TOPLEFT', panel, 'TOPLEFT', 12, -94)
