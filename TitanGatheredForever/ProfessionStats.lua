@@ -677,12 +677,17 @@ local function createPanel(frame)
     end
     panel.viewPicker = ns.Nav.Dropdown(panel, 372, -40, 150, panel.ViewOptions, function() return panel.view end, setView)
     -- A search box beside the pickers (Escape clears it), for the Attempts and Materials lists.
-    panel.searchLabel = text(panel, 'GameFontNormalSmall')
-    panel.searchLabel:SetPoint('TOPLEFT', panel, 'TOPLEFT', 536, -46)
-    panel.searchLabel:SetText('Search')
+    -- The box stretches from beside the view picker to the right edge of the panel, whose width follows the
+    -- game's professions window, so it never runs past the edge.
     local search = CreateFrame('EditBox', nil, panel, 'InputBoxTemplate')
     panel.search = search
-    search:SetSize(170, 22); search:SetPoint('TOPLEFT', panel, 'TOPLEFT', 590, -41); search:SetAutoFocus(false)
+    search:SetHeight(22)
+    search:SetPoint('TOPLEFT', panel.viewPicker, 'TOPRIGHT', 62, -1)
+    search:SetPoint('TOPRIGHT', panel, 'TOPRIGHT', -18, -41)
+    search:SetAutoFocus(false)
+    panel.searchLabel = text(panel, 'GameFontNormalSmall')
+    panel.searchLabel:SetPoint('RIGHT', search, 'LEFT', -10, 0)
+    panel.searchLabel:SetText('Search')
     search:SetScript('OnEscapePressed', function(self)
         self:ClearFocus()
         if self:GetText() ~= '' then self:SetText(''); panel.searchText, panel.offset = nil, 0; refreshPanel(panel) end

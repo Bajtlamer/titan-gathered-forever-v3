@@ -612,6 +612,8 @@ test('profession statistics attach below the native window, preserve recipe coun
     -- the columns of the removed Reagent use tab: the leading profession and its share
     assert(view.panel.lines[1].cells[2].text~='');assert(view.panel.lines[1].cells[3].text:find('%',1,true))
     eq(view.panel.head[2].text,ns.Style.Label('Leading profession'));eq(view.panel.head[3].text,ns.Style.Label('Share'))
+    -- the search box ends at the right edge of the panel (it ran past it over the profession tabs)
+    local edge=view.panel.search.point;eq(edge[1],'TOPRIGHT');eq(edge[2],view.panel);eq(edge[3],'TOPRIGHT');eq(edge[4],-18)
     -- the search keeps the matching materials; Escape clears it
     view.panel.search:SetText('zzz');view.panel.search.scripts.OnTextChanged(view.panel.search,true)
     eq(#view.panel.data,0);assert(view.panel.empty.text:find('Nothing matches this search.',1,true))

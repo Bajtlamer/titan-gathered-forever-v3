@@ -2,6 +2,10 @@
 
 Updated 2026-11-28. Versions up to 0.5.172 are published in release-notes/ref-0.5.172.md. These changes describe source candidates since the latest published versioned notes.
 
+## Statistics search box inside the panel, 0.5.181
+
+- Fixed: the search box of the professions Statistics (0.5.173) was placed at fixed coordinates and ran past the right edge of the panel, over the profession buttons beside the game window. It is now anchored between the view combo box and the right edge of the panel, with its label to its left. Release notes renamed to release-notes/ref-0.5.181.md.
+
 ## Icons in Statistics > Attempts and profession icons, 0.5.180
 
 - Statistics > Attempts shows the crafted item (else the recipe spell) or the gathering profession icon, which 0.5.179 missed. Style.ProfessionIcon gives each profession a game icon (Trade_* and similar, weapon masters a sword): the trainers of the Trainers tab, the Profession columns of Unlearned recipes and Crafting profit, the profession tabs and headings of Statistics > Gathered items, Learned professions and the Titan Panel list. Release notes renamed to release-notes/ref-0.5.180.md.
