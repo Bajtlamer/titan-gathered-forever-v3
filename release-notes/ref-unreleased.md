@@ -2,6 +2,10 @@
 
 Updated 2026-11-28. Versions up to 0.5.172 are published in release-notes/ref-0.5.172.md. These changes describe source candidates since the latest published versioned notes.
 
+## Quests ready to turn in, 0.5.189
+
+- QuestsView marks an open quest as ready (status 'ready', label Ready to turn in, yellow) when JournalPins.Ready says so (C_QuestLog.ReadyForTurnIn or IsComplete), only when the list shows this character or all characters, because only the logged-in character's quest log is readable. The status filter gains Ready to turn in; In progress keeps the open ones. The quest name gets the game's mark of its state (GossipFrame ActiveQuestIcon, IncompleteQuestIcon, RaidFrame ReadyCheck-Ready and ReadyCheck-NotReady), drawn whole with Style.Icon(texture, size, true). The Quest column is 235 px and Status 110 px. JournalPins.LogChanged refreshes the list when a quest changes state.
+
 ## The Options divider on every list tab, 0.5.188
 
 - The owner accepted the look of 0.5.187. The line is Nav.Divider (moved from ListWindow): every ListWindow tab draws it unless its spec sets divider = false (Journal and My materials), and Unlearned recipes, Trainers and Crafting profit draw it at -125 with their rows, scroll bars and empty texts 8 px lower (-140); the reports (Lifetime materials, Observed chances, PvP Board) start their content at 140 instead of 132. The Crafting profit footer moves from -492 to -500 to stay clear of the last row. Economy keeps its banded table without the line.

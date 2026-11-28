@@ -88,7 +88,10 @@ function Pins.LogChanged()
     if signature ~= Pins.signature then
         local first = Pins.signature == nil
         Pins.signature = signature
-        if not first then Pins.Redraw() end
+        if not first then
+            Pins.Redraw()
+            if ns.QuestsView and ns.QuestsView.Refresh then ns.QuestsView.Refresh() end
+        end
     end
 end
 

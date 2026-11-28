@@ -64,11 +64,13 @@ end
 -- Icons before the names in list rows: inline texture text with the icon border cropped, '' when the client has no
 -- icon. Lists use ItemLabel (icon and name); sorting and search keep using the plain name.
 Style.ICON_SIZE = 14
-function Style.Icon(texture, size)
+function Style.Icon(texture, size, whole)
     if texture == nil or (ns.IsPublic and not ns.IsPublic(texture)) then return '' end
     if type(texture) ~= 'number' and type(texture) ~= 'string' then return '' end
     if texture == '' or texture == 0 then return '' end
     size = size or Style.ICON_SIZE
+    -- whole: a mark such as a quest sign is drawn as it is; an item icon loses its border.
+    if whole then return string.format('|T%s:%d:%d:0:0|t ', tostring(texture), size, size) end
     return string.format('|T%s:%d:%d:0:0:64:64:5:59:5:59|t ', tostring(texture), size, size)
 end
 

@@ -112,6 +112,7 @@ test('list rows put the item icon before the name, with the border cropped', fun
     eq(S.ProfessionIcon('Herbalism'), S.ProfessionIcon('Herbs'))
     eq(S.ProfessionIcon('Disenchanting'), S.ProfessionIcon('Enchanting'))
     eq(S.ProfessionIcon('Unknown'), '')
+    eq(S.Icon('Interface\\GossipFrame\\ActiveQuestIcon', nil, true), '|TInterface\\GossipFrame\\ActiveQuestIcon:14:14:0:0|t ')
     C_Item, C_Spell, ITEM_QUALITY_COLORS = nil, nil, nil
 end)
 

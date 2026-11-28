@@ -322,6 +322,39 @@ test('the Quests tab lists quests with names from the game, status filter, money
     assert(strip(w.footer:GetText()):find('Listed: 1 turn-ins, 450 experience, 250c', 1, true))
 end)
 
+test('a quest of this character whose objectives are done is ready to turn in, with the game marks before the names', function()
+    local ns = newNs()
+    installFrames()
+    loadViews(ns)
+    ns.Style.Icon = function(texture, _, whole) return whole and ('[' .. texture:match('[^\\]+$') .. ']') or '' end
+    ns.db.questIncome = { Realm = { ['Player-1-AAA'] = {
+        [7] = { copper = 250, turnIns = 1, firstAt = 50, lastAt = 50 },
+        [8] = { copper = 0, turnIns = 0, acceptedAt = 60, accepts = 1 },
+        [10] = { copper = 0, turnIns = 0, acceptedAt = 70, accepts = 1 },
+        [11] = { copper = 0, turnIns = 0, abandons = 1, abandonedAt = 40 },
+    } } }
+    local ready = _G.C_QuestLog.ReadyForTurnIn
+    _G.C_QuestLog.ReadyForTurnIn = function(id) return id == 10 end
+    ns.Nav.Open('quests')
+    local view, w = ns.Nav.views.journal, ns.Nav.views.journal.window
+    local first = cellsOf(w, 1)                                      -- newest activity first: quest 10
+    eq(first[1], '[ActiveQuestIcon]Quest 10'); eq(first[2], 'Ready to turn in')
+    local second = cellsOf(w, 2)
+    eq(second[1], '[IncompleteQuestIcon]Quest 8'); eq(second[2], 'In progress')
+    eq(cellsOf(w, 3)[1], '[ReadyCheck-Ready]Wolves Across the Border')
+    eq(cellsOf(w, 4)[1], '[ReadyCheck-NotReady]Quest 11')
+    ns.QuestsView.status = 'ready'; view.Changed()
+    eq(view.total, 1)
+    ns.QuestsView.status = 'open'; view.Changed()
+    eq(view.total, 1)
+    -- another character's quest log cannot be read: its quests stay in progress
+    ns.characterID = 'Player-1-BBB'
+    ns.QuestsView.status, ns.QuestsView.character = 'all', 'Player-1-AAA'; view.Changed()
+    eq(cellsOf(w, 1)[2], 'In progress')
+    ns.QuestsView.character, ns.characterID = false, 'Player-1-AAA'
+    _G.C_QuestLog.ReadyForTurnIn = ready
+end)
+
 test('durations are short and readable', function()
     local ns = newNs()
     installFrames()
