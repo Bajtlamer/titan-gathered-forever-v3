@@ -14,9 +14,14 @@ Version 0.6.0 is a milestone. Titan Gathered Forever no longer needs Titan Panel
   - The chat says it once after the update, when the module is missing or disabled.
 - Your scanned prices and recorded sales stay in the core's saved data. Disabling the module keeps them; enabling it again brings them back.
 
+## Added
+
+- The minimap button tooltip also lists the modules of the collection that are not installed, in gray as Not installed, after the installed ones, with a line saying where to get them (CurseForge or titan-gathered.com).
+
 ## Fixed
 
 - The minimap button tooltip showed the Auction module as Switched off when the Auction items group was hidden in the material list, although the module kept running. Hiding the group now only hides the group.
+- The minimap button tooltip never showed Herbalism as Switched off when it was hidden in the settings, because the folder name (Herbalism) differs from its settings key (Herbs).
 
 ## Upgrading
 

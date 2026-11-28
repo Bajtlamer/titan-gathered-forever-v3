@@ -125,6 +125,40 @@ test('the tooltip shows the version, the installed modules with their state, Tit
     C_AddOns = nil
 end)
 
+test('the modules of the collection that are not installed are listed last as Not installed', function()
+    local ns, lines = env()
+    local addons = {
+        { 'TitanGatheredForever_Herbalism', 'Titan Gathered Forever: Herbalism', true },
+        { 'TitanGatheredForever_Mining', 'Titan Gathered Forever: Mining', true },
+    }
+    C_AddOns = {
+        GetNumAddOns = function() return #addons end,
+        GetAddOnInfo = function(index) return addons[index][1], addons[index][2] end,
+        IsAddOnLoaded = function() return true end,
+        GetAddOnMetadata = function() return '0.6.0' end,
+    }
+    ns.KnownModules = {
+        { folder = 'TitanGatheredForever_AuctionItems', id = 'Auction', label = 'Auction house' },
+        { folder = 'TitanGatheredForever_Herbalism', id = 'Herbs', label = 'Herbalism' },
+        { folder = 'TitanGatheredForever_Mining', id = 'Mining', label = 'Mining' },
+        { folder = 'TitanGatheredForever_Tailoring', id = 'Tailoring', label = 'Tailoring' },
+        { folder = 'TitanGatheredForever_Discovery', id = 'Discovery', label = 'Discovery', standalone = true },
+    }
+    ns.settings.categories = { Herbs = false }       -- the settings key of the Herbalism folder is Herbs
+    local modules = ns.MinimapButton.Modules()
+    local order = {}
+    for _, row in ipairs(modules) do order[#order + 1] = row.label .. '=' .. row.state end
+    eq(table.concat(order, ','), 'Herbalism=off,Mining=active,Auction house=missing,Tailoring=missing,Discovery=missing')
+    ns.MinimapButton.Attach()
+    local button = ns.MinimapButton.button
+    button.scripts.OnEnter(button)
+    local text = table.concat(lines, '\n')
+    assert(text:find('<gray>Tailoring</> | <gray>Not installed</>', 1, true), text)
+    assert(text:find('<ffffffff>Herbalism</> | <gray>Switched off</>', 1, true), text)
+    assert(text:find('Modules not installed: CurseForge or titan-gathered.com', 1, true), text)
+    C_AddOns = nil
+end)
+
 test('the Titan Panel line reads the Titan Panel addon itself, not the panel entry', function()
     local addons = { { 'Titan', true } }
     C_AddOns = {

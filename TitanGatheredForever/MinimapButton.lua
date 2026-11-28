@@ -12,29 +12,34 @@ Button.HINTS = {
     'Drag: move around the minimap',
 }
 
--- The addons of the collection that are installed, from the game's addon list: each module with its state, Active
--- (loaded and switched on), Switched off (loaded, hidden in the TGF settings) or Disabled (off in the AddOns list).
--- Discovery has its own version line, so its version is shown.
+-- The modules of the collection, from the game's addon list: each installed module with its state, Active (loaded and
+-- switched on), Switched off (loaded, hidden in the TGF settings) or Disabled (off in the AddOns list), and every module
+-- of the collection that is not in the list as Not installed (ns.KnownModules, generated with the catalogue). Discovery
+-- has its own version line, so its version is shown.
 local PREFIX = 'TitanGatheredForever_'
-local moduleIDs = { AuctionItems = 'Auction' }
 function Button.Modules()
     local api = C_AddOns
     if not api or not api.GetNumAddOns or not api.GetAddOnInfo then return {} end
     local loaded = api.IsAddOnLoaded or IsAddOnLoaded
-    local rows = {}
+    local known = {}
+    for _, module in ipairs(ns.KnownModules or {}) do known[module.folder] = module end
+    local rows, seen = {}, {}
     local okCount, count = pcall(api.GetNumAddOns)
     for index = 1, okCount and type(count) == 'number' and count or 0 do
         local ok, name, title = pcall(api.GetAddOnInfo, index)
         if ok and type(name) == 'string' and name:sub(1, #PREFIX) == PREFIX then
+            seen[name] = true
             local suffix = name:sub(#PREFIX + 1)
+            local module = known[name]
             local label = type(title) == 'string' and title:gsub('|c%x%x%x%x%x%x%x%x', ''):gsub('|r', '') or suffix
             label = label:gsub('^Titan Gathered Forever: ', ''):gsub('^Titan Gathered ', '')
-            local row = { name = name, id = moduleIDs[suffix] or suffix, label = label, discovery = suffix == 'Discovery' }
+            -- the settings key of the module (Herbs for the Herbalism folder), from the generated list
+            local row = { name = name, id = module and module.id or suffix, label = label, discovery = suffix == 'Discovery' }
             local okLoaded, isLoaded = false, nil
             if loaded then okLoaded, isLoaded = pcall(loaded, name) end
             if not okLoaded or isLoaded ~= true then row.state = 'disabled'
             -- Hiding the Auction items group only hides the material list group: the Auction house features keep running.
-            elseif not row.discovery and suffix ~= 'AuctionItems' and ns.settings and type(ns.settings.categories) == 'table'
+            elseif not row.discovery and row.id ~= 'Auction' and ns.settings and type(ns.settings.categories) == 'table'
                 and ns.settings.categories[row.id] == false then row.state = 'off'
             else row.state = 'active' end
             if row.discovery and api.GetAddOnMetadata then
@@ -44,14 +49,23 @@ function Button.Modules()
             rows[#rows + 1] = row
         end
     end
+    for _, module in ipairs(ns.KnownModules or {}) do
+        if not seen[module.folder] then
+            rows[#rows + 1] = { name = module.folder, id = module.id, label = module.label, state = 'missing',
+                discovery = module.standalone == true }
+        end
+    end
+    -- installed modules first, then Discovery, then what is not installed, each by name
+    local function rank(row) return (row.state == 'missing' and 2 or 0) + (row.discovery and 1 or 0) end
     table.sort(rows, function(a, b)
-        if a.discovery ~= b.discovery then return not a.discovery end
+        if rank(a) ~= rank(b) then return rank(a) < rank(b) end
         return a.label < b.label
     end)
     return rows
 end
 
-local STATES = { active = { 'Active', 'green' }, off = { 'Switched off', 'gray' }, disabled = { 'Disabled', 'orange' } }
+local STATES = { active = { 'Active', 'green' }, off = { 'Switched off', 'gray' }, disabled = { 'Disabled', 'orange' },
+    missing = { 'Not installed', 'gray' } }
 
 -- What the button shows when pointed at: the version, the installed modules with their state, the Titan Panel
 -- entry and the clicks.
@@ -68,12 +82,17 @@ function Button.Tooltip(tip)
     tip:AddLine(' ')
     tip:AddLine(Style.Text(Style.gold, 'Modules'))
     if #modules == 0 then tip:AddLine(Style.Text(Style.gray, 'No profession module installed.')) end
+    local missing = false
     for _, row in ipairs(modules) do
         local state = STATES[row.state]
         local icon = Style.ProfessionIcon and Style.ProfessionIcon(row.id) or ''
-        local label = icon .. Style.Text(Style.white or 'ffffffff', row.label) .. (row.version and Style.Text(Style.gray, ' v' .. row.version) or '')
+        -- a module that is not installed is named in gray, so the installed ones stand out
+        local color = row.state == 'missing' and Style.gray or (Style.white or 'ffffffff')
+        local label = icon .. Style.Text(color, row.label) .. (row.version and Style.Text(Style.gray, ' v' .. row.version) or '')
         tip:AddDoubleLine(label, Style.Text(Style[state[2]] or Style.gray, state[1]))
+        missing = missing or row.state == 'missing'
     end
+    if missing then tip:AddLine(Style.Text(Style.gray, 'Modules not installed: CurseForge or titan-gathered.com')) end
     local panel = ns.Titan and ns.Titan.PanelState and ns.Titan.PanelState() or 'missing'
     local panelStates = { active = { 'Active', 'green' }, disabled = { 'Disabled', 'orange' }, missing = { 'Not installed', 'gray' } }
     local shown = panelStates[panel] or panelStates.missing

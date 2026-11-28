@@ -463,6 +463,12 @@ def generate(root, check=False):
                             {'itemCount': len(module['items']), 'recipeCount': len(module['recipes']),
                              'bookCount': len(module.get('book', {}))})
     outputs['catalogue/modules.json'] = json.dumps(module_index, indent=2) + '\n'
+    # Every module of the collection, installed or not, so the core can list the missing ones (minimap button tooltip).
+    standalone = json.loads((root / 'catalogue/standalone-modules.json').read_text())
+    known = [{'folder': m['folder'], 'id': m['id'], 'label': MODULE_EXTRAS.get(m['id'], {}).get('title', m['label'])}
+             for m in modules.values()]
+    known += [{'folder': m['folder'], 'id': m['id'], 'label': m['label'], 'standalone': True} for m in standalone]
+    outputs['TitanGatheredForever/Data/Metadata.lua'] += 'ns.KnownModules = ' + lua(known) + '\n'
     outputs['catalogue/reconciliation.json'] = json.dumps(reconciliation, indent=2, sort_keys=True) + '\n'
     old_ids = sorted({row['itemID'] for row in legacy})
     audit = {
