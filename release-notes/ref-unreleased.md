@@ -1,6 +1,10 @@
 # Unreleased development updates
 
-Updated 2026-11-27. Versions up to 0.5.172 are published in release-notes/ref-0.5.172.md. These changes describe source candidates since the latest published versioned notes.
+Updated 2026-11-28. Versions up to 0.5.172 are published in release-notes/ref-0.5.172.md. These changes describe source candidates since the latest published versioned notes.
+
+## Settings in the game Options, 0.5.174
+
+- The settings are also in the game Options window, AddOns tab, under Titan Gathered Forever, with a page per subject: General (minimap button, movable windows, window positions, icon appearance and buttons that open the windows), Titan Panel list, Professions, Map pins, Gathering spots, Map materials (a combo box picks the gathering profession), Travel routes, Auction house and Diagnostics. Each switch writes the same saved setting as the Titan Panel menu and runs the same update, and a page reads the settings again whenever it is shown, so the two never disagree. The Titan menu starts with Options..., and `/tgf settings` opens the Options page (the menu on a client without the Options window). New file OptionsPanel.lua: a full client restart is needed.
 
 ## Reagent use moved to Statistics, 0.5.173
 

@@ -8,7 +8,7 @@ Website: [titan-gathered.com](https://www.titan-gathered.com/).
 
 ## Current version
 
-The current stable candidate is version `0.5.173` and targets **WoW Forever 1.60.1, interface 16001**, with Titan Panel installed separately. The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); the published versions are in [ref-0.5.172.md](release-notes/ref-0.5.172.md) and earlier notes. Other WoW editions are outside this project's scope.
+The current stable candidate is version `0.5.174` and targets **WoW Forever 1.60.1, interface 16001**, with Titan Panel installed separately. The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); the published versions are in [ref-0.5.172.md](release-notes/ref-0.5.172.md) and earlier notes. Other WoW editions are outside this project's scope.
 
 A separate, optional data-collection module, [Titan Gathered Discovery](#discovery-data-collection-module) 0.1.0, has its own version line and is released apart from this core; it is installed locally and awaits live acceptance.
 
@@ -110,6 +110,8 @@ The tool changes the old `TitanGathered2ForeverDB` assignment to `TitanGatheredF
 ## Use TGF v3
 
 Right-click the Titan entry for Display, Professions, Additional items, Icon appearance, Flight points, Trainers, vendors and other pins, Gathering map, History and sources, and Diagnostics settings. Data collection is always on: history, map spots, profession actions, production, PvP, rare loot and trainer and vendor windows are recorded whatever the settings say, and only disabling an addon in the AddOns list stops it. Settings only decide what is shown. Map spots are not recorded inside instances, but the statistics there are.
+
+The same settings are in the game Options window (Esc > Options > AddOns > Titan Gathered Forever), with a page per subject: General (minimap button, movable windows, window positions, icon appearance, and buttons that open the main window, Profession statistics, the Journal and the export window), Titan Panel list, Professions, Map pins, Gathering spots, Map materials, Travel routes, Auction house and Diagnostics. A change there is the same change as in the menu. Options... at the top of the menu and `/tgf settings` open it.
 
 Everything that needs no parameter is in the right-click menu of the Titan entry:
 

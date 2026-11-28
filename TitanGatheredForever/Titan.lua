@@ -204,6 +204,9 @@ function Titan.Menu(owner)
     Titan.Hide()
     MenuUtil.CreateContextMenu(owner, function(_, root)
         root:CreateTitle(ns.Style.Text(ns.Style.gold, ns.L.title))
+        if ns.Options and ns.Options.category then
+            root:CreateButton('Options...', function() ns.Options.Open() end)
+        end
         local display = root:CreateButton('Display')
         local function toggle(parent, label, key)
             parent:CreateCheckbox(label, function() return ns.settings[key] end, function()

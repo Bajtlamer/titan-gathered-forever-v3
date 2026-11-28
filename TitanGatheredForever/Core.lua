@@ -415,13 +415,17 @@ local function start()
         if command == 'production' or command == 'actions' then ns.ProfessionStats.Open(); return end
         if command == 'history' or command == 'chances' or command == 'pvp' then ns.Reports.Show(command); return end
         if command == 'kills' or command == 'quests' or command == 'journal' then ns.Nav.Open(command); return end
-        if command == 'settings' then ns.Titan.Menu(UIParent); return end
+        if command == 'settings' then
+            if not (ns.Options and ns.Options.Open()) then ns.Titan.Menu(UIParent) end
+            return
+        end
         if command == 'sales' then ns.Sales.Report(); return end
         if command ~= 'status' and not ns.settings.debugMode then ns.Print(help); return end
         ns.ShowStatus(command == 'status')
     end
     SLASH_TITANGATHEREDFOREVERV31 = '/tgf'
     pcall(ns.Legacy.Check)          -- a warning about old folders must never stop the start
+    pcall(ns.Options.Register)      -- the Options window entry is optional: a failure keeps the addon working
     ns.ScheduleRefresh()
 end
 
