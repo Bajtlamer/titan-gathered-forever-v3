@@ -1,6 +1,6 @@
 # Unreleased development updates
 
-Updated 2026-11-28. Versions up to 0.5.193 are published in release-notes/ref-0.5.193.md (Discovery 0.1.6 in release-notes/ref-discovery-0.1.6.md); the sections below up to 0.5.193 are its history. These changes describe source candidates since the latest published versioned notes.
+Updated 2026-11-28. Versions up to 0.6.0 are published in release-notes/ref-0.6.0.md (Discovery 0.1.8 in release-notes/ref-discovery-0.1.8.md); the sections below up to 0.6.0 are its history. These changes describe source candidates since the latest published versioned notes.
 
 ## Auction house module, 0.6.0
 

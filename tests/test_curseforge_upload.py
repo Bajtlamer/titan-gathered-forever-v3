@@ -21,6 +21,15 @@ class UploadLedgerTests(unittest.TestCase):
             self.assertFalse(upload.already_sent(ledger, 1810955, 'a-0.5.152-core.zip'))
             self.assertEqual(json.loads(ledger.read_text())['1810955']['a-0.5.151-core.zip'], 9777064)
 
+    def test_a_module_with_its_own_notes_gets_them_and_the_others_the_short_note(self):
+        with tempfile.TemporaryDirectory() as folder:
+            (Path(folder) / 'release-notes').mkdir()
+            (Path(folder) / 'release-notes' / 'ref-9.9.9-TitanGatheredForever_AuctionItems.md').write_text('Auction house notes')
+            self.assertEqual(upload.changelog('TitanGatheredForever_AuctionItems', '9.9.9', 'core', root=folder), 'Auction house notes')
+            self.assertIn('Version number aligned', upload.changelog('TitanGatheredForever_Mining', '9.9.9', 'core', root=folder))
+            self.assertEqual(upload.changelog('TitanGatheredForever', '9.9.9', 'core', root=folder), 'core')
+        self.assertIn('Auction house', upload.changelog('TitanGatheredForever_AuctionItems', '0.6.0', 'core'))
+
 
 if __name__ == '__main__':
     unittest.main()

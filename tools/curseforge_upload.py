@@ -93,9 +93,13 @@ def files_for(release_dir, release):
     return found
 
 
-def changelog(folder, release, notes):
+def changelog(folder, release, notes, root=ROOT):
     if folder == 'TitanGatheredForever':
         return notes
+    # A module that changed in this release has its own notes: release-notes/ref-<version>-<folder>.md
+    own = Path(root) / 'release-notes' / f'ref-{release}-{folder}.md'
+    if own.is_file():
+        return own.read_text()
     return ('Version number aligned with the Titan Gathered Forever core %s. The catalogue data of this module is '
             'unchanged. Requires the core of the same version; Titan Panel is optional.' % release)
 
