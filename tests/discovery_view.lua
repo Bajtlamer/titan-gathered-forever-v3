@@ -400,7 +400,7 @@ test('the window has two tabs: the collected data and how the module works', fun
     local ns = compared()
     ns.Window.Show()
     local window = ns.Window.window
-    eq(window.TitleText.text, 'Titan Gathered Discovery')
+    eq(window.TitleText.text, 'Titan Gathered Discovery v0.1.0')
     eq(window.page, 'data'); eq(window.pages.data.shown, true); eq(window.pages.guide.shown, false)
     assert(window.tabButtons.data and window.tabButtons.guide, 'both tabs exist')
     window.tabButtons.guide.OnClick()

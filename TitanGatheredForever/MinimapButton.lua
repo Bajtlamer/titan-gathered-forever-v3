@@ -15,7 +15,7 @@ Button.HINTS = {
 -- The modules of the collection, from the game's addon list: each installed module with its state, Active (loaded and
 -- switched on), Switched off (loaded, hidden in the TGF settings) or Disabled (off in the AddOns list), and every module
 -- of the collection that is not in the list as Not installed (ns.KnownModules, generated with the catalogue). Every
--- installed module's version is read, but shown only for Discovery and for a module that does not match the core.
+-- installed module's version is read, but shown only for a module that does not match the core (never Discovery).
 local PREFIX = 'TitanGatheredForever_'
 local FOLDER_IDS = { AuctionItems = 'Auction', Herbalism = 'Herbs' }   -- when the generated list is missing
 function Button.Modules()
@@ -100,10 +100,10 @@ function Button.Tooltip(tip)
         -- a module that is not installed is named in gray and its state is red, so it stands out from the installed ones
         local color = row.state == 'missing' and Style.gray or (Style.white or 'ffffffff')
         -- The modules are released with the core, so their version is shown only when it differs from the core's (orange:
-        -- update it); Discovery has its own version line and always shows it.
+        -- update it). Discovery has its own version line, shown in its window title instead.
         local stale = row.version and not row.discovery and version ~= '' and row.version ~= version
         local label = icon .. Style.Text(color, row.label)
-            .. ((row.discovery or stale) and row.version and Style.Text(stale and (Style.orange or Style.gray) or Style.gray, ' v' .. row.version) or '')
+            .. (stale and Style.Text(Style.orange or Style.gray, ' v' .. row.version) or '')
         outdated = outdated or stale
         tip:AddDoubleLine(label, Style.Text(Style[state[2]] or Style.gray, state[1]))
         missing = missing or row.state == 'missing'

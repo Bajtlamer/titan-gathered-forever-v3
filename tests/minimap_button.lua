@@ -118,7 +118,7 @@ test('the tooltip shows the version, the installed modules with their state, Tit
     assert(text:find('[Interface\\Icons\\INV_Misc_Coin_01]<ffffffff>Gathered Forever: Auction house</> | <gray>Active</>', 1, true), text)
     assert(text:find('[cooking]<ffffffff>Gathered Forever: Cooking</> | <orange>Disabled</>', 1, true), text)
     assert(text:find('[mining]<ffffffff>Gathered Forever: Mining</> | <gray>Switched off</>', 1, true), text)
-    assert(text:find('[Interface\\Icons\\INV_Misc_Spyglass_02]<ffffffff>Gathered Discovery</><gray> v0.1.6</> | <gray>Active</>', 1, true), text)
+    assert(text:find('[Interface\\Icons\\INV_Misc_Spyglass_02]<ffffffff>Gathered Discovery</> | <gray>Active</>', 1, true), text)
     assert(not text:find('another version', 1, true), 'all modules match the core')
     assert(not text:find('Bagnon', 1, true))
     local modules = ns.MinimapButton.Modules()

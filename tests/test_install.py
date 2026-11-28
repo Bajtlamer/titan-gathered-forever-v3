@@ -1,4 +1,5 @@
 import importlib.util
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -55,6 +56,21 @@ class InstallTests(unittest.TestCase):
         again = self.installer.install(ROOT, self.destination, apply=True, names=[name])
         self.assertEqual((again['backup'] / name / 'old.txt').read_text(), 'edited')
         self.assertFalse((self.destination / name / 'old.txt').exists())
+
+    def test_skipped_modules_are_neither_installed_nor_touched(self):
+        self.existing()
+        skipped = 'TitanGatheredForever_Herbalism'
+        result = self.installer.install(ROOT, self.destination, apply=True, skip=[skipped])
+        self.assertNotIn(skipped, result['addons']); self.assertIn('TitanGatheredForever', result['addons'])
+        self.assertEqual((self.destination / skipped / 'old.txt').read_text(), skipped)     # left as it was
+        self.assertFalse((result['backup'] / skipped).exists())
+        missing = 'TitanGatheredForever_AuctionItems'
+        shutil.rmtree(self.destination / missing)                                            # the player deleted it
+        self.installer.install(ROOT, self.destination, apply=True, skip=[missing])
+        self.assertFalse((self.destination / missing).exists())                               # a deleted module stays deleted
+        for bad in (['TitanGatheredForever'], ['Bagnon']):
+            with self.assertRaises(ValueError):
+                self.installer.install(ROOT, self.destination, skip=bad)
 
     def test_only_listed_standalone_modules_may_be_installed_alone(self):
         with self.assertRaises(ValueError):

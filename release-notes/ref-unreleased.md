@@ -12,6 +12,8 @@ Updated 2026-11-28. Versions up to 0.5.193 are published in release-notes/ref-0.
 - MinimapButton: a module other than Discovery shows its version (GetAddOnMetadata Version) only when it differs from the core's, in orange with an update line; Discovery always shows its own. Button.Icon gives Auction a coin (INV_Misc_Coin_01) and Discovery a spyglass (INV_Misc_Spyglass_02); FOLDER_IDS maps AuctionItems and Herbalism when ns.KnownModules is missing.
 - Not installed is red (Disabled stays orange). Style.Separator draws a line after the Titan Panel row; the notes (other version, where to get missing modules) and the click hints follow it.
 - Module names in the tooltip are the addon title without the leading Titan (Gathered Forever: Alchemy, Gathered Discovery); missing ones are built the same way from ns.KnownModules.
+- Discovery's version is no longer in the minimap list; Discovery 0.1.7 puts it in its window title (ns.env.moduleVersion).
+- tools/install.py --skip FOLDER (repeatable) leaves a module folder untouched: not installed, replaced or removed. The core cannot be skipped.
 - The minimap tooltip no longer shows the module as Switched off when the Auction items group is hidden in the material list.
 - Data (db.auction, db.sales, mailLog, auctionLog, auctionUndercutLog and the auction settings) stays in the core SavedVariables, so disabling the module keeps it.
 

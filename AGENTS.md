@@ -43,6 +43,7 @@ Informational text (notes, summaries, footers, labels) is small and gold; produc
 
 The user explicitly authorizes installing every completed addon update and new version into `/Applications/World of Warcraft/_forever_/Interface/AddOns` automatically. Do not leave tested runtime changes only in the source checkout or ask for this task authorization again.
 
+- When the owner removed a module folder on purpose (to test the core without it), pass `--skip <folder>` to the installer so it stays removed.
 - Run `python3 tools/check.py`, preview with `python3 tools/install.py --addons-dir '/Applications/World of Warcraft/_forever_/Interface/AddOns'`, then apply the same command with `--apply` after checks pass.
 - Use the installer so the previous candidate is backed up and unrelated addons, enablement and SavedVariables are preserved. Do not edit live files directly or change them while implementation is incomplete.
 - Verify the installed runtime files against the source candidate after installation. If they already match exactly, report the verified state instead of making an identical installation.
