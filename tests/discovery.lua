@@ -57,7 +57,7 @@ end
 test('the manifest names the module like its folder, needs only the core and keeps its own saved table', function()
     local toc = readAll(FOLDER .. '/' .. FOLDER .. '.toc')
     has(toc, '## Interface: 16001')
-    has(toc, '## Title: Titan Gathered Discovery\n')
+    has(toc, '## Title: Titan Gathered Forever: Discovery\n')
     has(toc, '## Dependencies: TitanGatheredForever\n')
     has(toc, '## SavedVariables: TitanGatheredForeverDiscoveryDB')
     lacks(toc, 'TitanGatheredForeverV3DB')
@@ -353,7 +353,7 @@ test('the plugin of Titan Panel carries the whole name of the module and its own
     frames[1].OnEvent(frames[1], 'PLAYER_LOGIN')
     _G.LibStub = nil
     eq(registered.name, 'TitanGatheredForeverDiscovery')
-    eq(registered.object.label, 'Titan Gathered Discovery')
+    eq(registered.object.label, 'Titan Gathered Forever: Discovery')
     has(registered.object.icon, 'TitanGatheredForever_Discovery')
 end)
 

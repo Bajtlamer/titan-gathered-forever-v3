@@ -46,7 +46,7 @@ local function build()
     Nav.Draggable(w, 'discovery')
     -- the module has its own version line, so its version is in the title (the minimap button list does not show it)
     local version = ns.env and ns.env.moduleVersion
-    w.TitleText:SetText('Titan Gathered Discovery' .. (version and version ~= 'unknown' and (' v' .. version) or ''))
+    w.TitleText:SetText('Titan Gathered Forever: Discovery' .. (version and version ~= 'unknown' and (' v' .. version) or ''))
     -- Two pages over the same area, one for each tab.
     local data, guide = CreateFrame('Frame', nil, w), CreateFrame('Frame', nil, w)
     data:SetAllPoints(w); guide:SetAllPoints(w)

@@ -34,7 +34,7 @@ function Guide.Lines()
     end
 
     section('What it is')
-    add(label('Titan Gathered Discovery is a data-collection tool for the owner of Titan Gathered Forever and for players who choose to help. It records what the WoW Forever client shows and compares it with the data Titan Gathered Forever ships, so that new and different facts can be found, checked and added. It is not a player feature: nothing changes in your game because of it.'))
+    add(label('Titan Gathered Forever: Discovery is a data-collection tool for the owner of Titan Gathered Forever and for players who choose to help. It records what the WoW Forever client shows and compares it with the data Titan Gathered Forever ships, so that new and different facts can be found, checked and added. It is not a player feature: nothing changes in your game because of it.'))
 
     section('What it records')
     add(label('Everything you loot and where it came from, the NPCs and objects you talk to or target (IDs, names, services, vendor and trainer goods), quests (not their text), the zones and areas you enter, your profession skills, and the client build and module versions.'))

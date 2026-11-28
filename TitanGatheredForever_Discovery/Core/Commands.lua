@@ -29,7 +29,7 @@ local function help()
         say(Text.Label('Recording has not started yet: ') .. Text.Value('/tgfd accept'))
         return
     end
-    say(Text.Label('Titan Gathered Discovery commands:'))
+    say(Text.Label('Titan Gathered Forever: Discovery commands:'))
     say(Text.Value('/tgfd status') .. Text.Label(': state, versions, baseline and record counts'))
     say(Text.Value('/tgfd stop') .. Text.Label(': pause recording'))
     say(Text.Value('/tgfd start') .. Text.Label(': resume recording'))

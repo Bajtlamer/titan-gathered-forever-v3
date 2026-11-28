@@ -47,7 +47,7 @@ local function onLogin()
     local core = _G.TitanGatheredForeverV3
     if core and core.Titan and core.Titan.AddMenuExtension then
         pcall(core.Titan.AddMenuExtension, function(root)
-            root:CreateButton('Titan Gathered Discovery', function() ns.Window.Toggle() end)
+            root:CreateButton('Titan Gathered Forever: Discovery', function() ns.Window.Toggle() end)
         end)
     end
     local began = ns.Consent.Auto(ns.db, ns.runtime, ns.env.now())

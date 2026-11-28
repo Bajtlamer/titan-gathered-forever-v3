@@ -14,6 +14,7 @@ Updated 2026-11-28. Versions up to 0.5.193 are published in release-notes/ref-0.
 - Module names in the tooltip are the addon title without the leading Titan (Gathered Forever: Alchemy; Discovery as Gathered Forever: Discovery); missing ones are built the same way from ns.KnownModules.
 - Discovery's version is no longer in the minimap list; Discovery 0.1.7 puts it in its window title (ns.env.moduleVersion).
 - tools/install.py --skip FOLDER (repeatable) leaves a module folder untouched: not installed, replaced or removed. The core cannot be skipped.
+- Discovery 0.1.8 is named Titan Gathered Forever: Discovery everywhere in the game (toc Title, window, LDB label, menu entry, guide, consent and command texts); the LDB object name TitanGatheredForeverDiscovery is unchanged, so Titan Panel keeps the plugin's place.
 - The minimap tooltip no longer shows the module as Switched off when the Auction items group is hidden in the material list.
 - Data (db.auction, db.sales, mailLog, auctionLog, auctionUndercutLog and the auction settings) stays in the core SavedVariables, so disabling the module keeps it.
 
