@@ -320,6 +320,28 @@ function Nav.Divider(parent, x, y, width)
     return line
 end
 
+-- Opens the world map at mapID from a list. The tab window steps aside while the map is open, so Escape closes the
+-- map alone, and comes back with its view, filters and scroll position when the map closes.
+function Nav.ShowMap(mapID)
+    if not mapID then return end
+    local id, window = Nav.Current()
+    if id and window then
+        Nav.returnTo = id
+        window:Hide()
+    end
+    local map = _G.WorldMapFrame
+    if map and map.HookScript and not Nav.mapHooked then
+        Nav.mapHooked = true
+        map:HookScript('OnHide', function()
+            local back = Nav.returnTo
+            Nav.returnTo = nil
+            if back then Nav.Open(back) end
+        end)
+    end
+    if OpenWorldMap then OpenWorldMap(mapID)
+    elseif map and map.SetMapID then map:Show(); map:SetMapID(mapID) end
+end
+
 -- A vertical scroll bar. scrollTo(offset) receives the dragged position; wheel(delta) the mouse wheel over the bar.
 function Nav.Scrollbar(window, x, y, height, scrollTo, wheel)
     local slider = CreateFrame('Slider', nil, window)

@@ -152,6 +152,7 @@ end
 function View.Click(row)
     if not row.giver then return end
     local _, giver = ns.QuestIncome.GiverName(row.giver)
+    if ns.JournalPins then ns.JournalPins.focus = { npcID = row.giver, status = row.status } end
     if giver and giver.mapID then List.ShowOnMap(row.giver, giver.mapID) end
 end
 
@@ -183,10 +184,11 @@ View.modes = {
     { value = 'quests', label = 'Quests',
         note = 'Quests you accepted, turned in or abandoned, with what they gave and how long they took. Accepting and '
             .. 'abandoning are recorded since version 0.5.165; turn-ins and their money since quest income was added. A yellow question '
-            .. 'mark is a quest of this character ready to turn in, a silver one a quest still in progress. Hover '
+            .. 'mark is a quest of this character ready to turn in, a silver one a quest still in progress. Turned in counts the '
+            .. 'hand-ins of the characters shown: with All characters, another character may have turned in a quest still open here. Hover '
             .. 'a row for the giver and the items received; click it to show the giver on the map. Escape in the search '
             .. 'box clears it.',
-        columns = { { 'Quest', 0, 235, 'text' }, { 'Status', 240, 110, 'text' }, { 'Turn-ins', 355, 60, 'number' },
+        columns = { { 'Quest', 0, 235, 'text' }, { 'Status', 240, 110, 'text' }, { 'Turned in', 355, 60, 'number' },
             { 'Experience', 420, 80, 'number' }, { 'Money', 505, 105, 'number' }, { 'Time taken', 615, 80, 'number' },
             { 'Turned in at', 700, 115, 'text' }, { 'Last activity', 820, 90, 'number' } },
         sortKey = 'quests', default = { column = 8, descending = true },

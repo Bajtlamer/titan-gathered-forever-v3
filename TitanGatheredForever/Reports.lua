@@ -264,13 +264,13 @@ function Reports.ItemSources(owner,itemID,character)
             local mapID=r.mapID
             local label=string.format('%s: %.1f%% (%d / %d)',Reports.Source(r),r.percent,r.hits,r.trials)
             if mapID and mapID>0 then
-                root:CreateButton(label,function()if WorldMapFrame then WorldMapFrame:Show();WorldMapFrame:SetMapID(mapID)end end)
+                root:CreateButton(label,function()ns.Nav.ShowMap(mapID)end)
             else root:CreateTitle(label)end
         end
         for index=1,math.min(3,#evidence.spots)do
             local spot=evidence.spots[index];local mapID=spot.mapID
             root:CreateButton(string.format('%s: %d saved positions (separate from rate samples)',Reports.Zone(mapID),spot.positions),function()
-                if WorldMapFrame then WorldMapFrame:Show();WorldMapFrame:SetMapID(mapID)end
+                ns.Nav.ShowMap(mapID)
             end)
         end
         local record=ns.Catalog.Get and ns.Catalog.Get(itemID)

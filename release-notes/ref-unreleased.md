@@ -2,6 +2,12 @@
 
 Updated 2026-11-28. Versions up to 0.5.172 are published in release-notes/ref-0.5.172.md. These changes describe source candidates since the latest published versioned notes.
 
+## Map round trip, quest state pins and Turned in, 0.5.190
+
+- Fixed: Nav.ShowMap opens the world map for every list (ListWindow.ShowOnMap, Unlearned recipes, Trainers, NpcSources.ShowOnMap, the source menus of the reports). It hides the current tab window and reopens that tab from a WorldMapFrame OnHide hook, so Escape closes the map alone and the tab returns with its state; before, Escape closed the map and the list together.
+- Fixed: the giver of a quest clicked in Journal > Quests showed the note icon of QuestGiverPast whatever the state. JournalPins.focus keeps the clicked quest's status and the pin kind follows it: QuestGiverReady (ActiveQuestIcon, with the shadow), QuestGiver, QuestGiverDone (ReadyCheck-Ready), QuestGiverAbandoned (ReadyCheck-NotReady); the tooltip names the state. JournalPins.IsQuestKind covers the kinds.
+- The Quests column Turn-ins is renamed Turned in and the note explains it counts the hand-ins of the characters shown.
+
 ## Quests ready to turn in, 0.5.189
 
 - QuestsView marks an open quest as ready (status 'ready', label Ready to turn in, yellow) when JournalPins.Ready says so (C_QuestLog.ReadyForTurnIn or IsComplete), only when the list shows this character or all characters, because only the logged-in character's quest log is readable. The status filter gains Ready to turn in; In progress keeps the open ones. The quest name gets the game's mark of its state (GossipFrame ActiveQuestIcon, IncompleteQuestIcon, RaidFrame ReadyCheck-Ready and ReadyCheck-NotReady), drawn whole with Style.Icon(texture, size, true). The Quest column is 235 px and Status 110 px. JournalPins.LogChanged refreshes the list when a quest changes state.

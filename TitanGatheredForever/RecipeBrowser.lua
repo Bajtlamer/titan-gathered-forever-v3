@@ -102,8 +102,7 @@ local function openMap(line)
     local place = ns.NpcSources.Location(source.npcID)
     local mapID = place and place.mapID or ns.NpcSources.ContinentMap(source.npcID)
     if mapID then
-        if OpenWorldMap then OpenWorldMap(mapID)
-        elseif WorldMapFrame and WorldMapFrame.SetMapID then WorldMapFrame:Show(); WorldMapFrame:SetMapID(mapID) end
+        ns.Nav.ShowMap(mapID)
     end
     if ns.Map and ns.Map.Update then ns.Map.Update() end
     if ns.Minimap and ns.Minimap.Update then ns.Minimap.Update() end

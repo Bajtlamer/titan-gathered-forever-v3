@@ -1,6 +1,6 @@
-# Titan Gathered Forever 0.5.189
+# Titan Gathered Forever 0.5.190
 
-Update from 0.5.172. This text is the changelog for the website and the release page. Versions 0.5.173 to 0.5.188 were internal steps and are included here. New files were added and the manifests changed: fully restart WoW after updating, a reload is not enough.
+Update from 0.5.172. This text is the changelog for the website and the release page. Versions 0.5.173 to 0.5.189 were internal steps and are included here. New files were added and the manifests changed: fully restart WoW after updating, a reload is not enough.
 
 ## Added
 
@@ -9,7 +9,7 @@ Update from 0.5.172. This text is the changelog for the website and the release 
 - **Settings in the game Options window.** Esc > Options > AddOns > Titan Gathered lists the settings on pages: General, Material list, Professions, Map pins, Gathering spots, Map materials, Travel routes, Auction house, Diagnostics and Backup. A change there is the same change as in the right click menu, which now starts with Options...; `/tgf settings` opens the page.
 - **Backup page.** It shows the folder and the file that hold all your data (statistics, map spots, journal and the settings of every character of the account) in a box to copy, with the steps to move it to another computer or keep a backup. All settings can also be exported as one text and imported on another account; the text is only read as values and a checksum refuses an incomplete copy.
 - **Icons in the lists.** Every list that names items shows the item's icon before the name: My materials, Lifetime materials, Observed chances, Crafting profit (the product), Unlearned recipes (the recipe item, or the spell a trainer teaches), Journal > Creature drops, Statistics (Attempts with the crafted item or the gathering profession, Materials and Gathered items), the reagent window, the auction history beside the Sell tab and the list of the Titan Panel entry. Professions carry their icon too: the trainers in the Trainers tab, the Profession columns of Unlearned recipes and Crafting profit, the profession tabs and headings of Gathered items, Learned professions and the Titan Panel list.
-- **Quests ready to turn in.** Journal > Quests has the status Ready to turn in, also as a choice of the status filter, for quests of this character whose objectives are done but which were not handed in yet; In progress now means the objectives are still open. Every quest shows the game's mark before its name: the yellow question mark when ready to turn in, the silver one in progress, a check when completed and a cross when abandoned or failed. The list follows the quest log as it changes. The quest log of another character cannot be read, so its quests stay In progress.
+- **Quests ready to turn in.** Journal > Quests has the status Ready to turn in, also as a choice of the status filter, for quests of this character whose objectives are done but which were not handed in yet; In progress now means the objectives are still open. The column Turn-ins is renamed Turned in: it counts the hand-ins of the characters shown, so with All characters a quest may be open here and turned in by another character. Every quest shows the game's mark before its name: the yellow question mark when ready to turn in, the silver one in progress, a check when completed and a cross when abandoned or failed. The list follows the quest log as it changes. The quest log of another character cannot be read, so its quests stay In progress.
 - **Search in Statistics.** Attempts and Materials in the professions Statistics have a search box (Escape clears it).
 
 ## Changed
@@ -21,6 +21,8 @@ Update from 0.5.172. This text is the changelog for the website and the release 
 
 ## Fixed
 
+- Escape after a click in a list that opened the world map closed the map and the list window together. The list window now steps aside while the map is open, so Escape closes the map only, and the list comes back with the same view, filters and scroll position. This holds for every list that opens the map (Journal, Unlearned recipes, Trainers, the sources of a material).
+- A quest giver shown from Journal > Quests had a plain note icon on the map whatever the state of the quest. It now shows the mark of the quest that was clicked, as the list does: the yellow question mark when ready to turn in, the silver one in progress, a check when completed and a cross when abandoned; the pin tooltip says which.
 - The Reagent use tab of the main window showed the same estimate as Statistics > Materials in the professions window. The duplicate tab is removed; its columns are in Materials.
 - The search box of the professions Statistics ran past the right edge of the panel, over the profession buttons beside the window. It now stretches from the view combo box to the edge and fits any window width, and the three combo boxes are narrower to leave it room.
 

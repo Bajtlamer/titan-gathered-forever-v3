@@ -340,8 +340,7 @@ function ListWindow.ShowOnMap(npcID, mapID)
         else ns.NpcSources.SetHighlight({ npcID }) end
     end
     if mapID then
-        if OpenWorldMap then OpenWorldMap(mapID)
-        elseif WorldMapFrame and WorldMapFrame.SetMapID then WorldMapFrame:Show(); WorldMapFrame:SetMapID(mapID) end
+        ns.Nav.ShowMap(mapID)
     end
     if ns.Map and ns.Map.Update then ns.Map.Update() end
     if ns.Minimap and ns.Minimap.Update then ns.Minimap.Update() end

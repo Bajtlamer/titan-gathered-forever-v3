@@ -355,6 +355,29 @@ test('a quest of this character whose objectives are done is ready to turn in, w
     _G.C_QuestLog.ReadyForTurnIn = ready
 end)
 
+test('a list opens the map without closing itself: Escape closes the map and the same view comes back', function()
+    local ns = newNs()
+    installFrames()
+    loadViews(ns)
+    ns.db.questIncome = { Realm = { ['Player-1-AAA'] = { [8] = { copper = 0, turnIns = 0, acceptedAt = 60, accepts = 1 } } } }
+    local hooks, opened = {}, {}
+    _G.WorldMapFrame = { shown = false, HookScript = function(self, event, fn) hooks[event] = fn end,
+        Show = function(self) self.shown = true end, SetMapID = function(self, id) opened[#opened + 1] = id end }
+    ns.Nav.Open('quests')
+    local view = ns.Nav.views.journal
+    ns.QuestsView.status = 'open'; view.Changed()
+    eq(view.window:IsShown(), true)
+    ns.Nav.ShowMap(1429)
+    eq(opened[1], 1429)
+    eq(view.window:IsShown(), false)                                 -- out of the way: Escape closes the map only
+    hooks.OnHide()                                                   -- the map closes
+    eq(view.window:IsShown(), true); eq(view.mode, 'quests'); eq(ns.QuestsView.status, 'open')
+    hooks.OnHide()                                                   -- a later close of the map opens nothing
+    eq(ns.Nav.returnTo, nil)
+    ns.QuestsView.status = 'all'
+    _G.WorldMapFrame = nil
+end)
+
 test('durations are short and readable', function()
     local ns = newNs()
     installFrames()
@@ -549,6 +572,16 @@ test('only givers of quests in progress get a pin, a round gray question mark, n
     eq(#shown, 2); eq(shown[1].kind, 'QuestGiverPast')
     assert(not ns.PinStyle.Icon(nil, 'QuestGiverPast'):find('Quest', 1, true))
     lit[198] = nil
+    -- a quest clicked in the list: its giver shows the mark of that quest's state, as the list does
+    lit[198] = true
+    for status, kind in pairs({ ready = 'QuestGiverReady', completed = 'QuestGiverDone', abandoned = 'QuestGiverAbandoned' }) do
+        ns.JournalPins.focus = { npcID = 198, status = status }
+        eq(ns.JournalPins.List(1429)[1].kind, kind)
+    end
+    assert(ns.PinStyle.Icon(nil, 'QuestGiverReady'):find('ActiveQuestIcon', 1, true))
+    assert(ns.PinStyle.Icon(nil, 'QuestGiverDone'):find('ReadyCheck%-Ready'))
+    ns.JournalPins.FillTooltip(tip, { kind = 'QuestGiverReady', npcID = 198 })
+    ns.JournalPins.focus, lit[198] = nil, nil
     -- without the quest log API the record decides
     _G.C_QuestLog.IsOnQuest = nil
     ns.db.questIncome.Realm['Player-1-AAA'][8] = { copper = 0, turnIns = 0, acceptedAt = 5 }

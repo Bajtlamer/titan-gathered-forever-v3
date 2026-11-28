@@ -3,12 +3,15 @@ local PinStyle = {}
 ns.PinStyle = PinStyle
 local labels = { Mining = 'Titan Gathered Forever Mining spot', Herbs = 'Titan Gathered Forever Herbalism spot', Skinning = 'Titan Gathered Forever Skinning area', Fishing = 'Titan Gathered Forever Fishing spot', Rare = 'Titan Gathered Forever Rare loot', PvP = 'Titan Gathered Forever PvP kill spot',
                 Trainer = 'Titan Gathered Forever Profession trainer', WeaponMaster = 'Titan Gathered Forever Weapon master', RecipeVendor = 'Titan Gathered Forever Recipe vendor',
-                QuestGiver = 'Titan Gathered Forever Quest in progress', QuestGiverPast = 'Titan Gathered Forever Quest giver', RareCreature = 'Titan Gathered Forever Rare creature' }
+                QuestGiver = 'Titan Gathered Forever Quest in progress', QuestGiverPast = 'Titan Gathered Forever Quest giver', RareCreature = 'Titan Gathered Forever Rare creature',
+                QuestGiverReady = 'Titan Gathered Forever Quest ready to turn in', QuestGiverDone = 'Titan Gathered Forever Completed quest', QuestGiverAbandoned = 'Titan Gathered Forever Abandoned quest' }
 local historyNote = 'Source/zone observations, not a chance at this coordinate.'
 local icons = { Mining = 'Interface\\Icons\\Trade_Mining', Herbs = 'Interface\\Icons\\Trade_Herbalism',
                 Skinning = 'Interface\\Icons\\INV_Misc_Pelt_Wolf_01', PvP = 'Interface\\Icons\\INV_Sword_04',
                 Trainer = 'Interface\\Icons\\INV_Misc_Book_11', WeaponMaster = 'Interface\\Icons\\INV_Sword_27', RecipeVendor = 'Interface\\Icons\\INV_Scroll_03',
-                QuestGiver = 'Interface\\GossipFrame\\IncompleteQuestIcon', QuestGiverPast = 'Interface\\Icons\\INV_Misc_Note_01', RareCreature = 'Interface\\Icons\\INV_Misc_Head_Dragon_01' }
+                QuestGiver = 'Interface\\GossipFrame\\IncompleteQuestIcon', QuestGiverPast = 'Interface\\Icons\\INV_Misc_Note_01', RareCreature = 'Interface\\Icons\\INV_Misc_Head_Dragon_01',
+                QuestGiverReady = 'Interface\\GossipFrame\\ActiveQuestIcon', QuestGiverDone = 'Interface\\RaidFrame\\ReadyCheck-Ready',
+                QuestGiverAbandoned = 'Interface\\RaidFrame\\ReadyCheck-NotReady' }
 
 function PinStyle.Label(kind) return labels[kind] or ('Titan Gathered Forever ' .. kind .. ' material source') end
 function PinStyle.Icon(itemID, kind)
@@ -139,7 +142,7 @@ end
 -- A symbol pin with a drop shadow: the same symbol in black, a little lower and to the right, under it. Used for the
 -- silver question mark of a quest in progress, which is otherwise hard to read on a light map. Pins are reused for
 -- other kinds, so any other kind hides the shadow.
-local shadowed = { QuestGiver = true }
+local shadowed = { QuestGiver = true, QuestGiverReady = true }
 
 function PinStyle.Badge(pin, kind)
     local shadow = pin.tgfShadow

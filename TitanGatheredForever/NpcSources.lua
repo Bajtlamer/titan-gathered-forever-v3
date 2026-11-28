@@ -290,7 +290,7 @@ end
 -- additional information. The header is separated from the list by a rule.
 function Npc.FillTooltip(tooltip, node)
     if node.kind == 'WeaponMaster' and ns.WeaponMasters then return ns.WeaponMasters.FillTooltip(tooltip, node) end
-    if (node.kind == 'QuestGiver' or node.kind == 'QuestGiverPast' or node.kind == 'RareCreature') and ns.JournalPins then return ns.JournalPins.FillTooltip(tooltip, node) end
+    if ns.JournalPins and (ns.JournalPins.IsQuestKind(node.kind) or node.kind == 'RareCreature') then return ns.JournalPins.FillTooltip(tooltip, node) end
     local record = Npc.Record(node.npcID)
     if not record then return end
     local Style = ns.Style
@@ -410,8 +410,7 @@ function Npc.ShowOnMap(npcID)
     local place = Npc.Location(npcID)
     local mapID = place and place.mapID or Npc.ContinentMap(npcID)
     if mapID then
-        if OpenWorldMap then OpenWorldMap(mapID)
-        elseif WorldMapFrame and WorldMapFrame.SetMapID then WorldMapFrame:Show(); WorldMapFrame:SetMapID(mapID) end
+        ns.Nav.ShowMap(mapID)
     end
     if ns.Map and ns.Map.Update then ns.Map.Update() end
     if ns.Minimap and ns.Minimap.Update then ns.Minimap.Update() end
