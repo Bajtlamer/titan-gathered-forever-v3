@@ -16,6 +16,7 @@ Updated 2026-11-28. Versions up to 0.5.193 are published in release-notes/ref-0.
 - tools/install.py --skip FOLDER (repeatable) leaves a module folder untouched: not installed, replaced or removed. The core cannot be skipped.
 - Discovery 0.1.8 is named Titan Gathered Forever: Discovery everywhere in the game (toc Title, window, LDB label, menu entry, guide, consent and command texts); the LDB object name TitanGatheredForeverDiscovery is unchanged, so Titan Panel keeps the plugin's place.
 - Manifests: the core has `## Category: Professions`; every module (generated, and Discovery) has `## Category: Professions` and `## Group: TitanGatheredForever`, which the 1.60.1 AddOns list uses to fold modules under their parent (as Bagnon does with BagBrother). Needs a full client restart.
+- Live finding: with OptionalDeps: Titan the AddOns list nested the core under Titan Panel (User Interface), and the modules, whose group parent was itself nested, stayed loose at the top level. OptionalDeps: Titan is removed from the core and Discovery; Titan Panel registers the LDB object through LibDataBroker_DataObjectCreated whenever it is created, and Titan still loads first by folder order.
 - The minimap tooltip no longer shows the module as Switched off when the Auction items group is hidden in the material list.
 - Data (db.auction, db.sales, mailLog, auctionLog, auctionUndercutLog and the auction settings) stays in the core SavedVariables, so disabling the module keeps it.
 

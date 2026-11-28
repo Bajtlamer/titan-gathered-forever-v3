@@ -59,6 +59,7 @@ test('the manifest names the module like its folder, needs only the core and kee
     has(toc, '## Interface: 16001')
     has(toc, '## Title: Titan Gathered Forever: Discovery\n')
     has(toc, '## Dependencies: TitanGatheredForever\n')
+    assert(not toc:find('OptionalDeps', 1, true), 'no tie to Titan Panel')
     has(toc, '## Category: Professions\n'); has(toc, '## Group: TitanGatheredForever\n')   -- folded under the core
     has(toc, '## SavedVariables: TitanGatheredForeverDiscoveryDB')
     lacks(toc, 'TitanGatheredForeverV3DB')

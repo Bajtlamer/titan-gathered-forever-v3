@@ -26,7 +26,7 @@ class BrandingTests(unittest.TestCase):
         toc = (CORE / (NAME + '.toc')).read_text()
         self.assertIn('## Title: ' + TITLE + '\n', toc)
         self.assertIn('## SavedVariables: TitanGatheredForeverV3DB\n', toc)
-        self.assertIn('## OptionalDeps: Titan\n', toc)
+        self.assertNotIn('## OptionalDeps:', toc)   # independent of Titan Panel, top level in the AddOns list
         self.assertNotIn('## Dependencies:', toc)
         self.assertIn('## Category: Professions\n', toc)        # the AddOns list section of the whole family
         modules = json.loads((ROOT / 'catalogue/modules.json').read_text())
