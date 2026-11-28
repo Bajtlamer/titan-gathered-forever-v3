@@ -75,7 +75,7 @@ function Button.Icon(id)
 end
 
 local STATES = { active = { 'Active', 'green' }, off = { 'Switched off', 'gray' }, disabled = { 'Disabled', 'orange' },
-    missing = { 'Not installed', 'gray' } }
+    missing = { 'Not installed', 'red' } }
 
 -- What the button shows when pointed at: the version, the installed modules with their state, the Titan Panel
 -- entry and the clicks.
@@ -96,7 +96,7 @@ function Button.Tooltip(tip)
     for _, row in ipairs(modules) do
         local state = STATES[row.state]
         local icon = Button.Icon(row.id)
-        -- a module that is not installed is named in gray, so the installed ones stand out
+        -- a module that is not installed is named in gray and its state is red, so it stands out from the installed ones
         local color = row.state == 'missing' and Style.gray or (Style.white or 'ffffffff')
         -- The modules are released with the core, so their version is shown only when it differs from the core's (orange:
         -- update it); Discovery has its own version line and always shows it.
@@ -107,13 +107,14 @@ function Button.Tooltip(tip)
         tip:AddDoubleLine(label, Style.Text(Style[state[2]] or Style.gray, state[1]))
         missing = missing or row.state == 'missing'
     end
-    if outdated then tip:AddLine(Style.Text(Style.orange or Style.gray, 'A module in orange is of another version than the core: update it.')) end
-    if missing then tip:AddLine(Style.Text(Style.gray, 'Modules not installed: CurseForge or titan-gathered.com')) end
     local panel = ns.Titan and ns.Titan.PanelState and ns.Titan.PanelState() or 'missing'
     local panelStates = { active = { 'Active', 'green' }, disabled = { 'Disabled', 'orange' }, missing = { 'Not installed', 'gray' } }
     local shown = panelStates[panel] or panelStates.missing
     tip:AddDoubleLine(Style.Text(Style.gold, 'Titan Panel'), Style.Text(Style[shown[2]] or Style.gray, shown[1]))
-    tip:AddLine(' ')
+    -- a line divides the list from the notes and the instructions below it
+    if Style.Separator then Style.Separator(tip) else tip:AddLine(' ') end
+    if outdated then tip:AddLine(Style.Text(Style.orange or Style.gray, 'A module in orange is of another version than the core: update it.')) end
+    if missing then tip:AddLine(Style.Text(Style.gray, 'Modules not installed: CurseForge or titan-gathered.com')) end
     for _, hint in ipairs(Button.HINTS) do tip:AddLine(Style.Text(Style.gray, hint)) end
 end
 

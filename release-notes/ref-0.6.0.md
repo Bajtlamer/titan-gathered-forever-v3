@@ -16,7 +16,7 @@ Version 0.6.0 is a milestone. Titan Gathered Forever no longer needs Titan Panel
 
 ## Added
 
-- The minimap button tooltip also lists the modules of the collection that are not installed, in gray as Not installed, after the installed ones, with a line saying where to get them (CurseForge or titan-gathered.com).
+- The minimap button tooltip also lists the modules of the collection that are not installed, named in gray with a red Not installed, after the installed ones, with a line saying where to get them (CurseForge or titan-gathered.com).
 - A module of another version than the core shows its version in orange, with a line saying to update it, so an old module beside a new core stands out. Matching modules show no version, because they are released with the core; Discovery keeps its own version.
 
 ## Fixed
@@ -24,6 +24,10 @@ Version 0.6.0 is a milestone. Titan Gathered Forever no longer needs Titan Panel
 - The minimap button tooltip showed the Auction module as Switched off when the Auction items group was hidden in the material list, although the module kept running. Hiding the group now only hides the group.
 - The minimap button tooltip never showed Herbalism as Switched off when it was hidden in the settings, because the folder name (Herbalism) differs from its settings key (Herbs).
 - The Auction house and Discovery lines of the minimap button tooltip had no icon; they now show a coin and a spyglass.
+
+## Changed in the minimap button tooltip
+
+- A divider line separates the module list and Titan Panel from the notes and the click instructions below.
 
 ## Upgrading
 

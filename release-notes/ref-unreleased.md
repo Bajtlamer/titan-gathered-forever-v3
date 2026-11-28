@@ -10,6 +10,7 @@ Updated 2026-11-28. Versions up to 0.5.193 are published in release-notes/ref-0.
 - ns.AuctionModuleNotice prints once per account (db.auctionModuleNotice) at login when the module is missing or disabled, so a player who updated only the core learns where the features went.
 - The generator writes ns.KnownModules (folder, settings id, label, standalone) into Data/Metadata.lua from the catalogue modules and catalogue/standalone-modules.json. MinimapButton.Modules adds every known folder missing from the addon list as state 'missing' (Not installed, gray, listed last with a hint line) and takes the settings id from that list, which fixes Herbalism (id Herbs) never showing Switched off.
 - MinimapButton: a module other than Discovery shows its version (GetAddOnMetadata Version) only when it differs from the core's, in orange with an update line; Discovery always shows its own. Button.Icon gives Auction a coin (INV_Misc_Coin_01) and Discovery a spyglass (INV_Misc_Spyglass_02); FOLDER_IDS maps AuctionItems and Herbalism when ns.KnownModules is missing.
+- Not installed is red (Disabled stays orange). Style.Separator draws a line after the Titan Panel row; the notes (other version, where to get missing modules) and the click hints follow it.
 - The minimap tooltip no longer shows the module as Switched off when the Auction items group is hidden in the material list.
 - Data (db.auction, db.sales, mailLog, auctionLog, auctionUndercutLog and the auction settings) stays in the core SavedVariables, so disabling the module keeps it.
 

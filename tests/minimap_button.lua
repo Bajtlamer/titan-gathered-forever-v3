@@ -47,7 +47,7 @@ local function env(settings)
         AddDoubleLine = function(_, left, right) lines[#lines + 1] = left .. ' | ' .. right end,
         Hide = function() lines.shown = false end }
     local ns = { settings = settings or { showMinimapButton = true, minimapButtonAngle = 205 }, IsPublic = function() return true end,
-        Style = { gold = 'gold', gray = 'gray', orange = 'orange', Text = function(color, text) return '<' .. color .. '>' .. text .. '</>' end,
+        Style = { gold = 'gold', gray = 'gray', orange = 'orange', red = 'red', Text = function(color, text) return '<' .. color .. '>' .. text .. '</>' end,
             Icon = function(texture) return '[' .. texture .. ']' end,
             ProfessionIcon = function(id) return ({ Mining = '[mining]', Herbs = '[herbs]', Tailoring = '[tailoring]', Cooking = '[cooking]' })[id] or '' end },
         calls = { browser = 0 } }
@@ -149,6 +149,7 @@ test('the modules of the collection that are not installed are listed last as No
         { folder = 'TitanGatheredForever_Discovery', id = 'Discovery', label = 'Discovery', standalone = true },
     }
     ns.settings.categories = { Herbs = false }       -- the settings key of the Herbalism folder is Herbs
+    ns.Style.Separator = function(tip) tip:AddLine('<divider>') end
     local modules = ns.MinimapButton.Modules()
     local order = {}
     for _, row in ipairs(modules) do order[#order + 1] = row.label .. '=' .. row.state end
@@ -157,14 +158,19 @@ test('the modules of the collection that are not installed are listed last as No
     local button = ns.MinimapButton.button
     button.scripts.OnEnter(button)
     local text = table.concat(lines, '\n')
-    assert(text:find('[tailoring]<gray>Tailoring</> | <gray>Not installed</>', 1, true), text)
+    assert(text:find('[tailoring]<gray>Tailoring</> | <red>Not installed</>', 1, true), text)
     assert(text:find('[herbs]<ffffffff>Herbalism</> | <gray>Switched off</>', 1, true), text)
     -- a module of another version than the core is shown in orange, with a line saying to update it
     assert(text:find('[mining]<ffffffff>Mining</><orange> v0.5.193</> | <green>Active</>', 1, true)
         or text:find('[mining]<ffffffff>Mining</><orange> v0.5.193</> | <gray>Active</>', 1, true), text)
     assert(text:find('another version than the core: update it', 1, true), text)
-    assert(text:find('[Interface\\Icons\\INV_Misc_Spyglass_02]<gray>Discovery</> | <gray>Not installed</>', 1, true), text)
+    assert(text:find('[Interface\\Icons\\INV_Misc_Spyglass_02]<gray>Discovery</> | <red>Not installed</>', 1, true), text)
     assert(text:find('Modules not installed: CurseForge or titan-gathered.com', 1, true), text)
+    -- the list ends with Titan Panel, then the divider, then the notes and the click hints
+    local function at(needle) for i, line in ipairs(lines) do if line:find(needle, 1, true) then return i end end end
+    local panel, divider, note, hint = at('Titan Panel'), at('<divider>'), at('Modules not installed'), at('Left click')
+    assert(panel and divider and note and hint, text)
+    assert(panel < divider and divider < note and note < hint, text)
     C_AddOns = nil
 end)
 
