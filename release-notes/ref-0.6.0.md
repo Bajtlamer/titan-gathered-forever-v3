@@ -28,7 +28,7 @@ Version 0.6.0 is a milestone. Titan Gathered Forever no longer needs Titan Panel
 ## Changed in the minimap button tooltip
 
 - A divider line separates the module list and Titan Panel from the notes and the click instructions below.
-- The modules are listed with their full names without Titan, such as Gathered Forever: Alchemy and Gathered Discovery.
+- The modules are listed with their full names without Titan, such as Gathered Forever: Alchemy and Gathered Forever: Discovery.
 
 ## Upgrading
 

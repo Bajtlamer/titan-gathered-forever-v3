@@ -33,7 +33,9 @@ function Button.Modules()
             local suffix = name:sub(#PREFIX + 1)
             local module = known[name]
             local label = type(title) == 'string' and title:gsub('|c%x%x%x%x%x%x%x%x', ''):gsub('|r', '') or suffix
-            label = label:gsub('^Titan ', '')       -- the full name without Titan: Gathered Forever: Alchemy, Gathered Discovery
+            -- the full name without Titan, the same for every module: Gathered Forever: Alchemy, Gathered Forever: Discovery
+            label = label:gsub('^Titan ', '')
+            if not label:find('^Gathered Forever: ') then label = 'Gathered Forever: ' .. label:gsub('^Gathered ', '') end
             -- the settings key of the module (Herbs for the Herbalism folder), from the generated list
             local row = { name = name, id = module and module.id or FOLDER_IDS[suffix] or suffix, label = label, discovery = suffix == 'Discovery' }
             local okLoaded, isLoaded = false, nil
@@ -52,7 +54,7 @@ function Button.Modules()
     end
     for _, module in ipairs(ns.KnownModules or {}) do
         if not seen[module.folder] then
-            local label = (module.standalone and 'Gathered ' or 'Gathered Forever: ') .. module.label
+            local label = 'Gathered Forever: ' .. module.label
             rows[#rows + 1] = { name = module.folder, id = module.id, label = label, state = 'missing',
                 discovery = module.standalone == true }
         end

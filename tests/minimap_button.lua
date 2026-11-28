@@ -97,7 +97,7 @@ test('the tooltip shows the version, the installed modules with their state, Tit
         { 'TitanGatheredForever_Mining', 'Titan Gathered Forever: Mining', true },
         { 'TitanGatheredForever_AuctionItems', 'Titan Gathered Forever: Auction house', true },
         { 'TitanGatheredForever_Cooking', 'Titan Gathered Forever: Cooking', false },
-        { 'TitanGatheredForever_Discovery', 'Titan Gathered Discovery', true },
+        { 'TitanGatheredForever_Discovery', 'Titan Gathered Forever: Discovery', true },
         { 'Bagnon', 'Bagnon', true },
     }
     C_AddOns = {
@@ -118,11 +118,11 @@ test('the tooltip shows the version, the installed modules with their state, Tit
     assert(text:find('[Interface\\Icons\\INV_Misc_Coin_01]<ffffffff>Gathered Forever: Auction house</> | <gray>Active</>', 1, true), text)
     assert(text:find('[cooking]<ffffffff>Gathered Forever: Cooking</> | <orange>Disabled</>', 1, true), text)
     assert(text:find('[mining]<ffffffff>Gathered Forever: Mining</> | <gray>Switched off</>', 1, true), text)
-    assert(text:find('[Interface\\Icons\\INV_Misc_Spyglass_02]<ffffffff>Gathered Discovery</> | <gray>Active</>', 1, true), text)
+    assert(text:find('[Interface\\Icons\\INV_Misc_Spyglass_02]<ffffffff>Gathered Forever: Discovery</> | <gray>Active</>', 1, true), text)
     assert(not text:find('another version', 1, true), 'all modules match the core')
     assert(not text:find('Bagnon', 1, true))
     local modules = ns.MinimapButton.Modules()
-    eq(#modules, 4); eq(modules[4].label, 'Gathered Discovery')        -- by name, Discovery last
+    eq(#modules, 4); eq(modules[4].label, 'Gathered Forever: Discovery')        -- by name, Discovery last
     assert(text:find('Titan Panel</> | <gray>Not installed</>', 1, true), text)
     assert(text:find('Left click', 1, true) and text:find('Right click', 1, true) and text:find('Drag', 1, true))
     button.scripts.OnLeave(button); eq(lines.shown, false)
@@ -153,7 +153,7 @@ test('the modules of the collection that are not installed are listed last as No
     local modules = ns.MinimapButton.Modules()
     local order = {}
     for _, row in ipairs(modules) do order[#order + 1] = row.label .. '=' .. row.state end
-    eq(table.concat(order, ','), 'Gathered Forever: Herbalism=off,Gathered Forever: Mining=active,Gathered Forever: Auction house=missing,Gathered Forever: Tailoring=missing,Gathered Discovery=missing')
+    eq(table.concat(order, ','), 'Gathered Forever: Herbalism=off,Gathered Forever: Mining=active,Gathered Forever: Auction house=missing,Gathered Forever: Tailoring=missing,Gathered Forever: Discovery=missing')
     ns.MinimapButton.Attach()
     local button = ns.MinimapButton.button
     button.scripts.OnEnter(button)
@@ -164,7 +164,7 @@ test('the modules of the collection that are not installed are listed last as No
     assert(text:find('[mining]<ffffffff>Gathered Forever: Mining</><orange> v0.5.193</> | <green>Active</>', 1, true)
         or text:find('[mining]<ffffffff>Gathered Forever: Mining</><orange> v0.5.193</> | <gray>Active</>', 1, true), text)
     assert(text:find('another version than the core: update it', 1, true), text)
-    assert(text:find('[Interface\\Icons\\INV_Misc_Spyglass_02]<gray>Gathered Discovery</> | <red>Not installed</>', 1, true), text)
+    assert(text:find('[Interface\\Icons\\INV_Misc_Spyglass_02]<gray>Gathered Forever: Discovery</> | <red>Not installed</>', 1, true), text)
     assert(text:find('Modules not installed: CurseForge or titan-gathered.com', 1, true), text)
     -- the list ends with Titan Panel, then the divider, then the notes and the click hints
     local function at(needle) for i, line in ipairs(lines) do if line:find(needle, 1, true) then return i end end end
