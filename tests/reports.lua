@@ -28,7 +28,7 @@ local function frame()
  function f:SetScript(k,fn)self.scripts[k]=fn end
  function f:SetText(v)self.text=v end
  function f:CreateFontString()return region()end
- function f:CreateTexture()local t={shown=true};for _,m in ipairs({'SetAllPoints','SetPoint','SetColorTexture','SetHeight'})do t[m]=function()end end;function t:Show()self.shown=true end;function t:Hide()self.shown=false end;return t end
+ function f:CreateTexture()local t={shown=true};for _,m in ipairs({'SetAllPoints','SetPoint','SetColorTexture','SetHeight','SetSize'})do t[m]=function()end end;function t:Show()self.shown=true end;function t:Hide()self.shown=false end;return t end
  function f:GetThumbTexture()return{SetSize=function()end}end
  function f:SetValue(v)self.value=v end
  function f:GetText()return self.text or ''end
@@ -76,26 +76,12 @@ test('lifetime values replace the last location with observed source chances',fu
  eq(r.cells[3].text,'1 source')
  assert(r.cells[3].point[4]>300);assert(r.height<37)
 end)
-test('global reagent report shows leading profession share and opens full breakdown',function()
- local previous=ns.production
- local selected
- ns.production={ReagentUsage=function(_,character)
-  selected=character
-  return {{itemID=159,quantity=100,leading='Tailoring',share=75,professions={Tailoring=75,FirstAid=25}}},
-      {coverageBegan=100,unsupportedCasts=2}
- end,Rows=function()return{}end,Totals=function()return{}end}
- ns.Reports.Show('reagentUsage');local w=ns.Reports.windows.reagentUsage
- assert(w:IsShown()and not ns.Reports.windows.history:IsShown())
- eq(w.rows[1].cells[1].text,'Item 159');eq(w.rows[1].cells[2].text,'100')
- eq(w.rows[1].cells[3].text,'Tailoring');eq(w.rows[1].cells[4].text,'75.0%')
- assert(w.note.text:find('Coverage since '..ns.Style.Date('100'),1,true));assert(w.note.text:find('2 completed recipes',1,true))
- pick(w.scope,'All characters');eq(selected,nil);eq(w.scope.text,'All characters')
- local previousMenu=MenuUtil;local titles={};MenuUtil={CreateContextMenu=function(_,fn)
-  fn({}, {CreateTitle=function(_,value)titles[#titles+1]=value end,SetScrollMode=function()end})
- end}
- w.rows[1].scripts.OnClick(w.rows[1])
- local found=false;for _,title in ipairs(titles)do if title:find('Tailoring: 75 (75.0%)',1,true)then found=true end end;assert(found)
- MenuUtil=previousMenu;ns.Reports.Update(w);ns.production=previous
+test('reagent use is no tab of its own: its name opens Statistics > Materials of the professions window',function()
+ for _,tab in ipairs(ns.Nav.tabs)do assert(tab.id~='reagentUsage','no Reagent use tab')end
+ local previous=ns.ProfessionStats;local opened
+ ns.ProfessionStats={OpenView=function(view)opened=view end}
+ ns.Reports.Show('reagentUsage');eq(opened,'materials');eq(ns.Reports.windows.reagentUsage,nil)
+ ns.ProfessionStats=previous
 end)
 test('lifetime obtained quantity includes the item crafted output total',function()
  ns.production={Totals=function()return{{itemID=769,quantity=12},{itemID=2680,quantity=7}}end}
@@ -280,20 +266,7 @@ test('a click on a column header sorts the chances, grouped or not, and a second
  pick(w.group,'All sources');w.sorter.state=nil;w.sorter.Sync();ns.settings.columnSort={};ns.Reports.Update(w)
  ns.Reports.Rows=original
 end)
-test('the lifetime and reagent use lists sort by their columns',function()
- local previous=ns.production
- ns.production={ReagentUsage=function()
-  return {{itemID=159,quantity=100,leading='Tailoring',share=75,professions={Tailoring=75,FirstAid=25}},
-          {itemID=160,quantity=30,leading='FirstAid',share=90,professions={FirstAid=30}}},{coverageBegan=100,unsupportedCasts=0}
- end,Rows=function()return{}end,Totals=function()return{}end}
- ns.Reports.Show('reagentUsage');local w=ns.Reports.windows.reagentUsage
- assert(w.sorter,'the header is sortable')
- eq(w.rows[1].data.itemID,159)
- w.sorter.buttons[4].scripts.OnClick()                             -- Share of tracked use: the highest first
- eq(w.rows[1].data.itemID,160);eq(w.rows[2].data.itemID,159)
- w.sorter.buttons[3].scripts.OnClick()                             -- Leading profession, a text: a to z (First Aid, Tailoring)
- eq(w.rows[1].data.itemID,160)
- w.sorter.state=nil;w.sorter.Sync();ns.settings.columnSort={};ns.Reports.Update(w);ns.production=previous
+test('the lifetime list sorts by its columns',function()
  ns.Reports.Show('history');local h=ns.Reports.windows.history
  assert(h.sorter,'the lifetime header is sortable');eq(h.sorter.buttons[4].scripts.OnClick,nil)   -- Chance and Hits/samples hold no value of a parent row
 end)
@@ -450,7 +423,7 @@ test('every report copes with a player who has no profession addon installed',fu
  local modules,hiddenKind=ns.Catalog.Modules,ns.Catalog.Hidden
  ns.Catalog.Modules=function()return{}end;ns.Catalog.Hidden=function()return true end
  ns.Yields={Available=function()return{}end,Rows=function()return{}end};ns.Economy={Coin=function(c)return c..'c'end}
- for _,mode in ipairs({'history','chances','production','actions','reagentUsage'})do
+ for _,mode in ipairs({'history','chances','production','actions'})do
   ns.Reports.Show(mode);local w=ns.Reports.windows[mode];assert(w:IsShown(),mode)
  end
  local w=ns.Reports.windows.actions;pick(w.group,'Gathered, most items')
@@ -477,6 +450,7 @@ test('Economy shows confirmed receipts for the empty Forever realm key and label
     assert(loadfile('TitanGatheredForever/VendorSales.lua'))('Titan Gathered Forever', ns)
     assert(loadfile('TitanGatheredForever/QuestIncome.lua'))('Titan Gathered Forever', ns)
     assert(loadfile('TitanGatheredForever/EconomyView.lua'))('Titan Gathered Forever', ns)
+    ns.Reports.Show('history')                                       -- a tab window is open before Economy
     local previous = ns.Nav.Current()
     assert(previous)
     ns.Nav.Open('economy')
@@ -629,13 +603,25 @@ test('profession statistics attach below the native window, preserve recipe coun
     -- The views are chosen in a combo box on the row of the pickers (the portrait and the skill bar of the native window
     -- cover the top-left corner of the panel), like the other pickers.
     local viewPicker=view.panel.viewPicker
-    eq(viewPicker.point[5],-40);assert(viewPicker.point[4]>=360,'right of the pickers')
+    eq(viewPicker.point[5],-40);eq(viewPicker.point[4],304,'right of the pickers')
+    -- the pickers are narrow enough to leave the search box room: profession 12+140, character 158+140, view 304+128
+    eq(view.panel.kindPicker.point[4],12);eq(view.panel.characterPicker.point[4],158)
     local viewOptions=view.panel.ViewOptions()
     eq(#viewOptions,3);eq(viewOptions[1].value,'attempts');eq(viewOptions[1].label,'Attempts')
     eq(viewOptions[2].label,'Materials');eq(viewOptions[3].value,'gathered');eq(viewOptions[3].label,'Gathered items')
     view.panel.SetView('materials')
     eq(view.panel.lines[1].cells[1].text,'Item 159');eq(view.panel.lines[1].cells[4].text,ns.Style.Value(3))
-    eq(view.panel.lines[1].cells[2].text,'');eq(view.panel.lines[1].cells[3].text,'')
+    -- the columns of the removed Reagent use tab: the leading profession and its share
+    assert(view.panel.lines[1].cells[2].text~='');assert(view.panel.lines[1].cells[3].text:find('%',1,true))
+    eq(view.panel.head[2].text,ns.Style.Label('Leading profession'));eq(view.panel.head[3].text,ns.Style.Label('Share'))
+    -- the search box ends at the right edge of the panel (it ran past it over the profession tabs)
+    local edge=view.panel.search.point;eq(edge[1],'TOPRIGHT');eq(edge[2],view.panel);eq(edge[3],'TOPRIGHT');eq(edge[4],-18)
+    -- the search keeps the matching materials; Escape clears it
+    view.panel.search:SetText('zzz');view.panel.search.scripts.OnTextChanged(view.panel.search,true)
+    eq(#view.panel.data,0);assert(view.panel.empty.text:find('Nothing matches this search.',1,true))
+    view.panel.search:SetText('item 159');view.panel.search.scripts.OnTextChanged(view.panel.search,true)
+    eq(view.panel.data[1].itemID,159)
+    view.panel.search.scripts.OnEscapePressed(view.panel.search);eq(view.panel.searchText,nil)
     -- The header sorts the list: a click on a column sorts by it (names a to z, numbers from the highest), a second click
     -- reverses the order, and the choice is kept for each of the two views.
     local rows={
@@ -648,7 +634,9 @@ test('profession statistics attach below the native window, preserve recipe coun
     eq(sorted({column=2,descending=true}),'Beta,Gamma,Alpha,Delta');eq(sorted({column=2,descending=false}),'Delta,Alpha,Gamma,Beta')
     eq(sorted({column=3,descending=true}),'Gamma,Beta,Alpha,Delta')
     eq(sorted({column=4,descending=true}),'Alpha,Gamma,Beta,Delta')      -- 100%, 100%, 50%, unknown last; ties by name
-    local usage={{itemID=3,quantity=5},{itemID=1,quantity=9},{itemID=2,quantity=5}}
+    local usage={{itemID=3,quantity=5,leading='Tailoring',share=40},{itemID=1,quantity=9,leading='Cooking',share=90},{itemID=2,quantity=5,leading='Alchemy',share=60}}
+    view.SortRows(usage,'materials',{column=3,descending=true});eq(usage[1].itemID,1);eq(usage[3].itemID,3)
+    view.SortRows(usage,'materials',{column=2,descending=false});eq(usage[1].itemID,2);eq(usage[3].itemID,3)
     view.SortRows(usage,'materials',{column=4,descending=true});eq(usage[1].itemID,1);eq(usage[2].itemID,2);eq(usage[3].itemID,3)
     view.SortRows(usage,'materials',{column=1,descending=false});eq(usage[1].itemID,1);eq(usage[3].itemID,3)
     view.panel.SetView('attempts')

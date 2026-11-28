@@ -154,7 +154,7 @@ local function fixture(interface, saved, noBroker, noModules)
     local ns = {}
     for _, path in ipairs({ 'Localization/enUS.lua', 'Style.lua', 'Data/Metadata.lua', 'Data/NpcSeed.lua', 'Catalog.lua',
                             'Settings.lua', 'DebugLog.lua', 'Professions.lua', 'KnownRecipes.lua', 'Inventory.lua', 'Gathering.lua', 'History.lua', 'Actions.lua', 'PvP.lua', 'Production.lua', 'Crafting.lua', 'Export.lua', 'Observations.lua', 'Sources.lua', 'NpcSources.lua', 'WeaponMasters.lua', 'NpcObserver.lua', 'PinStyle.lua', 'IconConfig.lua', 'FlightPaths.lua', 'Transport.lua', 'Map.lua', 'Minimap.lua',
-                            'Tooltips.lua', 'Reports.lua', 'CraftingView.lua', 'ProfessionButton.lua', 'ProfessionStats.lua', 'Movable.lua', 'AuctionScan.lua', 'AuctionUndercut.lua', 'Sales.lua', 'LegacyFolders.lua', 'Economy.lua', 'LootIncome.lua', 'VendorSales.lua', 'QuestIncome.lua', 'Kills.lua', 'Journal.lua', 'EconomyView.lua', 'AuctionHistory.lua', 'Yields.lua', 'RecipeBrowser.lua', 'MinimapButton.lua', 'Titan.lua', 'Core.lua' }) do
+                            'Tooltips.lua', 'Reports.lua', 'CraftingView.lua', 'ProfessionButton.lua', 'ProfessionStats.lua', 'Movable.lua', 'AuctionScan.lua', 'AuctionUndercut.lua', 'Sales.lua', 'LegacyFolders.lua', 'Economy.lua', 'LootIncome.lua', 'VendorSales.lua', 'QuestIncome.lua', 'Kills.lua', 'Journal.lua', 'EconomyView.lua', 'AuctionHistory.lua', 'Yields.lua', 'RecipeBrowser.lua', 'MinimapButton.lua', 'Titan.lua', 'OptionsPanel.lua', 'Core.lua' }) do
         assert(loadfile('TitanGatheredForever/' .. path))('TitanGatheredForever', ns)
     end
     -- Keep integration scenarios small; the generated data is validated separately.
@@ -296,9 +296,12 @@ test('rejects other client interfaces', function()
     assert(s.message:find('Forever', 1, true))
 end)
 
-test('missing broker support produces a useful diagnostic', function()
-    local s = fixture(nil, nil, true); s:Start()
-    assert(s.message:find('Titan', 1, true))
+test('without Titan Panel or another broker display the addon starts alone and says nothing', function()
+    local s, ns = fixture(nil, nil, true); s:Start()
+    eq(s.message, nil)
+    eq(s.broker, nil)
+    assert(ns.inventory, 'the addon did not start without a broker')
+    eq(ns.Titan.broker, nil)
 end)
 
 test('inventory events coalesce and bank closure preserves snapshots', function()

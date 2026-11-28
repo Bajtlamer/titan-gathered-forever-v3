@@ -44,6 +44,8 @@ function Titan.Rows()
     return rows
 end
 
+-- The material list below the panel entry (Titan Panel or another data broker display). The same data is the My
+-- materials tab of the main window.
 function Titan.Show(owner)
     local tooltip = Titan.tooltip
     if not tooltip then
@@ -58,7 +60,7 @@ function Titan.Show(owner)
     if #skills > 0 then
         tooltip:AddLine(ns.Style.Text(ns.Style.gold, 'Learned professions'))
         for _, skill in ipairs(skills) do
-            tooltip:AddDoubleLine(ns.Style.Text(ns.Style.SkillColor(skill.rank, skill.maxRank), skill.name), ns.Style.Skill(skill.rank, skill.maxRank))
+            tooltip:AddDoubleLine(ns.Style.ProfessionIcon(skill.kind) .. ns.Style.Text(ns.Style.SkillColor(skill.rank, skill.maxRank), skill.name), ns.Style.Skill(skill.rank, skill.maxRank))
         end
         ns.Style.Separator(tooltip)
     end
@@ -72,7 +74,7 @@ function Titan.Show(owner)
         local row = rows[index]
         if row.group ~= group then ns.Style.Section(tooltip, row.group); group = row.group end
         local c = row.count
-        tooltip:AddDoubleLine(ns.Style.ItemName(row.itemID), ns.Tooltips.CountValues(c), 1, 1, 1, 1, 1, 1)
+        tooltip:AddDoubleLine(ns.Style.ItemLabel(row.itemID), ns.Tooltips.CountValues(c), 1, 1, 1, 1, 1, 1)
     end
     if #rows == 0 then tooltip:AddLine(ns.L.noItems, 1, 1, 1, true) end
     ns.Style.Separator(tooltip)
@@ -204,6 +206,9 @@ function Titan.Menu(owner)
     Titan.Hide()
     MenuUtil.CreateContextMenu(owner, function(_, root)
         root:CreateTitle(ns.Style.Text(ns.Style.gold, ns.L.title))
+        if ns.Options and ns.Options.category then
+            root:CreateButton('Options...', function() ns.Options.Open() end)
+        end
         local display = root:CreateButton('Display')
         local function toggle(parent, label, key)
             parent:CreateCheckbox(label, function() return ns.settings[key] end, function()
@@ -413,7 +418,7 @@ function Titan.Menu(owner)
         reports:CreateButton('Kills', function() ns.Nav.Open('kills') end)
         reports:CreateButton('Quests', function() ns.Nav.Open('quests') end)
         reports:CreateButton('Journal', function() ns.Nav.Open('journal') end)
-        reports:CreateButton('Reagent use estimates', function() ns.Reports.Show('reagentUsage') end)
+        reports:CreateButton('Reagent use estimates', function() ns.ProfessionStats.OpenView('materials') end)
         reports:CreateButton('Export statistics',function()ns.ExportView.Show()end)
         reports:CreateButton('Plan selected recipe reagents',function()
             if ns.Crafting.selectedID then ns.CraftingView.Show(ns.Crafting.selectedID,1)
@@ -435,9 +440,31 @@ function Titan.Menu(owner)
     end)
 end
 
+-- Titan Panel itself in the game's addon list: 'active' (loaded), 'disabled' (installed, switched off in the AddOns
+-- list) or 'missing'. The panel entry below needs only the LibDataBroker library, which other addons (Bagnon and
+-- others) bring too, so the entry existing does not mean Titan Panel is there.
+function Titan.PanelState()
+    local api = C_AddOns
+    local loaded = api and api.IsAddOnLoaded or IsAddOnLoaded
+    if loaded then
+        local ok, value = pcall(loaded, 'Titan')
+        if ok and value == true then return 'active' end
+    end
+    if api and api.GetNumAddOns and api.GetAddOnInfo then
+        local ok, count = pcall(api.GetNumAddOns)
+        for index = 1, ok and type(count) == 'number' and count or 0 do
+            local okInfo, name = pcall(api.GetAddOnInfo, index)
+            if okInfo and name == 'Titan' then return 'disabled' end
+        end
+    end
+    return 'missing'
+end
+
+-- The panel entry. Titan Panel shows it, and so does any other display of the LibDataBroker library (ChocolateBar,
+-- Bazooka and others) that is installed. Without one the addon runs alone; the list is the My materials tab.
 function Titan.Initialize()
     local ldb = LibStub and LibStub:GetLibrary('LibDataBroker-1.1', true)
-    if not ldb then ns.Print(ns.L.missingTitan); return false end
+    if not ldb then ns.Debug('No panel display (Titan Panel or another LibDataBroker display): the materials are in the My materials tab.'); return false end
     local version = C_AddOns.GetAddOnMetadata('TitanGatheredForever', 'Version') or ''
     Titan.version = version:match('^(%d+%.%d+%.%d+)') or version
     Titan.broker = ldb:NewDataObject('TitanGatheredForever', {

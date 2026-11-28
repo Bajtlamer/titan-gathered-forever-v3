@@ -117,3 +117,115 @@ function ns.Settings.Initialize(saved)
     if type(saved.knownRecipes) ~= 'table' then saved.knownRecipes = {} end
     return saved, settings
 end
+
+-- Settings as one line of text for copying to another character, account or computer. The format is read by a
+-- small parser, never run as code, so a pasted text can only carry values: T and F are booleans, n<number>; a
+-- number, s<length>:<bytes> a string and {key value ...} a table. A header names the format and carries a checksum.
+local HEADER = 'TGF-SETTINGS:1:'
+local MAX_DEPTH, MAX_TEXT = 20, 200000
+
+local function checksum(payload)
+    local a, b = 1, 0
+    for index = 1, #payload do a = (a + payload:byte(index)) % 65521; b = (b + a) % 65521 end
+    return string.format('%08x', b * 65536 + a)
+end
+
+local function finite(value) return value == value and value ~= math.huge and value ~= -math.huge end
+
+local function encode(value, out, depth)
+    local kind = type(value)
+    if kind == 'boolean' then out[#out + 1] = value and 'T' or 'F'
+    elseif kind == 'number' then
+        if not finite(value) then return false end
+        out[#out + 1] = 'n' .. string.format('%.17g', value):gsub(',', '.') .. ';'
+    elseif kind == 'string' then out[#out + 1] = 's' .. #value .. ':' .. value
+    elseif kind == 'table' then
+        if depth >= MAX_DEPTH then return false end
+        local keys = {}
+        for key in pairs(value) do
+            local keyKind = type(key)
+            if (keyKind == 'string' or (keyKind == 'number' and finite(key))) then keys[#keys + 1] = key end
+        end
+        table.sort(keys, function(a, b)
+            if type(a) ~= type(b) then return type(a) == 'number' end
+            return a < b
+        end)
+        out[#out + 1] = '{'
+        for _, key in ipairs(keys) do
+            local mark = #out
+            if encode(key, out, depth + 1) == false or encode(value[key], out, depth + 1) == false then
+                for index = #out, mark + 1, -1 do out[index] = nil end
+            end
+        end
+        out[#out + 1] = '}'
+    else return false end
+end
+
+function ns.Settings.Export(settings)
+    local out = {}
+    encode(settings, out, 0)
+    local body = table.concat(out)
+    return HEADER .. checksum(body) .. ':' .. body
+end
+
+-- Returns the settings table of an exported text, or nil and the reason.
+function ns.Settings.Decode(text)
+    if type(text) ~= 'string' then return nil, 'Paste an exported settings text first.' end
+    text = text:match('^%s*(.-)%s*$')
+    if text == '' then return nil, 'Paste an exported settings text first.' end
+    if #text > MAX_TEXT then return nil, 'The text is too long for a settings export.' end
+    if text:sub(1, #HEADER) ~= HEADER then return nil, 'This is not a Titan Gathered settings export.' end
+    local sum, body = text:sub(#HEADER + 1):match('^(%x%x%x%x%x%x%x%x):(.*)$')
+    if not sum or checksum(body) ~= sum:lower() then return nil, 'The text is incomplete or changed: copy the whole export again.' end
+    local position = 1
+    local function read(depth)
+        local mark = body:sub(position, position)
+        if mark == 'T' or mark == 'F' then position = position + 1; return mark == 'T' end
+        if mark == 'n' then
+            local digits = body:match('^n([^;]*);', position)
+            local number = digits and tonumber(digits)
+            if not number or not finite(number) then error('bad number') end
+            position = position + #digits + 2
+            return number
+        end
+        if mark == 's' then
+            local length = body:match('^s(%d+):', position)
+            if not length then error('bad string') end
+            local first = position + #length + 2
+            local last = first + tonumber(length) - 1
+            if last > #body then error('short string') end
+            position = last + 1
+            return body:sub(first, last)
+        end
+        if mark == '{' then
+            if depth >= MAX_DEPTH then error('too deep') end
+            position = position + 1
+            local result = {}
+            while body:sub(position, position) ~= '}' do
+                if position > #body then error('open table') end
+                local key = read(depth + 1)
+                if type(key) ~= 'string' and type(key) ~= 'number' then error('bad key') end
+                result[key] = read(depth + 1)
+            end
+            position = position + 1
+            return result
+        end
+        error('unexpected value')
+    end
+    local ok, value = pcall(read, 0)
+    if not ok or type(value) ~= 'table' or position <= #body then
+        return nil, 'The text is incomplete or changed: copy the whole export again.'
+    end
+    return value
+end
+
+-- Replaces the settings with an exported text. The values pass the same checks as the saved variables on load,
+-- and the settings table stays the same table, so every module sees the new values.
+function ns.Settings.Import(settings, text)
+    local imported, reason = ns.Settings.Decode(text)
+    if not imported then return false, reason end
+    local _, clean = ns.Settings.Initialize({ schema = 1, settings = imported })
+    for key in pairs(settings) do settings[key] = nil end
+    for key, value in pairs(clean) do settings[key] = value end
+    return true
+end

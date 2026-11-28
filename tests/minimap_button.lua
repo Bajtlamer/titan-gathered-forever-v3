@@ -44,6 +44,7 @@ local function env(settings)
     local lines = {}
     GameTooltip = { SetOwner = function(_, owner, anchor) lines.owner, lines.anchor = owner, anchor end,
         AddLine = function(_, text) lines[#lines + 1] = text end, Show = function() lines.shown = true end,
+        AddDoubleLine = function(_, left, right) lines[#lines + 1] = left .. ' | ' .. right end,
         Hide = function() lines.shown = false end }
     local ns = { settings = settings or { showMinimapButton = true, minimapButtonAngle = 205 }, IsPublic = function() return true end,
         Style = { gold = 'gold', gray = 'gray', Text = function(color, text) return '<' .. color .. '>' .. text .. '</>' end },
@@ -87,17 +88,59 @@ test('left click toggles the recipes window and right click opens the menu', fun
     button.scripts.OnClick(button, 'RightButton'); eq(ns.calls.menuOwner, button); eq(ns.calls.browser, 2)
 end)
 
-test('the tooltip explains the clicks', function()
+test('the tooltip shows the version, the installed modules with their state, Titan Panel and the clicks', function()
     local ns, lines = env()
+    local addons = {
+        { 'TitanGatheredForever', 'Titan Gathered Forever', true },
+        { 'TitanGatheredForever_Mining', 'Titan Gathered Forever: Mining', true },
+        { 'TitanGatheredForever_AuctionItems', 'Titan Gathered Forever: Auction items', true },
+        { 'TitanGatheredForever_Cooking', 'Titan Gathered Forever: Cooking', false },
+        { 'TitanGatheredForever_Discovery', 'Titan Gathered Discovery', true },
+        { 'Bagnon', 'Bagnon', true },
+    }
+    C_AddOns = {
+        GetNumAddOns = function() return #addons end,
+        GetAddOnInfo = function(index) return addons[index][1], addons[index][2] end,
+        IsAddOnLoaded = function(name) for _, a in ipairs(addons) do if a[1] == name then return a[3] end end end,
+        GetAddOnMetadata = function(name) return name == 'TitanGatheredForever_Discovery' and '0.1.6' or '0.5.192' end,
+    }
+    ns.settings.categories = { Auction = false }
     ns.MinimapButton.Attach()
     local button = ns.MinimapButton.button
     button.scripts.OnEnter(button)
     eq(lines.owner, button); eq(lines.shown, true)
-    eq(lines[1], '<gold>Titan Gathered Forever</>')
-    local text = table.concat(lines, '|')
-    assert(text:find('Left click', 1, true) and text:find('recipes and statistics', 1, true))
-    assert(text:find('Right click', 1, true) and text:find('Drag', 1, true))
+    eq(lines[1], '<gold>Titan Gathered Forever</> | <ffffffff>v0.5.192</>')
+    local text = table.concat(lines, '\n')
+    assert(text:find('<ffffffff>Auction items</> | <gray>Switched off</>', 1, true), text)
+    assert(text:find('<ffffffff>Cooking</> | <gray>Disabled</>', 1, true), text)
+    assert(text:find('<ffffffff>Mining</> | <gray>Active</>', 1, true), text)
+    assert(text:find('<ffffffff>Discovery</><gray> v0.1.6</> | <gray>Active</>', 1, true), text)
+    assert(not text:find('Bagnon', 1, true))
+    local modules = ns.MinimapButton.Modules()
+    eq(#modules, 4); eq(modules[4].label, 'Discovery')        -- by name, Discovery last
+    assert(text:find('Titan Panel</> | <gray>Not installed</>', 1, true), text)
+    assert(text:find('Left click', 1, true) and text:find('Right click', 1, true) and text:find('Drag', 1, true))
     button.scripts.OnLeave(button); eq(lines.shown, false)
+    C_AddOns = nil
+end)
+
+test('the Titan Panel line reads the Titan Panel addon itself, not the panel entry', function()
+    local addons = { { 'Titan', true } }
+    C_AddOns = {
+        GetNumAddOns = function() return #addons end,
+        GetAddOnInfo = function(index) return addons[index][1] end,
+        IsAddOnLoaded = function(name) for _, a in ipairs(addons) do if a[1] == name then return a[2] end end return false end,
+    }
+    local ns = {}
+    _G.LibStub = nil
+    ns.Debug = function() end
+    assert(loadfile('TitanGatheredForever/Titan.lua'))('TitanGatheredForever', ns)
+    eq(ns.Titan.PanelState(), 'active')
+    addons[1][2] = false
+    eq(ns.Titan.PanelState(), 'disabled')                 -- installed, off in the AddOns list (Bagnon may still bring the library)
+    addons = {}
+    eq(ns.Titan.PanelState(), 'missing')
+    C_AddOns = nil
 end)
 
 test('dragging moves the button around the edge and saves the angle', function()

@@ -92,6 +92,7 @@ function ns.ScheduleRefresh()
             end
         end
         ns.Titan.Refresh()
+        if ns.MaterialsView then ns.MaterialsView.Refresh() end
         ns.Reports.Refresh()
     end)
 end
@@ -332,7 +333,7 @@ local function start()
         ns.Print('NPC world axes swapped: ' .. tostring(ns.settings.npcAxisSwap))
         ns.NpcNearest()
     end
-    local help = 'Most functions are in the right-click menu of the Titan entry. Command with a parameter: /tgf recipe <recipeID> [operations]. /tgf sales lists the auction sales read from the mail. /tgf kills, /tgf quests and /tgf journal open the kill and quest logs and the journal.'
+    local help = 'Most functions are in the right-click menu of the minimap button (or the Titan Panel entry) and in Esc > Options > AddOns > Titan Gathered. Command with a parameter: /tgf recipe <recipeID> [operations]. /tgf sales lists the auction sales read from the mail. /tgf kills, /tgf quests and /tgf journal open the kill and quest logs and the journal.'
     function ns.ShowStatus(toChat)
         local report = toChat and ns.Print or ns.Debug
         local count = ns.inventory:Get(0)
@@ -414,14 +415,18 @@ local function start()
         if command == 'next' or command == 'prev' then ns.ChangeSummaryPage(command == 'next' and 1 or -1); return end
         if command == 'production' or command == 'actions' then ns.ProfessionStats.Open(); return end
         if command == 'history' or command == 'chances' or command == 'pvp' then ns.Reports.Show(command); return end
-        if command == 'kills' or command == 'quests' or command == 'journal' then ns.Nav.Open(command); return end
-        if command == 'settings' then ns.Titan.Menu(UIParent); return end
+        if command == 'kills' or command == 'quests' or command == 'journal' or command == 'materials' then ns.Nav.Open(command); return end
+        if command == 'settings' then
+            if not (ns.Options and ns.Options.Open()) then ns.Titan.Menu(UIParent) end
+            return
+        end
         if command == 'sales' then ns.Sales.Report(); return end
         if command ~= 'status' and not ns.settings.debugMode then ns.Print(help); return end
         ns.ShowStatus(command == 'status')
     end
     SLASH_TITANGATHEREDFOREVERV31 = '/tgf'
     pcall(ns.Legacy.Check)          -- a warning about old folders must never stop the start
+    pcall(ns.Options.Register)      -- the Options window entry is optional: a failure keeps the addon working
     ns.ScheduleRefresh()
 end
 

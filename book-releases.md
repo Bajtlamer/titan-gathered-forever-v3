@@ -19,7 +19,7 @@ Standing user instruction: install every completed, verified runtime update or n
    ```
 
    This installs the core and all thirteen optional addons. Enable only the modules you want in WoW. Existing TG3 folders are moved intact to a unique directory under `Interface/.tgf-v3-backups/`; the command prints that directory. Old backups remain available on subsequent installs. Unrelated addons, previous-generation folders and SavedVariables are preserved. Disable the previous generation yourself before enabling TG3.
-4. Launch WoW with Titan Panel and the affected modules enabled. Enable Lua errors with `/console scriptErrors 1`; use `/reload` after subsequent configuration changes. Follow `book-wow-forever-validation.md`, checking startup, tooltips, bag/bank updates, maps, history and persistence. Automated checks do not establish live-client compatibility.
+4. Launch WoW with the affected modules enabled, once with Titan Panel and once without it (Titan Panel is optional since 0.5.177). Enable Lua errors with `/console scriptErrors 1`; use `/reload` after subsequent configuration changes. Follow `book-wow-forever-validation.md`, checking startup, tooltips, bag/bank updates, maps, history and persistence. Automated checks do not establish live-client compatibility.
 
 The installer stages the complete candidate before replacement and automatically restores original folders if an ordinary installation error occurs. Symlink destinations, symlink/file TG3 targets and source/destination overlap are rejected. An exclusive `Interface/.tgf-v3-install-lock` directory blocks simultaneous installer runs.
 
@@ -58,7 +58,7 @@ The upload directory contains exactly fifteen ZIPs and two metadata files:
 - `downloads.json`: schema version, release version, client/interface, labels, filenames, dependencies, byte sizes and SHA-256 hashes.
 - `SHA256SUMS`: checksums for ZIPs and the download index.
 
-Every ZIP extracts addon folders directly under AddOns. Optional modules require the shared core and Titan Panel. The complete collection requires Titan Panel separately. Packages contain only manifest-listed runtime files and the core artwork.
+Every ZIP extracts addon folders directly under AddOns. Optional modules require the shared core. Titan Panel is optional (since 0.5.177) and never packaged. Packages contain only manifest-listed runtime files and the core artwork.
 
 On macOS, verify with `shasum -a 256 -c SHA256SUMS` from the upload directory. Linux CI uses `sha256sum --check SHA256SUMS`.
 

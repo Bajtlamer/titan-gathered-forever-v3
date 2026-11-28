@@ -1,6 +1,95 @@
 # Unreleased development updates
 
-Updated 2026-11-27. Versions up to 0.5.172 are published in release-notes/ref-0.5.172.md. These changes describe source candidates since the latest published versioned notes.
+Updated 2026-11-28. Versions up to 0.5.172 are published in release-notes/ref-0.5.172.md. These changes describe source candidates since the latest published versioned notes.
+
+## Titan Panel state from the addon list, 0.5.193
+
+- Fixed: the minimap tooltip and the General Options note took the panel entry (ns.Titan.broker) for Titan Panel, but the entry needs only LibDataBroker, which Bagnon (BagBrother/libs) loads too; with Titan Panel disabled the tooltip said Plugin active. Titan.PanelState reads the Titan addon: active (IsAddOnLoaded), disabled (listed by GetAddOnInfo but not loaded) or missing. The tooltip shows Active, Disabled or Not installed.
+
+## Minimap button overview, 0.5.192
+
+- The minimap button tooltip (MinimapButton.Tooltip) shows the core version, the installed TitanGatheredForever_* addons from the game's addon list (C_AddOns.GetNumAddOns, GetAddOnInfo, IsAddOnLoaded) with their profession icon and state: Active, Switched off (settings.categories) or Disabled (not loaded), Discovery last with its version; then the Titan Panel plugin state and the click hints.
+
+## Escape closes the map only, 0.5.191
+
+- Fixed: 0.5.190 reopened the list in the OnHide of the map, inside the same Escape, which then closed every window of UISpecialFrames, the reopened list included; and it hid the list also beside the small map. Nav.ShowMap now takes the list window out of UISpecialFrames while the map is open, hides it only when the map is maximized (WorldMapFrame:IsMaximized), and one frame after the map closed (C_Timer.After 0) puts it back into UISpecialFrames and reopens a hidden list.
+
+## Map round trip, quest state pins and Turned in, 0.5.190
+
+- Fixed: Nav.ShowMap opens the world map for every list (ListWindow.ShowOnMap, Unlearned recipes, Trainers, NpcSources.ShowOnMap, the source menus of the reports). It hides the current tab window and reopens that tab from a WorldMapFrame OnHide hook, so Escape closes the map alone and the tab returns with its state; before, Escape closed the map and the list together.
+- Fixed: the giver of a quest clicked in Journal > Quests showed the note icon of QuestGiverPast whatever the state. JournalPins.focus keeps the clicked quest's status and the pin kind follows it: QuestGiverReady (ActiveQuestIcon, with the shadow), QuestGiver, QuestGiverDone (ReadyCheck-Ready), QuestGiverAbandoned (ReadyCheck-NotReady); the tooltip names the state. JournalPins.IsQuestKind covers the kinds.
+- The Quests column Turn-ins is renamed Turned in and the note explains it counts the hand-ins of the characters shown.
+
+## Quests ready to turn in, 0.5.189
+
+- QuestsView marks an open quest as ready (status 'ready', label Ready to turn in, yellow) when JournalPins.Ready says so (C_QuestLog.ReadyForTurnIn or IsComplete), only when the list shows this character or all characters, because only the logged-in character's quest log is readable. The status filter gains Ready to turn in; In progress keeps the open ones. The quest name gets the game's mark of its state (GossipFrame ActiveQuestIcon, IncompleteQuestIcon, RaidFrame ReadyCheck-Ready and ReadyCheck-NotReady), drawn whole with Style.Icon(texture, size, true). The Quest column is 235 px and Status 110 px. JournalPins.LogChanged refreshes the list when a quest changes state.
+
+## The Options divider on every list tab, 0.5.188
+
+- The owner accepted the look of 0.5.187. The line is Nav.Divider (moved from ListWindow): every ListWindow tab draws it unless its spec sets divider = false (Journal and My materials), and Unlearned recipes, Trainers and Crafting profit draw it at -125 with their rows, scroll bars and empty texts 8 px lower (-140); the reports (Lifetime materials, Observed chances, PvP Board) start their content at 140 instead of 132. The Crafting profit footer moves from -492 to -500 to stay clear of the last row. Economy keeps its banded table without the line.
+
+## The Options divider between the headers and the rows of My materials, 0.5.187 (trial)
+
+- The divider moves back between the column headers and the rows (centred at -125). The headers keep their original place under the combo boxes (-100) and the rows start 8 px lower (-140).
+
+## The Options window divider in My materials, 0.5.186 (trial)
+
+- The line between the combo boxes and the headers is the divider of the game's Options window (Options_HorizontalDivider) at the height of its art, stretched to the list width; 0.5.183 had forced it to 4 px, which made a thick bar. Without the art, the 1 px gold line of 0.5.185 stays.
+
+## Golden line between the combo boxes and the headers of My materials, 0.5.185 (trial)
+
+- The thin gold line moves up between the row of combo boxes and the column headers (at -97); on a tab with the line the headers and rows sit 6 px lower (headers -106, rows -138) instead of the rows 8 px lower.
+
+## Thin golden line under the headers of My materials, 0.5.184 (trial)
+
+- The divider of 0.5.183 (the Options window art) was a thick brown bar and sat on the rows. It is now the same line as under the list of the professions Statistics: 1 px of gold at 55 %, 12 px under the header text, and the rows start 8 px lower (at -140 instead of -132) on a tab with the line, with the scroll bar and the empty text moved alike.
+
+## Golden divider under the headers of My materials, 0.5.183 (trial)
+
+- ListWindow draws a thin golden line with depth between the column headers and the rows when a tab asks for it (spec.divider): the Options_HorizontalDivider art of the game's Options window, else a gold line over a dark shadow line. Only My materials uses it, as a trial before the other tabs. Release notes renamed to release-notes/ref-0.5.183.md.
+
+## Narrower Statistics combo boxes, 0.5.182
+
+- The profession, character and view combo boxes of the professions Statistics are narrower (140, 140 and 128 px, 6 px apart instead of 164, 174 and 150), so the search box beside them is about 70 px wider. Release notes renamed to release-notes/ref-0.5.182.md.
+
+## Statistics search box inside the panel, 0.5.181
+
+- Fixed: the search box of the professions Statistics (0.5.173) was placed at fixed coordinates and ran past the right edge of the panel, over the profession buttons beside the game window. It is now anchored between the view combo box and the right edge of the panel, with its label to its left. Release notes renamed to release-notes/ref-0.5.181.md.
+
+## Icons in Statistics > Attempts and profession icons, 0.5.180
+
+- Statistics > Attempts shows the crafted item (else the recipe spell) or the gathering profession icon, which 0.5.179 missed. Style.ProfessionIcon gives each profession a game icon (Trade_* and similar, weapon masters a sword): the trainers of the Trainers tab, the Profession columns of Unlearned recipes and Crafting profit, the profession tabs and headings of Statistics > Gathered items, Learned professions and the Titan Panel list. Release notes renamed to release-notes/ref-0.5.180.md.
+
+## Item icons in the lists, 0.5.179
+
+- Style.ItemIcon, Style.SpellIcon and Style.ItemLabel put the icon before the name as inline texture text (14 px, border cropped, nothing when the client gives no icon). Used in My materials, Lifetime materials, Observed chances, Profession actions yields, Crafting profit (product), Unlearned recipes (vendor recipe item, else the trainer spell from the seed, else a scroll icon), Journal Creature drops, Statistics Materials and Gathered items, the reagent window, the auction history header and the Titan Panel list. Sort values and search keep the plain name. Release notes renamed to release-notes/ref-0.5.179.md.
+
+## My materials tab, 0.5.178
+
+- New first tab of the main window, My materials (MaterialsView.lua, a ListWindow): the catalogue materials the character holds with bags, bank snapshot and total, a scope combo box (in bags or bank, or all catalogue materials), a group combo box, search, sortable columns and the item tooltip on hover; the footer sums the items and says how old the bank snapshot is. A second view, Learned professions, lists skill, share of the rank and primary or secondary. It refreshes with the bags. The minimap button is back to its short help on hover (the material list there, added in 0.5.177, is removed) and its left click opens My materials the first time; `/tgf materials` opens it. The Titan Panel entry keeps its list. Release notes renamed to release-notes/ref-0.5.178.md.
+
+## Titan Panel optional and smaller Options text, 0.5.177 (Discovery 0.1.6)
+
+- Titan Panel is optional: the core manifest has OptionalDeps: Titan instead of Dependencies, and the thirteen modules and Discovery depend on the core only. Without a LibDataBroker display the panel entry is not created and nothing is printed (the old "requires Titan Panel" line is gone); the minimap button shows the material list when pointed at (the mouse wheel turns its pages, the hints are its footer), and its right click menu, the world map button and the Options window carry every setting. Any LibDataBroker display (Titan Panel, ChocolateBar, Bazooka) shows the entry. The General Options page says where the list is, also when the minimap button is hidden without a panel display. The Options page Titan Panel list is renamed Material list.
+- The text of the Options pages is smaller: titles, headers, labels and buttons by about two points, notes by one, with tighter rows and smaller check boxes.
+- Versioned notes prepared for the release: release-notes/ref-0.5.177.md and release-notes/ref-discovery-0.1.6.md.
+
+## Moving the saved data to another computer, 0.5.176
+
+- The Backup page starts with moving or backing up everything: it names the file (TitanGatheredForever.lua, plus TitanGatheredForever_Discovery.lua when Discovery is loaded), shows its folder in a box to copy (default install folder of Windows or macOS; the account folder from the account selected at login, YOUR_ACCOUNT when the client does not give it), tells how to open it in File Explorer or Finder, and lists the steps. It warns that the copied file replaces the data on the other computer. The settings export follows below it. The JSON statistics export is no longer linked from Backup: it is a split developer export, not a backup.
+
+## Settings backup and the Options name, 0.5.175
+
+- The Options entry is named Titan Gathered, with the addon icon before the name.
+- New Backup page: Export settings puts every setting in a text box as one text to copy; Import settings reads such a pasted text and replaces the settings, then offers Reload interface. The text is read by a small parser (never run as code) and carries a checksum, so a partial or changed copy is refused with a message. Statistics stay out of it: the game's text boxes hold about 32 KB and the saved data is a few MB, so the page explains how to move everything as the SavedVariables file, and links the JSON statistics export.
+
+## Settings in the game Options, 0.5.174
+
+- The settings are also in the game Options window, AddOns tab, under Titan Gathered Forever, with a page per subject: General (minimap button, movable windows, window positions, icon appearance and buttons that open the windows), Titan Panel list, Professions, Map pins, Gathering spots, Map materials (a combo box picks the gathering profession), Travel routes, Auction house and Diagnostics. Each switch writes the same saved setting as the Titan Panel menu and runs the same update, and a page reads the settings again whenever it is shown, so the two never disagree. The Titan menu starts with Options..., and `/tgf settings` opens the Options page (the menu on a client without the Options window). New file OptionsPanel.lua: a full client restart is needed.
+
+## Reagent use moved to Statistics, 0.5.173
+
+- The Reagent use tab of the main window is removed: it showed the same estimate as Statistics > Materials in the professions window. Materials gains the two columns the tab had (leading profession and its share of the use, both sortable), and Attempts and Materials get a search box (Escape clears it). Titan menu > History and sources > Reagent use estimates opens Statistics > Materials. The main window has eight tabs, leaving room for later ones.
 
 ## No double question mark for a finished quest, 0.5.172
 

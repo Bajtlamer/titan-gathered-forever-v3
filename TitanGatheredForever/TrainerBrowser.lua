@@ -16,7 +16,7 @@ function Browser.Cells(row)
         local when = row.lastSeen and date and (' ' .. Style.Date(date('%Y-%m-%d', row.lastSeen))) or ''
         status = Style.Text(Style.gold, 'Visited') .. when
     end
-    return { Style.Text(Style.green, row.name), ns.NpcSources.Label(row.kind), row.zone or 'Unknown',
+    return { Style.ProfessionIcon(row.kind) .. Style.Text(Style.green, row.name), ns.NpcSources.Label(row.kind), row.zone or 'Unknown',
         row.x and string.format('%.1f, %.1f', row.x, row.y) or 'Unknown', status }
 end
 
@@ -85,8 +85,7 @@ local function openMap(line)
     end
     local mapID = row.mapID or ns.NpcSources.ContinentMap(row.npcID)
     if mapID then
-        if OpenWorldMap then OpenWorldMap(mapID)
-        elseif WorldMapFrame and WorldMapFrame.SetMapID then WorldMapFrame:Show(); WorldMapFrame:SetMapID(mapID) end
+        ns.Nav.ShowMap(mapID)
     end
     if ns.Map and ns.Map.Update then ns.Map.Update() end
     if ns.Minimap and ns.Minimap.Update then ns.Minimap.Update() end
@@ -180,7 +179,7 @@ function Browser.Show()
         for index = 1, ROWS do
             local line = CreateFrame('Button', nil, w)
             line:SetSize(ROW_WIDTH, ROW_HEIGHT)
-            line:SetPoint('TOPLEFT', w, 'TOPLEFT', 15, -132 - (index - 1) * ROW_HEIGHT)
+            line:SetPoint('TOPLEFT', w, 'TOPLEFT', 15, -140 - (index - 1) * ROW_HEIGHT)
             line.cells = {}
             for i, column in ipairs(columns) do line.cells[i] = text(line, 'GameFontHighlightSmall', column[2], 0, column[3]) end
             line:SetScript('OnClick', openMap)
@@ -195,7 +194,8 @@ function Browser.Show()
         end
         w:EnableMouseWheel(true)
         w:SetScript('OnMouseWheel', function(_, delta) Browser.Scroll(-delta * WHEEL_STEP) end)
-        w.slider = ns.Nav.Scrollbar(w, 15 + ROW_WIDTH + 8, -132, ROWS * ROW_HEIGHT, function(value)
+        ns.Nav.Divider(w, 15, -125, ROW_WIDTH)  -- the line between the headers and the rows, as on every list tab
+        w.slider = ns.Nav.Scrollbar(w, 15 + ROW_WIDTH + 8, -140, ROWS * ROW_HEIGHT, function(value)
             Browser.ScrollTo(value)
         end, function(delta) Browser.Scroll(-delta * WHEEL_STEP) end)
         w.footer = text(w, 'GameFontHighlightSmall', 15, -520, 930)

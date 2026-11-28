@@ -274,7 +274,7 @@ function View.Refresh()
         if data then
             local paint = color(data.state)
             row:Show()
-            row.name:SetText(ns.Style.Text(paint, ns.ItemName(data.itemID)))
+            row.name:SetText(ns.Style.ItemIcon(data.itemID) .. ns.Style.Text(paint, ns.ItemName(data.itemID)))
             row.need:SetText(tostring(data.required))
             row.bags:SetText(tostring(data.bags))
             row.bank:SetText(data.bank and tostring(data.bank) or '-')

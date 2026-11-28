@@ -50,7 +50,7 @@ class PackageTests(unittest.TestCase):
                 self.assertIn(f'{name}/LICENSE', names)
                 self.assertNotIn(f'{name}/NOTICE', names)
                 self.assertFalse([n for n in names if n.startswith(f'{name}/tests') or n.endswith('.md') or n.endswith('.py')])
-                self.assertIn('## Dependencies: Titan, TitanGatheredForever', manifest)
+                self.assertIn('## Dependencies: TitanGatheredForever', manifest)
                 self.assertRegex(manifest, r'(?m)^## Version: \d+\.\d+\.\d+$')
                 self.assertEqual(re.search(r'^## IconTexture: (.+)$', manifest, re.M).group(1),
                                  f'Interface\\AddOns\\{name}\\Artwork\\AddonIcon')
@@ -123,10 +123,11 @@ class PackageTests(unittest.TestCase):
                     folder = module['folder']
                     self.assertIn(f'{folder}/Data.lua', names)
                     module_toc = archive.read(f'{folder}/{folder}.toc').decode()
-                    self.assertIn('## Dependencies: Titan, TitanGatheredForever', module_toc)
+                    self.assertIn('## Dependencies: TitanGatheredForever\n', module_toc)
                 manifest = archive.read('TitanGatheredForever/TitanGatheredForever.toc').decode()
                 self.assertIn('## Interface: 16001', manifest)
-                self.assertIn('## Dependencies: Titan', manifest)
+                self.assertIn('## OptionalDeps: Titan', manifest)
+                self.assertNotIn('## Dependencies:', manifest)
                 self.assertIn('## SavedVariables: TitanGatheredForeverV3DB', manifest)
                 for line in manifest.splitlines():
                     if line and not line.startswith('#'):

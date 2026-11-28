@@ -8,12 +8,12 @@ ns.Nav = Nav
 Nav.WIDTH, Nav.HEIGHT = 985, 592
 Nav.TAB_Y = -558
 Nav.tabs = {
+    { id = 'materials', label = 'My materials' },
     { id = 'recipes', label = 'Unlearned recipes' },
     { id = 'trainers', label = 'Trainers' },
     { id = 'history', label = 'Lifetime materials' },
     { id = 'chances', label = 'Observed chances' },
     { id = 'profit', label = 'Crafting profit' },
-    { id = 'reagentUsage', label = 'Reagent use' },
     { id = 'pvp', label = 'PvP Board' },
     { id = 'economy', label = 'Economy' },
     { id = 'journal', label = 'Journal' },
@@ -54,7 +54,7 @@ end
 -- Opens the last used tab, or closes the window when one is already open (the minimap button).
 function Nav.Toggle()
     local id, window = Nav.Current()
-    if id then window:Hide() else Nav.Open(Nav.last or 'recipes') end
+    if id then window:Hide() else Nav.Open(Nav.last or 'materials') end
 end
 
 -- Window positions are kept in the saved variables (windowPositions), one per window or group of windows, so a
@@ -298,6 +298,78 @@ function Nav.Dropdown(parent, x, y, width, options, get, set)
     b.Sync = function() b:SetText(labelOf()) end
     b.Sync()
     return b
+end
+
+-- The divider of the game's Options window (the line under a page title) between the column headers and the rows: the Options_HorizontalDivider art at its own height, stretched to the width of the list. Without that art,
+-- a 1 px gold line at 55 %, the line under the list of the professions Statistics.
+Nav.DIVIDER_ATLAS = 'Options_HorizontalDivider'
+function Nav.Divider(parent, x, y, width)
+    local line = parent:CreateTexture(nil, 'ARTWORK')
+    local ok = line.SetAtlas and pcall(line.SetAtlas, line, Nav.DIVIDER_ATLAS, true)
+    if ok and (not line.GetAtlas or line:GetAtlas() == Nav.DIVIDER_ATLAS) then
+        local height = line.GetHeight and line:GetHeight()
+        if type(height) ~= 'number' or height <= 0 or height > 16 then height = 2 end
+        line:SetSize(width, height)
+        line:SetPoint('LEFT', parent, 'TOPLEFT', x, y)
+        line.atlas = true
+        return line
+    end
+    line:SetColorTexture(1, 0.82, 0, 0.55)
+    line:SetPoint('TOPLEFT', parent, 'TOPLEFT', x, y)
+    line:SetSize(width, 1)
+    return line
+end
+
+-- Opens the world map at mapID from a list, so that Escape closes the map alone and the list is there afterwards.
+-- The game closes every window of UISpecialFrames together with the map on one Escape, so while the map is open the
+-- list is taken out of that list: with the small map it stays open beside the map; with the full-screen map, which
+-- would hide it anyway, it steps aside and comes back. Both happen one frame after the map closed, so the Escape that
+-- closed the map cannot close the list too.
+local function mapMaximized(map)
+    if map.IsMaximized then
+        local ok, value = pcall(map.IsMaximized, map)
+        if ok and (not ns.IsPublic or ns.IsPublic(value)) then return value == true end
+    end
+    return map.isMaximized == true
+end
+
+local function setEscape(window, on)
+    local name = window and window.GetName and window:GetName()
+    local list = _G.UISpecialFrames
+    if type(name) ~= 'string' or type(list) ~= 'table' then return end
+    for index = #list, 1, -1 do if list[index] == name then table.remove(list, index) end end
+    if on then list[#list + 1] = name end
+end
+Nav.SetEscape = setEscape
+
+local function mapClosed()
+    local back = Nav.returnTo
+    Nav.returnTo = nil
+    if not back then return end
+    local function restore()
+        setEscape(back.window, true)
+        if back.hidden and not back.window:IsShown() then Nav.Open(back.id) end
+    end
+    if C_Timer and C_Timer.After then C_Timer.After(0, restore) else restore() end
+end
+
+function Nav.ShowMap(mapID)
+    if not mapID then return end
+    local map = _G.WorldMapFrame
+    if map and map.HookScript and not Nav.mapHooked then
+        Nav.mapHooked = true
+        map:HookScript('OnHide', mapClosed)
+    end
+    local id, window = Nav.Current()
+    if OpenWorldMap then OpenWorldMap(mapID)
+    elseif map and map.SetMapID then map:Show(); map:SetMapID(mapID) end
+    if id and window and map then
+        local hidden = mapMaximized(map)
+        if Nav.returnTo and Nav.returnTo.window ~= window then setEscape(Nav.returnTo.window, true) end
+        Nav.returnTo = { id = id, window = window, hidden = hidden }
+        setEscape(window, false)
+        if hidden then window:Hide() end
+    end
 end
 
 -- A vertical scroll bar. scrollTo(offset) receives the dragged position; wheel(delta) the mouse wheel over the bar.

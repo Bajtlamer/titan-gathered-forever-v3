@@ -6,12 +6,25 @@ ns.QuestsView = View
 
 local Style, List = ns.Style, ns.ListWindow
 
+-- A status: its label, its color and the icon before the quest name, the marks the game itself uses: the yellow
+-- question mark of a quest ready to turn in, the silver one of a quest in progress, the check of a done quest and
+-- the cross of an abandoned or failed one.
 local statuses = {
-    completed = { 'Completed', Style.white }, open = { 'In progress', Style.cyan },
-    abandoned = { 'Abandoned or failed', Style.orange }, unknown = { 'Unknown', Style.gray },
+    completed = { 'Completed', Style.white, 'Interface\\RaidFrame\\ReadyCheck-Ready' },
+    ready = { 'Ready to turn in', Style.yellow, 'Interface\\GossipFrame\\ActiveQuestIcon' },
+    open = { 'In progress', Style.cyan, 'Interface\\GossipFrame\\IncompleteQuestIcon' },
+    abandoned = { 'Abandoned or failed', Style.orange, 'Interface\\RaidFrame\\ReadyCheck-NotReady' },
+    unknown = { 'Unknown', Style.gray },
 }
+View.statuses = statuses
 local statusChoices = { { value = 'all', label = 'All quests' }, { value = 'completed', label = 'Completed' },
-    { value = 'open', label = 'In progress' }, { value = 'abandoned', label = 'Abandoned or failed' } }
+    { value = 'ready', label = 'Ready to turn in' }, { value = 'open', label = 'In progress' },
+    { value = 'abandoned', label = 'Abandoned or failed' } }
+
+function View.StatusIcon(status)
+    local entry = statuses[status]
+    return entry and entry[3] and Style.Icon and Style.Icon(entry[3], nil, true) or ''
+end
 
 local requested = {}
 function View.Title(questID)
@@ -36,7 +49,7 @@ function View.Cells(row)
     local title, average = View.Title(row.questID), View.AverageTime(row)
     local zone = List.Zone(row.mapID)
     return {
-        title and Style.Value(title) or Style.Text(Style.gray, 'Quest ' .. row.questID),
+        View.StatusIcon(row.status) .. (title and Style.Value(title) or Style.Text(Style.gray, 'Quest ' .. row.questID)),
         Style.Text(status[2], status[1]),
         row.turnIns > 0 and Style.Value(row.turnIns) or Style.Text(Style.gray, '0'),
         row.xpTurnIns > 0 and Style.Value(row.xp) or List.Unknown(),
@@ -48,7 +61,7 @@ function View.Cells(row)
     }
 end
 
-local order = { completed = 1, open = 2, abandoned = 3, unknown = 4 }
+local order = { completed = 1, ready = 2, open = 3, abandoned = 4, unknown = 5 }
 function View.SortValue(row, column)
     if column == 1 then return string.lower(View.Name(row)) end
     if column == 2 then return order[row.status] end
@@ -67,8 +80,16 @@ end
 
 local function realm() return GetRealmName and GetRealmName() end
 
+-- A quest in progress whose objectives are done is ready to turn in. Only the quest log of the character that is
+-- logged in can be read, so this shows for this character's quests (and in All characters when this character has it).
 function View.Rows()
     local rows = ns.QuestIncome.Rows(ns.db and ns.db.questIncome, realm(), View.character or nil)
+    local own = not View.character or View.character == ns.characterID
+    if own and ns.JournalPins and ns.JournalPins.Ready then
+        for _, row in ipairs(rows) do
+            if row.status == 'open' and ns.JournalPins.Ready(row.questID) then row.status = 'ready' end
+        end
+    end
     if View.status ~= 'all' then
         local kept = {}
         for _, row in ipairs(rows) do
@@ -131,6 +152,7 @@ end
 function View.Click(row)
     if not row.giver then return end
     local _, giver = ns.QuestIncome.GiverName(row.giver)
+    if ns.JournalPins then ns.JournalPins.focus = { npcID = row.giver, status = row.status } end
     if giver and giver.mapID then List.ShowOnMap(row.giver, giver.mapID) end
 end
 
@@ -161,10 +183,12 @@ View.statusFilter = { width = 170, options = function() return statusChoices end
 View.modes = {
     { value = 'quests', label = 'Quests',
         note = 'Quests you accepted, turned in or abandoned, with what they gave and how long they took. Accepting and '
-            .. 'abandoning are recorded since version 0.5.165; turn-ins and their money since quest income was added. Hover '
+            .. 'abandoning are recorded since version 0.5.165; turn-ins and their money since quest income was added. A yellow question '
+            .. 'mark is a quest of this character ready to turn in, a silver one a quest still in progress. Turned in counts the '
+            .. 'hand-ins of the characters shown: with All characters, another character may have turned in a quest still open here. Hover '
             .. 'a row for the giver and the items received; click it to show the giver on the map. Escape in the search '
             .. 'box clears it.',
-        columns = { { 'Quest', 0, 250, 'text' }, { 'Status', 255, 95, 'text' }, { 'Turn-ins', 355, 60, 'number' },
+        columns = { { 'Quest', 0, 235, 'text' }, { 'Status', 240, 110, 'text' }, { 'Turned in', 355, 60, 'number' },
             { 'Experience', 420, 80, 'number' }, { 'Money', 505, 105, 'number' }, { 'Time taken', 615, 80, 'number' },
             { 'Turned in at', 700, 115, 'text' }, { 'Last activity', 820, 90, 'number' } },
         sortKey = 'quests', default = { column = 8, descending = true },

@@ -40,6 +40,8 @@ commands = [
     [runtime, 'tests/pin_style.lua'],
     [runtime, 'tests/icon_appearance.lua'],
     [runtime, 'tests/icon_config.lua'],
+    [runtime, 'tests/options_panel.lua'],
+    [runtime, 'tests/materials_view.lua'],
     [runtime, 'tests/minimap.lua'],
     [runtime, 'tests/npc_sources.lua'],
     [runtime, 'tests/weapon_masters.lua'],

@@ -10,7 +10,7 @@ assert(#ns.Catalog.Modules() == 0, 'Core invented loaded profession modules')
 local function loadAddon(folder)
     local manifest = assert(io.open(folder .. '/' .. folder .. '.toc', 'r'))
     local text = manifest:read('*a'); manifest:close()
-    assert(text:find('## Dependencies: Titan, TitanGatheredForever', 1, true))
+    assert(text:find('## Dependencies: TitanGatheredForever\n', 1, true), folder .. ' must depend on the core only')
     for file in text:gmatch('[^\r\n]+') do
         if file:match('%.lua$') then assert(loadfile(folder .. '/' .. file))(folder, {}) end
     end

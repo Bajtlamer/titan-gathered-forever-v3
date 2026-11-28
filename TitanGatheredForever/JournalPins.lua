@@ -88,7 +88,10 @@ function Pins.LogChanged()
     if signature ~= Pins.signature then
         local first = Pins.signature == nil
         Pins.signature = signature
-        if not first then Pins.Redraw() end
+        if not first then
+            Pins.Redraw()
+            if ns.QuestsView and ns.QuestsView.Refresh then ns.QuestsView.Refresh() end
+        end
     end
 end
 
@@ -97,13 +100,20 @@ end
 -- with a drop shadow (PinStyle.Badge). The yellow exclamation mark is the game's own sign of a quest that can be taken: the addon never
 -- draws it, because it cannot know which quests are still available. A giver shown from the Quests list
 -- (highlighted) whose quests are all done gets a plain note icon.
+-- The giver of a quest clicked in the Quests list shows the mark of that quest's state, as the list does.
+Pins.FOCUS_KINDS = { ready = 'QuestGiverReady', open = 'QuestGiver', completed = 'QuestGiverDone', abandoned = 'QuestGiverAbandoned' }
+function Pins.IsQuestKind(kind) return type(kind) == 'string' and kind:find('^QuestGiver') ~= nil end
+
 function Pins.List(mapID)
     local result, settings = {}, ns.settings or {}
     for npcID, giver in pairs(realmStore('questGivers')) do
         if type(giver) == 'table' and giver.mapID == mapID and type(giver.x) == 'number' and type(giver.y) == 'number' then
             local open = openQuests(giver)
             local kind
-            if open > 0 and (settings.mapQuestGivers ~= false or highlighted(npcID)) then kind = 'QuestGiver'
+            local focus = Pins.focus
+            if focus and focus.npcID == npcID and highlighted(npcID) and Pins.FOCUS_KINDS[focus.status] then
+                kind = Pins.FOCUS_KINDS[focus.status]
+            elseif open > 0 and (settings.mapQuestGivers ~= false or highlighted(npcID)) then kind = 'QuestGiver'
             elseif highlighted(npcID) then kind = 'QuestGiverPast' end
             if kind then
                 result[#result + 1] = { kind = kind, npcID = npcID, mapID = mapID, x = giver.x, y = giver.y, open = open }
@@ -145,10 +155,12 @@ end
 function Pins.FillTooltip(tip, node)
     local Style = ns.Style
     local small = Style.Small or function() end
-    if node.kind == 'QuestGiver' or node.kind == 'QuestGiverPast' then
+    if Pins.IsQuestKind(node.kind) then
         local giver = realmStore('questGivers')[node.npcID] or {}
         tip:AddLine(Style.Text(Style.gold, giver.name or ('Creature ' .. node.npcID)))
-        tip:AddLine(Style.Label(node.kind == 'QuestGiver' and 'Gave you a quest that is in progress' or 'Quest giver'))
+        local lines = { QuestGiver = 'Gave you a quest that is in progress', QuestGiverReady = 'Gave you a quest that is ready to turn in',
+            QuestGiverDone = 'Gave you a quest you completed', QuestGiverAbandoned = 'Gave you a quest you abandoned' }
+        tip:AddLine(Style.Label(lines[node.kind] or 'Quest giver'))
         -- Quests in progress first, then the others, each by ID.
         local quests = {}
         for questID in pairs(type(giver.quests) == 'table' and giver.quests or {}) do

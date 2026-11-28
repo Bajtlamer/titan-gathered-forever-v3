@@ -50,6 +50,7 @@ end
 -- nil for every view }), modes (the views). A view: value, label, note, columns ({ label, x, width, kind }), sortKey,
 -- default (first order), rows(view) -> rows, extra, cells(row), sortValue(row, column), tie(a, b),
 -- search(row) -> lower-case text, tooltip(tip, row), click(row), footer(view, rows, extra), empty, nothing, what.
+-- divider = false leaves out the golden line between the column headers and the rows (drawn by default).
 -- A spec without modes is a single view.
 function ListWindow.Create(spec)
     local modes = spec.modes or { spec }
@@ -206,6 +207,9 @@ function ListWindow.Create(spec)
                 view.searchText = self:GetText()
                 view.Changed()
             end)
+            -- With the divider (between the column headers and the rows) the rows start 8 px lower, so the line has
+            -- room above and below it; the headers keep their place under the combo boxes.
+            local top = spec.divider ~= false and -140 or -132
             w.headers = {}
             for _, mode in ipairs(modes) do
                 local header = CreateFrame('Frame', nil, w)
@@ -220,11 +224,12 @@ function ListWindow.Create(spec)
                 view.sorters[mode.value or 1] = ns.ColumnSort.Attach({ parent = header, cells = headCells, kinds = kinds,
                     key = mode.sortKey, default = mode.default, onChange = view.Changed })
             end
+            if spec.divider ~= false then w.divider = ListWindow.Divider(w, 15, -125, ROW_WIDTH) end
             w.lines = {}
             for index = 1, ROWS do
                 local line = CreateFrame('Button', nil, w)
                 line:SetSize(ROW_WIDTH, ROW_HEIGHT)
-                line:SetPoint('TOPLEFT', w, 'TOPLEFT', 15, -132 - (index - 1) * ROW_HEIGHT)
+                line:SetPoint('TOPLEFT', w, 'TOPLEFT', 15, top - (index - 1) * ROW_HEIGHT)
                 line.cellSets = {}
                 for _, mode in ipairs(modes) do
                     local cells = {}
@@ -247,10 +252,10 @@ function ListWindow.Create(spec)
                 end)
                 w.lines[index] = line
             end
-            w.empty = text(w, 'GameFontNormalSmall', 15, -136, 930)
+            w.empty = text(w, 'GameFontNormalSmall', 15, top - 4, 930)
             w:EnableMouseWheel(true)
             w:SetScript('OnMouseWheel', function(_, delta) view.Scroll(-delta * WHEEL_STEP) end)
-            w.slider = ns.Nav.Scrollbar(w, 15 + ROW_WIDTH + 8, -132, ROWS * ROW_HEIGHT, function(value)
+            w.slider = ns.Nav.Scrollbar(w, 15 + ROW_WIDTH + 8, top, ROWS * ROW_HEIGHT, function(value)
                 view.ScrollTo(value)
             end, function(delta) view.Scroll(-delta * WHEEL_STEP) end)
             w.footer = text(w, 'GameFontNormalSmall', 15, -500, 950)
@@ -270,6 +275,9 @@ function ListWindow.Create(spec)
     ns.Nav.views[spec.id] = view
     return view
 end
+
+-- The line between the column headers and the rows: Nav.Divider, shared with the other list tabs.
+function ListWindow.Divider(...) return ns.Nav.Divider(...) end
 
 -- Shared cell formats.
 function ListWindow.Unknown() return ns.Style.Text(ns.Style.gray, 'Unknown') end
@@ -332,8 +340,7 @@ function ListWindow.ShowOnMap(npcID, mapID)
         else ns.NpcSources.SetHighlight({ npcID }) end
     end
     if mapID then
-        if OpenWorldMap then OpenWorldMap(mapID)
-        elseif WorldMapFrame and WorldMapFrame.SetMapID then WorldMapFrame:Show(); WorldMapFrame:SetMapID(mapID) end
+        ns.Nav.ShowMap(mapID)
     end
     if ns.Map and ns.Map.Update then ns.Map.Update() end
     if ns.Minimap and ns.Minimap.Update then ns.Minimap.Update() end

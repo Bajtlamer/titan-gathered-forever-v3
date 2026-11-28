@@ -36,12 +36,12 @@ function Browser.Cells(row)
         count = n < Browser.THIN and Style.Text(Style.orange, label) or label
     end
     -- How many one craft makes, when it is not one: the profit is for the whole craft.
-    local name = Style.Text(paint, row.name)
+    local name = Style.ItemIcon(row.productID) .. Style.Text(paint, row.name)
     if product and product.quantity ~= 1 then
         name = name .. Style.Text(Style.gray, string.format(' x%s', product.quantity == math.floor(product.quantity)
             and product.quantity or string.format('%.1f', product.quantity)))
     end
-    return { name, ns.NpcSources.Label(row.kind), materials,
+    return { name, Style.ProfessionIcon(row.kind) .. ns.NpcSources.Label(row.kind), materials,
         product and product.auction and coin(product.auction.net) or unknown, count,
         product and product.vendor and coin(product.vendor) or unknown,
         product and product.best and (product.best == 'auction' and 'Auction' or 'Vendor') or unknown, profit }
@@ -236,7 +236,7 @@ function Browser.Show()
         for index = 1, ROWS do
             local line = CreateFrame('Button', nil, w)
             line:SetSize(ROW_WIDTH, ROW_HEIGHT)
-            line:SetPoint('TOPLEFT', w, 'TOPLEFT', 15, -132 - (index - 1) * ROW_HEIGHT)
+            line:SetPoint('TOPLEFT', w, 'TOPLEFT', 15, -140 - (index - 1) * ROW_HEIGHT)
             line.cells = {}
             for i, column in ipairs(columns) do line.cells[i] = text(line, 'GameFontHighlightSmall', column[2], 0, column[3]) end
             line:SetScript('OnClick', function(self) if self.row then ns.CraftingView.Show(self.row.recipeID, 1) end end)
@@ -251,10 +251,11 @@ function Browser.Show()
         end
         w:EnableMouseWheel(true)
         w:SetScript('OnMouseWheel', function(_, delta) Browser.Scroll(-delta * WHEEL_STEP) end)
-        w.slider = ns.Nav.Scrollbar(w, 15 + ROW_WIDTH + 8, -132, ROWS * ROW_HEIGHT, function(value)
+        ns.Nav.Divider(w, 15, -125, ROW_WIDTH)  -- the line between the headers and the rows, as on every list tab
+        w.slider = ns.Nav.Scrollbar(w, 15 + ROW_WIDTH + 8, -140, ROWS * ROW_HEIGHT, function(value)
             Browser.ScrollTo(value)
         end, function(delta) Browser.Scroll(-delta * WHEEL_STEP) end)
-        w.footer = text(w, 'GameFontNormalSmall', 15, -492, 930)
+        w.footer = text(w, 'GameFontNormalSmall', 15, -500, 930)
     end
     ns.Nav.Activate('profit', w)
     w:Show()

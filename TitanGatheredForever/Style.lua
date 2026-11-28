@@ -61,6 +61,56 @@ function Style.MenuNote(parent, value)
     return description
 end
 
+-- Icons before the names in list rows: inline texture text with the icon border cropped, '' when the client has no
+-- icon. Lists use ItemLabel (icon and name); sorting and search keep using the plain name.
+Style.ICON_SIZE = 14
+function Style.Icon(texture, size, whole)
+    if texture == nil or (ns.IsPublic and not ns.IsPublic(texture)) then return '' end
+    if type(texture) ~= 'number' and type(texture) ~= 'string' then return '' end
+    if texture == '' or texture == 0 then return '' end
+    size = size or Style.ICON_SIZE
+    -- whole: a mark such as a quest sign is drawn as it is; an item icon loses its border.
+    if whole then return string.format('|T%s:%d:%d:0:0|t ', tostring(texture), size, size) end
+    return string.format('|T%s:%d:%d:0:0:64:64:5:59:5:59|t ', tostring(texture), size, size)
+end
+
+function Style.ItemIcon(itemID, size)
+    if type(itemID) ~= 'number' or not C_Item or not C_Item.GetItemIconByID then return '' end
+    local ok, icon = pcall(C_Item.GetItemIconByID, itemID)
+    return ok and Style.Icon(icon, size) or ''
+end
+
+function Style.SpellIcon(spellID, size)
+    if type(spellID) ~= 'number' then return '' end
+    local ok, icon = pcall(function()
+        if C_Spell and C_Spell.GetSpellTexture then return C_Spell.GetSpellTexture(spellID) end
+        if C_Spell and C_Spell.GetSpellInfo then local info = C_Spell.GetSpellInfo(spellID); return info and info.iconID end
+        if GetSpellTexture then return GetSpellTexture(spellID) end
+    end)
+    return ok and Style.Icon(icon, size) or ''
+end
+
+-- The icon of a profession (the kinds of the catalogue, the actions and the NPC sources), for profession columns
+-- and the trainers, who have no icon of their own.
+Style.PROFESSION_ICONS = {
+    Alchemy = 'Interface\\Icons\\Trade_Alchemy', Blacksmithing = 'Interface\\Icons\\Trade_BlackSmithing',
+    Cooking = 'Interface\\Icons\\INV_Misc_Food_15', Enchanting = 'Interface\\Icons\\Trade_Engraving',
+    Engineering = 'Interface\\Icons\\Trade_Engineering', FirstAid = 'Interface\\Icons\\Spell_Holy_SealOfSacrifice',
+    Fishing = 'Interface\\Icons\\Trade_Fishing', Herbs = 'Interface\\Icons\\Trade_Herbalism',
+    Leatherworking = 'Interface\\Icons\\Trade_LeatherWorking', Mining = 'Interface\\Icons\\Trade_Mining',
+    Skinning = 'Interface\\Icons\\INV_Misc_Pelt_Wolf_01', Tailoring = 'Interface\\Icons\\Trade_Tailoring',
+    WeaponMaster = 'Interface\\Icons\\INV_Sword_27',
+}
+local professionAliases = { Herbalism = 'Herbs', ['First Aid'] = 'FirstAid', Disenchanting = 'Enchanting' }
+function Style.ProfessionIcon(kind, size)
+    local icon = Style.PROFESSION_ICONS[professionAliases[kind] or kind]
+    return icon and Style.Icon(icon, size) or ''
+end
+
+function Style.ItemLabel(itemID)
+    return Style.ItemIcon(itemID) .. Style.ItemName(itemID)
+end
+
 function Style.ItemName(itemID)
     local _, _, quality = C_Item.GetItemInfo(itemID)
     local color = ns.IsPublic(quality) and ITEM_QUALITY_COLORS[quality]

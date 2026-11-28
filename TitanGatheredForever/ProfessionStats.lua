@@ -164,7 +164,7 @@ local GAP = 3
 local COLUMNS = 6
 local LAYOUTS = {
     attempts = { widths = { false, 90, 100, 110 }, heads = { 'Recipe', 'Attempts', 'Completed', 'Completed %' } },
-    materials = { widths = { false, 0, 0, 110 }, heads = { 'Material', '', '', 'Est. used' } },
+    materials = { widths = { false, 150, 80, 110 }, heads = { 'Material', 'Leading profession', 'Share', 'Est. used' } },
     gathered = { widths = { false, 80, 70, 100, 100, 100 },
         heads = { 'Item', 'Quantity', 'Share', 'Unit value', 'Total value', 'Best sale' } },
 }
@@ -309,7 +309,8 @@ local function syncTabs(panel)
         if tab then
             if choice then
                 tab.value = choice.value
-                tab.label:SetText(choice.value == current and Style.Value(choice.label) or Style.Label(choice.label))
+                local icon = choice.value and Style.ProfessionIcon and Style.ProfessionIcon(choice.value) or ''
+                tab.label:SetText(icon .. (choice.value == current and Style.Value(choice.label) or Style.Label(choice.label)))
                 local width = tab.label.GetStringWidth and tab.label:GetStringWidth()
                 if type(width) ~= 'number' then width = 70 end
                 tab:SetSize(width + 24, 20)
@@ -337,18 +338,21 @@ local function render(panel)
         line:SetShown(row ~= nil)
         local cell = line.cells
         if row and panel.view == 'materials' then
-            cell[1]:SetText(Style.ItemName(row.itemID))
-            cell[2]:SetText(''); cell[3]:SetText('')
+            cell[1]:SetText(Style.ItemLabel(row.itemID))
+            local leading = row.leading and ns.Production.labels[row.leading]
+            cell[2]:SetText(leading and Style.Value(leading) or Style.Label('Unknown'))
+            cell[3]:SetText(type(row.share) == 'number' and Style.Value(string.format('%.1f%%', row.share)) or Style.Label('Unknown'))
             cell[4]:SetText(Style.Value(row.quantity))
         elseif row and panel.view == 'gathered' then
             for column = 2, COLUMNS do cell[column]:SetText('') end
             if row.summary then
                 -- A line of text across the columns: the summary of a profession.
                 cell[1]:SetPoint('RIGHT', line, 'RIGHT', 0, 0)
-                cell[1]:SetText(row.gold and Style.Text(Style.gold, row.text) or row.text)
+                local icon = row.title and Style.ProfessionIcon and Style.ProfessionIcon(row.kind) or ''
+                cell[1]:SetText(icon .. (row.gold and Style.Text(Style.gold, row.text) or row.text))
             else
                 cell[1]:SetPoint('RIGHT', line, 'RIGHT', -panel.nameRight, 0)
-                cell[1]:SetText(Style.ItemName(row.itemID))
+                cell[1]:SetText(Style.ItemLabel(row.itemID))
                 cell[2]:SetText(Style.Value(row.quantity))
                 cell[3]:SetText(Style.Value(string.format('%.1f%%', row.share)))
                 cell[4]:SetText(row.unit and ns.Economy.Coin(row.unit) or Style.Label('No price'))
@@ -356,7 +360,10 @@ local function render(panel)
                 cell[6]:SetText(Style.Value(row.source or ''))
             end
         elseif row then
-            cell[1]:SetText(Style.Value(row.name)
+            local icon = row.action and Style.ProfessionIcon(row.action.kind)
+                or (row.craft and row.craft.itemID and Style.ItemIcon(row.craft.itemID)) or ''
+            if icon == '' and type(row.id) == 'number' then icon = Style.SpellIcon(row.id) end
+            cell[1]:SetText(icon .. Style.Value(row.name)
                 .. (row.action and row.action.kind ~= 'Enchanting' and Style.Label(' (gathering)') or ''))
             cell[2]:SetText(Style.Value(row.attempts))
             cell[3]:SetText(Style.Value(row.completed))
@@ -376,12 +383,27 @@ end
 local function sortValue(row, view, column)
     if view == 'materials' then
         if column == 1 then return string.lower(nameOf(row, view)) end
+        if column == 2 then return string.lower(row.leading and ns.Production.labels[row.leading] or '') end
+        if column == 3 then return row.share or -1 end
         return row.quantity
     end
     if column == 1 then return string.lower(nameOf(row, view)) end
     if column == 2 then return row.attempts end
     if column == 3 then return row.completed end
     return row.attempts > 0 and row.completed / row.attempts or -1
+end
+
+-- The rows whose name (or, for a material, its leading profession) contains the search text, ignoring case.
+function View.Search(rows, view, needle)
+    needle = type(needle) == 'string' and needle:lower() or ''
+    if needle == '' then return rows end
+    local kept = {}
+    for _, row in ipairs(rows) do
+        local haystack = nameOf(row, view)
+        if view == 'materials' and row.leading then haystack = haystack .. ' ' .. (ns.Production.labels[row.leading] or '') end
+        if string.lower(tostring(haystack)):find(needle, 1, true) then kept[#kept + 1] = row end
+    end
+    return kept
 end
 
 function View.SortRows(rows, view, state)
@@ -406,6 +428,7 @@ end
 -- profession (a row without a value is last); the first rows of a profession are still the most collected or the most
 -- valuable ones, because that is what the rows were limited to.
 local GATHERED_KINDS = { 'text', 'number', 'number', 'number', 'number', 'text' }
+local MATERIAL_KINDS = { 'text', 'text', 'number', 'number' }
 local function gatheredValue(row, column)
     if column == 1 then return string.lower(tostring(ns.ItemName and ns.ItemName(row.itemID) or row.itemID)) end
     if column == 2 then return row.quantity end
@@ -459,6 +482,7 @@ local function refreshPanel(panel)
     local view = panel.view
     if view == 'materials' then
         local rows, coverage = ns.production:ReagentUsage(character, panel.kind or nil)
+        rows = View.Search(rows, 'materials', panel.searchText)
         View.SortRows(rows, 'materials', panel.sorts.materials)
         panel.data = rows
         panel.note:SetText(Style.Label('Estimated use from fixed required materials.'))
@@ -491,7 +515,7 @@ local function refreshPanel(panel)
         panel.gatheredTable = kind and true or false
         panel.coverage:SetText(kind and '' or Style.Label(GATHERED_NOTE))
     else
-        panel.data = View.Rows(character, panel.kind or nil)
+        panel.data = View.Search(View.Rows(character, panel.kind or nil), 'attempts', panel.searchText)
         View.SortRows(panel.data, 'attempts', panel.sorts.attempts)
         local attempts, completed = 0, 0
         for _, row in ipairs(panel.data) do
@@ -508,7 +532,8 @@ local function refreshPanel(panel)
     end
     local message
     if #panel.data == 0 then
-        if view == 'materials' then message = 'No material use estimated for this view.'
+        if panel.searchText and panel.searchText ~= '' and view ~= 'gathered' then message = 'Nothing matches this search.'
+        elseif view == 'materials' then message = 'No material use estimated for this view.'
         elseif view == 'gathered' then
             message = #(ns.Yields and ns.Yields.Available() or {}) == 0
                 and 'No gathering profession (Mining, Herbalism, Skinning, Fishing) is installed or switched on.'
@@ -520,6 +545,9 @@ local function refreshPanel(panel)
     local arrow = panel.sortArrow
     if panel.header.SetShown then panel.header:SetShown(view ~= 'gathered' or panel.gatheredTable == true) end
     if panel.kindPicker and panel.kindPicker.SetShown then panel.kindPicker:SetShown(view ~= 'gathered') end
+    -- The Gathered view lists summaries and tables per profession; the search is for the two flat lists.
+    if panel.search and panel.search.SetShown then panel.search:SetShown(view ~= 'gathered') end
+    if panel.searchLabel and panel.searchLabel.SetShown then panel.searchLabel:SetShown(view ~= 'gathered') end
     syncTabs(panel)
     if arrow and arrow.SetTexCoord then
         local label = panel.head[state.column]
@@ -630,7 +658,7 @@ local function createPanel(frame)
     panel.character, panel.kind, panel.offset, panel.view = ns.characterID, false, 0, 'attempts'
     panel.sorts = {
         attempts = savedSort('attempts', { column = 1, descending = false }, { 'text', 'number', 'number', 'number' }),
-        materials = savedSort('materials', { column = 4, descending = true }, { 'text', false, false, 'number' }),
+        materials = savedSort('materials', { column = 4, descending = true }, MATERIAL_KINDS),
         gathered = savedSort('gathered', { column = 2, descending = true }, GATHERED_KINDS) }
 
     -- The view is chosen in a combo box on the row of the pickers (the portrait and the skill bar of the native window cover
@@ -647,11 +675,33 @@ local function createPanel(frame)
         return { { value = 'attempts', label = 'Attempts' }, { value = 'materials', label = 'Materials' },
             { value = 'gathered', label = 'Gathered items' } }
     end
-    panel.viewPicker = ns.Nav.Dropdown(panel, 372, -40, 150, panel.ViewOptions, function() return panel.view end, setView)
+    panel.viewPicker = ns.Nav.Dropdown(panel, 304, -40, 128, panel.ViewOptions, function() return panel.view end, setView)
+    -- A search box beside the pickers (Escape clears it), for the Attempts and Materials lists.
+    -- The box stretches from beside the view picker to the right edge of the panel, whose width follows the
+    -- game's professions window, so it never runs past the edge.
+    local search = CreateFrame('EditBox', nil, panel, 'InputBoxTemplate')
+    panel.search = search
+    search:SetHeight(22)
+    search:SetPoint('TOPLEFT', panel.viewPicker, 'TOPRIGHT', 58, -1)
+    search:SetPoint('TOPRIGHT', panel, 'TOPRIGHT', -18, -41)
+    search:SetAutoFocus(false)
+    panel.searchLabel = text(panel, 'GameFontNormalSmall')
+    panel.searchLabel:SetPoint('RIGHT', search, 'LEFT', -10, 0)
+    panel.searchLabel:SetText('Search')
+    search:SetScript('OnEscapePressed', function(self)
+        self:ClearFocus()
+        if self:GetText() ~= '' then self:SetText(''); panel.searchText, panel.offset = nil, 0; refreshPanel(panel) end
+    end)
+    search:SetScript('OnEnterPressed', function(self) self:ClearFocus() end)
+    search:SetScript('OnTextChanged', function(self, user)
+        if not user then return end
+        panel.searchText, panel.offset = self:GetText(), 0
+        refreshPanel(panel)
+    end)
     local back = button(panel, 'Back', 62, function() panel:Hide() end)
     back:SetPoint('TOPRIGHT', panel, 'TOPRIGHT', -12, -10)
 
-    panel.kindPicker = ns.Nav.Dropdown(panel, 12, -40, 164, function() return View.KindOptions(panel) end,
+    panel.kindPicker = ns.Nav.Dropdown(panel, 12, -40, 140, function() return View.KindOptions(panel) end,
         function() if panel.view == 'gathered' then return gatheredKind(panel) end return panel.kind end,
         function(value)
             if panel.view == 'gathered' then panel.gatheredKind = value else panel.kind = value end
@@ -664,7 +714,7 @@ local function createPanel(frame)
         panel.kindPicker.Sync()
         refreshPanel(panel)
     end
-    panel.characterPicker = ns.Nav.Dropdown(panel, 184, -40, 174, characterOptions, function() return panel.character end,
+    panel.characterPicker = ns.Nav.Dropdown(panel, 158, -40, 140, characterOptions, function() return panel.character end,
         function(value) panel.character, panel.offset = value, 0; refreshPanel(panel) end)
     local header = CreateFrame('Frame', nil, panel)
     header:SetPoint('TOPLEFT', panel, 'TOPLEFT', 12, -94)
@@ -678,11 +728,12 @@ local function createPanel(frame)
     function panel.sortBy(index)
         local view = panel.view
         local state = panel.sorts[view]
-        if view == 'materials' and index ~= 1 and index ~= 4 then return end
+        if view == 'materials' and index > 4 then return end
         if view == 'attempts' and index > 4 then return end
         if state.column == index then state.descending = not state.descending
         else
-            local kind = view == 'gathered' and GATHERED_KINDS[index] or (index == 1 and 'text' or 'number')
+            local kind = view == 'gathered' and GATHERED_KINDS[index] or view == 'materials' and MATERIAL_KINDS[index]
+                or (index == 1 and 'text' or 'number')
             state.column, state.descending = index, kind == 'number'
         end
         saveSort(view, state)
@@ -801,6 +852,12 @@ function View.Open()
     View.panel:Show()
     View.panel.characterPicker.Sync()
     syncProfession()
+end
+
+-- Opens Statistics at a view ('attempts', 'materials' or 'gathered'): the Titan menu entry Reagent use estimates.
+function View.OpenView(view)
+    View.Open()
+    if View.panel and View.panel:IsShown() and View.panel.SetView then View.panel.SetView(view) end
 end
 
 function View.Initialize()

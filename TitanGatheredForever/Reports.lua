@@ -35,7 +35,6 @@ local function hiddenItems(character)
 end
 function Reports.Rows(mode,character,filter)
     local result={}
-    if mode=='reagentUsage'then return ns.production:ReagentUsage(character)end
     if mode=='actions' then
         for _,row in ipairs(ns.actions:Rows(character)) do
             if (not filter or row.kind==filter) and not hidden(row.kind) then result[#result+1]=row end
@@ -102,10 +101,9 @@ local layouts={
     production={{'Recipe',0,190},{'Attempts',200,65},{'Completed',275,75},{'Completed %',360,85},
         {'Matched',455,65},{'Items',530,55},{'Bonus',595,155},{'Multicraft',760,170}},
     yield={{'Item',0,420},{'Quantity',430,80},{'Share',520,70},{'Unit value',600,110},{'Total value',720,110},{'Best sale',840,90}},
-    reagentUsage={{'Reagent',0,250},{'Estimated used',260,150},{'Leading profession',420,220},{'Share of tracked use',650,280}},
 }
 local ACTIONS_NOTE='Fishing completion means a catch window; other completion means spell success. Stopped means no confirmed result; gaps are not reconstructed.'
-local contentTop,contentBottom=132,510
+local contentTop,contentBottom=140,510  -- the rows start below the line under the headers
 -- The Profession actions window has a second view that lists what was gathered and what it is worth.
 local function viewMode(window)
     return window.mode=='actions' and window.view and window.view~='summary' and 'yield' or window.mode
@@ -152,7 +150,7 @@ local function values(mode,row)
             row.matched,row.quantity,percent(row.bonusHits,row.bonusKnown),percent(row.multicraftHits,row.multicraftKnown)}
     elseif mode=='yield'then
         if row.summary then return {row.gold and ns.Style.Text and ns.Style.Text(ns.Style.gold,row.text)or row.text,'','','','',''}end
-        return {ns.Style.ItemName(row.itemID),row.quantity,string.format('%.1f%%',row.share),
+        return {ns.Style.ItemLabel(row.itemID),row.quantity,string.format('%.1f%%',row.share),
             row.unit and ns.Economy.Coin(row.unit)or'No price',row.value and ns.Economy.Coin(row.value)or'Unknown',row.source or''}
     elseif mode=='actions'then
         local began=ns.Style.Date(date and date('%Y-%m-%d %H:%M',row.began)or tostring(row.began))
@@ -163,19 +161,17 @@ local function values(mode,row)
             return {'',string.format('%.1f%%',rate.percent),string.format('%d / %d',rate.hits,rate.trials),rate.quantity,Reports.Source(rate)}
         elseif row.sources then
             local count=#row.sources
-            return {ns.Style.ItemName(row.itemID),'','',row.quantity,count..(count==1 and' source'or' sources')}
+            return {ns.Style.ItemLabel(row.itemID),'','',row.quantity,count..(count==1 and' source'or' sources')}
         end
-        return {ns.Style.ItemName(row.itemID),string.format('%.1f%%',row.percent),
+        return {ns.Style.ItemLabel(row.itemID),string.format('%.1f%%',row.percent),
             string.format('%d / %d',row.hits,row.trials),row.quantity,Reports.Source(row)}
-    elseif mode=='reagentUsage'then
-        return {ns.Style.ItemName(row.itemID),row.quantity,ns.Production.labels[row.leading],string.format('%.1f%%',row.share)}
     end
     if row.sourceRate then
         local rate=row.sourceRate
         return {'','',Reports.Source(rate),string.format('%.1f%%',rate.percent),string.format('%d / %d',rate.hits,rate.trials)}
     end
     local count=#(row.sources or{})
-    return {ns.Style.ItemName(row.itemID),row.quantity+(row.crafted or 0),
+    return {ns.Style.ItemLabel(row.itemID),row.quantity+(row.crafted or 0),
         count>0 and(count..(count==1 and' source'or' sources'))or'Unknown','',''}
 end
 function Reports.ReagentDetails(owner,row)
@@ -268,13 +264,13 @@ function Reports.ItemSources(owner,itemID,character)
             local mapID=r.mapID
             local label=string.format('%s: %.1f%% (%d / %d)',Reports.Source(r),r.percent,r.hits,r.trials)
             if mapID and mapID>0 then
-                root:CreateButton(label,function()if WorldMapFrame then WorldMapFrame:Show();WorldMapFrame:SetMapID(mapID)end end)
+                root:CreateButton(label,function()ns.Nav.ShowMap(mapID)end)
             else root:CreateTitle(label)end
         end
         for index=1,math.min(3,#evidence.spots)do
             local spot=evidence.spots[index];local mapID=spot.mapID
             root:CreateButton(string.format('%s: %d saved positions (separate from rate samples)',Reports.Zone(mapID),spot.positions),function()
-                if WorldMapFrame then WorldMapFrame:Show();WorldMapFrame:SetMapID(mapID)end
+                ns.Nav.ShowMap(mapID)
             end)
         end
         local record=ns.Catalog.Get and ns.Catalog.Get(itemID)
@@ -347,7 +343,6 @@ end
 local sortKinds={
     history={'text','number','number',false,false},
     chances={'text','number','number','number','text'},
-    reagentUsage={'text','number','text','number'},
 }
 function Reports.SortValue(window,row,column)
     local mode=window.mode
@@ -406,7 +401,7 @@ end
 function Reports.Update(window)
     if not ns.history then return end
     local character=not window.combined and (ns.characterID or UnitGUID('player'))or nil
-    local rows,metadata
+    local rows
     if window.mode=='pvp' then
         local stats=ns.pvp and ns.pvp:Snapshot(character)or{}
         local rank=stats.currentRankName or(stats.currentRankID==0 and'No rank')
@@ -430,15 +425,10 @@ function Reports.Update(window)
     elseif viewMode(window)=='yield' then
         gatheredFilter(window)
         rows=window.filter and ns.Yields and ns.Yields.Rows(character,window.filter,window.view)or{}
-    else rows,metadata=Reports.Rows(window.mode,character,window.filter)end
+    else rows=Reports.Rows(window.mode,character,window.filter)end
     rows=Reports.Search(window.mode,rows,window.searchText)
     if window.mode=='chances' and window.grouped then rows=Reports.GroupByItem(rows)end
     if window.sorter then window.sorter.Apply(rows,function(row,column)return Reports.SortValue(window,row,column)end,Reports.SortTie)end
-    if window.mode=='reagentUsage'then
-        local coverage=metadata.coverageBegan and ns.Style.Date(date and date('%Y-%m-%d',metadata.coverageBegan)or tostring(metadata.coverageBegan))or'unknown'
-        window.note:SetText(string.format('Estimated from fixed required reagents per completed craft. Coverage since %s. Percent is share of this reagent\'s tracked use. Unsupported recipes are excluded%s',
-            coverage,metadata.unsupportedCasts>0 and string.format('; %d completed recipes had unsupported required reagents',metadata.unsupportedCasts)or''))
-    end
     window.entries=entriesFor(window,rows);window.total=#rows
     if window.anchorItem then
         for index,entry in ipairs(window.entries)do
@@ -450,7 +440,6 @@ function Reports.Update(window)
     window.filterButton.Sync()
     if window.group then window.group.Sync()end
     window.empty:SetText(#rows==0 and (window.searchText and window.searchText~=''and'Nothing matches this search.'
-        or window.mode=='reagentUsage'and'No supported reagent use is recorded in this coverage period.'
         or window.mode=='production'and'No recipe operations recorded for this view. Earlier inventory cannot reconstruct production.'
         or viewMode(window)=='yield' and(window.filter==nil and 'No gathering profession (Mining, Herbalism, Skinning, Fishing) is installed or switched on.'
             or'Nothing gathered is recorded for this profession. Earlier loot history cannot be split by profession.')
@@ -501,11 +490,16 @@ end
 function Reports.ScrollTo(window,offset)window.offset=offset;Reports.Draw(window)end
 function Reports.Scroll(window,delta)Reports.ScrollTo(window,(window.offset or 0)+delta)end
 function Reports.Show(mode)
-    mode=(mode=='pvp' or mode=='chances' or mode=='actions' or mode=='production' or mode=='reagentUsage') and mode or 'history'
+    -- Reagent use was a tab of its own and repeated Statistics > Materials of the professions window, which it now opens.
+    if mode=='reagentUsage' then
+        if ns.ProfessionStats and ns.ProfessionStats.OpenView then ns.ProfessionStats.OpenView('materials') end
+        return
+    end
+    mode=(mode=='pvp' or mode=='chances' or mode=='actions' or mode=='production') and mode or 'history'
     local w=Reports.windows[mode]
     if not w then
         local name='TitanGatheredForever'..(mode=='pvp'and'PvPBoard'or mode=='chances'and'Chances'or mode=='actions'and'Actions'or mode=='production'and'Production'
-            or mode=='reagentUsage'and'ReagentUsage'or'History')..'Window'
+            or'History')..'Window'
         w=CreateFrame('Frame',name,UIParent,'BasicFrameTemplateWithInset');Reports.windows[mode]=w
         if UISpecialFrames then table.insert(UISpecialFrames,name)end
         w.mode,w.offset,w.rows,w.expanded=mode,0,{},{}
@@ -515,12 +509,10 @@ function Reports.Show(mode)
         w:SetScript('OnHide',function()GameTooltip:Hide()end)
         w.TitleText:SetText(mode=='pvp'and'Titan Gathered Forever PvP Board'
             or mode=='production'and'Titan Gathered Forever Crafting and cooking'
-            or mode=='reagentUsage'and'Titan Gathered Forever Reagent usage estimates'
             or mode=='chances'and'Titan Gathered Forever Observed acquisition chances'
             or mode=='actions'and'Titan Gathered Forever Profession actions'or'Titan Gathered Forever Lifetime material history')
         local note=text(w,'GameFontNormalSmall',15,-33,930);w.note=note
         note:SetText(mode=='pvp'and'Client lifetime honorable kills and rank are current-character totals across PvP modes. Per-kill honor estimates come only from named honorable-kill events; other honor awards are excluded. Death tracking begins with this version; earlier deaths cannot be reconstructed.'
-            or mode=='reagentUsage'and'Estimated reagent consumption by item and profession. Click a row for the profession breakdown.'
             or mode=='production'and'Completed % = completed casts / observed attempts, including unresolved attempts. Bonus/multicraft use readable-field counts. Click for output details.'
             or mode=='actions'and ACTIONS_NOTE
             or mode=='chances'and'Observed outcomes / complete looted sources, grouped by source and zone. Not a probability at a map coordinate. Click for sources.'
@@ -543,7 +535,7 @@ function Reports.Show(mode)
             end
             return list
         end,function()return w.filter or false end,function(value)w.filter=value or nil;w.offset=0;Reports.Update(w)end)
-        if mode=='reagentUsage'or mode=='pvp'then w.filterButton:Hide()end
+        if mode=='pvp'then w.filterButton:Hide()end
         if mode=='actions'then
             w.view='summary'
             w.group=ns.Nav.Dropdown(w,375,-65,170,function()
@@ -590,8 +582,7 @@ function Reports.Show(mode)
                 row.expand:SetSize(20,18);row.expand:Hide()
             end
             row:SetScript('OnClick',function(self)
-                if mode=='reagentUsage'and self.data then Reports.ReagentDetails(self,self.data)
-                elseif mode=='production'and self.data then Reports.ProductionDetails(self,self.data)
+                if mode=='production'and self.data then Reports.ProductionDetails(self,self.data)
                 elseif self.data and self.data.itemID then Reports.ItemSources(self,self.data.itemID,self.character)end
             end)
             row:SetScript('OnEnter',function(self)
@@ -599,6 +590,7 @@ function Reports.Show(mode)
             end)
             row:SetScript('OnLeave',function()GameTooltip:Hide()end);w.rows[i]=row
         end
+        ns.Nav.Divider(w,15,-125,930)  -- the line between the headers and the rows, as on every list tab
         w.empty=text(w,'GameFontNormalSmall',15,-contentTop,930)
         w.rangeText=text(w,'GameFontNormalSmall',15,-525,930)
         w.slider=ns.Nav.Scrollbar(w,15+930+8,-contentTop,contentBottom-contentTop,function(value)Reports.ScrollTo(w,value)end,

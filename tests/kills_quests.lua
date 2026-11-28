@@ -203,7 +203,11 @@ local function installFrames()
             end
         end })
     end
-    _G.CreateFrame = function(_, _, _, template) local f = frame(template); f.TitleText = frame(); return f end
+    _G.CreateFrame = function(_, name, _, template)
+        local f = frame(template); f.TitleText = frame()
+        f.frameName = name; f.GetName = function(self) return self.frameName end
+        return f
+    end
     local tip = { lines = {} }
     function tip:SetOwner() self.lines = {} end
     function tip:AddLine(text) self.lines[#self.lines + 1] = text end
@@ -242,7 +246,7 @@ test('the Kills tab lists creatures sorted by your kills, with search, filters a
         ['Player-1-BBB'] = { restricted = 0, npcs = { [113] = { kills = 3, group = 0 } } },
     } }
     local view = ns.Nav.views.journal
-    eq(ns.Nav.tabs[#ns.Nav.tabs].id, 'journal'); eq(#ns.Nav.tabs, 9)   -- kills and quests are views of the Journal tab
+    eq(ns.Nav.tabs[#ns.Nav.tabs].id, 'journal'); eq(#ns.Nav.tabs, 9)   -- kills and quests are views of the Journal tab; Reagent use is in Statistics; My materials is first
     ns.Nav.Open('kills')
     eq(view.mode, 'creatures')
     local w = view.window
@@ -320,6 +324,76 @@ test('the Quests tab lists quests with names from the game, status filter, money
     ns.QuestsView.DataLoaded(); ns.QuestsView.DataLoaded()
     eq(#timers, 1)
     assert(strip(w.footer:GetText()):find('Listed: 1 turn-ins, 450 experience, 250c', 1, true))
+end)
+
+test('a quest of this character whose objectives are done is ready to turn in, with the game marks before the names', function()
+    local ns = newNs()
+    installFrames()
+    loadViews(ns)
+    ns.Style.Icon = function(texture, _, whole) return whole and ('[' .. texture:match('[^\\]+$') .. ']') or '' end
+    ns.db.questIncome = { Realm = { ['Player-1-AAA'] = {
+        [7] = { copper = 250, turnIns = 1, firstAt = 50, lastAt = 50 },
+        [8] = { copper = 0, turnIns = 0, acceptedAt = 60, accepts = 1 },
+        [10] = { copper = 0, turnIns = 0, acceptedAt = 70, accepts = 1 },
+        [11] = { copper = 0, turnIns = 0, abandons = 1, abandonedAt = 40 },
+    } } }
+    local ready = _G.C_QuestLog.ReadyForTurnIn
+    _G.C_QuestLog.ReadyForTurnIn = function(id) return id == 10 end
+    ns.Nav.Open('quests')
+    local view, w = ns.Nav.views.journal, ns.Nav.views.journal.window
+    local first = cellsOf(w, 1)                                      -- newest activity first: quest 10
+    eq(first[1], '[ActiveQuestIcon]Quest 10'); eq(first[2], 'Ready to turn in')
+    local second = cellsOf(w, 2)
+    eq(second[1], '[IncompleteQuestIcon]Quest 8'); eq(second[2], 'In progress')
+    eq(cellsOf(w, 3)[1], '[ReadyCheck-Ready]Wolves Across the Border')
+    eq(cellsOf(w, 4)[1], '[ReadyCheck-NotReady]Quest 11')
+    ns.QuestsView.status = 'ready'; view.Changed()
+    eq(view.total, 1)
+    ns.QuestsView.status = 'open'; view.Changed()
+    eq(view.total, 1)
+    -- another character's quest log cannot be read: its quests stay in progress
+    ns.characterID = 'Player-1-BBB'
+    ns.QuestsView.status, ns.QuestsView.character = 'all', 'Player-1-AAA'; view.Changed()
+    eq(cellsOf(w, 1)[2], 'In progress')
+    ns.QuestsView.character, ns.characterID = false, 'Player-1-AAA'
+    _G.C_QuestLog.ReadyForTurnIn = ready
+end)
+
+test('a list opens the map so that Escape closes the map alone and the list stays or comes back', function()
+    local ns = newNs()
+    installFrames()
+    loadViews(ns)
+    ns.db.questIncome = { Realm = { ['Player-1-AAA'] = { [8] = { copper = 0, turnIns = 0, acceptedAt = 60, accepts = 1 } } } }
+    local hooks, opened, maximized = {}, {}, false
+    _G.WorldMapFrame = { HookScript = function(self, event, fn) hooks[event] = fn end, IsMaximized = function() return maximized end,
+        Show = function() end, SetMapID = function(self, id) opened[#opened + 1] = id end }
+    _G.UISpecialFrames = {}
+    ns.Nav.Open('quests')
+    local view = ns.Nav.views.journal
+    local name = view.window:GetName()
+    _G.UISpecialFrames = { 'OtherFrame', name }
+    local function escapable() for _, entry in ipairs(UISpecialFrames) do if entry == name then return true end end return false end
+    ns.QuestsView.status = 'open'; view.Changed()
+    -- the small map: the list stays open beside it, out of the Escape list while the map is open
+    timers = {}
+    ns.Nav.ShowMap(1429)
+    eq(opened[1], 1429); eq(view.window:IsShown(), true); eq(escapable(), false)
+    hooks.OnHide()                                                   -- Escape closed the map
+    eq(escapable(), false)                                           -- not in the same keypress
+    eq(#timers, 1); timers[1]()
+    eq(escapable(), true); eq(view.window:IsShown(), true); eq(ns.QuestsView.status, 'open')
+    -- the full-screen map: the list steps aside and comes back one frame after the map closed
+    maximized, timers = true, {}
+    ns.Nav.ShowMap(1429)
+    eq(view.window:IsShown(), false); eq(escapable(), false)
+    hooks.OnHide()
+    eq(view.window:IsShown(), false)
+    timers[1]()
+    eq(view.window:IsShown(), true); eq(view.mode, 'quests'); eq(ns.QuestsView.status, 'open'); eq(escapable(), true)
+    -- a later close of the map opens nothing
+    hooks.OnHide(); eq(ns.Nav.returnTo, nil)
+    ns.QuestsView.status = 'all'
+    _G.WorldMapFrame = nil
 end)
 
 test('durations are short and readable', function()
@@ -516,6 +590,16 @@ test('only givers of quests in progress get a pin, a round gray question mark, n
     eq(#shown, 2); eq(shown[1].kind, 'QuestGiverPast')
     assert(not ns.PinStyle.Icon(nil, 'QuestGiverPast'):find('Quest', 1, true))
     lit[198] = nil
+    -- a quest clicked in the list: its giver shows the mark of that quest's state, as the list does
+    lit[198] = true
+    for status, kind in pairs({ ready = 'QuestGiverReady', completed = 'QuestGiverDone', abandoned = 'QuestGiverAbandoned' }) do
+        ns.JournalPins.focus = { npcID = 198, status = status }
+        eq(ns.JournalPins.List(1429)[1].kind, kind)
+    end
+    assert(ns.PinStyle.Icon(nil, 'QuestGiverReady'):find('ActiveQuestIcon', 1, true))
+    assert(ns.PinStyle.Icon(nil, 'QuestGiverDone'):find('ReadyCheck%-Ready'))
+    ns.JournalPins.FillTooltip(tip, { kind = 'QuestGiverReady', npcID = 198 })
+    ns.JournalPins.focus, lit[198] = nil, nil
     -- without the quest log API the record decides
     _G.C_QuestLog.IsOnQuest = nil
     ns.db.questIncome.Realm['Player-1-AAA'][8] = { copper = 0, turnIns = 0, acceptedAt = 5 }

@@ -226,7 +226,7 @@ local function render(view, itemID)
     view.chartPeriod:SetText(own and (Style.Value(SALES_DAYS) .. Style.Label(' days'))
         or (latest and Style.Date(date('%d %b %H:%M', latest.at)) or ''))
     view.marketUnit, view.soldNetUnit = latest and latest.price, sales.averageNet
-    view.item:SetText(Style.Value(ns.ItemName(itemID)))
+    view.item:SetText(Style.ItemIcon(itemID) .. Style.Value(ns.ItemName(itemID)))
     view.price:SetText(money(latest and latest.price))
     view.scanDate:SetText(latest and (Style.Label('Scanned ') .. Style.Date(date('%d %b %H:%M', latest.at))) or '')
     local points, message = sales.points

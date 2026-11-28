@@ -12,7 +12,10 @@ function Browser.Cells(row)
     local where = ns.Style.Text(ns.Style.green, first.name) .. (#row.sources > 1 and (' (+' .. (#row.sources - 1) .. ')') or '')
     -- A recipe the player lacks the skill for is red, so the ones that could be learned now stand out.
     local function paint(value) return row.canLearn == false and ns.Style.Text(ns.Style.red, value) or value end
-    return { paint(row.name), ns.NpcSources.Label(row.kind), paint(row.skill and tostring(row.skill) or 'Unknown'),
+    local icon = (row.itemID and ns.Style.ItemIcon(row.itemID)) or ''
+    if icon == '' and row.spellID then icon = ns.Style.SpellIcon(row.spellID) end
+    if icon == '' then icon = ns.Style.Icon('Interface\\Icons\\INV_Scroll_03') end
+    return { icon .. paint(row.name), ns.Style.ProfessionIcon(row.kind) .. ns.NpcSources.Label(row.kind), paint(row.skill and tostring(row.skill) or 'Unknown'),
         row.trainer and 'Trainer' or 'Vendor', where, row.price and ns.NpcSources.CoinIcons(row.price) or 'Unknown' }
 end
 
@@ -99,8 +102,7 @@ local function openMap(line)
     local place = ns.NpcSources.Location(source.npcID)
     local mapID = place and place.mapID or ns.NpcSources.ContinentMap(source.npcID)
     if mapID then
-        if OpenWorldMap then OpenWorldMap(mapID)
-        elseif WorldMapFrame and WorldMapFrame.SetMapID then WorldMapFrame:Show(); WorldMapFrame:SetMapID(mapID) end
+        ns.Nav.ShowMap(mapID)
     end
     if ns.Map and ns.Map.Update then ns.Map.Update() end
     if ns.Minimap and ns.Minimap.Update then ns.Minimap.Update() end
@@ -199,7 +201,7 @@ function Browser.Show()
         for index = 1, ROWS do
             local line = CreateFrame('Button', nil, w)
             line:SetSize(ROW_WIDTH, ROW_HEIGHT)
-            line:SetPoint('TOPLEFT', w, 'TOPLEFT', 15, -132 - (index - 1) * ROW_HEIGHT)
+            line:SetPoint('TOPLEFT', w, 'TOPLEFT', 15, -140 - (index - 1) * ROW_HEIGHT)
             line.cells = {}
             for i, column in ipairs(columns) do line.cells[i] = text(line, 'GameFontHighlightSmall', column[2], 0, column[3]) end
             line:SetScript('OnClick', openMap)
@@ -220,7 +222,8 @@ function Browser.Show()
         -- Classic scrolling: the mouse wheel anywhere over the window, and a scroll bar on the right.
         w:EnableMouseWheel(true)
         w:SetScript('OnMouseWheel', function(_, delta) Browser.Scroll(-delta * WHEEL_STEP) end)
-        w.slider = ns.Nav.Scrollbar(w, 15 + ROW_WIDTH + 8, -132, ROWS * ROW_HEIGHT, function(value)
+        ns.Nav.Divider(w, 15, -125, ROW_WIDTH)  -- the line between the headers and the rows, as on every list tab
+        w.slider = ns.Nav.Scrollbar(w, 15 + ROW_WIDTH + 8, -140, ROWS * ROW_HEIGHT, function(value)
             Browser.ScrollTo(value)
         end, function(delta) Browser.Scroll(-delta * WHEEL_STEP) end)
         w.footer = text(w, 'GameFontNormalSmall', 15, -520, 930)
