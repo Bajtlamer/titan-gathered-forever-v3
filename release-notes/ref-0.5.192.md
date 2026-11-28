@@ -1,6 +1,6 @@
-# Titan Gathered Forever 0.5.191
+# Titan Gathered Forever 0.5.192
 
-Update from 0.5.172. This text is the changelog for the website and the release page. Versions 0.5.173 to 0.5.190 were internal steps and are included here. New files were added and the manifests changed: fully restart WoW after updating, a reload is not enough.
+Update from 0.5.172. This text is the changelog for the website and the release page. Versions 0.5.173 to 0.5.191 were internal steps and are included here. New files were added and the manifests changed: fully restart WoW after updating, a reload is not enough.
 
 ## Added
 
@@ -10,6 +10,7 @@ Update from 0.5.172. This text is the changelog for the website and the release 
 - **Backup page.** It shows the folder and the file that hold all your data (statistics, map spots, journal and the settings of every character of the account) in a box to copy, with the steps to move it to another computer or keep a backup. All settings can also be exported as one text and imported on another account; the text is only read as values and a checksum refuses an incomplete copy.
 - **Icons in the lists.** Every list that names items shows the item's icon before the name: My materials, Lifetime materials, Observed chances, Crafting profit (the product), Unlearned recipes (the recipe item, or the spell a trainer teaches), Journal > Creature drops, Statistics (Attempts with the crafted item or the gathering profession, Materials and Gathered items), the reagent window, the auction history beside the Sell tab and the list of the Titan Panel entry. Professions carry their icon too: the trainers in the Trainers tab, the Profession columns of Unlearned recipes and Crafting profit, the profession tabs and headings of Gathered items, Learned professions and the Titan Panel list.
 - **Quests ready to turn in.** Journal > Quests has the status Ready to turn in, also as a choice of the status filter, for quests of this character whose objectives are done but which were not handed in yet; In progress now means the objectives are still open. The column Turn-ins is renamed Turned in: it counts the hand-ins of the characters shown, so with All characters a quest may be open here and turned in by another character. Every quest shows the game's mark before its name: the yellow question mark when ready to turn in, the silver one in progress, a check when completed and a cross when abandoned or failed. The list follows the quest log as it changes. The quest log of another character cannot be read, so its quests stay In progress.
+- **Minimap button overview.** Pointing at the minimap button shows the version, every installed module with its icon and state (Active, Switched off in the settings, or Disabled in the AddOns list; Discovery with its own version), whether the Titan Panel plugin is active, and the clicks.
 - **Search in Statistics.** Attempts and Materials in the professions Statistics have a search box (Escape clears it).
 
 ## Changed

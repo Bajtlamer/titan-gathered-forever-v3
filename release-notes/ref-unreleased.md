@@ -2,6 +2,10 @@
 
 Updated 2026-11-28. Versions up to 0.5.172 are published in release-notes/ref-0.5.172.md. These changes describe source candidates since the latest published versioned notes.
 
+## Minimap button overview, 0.5.192
+
+- The minimap button tooltip (MinimapButton.Tooltip) shows the core version, the installed TitanGatheredForever_* addons from the game's addon list (C_AddOns.GetNumAddOns, GetAddOnInfo, IsAddOnLoaded) with their profession icon and state: Active, Switched off (settings.categories) or Disabled (not loaded), Discovery last with its version; then the Titan Panel plugin state and the click hints.
+
 ## Escape closes the map only, 0.5.191
 
 - Fixed: 0.5.190 reopened the list in the OnHide of the map, inside the same Escape, which then closed every window of UISpecialFrames, the reopened list included; and it hid the list also beside the small map. Nav.ShowMap now takes the list window out of UISpecialFrames while the map is open, hides it only when the map is maximized (WorldMapFrame:IsMaximized), and one frame after the map closed (C_Timer.After 0) puts it back into UISpecialFrames and reopens a hidden list.

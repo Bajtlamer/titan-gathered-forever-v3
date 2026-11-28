@@ -12,6 +12,74 @@ Button.HINTS = {
     'Drag: move around the minimap',
 }
 
+-- The addons of the collection that are installed, from the game's addon list: each module with its state, Active
+-- (loaded and switched on), Switched off (loaded, hidden in the TGF settings) or Disabled (off in the AddOns list).
+-- Discovery has its own version line, so its version is shown.
+local PREFIX = 'TitanGatheredForever_'
+local moduleIDs = { AuctionItems = 'Auction' }
+function Button.Modules()
+    local api = C_AddOns
+    if not api or not api.GetNumAddOns or not api.GetAddOnInfo then return {} end
+    local loaded = api.IsAddOnLoaded or IsAddOnLoaded
+    local rows = {}
+    local okCount, count = pcall(api.GetNumAddOns)
+    for index = 1, okCount and type(count) == 'number' and count or 0 do
+        local ok, name, title = pcall(api.GetAddOnInfo, index)
+        if ok and type(name) == 'string' and name:sub(1, #PREFIX) == PREFIX then
+            local suffix = name:sub(#PREFIX + 1)
+            local label = type(title) == 'string' and title:gsub('|c%x%x%x%x%x%x%x%x', ''):gsub('|r', '') or suffix
+            label = label:gsub('^Titan Gathered Forever: ', ''):gsub('^Titan Gathered ', '')
+            local row = { name = name, id = moduleIDs[suffix] or suffix, label = label, discovery = suffix == 'Discovery' }
+            local okLoaded, isLoaded = false, nil
+            if loaded then okLoaded, isLoaded = pcall(loaded, name) end
+            if not okLoaded or isLoaded ~= true then row.state = 'disabled'
+            elseif not row.discovery and ns.settings and type(ns.settings.categories) == 'table'
+                and ns.settings.categories[row.id] == false then row.state = 'off'
+            else row.state = 'active' end
+            if row.discovery and api.GetAddOnMetadata then
+                local okVersion, version = pcall(api.GetAddOnMetadata, name, 'Version')
+                if okVersion and type(version) == 'string' then row.version = version end
+            end
+            rows[#rows + 1] = row
+        end
+    end
+    table.sort(rows, function(a, b)
+        if a.discovery ~= b.discovery then return not a.discovery end
+        return a.label < b.label
+    end)
+    return rows
+end
+
+local STATES = { active = { 'Active', 'green' }, off = { 'Switched off', 'gray' }, disabled = { 'Disabled', 'orange' } }
+
+-- What the button shows when pointed at: the version, the installed modules with their state, the Titan Panel
+-- entry and the clicks.
+function Button.Tooltip(tip)
+    local Style = ns.Style
+    local version
+    if C_AddOns and C_AddOns.GetAddOnMetadata then
+        local ok, value = pcall(C_AddOns.GetAddOnMetadata, 'TitanGatheredForever', 'Version')
+        if ok and type(value) == 'string' then version = value end
+    end
+    version = version or (ns.Titan and ns.Titan.version) or ''
+    tip:AddDoubleLine(Style.Text(Style.gold, 'Titan Gathered Forever'), Style.Text(Style.white or 'ffffffff', 'v' .. version))
+    local modules = Button.Modules()
+    tip:AddLine(' ')
+    tip:AddLine(Style.Text(Style.gold, 'Modules'))
+    if #modules == 0 then tip:AddLine(Style.Text(Style.gray, 'No profession module installed.')) end
+    for _, row in ipairs(modules) do
+        local state = STATES[row.state]
+        local icon = Style.ProfessionIcon and Style.ProfessionIcon(row.id) or ''
+        local label = icon .. Style.Text(Style.white or 'ffffffff', row.label) .. (row.version and Style.Text(Style.gray, ' v' .. row.version) or '')
+        tip:AddDoubleLine(label, Style.Text(Style[state[2]] or Style.gray, state[1]))
+    end
+    local panel = ns.Titan and ns.Titan.broker
+    tip:AddDoubleLine(Style.Text(Style.gold, 'Titan Panel'),
+        Style.Text(panel and (Style.green or Style.gray) or Style.gray, panel and 'Plugin active' or 'Not installed'))
+    tip:AddLine(' ')
+    for _, hint in ipairs(Button.HINTS) do tip:AddLine(Style.Text(Style.gray, hint)) end
+end
+
 function Button.Position(angle, width, height)
     local radians = math.rad(angle)
     return math.cos(radians) * (width / 2 + OFFSET), math.sin(radians) * (height / 2 + OFFSET)
@@ -72,8 +140,7 @@ function Button.Attach()
     end)
     button:SetScript('OnEnter', function(self)
         GameTooltip:SetOwner(self, 'ANCHOR_LEFT')
-        GameTooltip:AddLine(ns.Style.Text(ns.Style.gold, 'Titan Gathered Forever'))
-        for _, hint in ipairs(Button.HINTS) do GameTooltip:AddLine(ns.Style.Text(ns.Style.gray, hint)) end
+        Button.Tooltip(GameTooltip)
         GameTooltip:Show()
     end)
     button:SetScript('OnLeave', function() GameTooltip:Hide() end)
