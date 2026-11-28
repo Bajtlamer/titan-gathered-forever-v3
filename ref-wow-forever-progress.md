@@ -6,6 +6,8 @@ Updated 2026-11-20. Current continuation plan: [plans/plan-live-verification-and
 
 Candidate 0.5.167 (2026-11-27, released the same day): Kills and Quests became views of the Journal tab (nine tabs), the window and tab strip scale down to fit the screen, and the sort arrow no longer covers left-aligned number headers. Candidate 0.5.166 (same day, superseded): loot per creature, rare creatures, quest givers and rewards, map pins for quest givers and rare creatures, and the Journal tab (levels, deaths with the killer from the death recap, reputation). Candidate 0.5.165 (same day, superseded): Kills and Quests tabs. Kills are counted from PARTY_KILL (the combat log is restricted on Forever), quests from QUEST_ACCEPTED, QUEST_TURNED_IN and QUEST_REMOVED. Automated checks pass; live verification of the kill events, experience attribution and quest name loading is open.
 
+Candidate 0.5.173 (2026-11-28, source and local installation, not released): the Reagent use tab is removed, its columns and a search box are in Statistics > Materials.
+
 Release 0.5.172 (2026-11-27): the quest pin disappears when the quest is ready to turn in, so the game's turn-in mark is not doubled. Versioned notes: [release-notes/ref-0.5.172.md](release-notes/ref-0.5.172.md).
 
 Release 0.5.171 (2026-11-27): quest giver pins only for quests in progress (0.5.168), as the silver question mark with a drop shadow (0.5.169 to 0.5.171), never the yellow exclamation mark. Versioned notes: [release-notes/ref-0.5.171.md](release-notes/ref-0.5.171.md).

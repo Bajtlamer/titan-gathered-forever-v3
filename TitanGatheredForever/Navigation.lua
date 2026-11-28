@@ -13,7 +13,6 @@ Nav.tabs = {
     { id = 'history', label = 'Lifetime materials' },
     { id = 'chances', label = 'Observed chances' },
     { id = 'profit', label = 'Crafting profit' },
-    { id = 'reagentUsage', label = 'Reagent use' },
     { id = 'pvp', label = 'PvP Board' },
     { id = 'economy', label = 'Economy' },
     { id = 'journal', label = 'Journal' },

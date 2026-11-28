@@ -2,6 +2,10 @@
 
 Updated 2026-11-27. Versions up to 0.5.172 are published in release-notes/ref-0.5.172.md. These changes describe source candidates since the latest published versioned notes.
 
+## Reagent use moved to Statistics, 0.5.173
+
+- The Reagent use tab of the main window is removed: it showed the same estimate as Statistics > Materials in the professions window. Materials gains the two columns the tab had (leading profession and its share of the use, both sortable), and Attempts and Materials get a search box (Escape clears it). Titan menu > History and sources > Reagent use estimates opens Statistics > Materials. The main window has eight tabs, leaving room for later ones.
+
 ## No double question mark for a finished quest, 0.5.172
 
 - When the objectives of a quest were done, the game showed its own question mark at the turn-in and the addon's silver question mark stayed next to it. The addon pin now disappears as soon as the quest is ready to turn in (C_QuestLog.ReadyForTurnIn or IsComplete), and comes back if the quest counts as open again. The quest log is watched with QUEST_LOG_UPDATE; the pins are redrawn only when a quest entered, left or finished its objectives. The pin tooltip shows such a quest as Ready to turn in.

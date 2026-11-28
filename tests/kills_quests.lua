@@ -242,7 +242,7 @@ test('the Kills tab lists creatures sorted by your kills, with search, filters a
         ['Player-1-BBB'] = { restricted = 0, npcs = { [113] = { kills = 3, group = 0 } } },
     } }
     local view = ns.Nav.views.journal
-    eq(ns.Nav.tabs[#ns.Nav.tabs].id, 'journal'); eq(#ns.Nav.tabs, 9)   -- kills and quests are views of the Journal tab
+    eq(ns.Nav.tabs[#ns.Nav.tabs].id, 'journal'); eq(#ns.Nav.tabs, 8)   -- kills and quests are views of the Journal tab; Reagent use is in Statistics
     ns.Nav.Open('kills')
     eq(view.mode, 'creatures')
     local w = view.window
