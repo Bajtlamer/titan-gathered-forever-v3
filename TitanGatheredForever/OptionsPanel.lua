@@ -159,6 +159,18 @@ end
 
 -- Moving everything to another computer, and the settings alone as one text. A text box holds what was exported or
 -- pasted; Import replaces the settings and asks for a reload, after which every module reads them again.
+-- Without a panel entry (no Titan Panel or other data broker display) the minimap button is the only place of the
+-- material list; hiding it is allowed, and this says what that means.
+function Options.ButtonNote()
+    if ns.Titan and ns.Titan.broker then
+        return note('Pointing at the minimap button or the Titan Panel entry shows the material list.')
+    end
+    if ns.settings.showMinimapButton == false then
+        return note('No Titan Panel (or other panel display) is installed, so with the minimap button hidden the material list is not shown. These Options and /tgf still work.')
+    end
+    return note('No Titan Panel is installed: pointing at the minimap button shows the material list.')
+end
+
 local function backupRows(page)
     local folder, known, mac = Options.DataFolder()
     local rows = {
@@ -201,9 +213,10 @@ end
 Options.PAGES = {
     { id = 'general', name = Options.TITLE, rows = function()
         return {
-            note('Collects your gathering, crafting, auction and journey statistics. The same settings are in the right-click menu of the Titan Panel entry and the minimap button.'),
+            note('Collects your gathering, crafting, auction and journey statistics. The same settings are in the right-click menu of the minimap button and of the Titan Panel entry when Titan Panel is installed.'),
             header('General'),
             onUnlessOff('Show minimap button', 'showMinimapButton', function() ns.MinimapButton.Update() end),
+            Options.ButtonNote(),
             onUnlessOff('Let me move the profession and auction house windows', 'moveBlizzard'),
             button('Reset window positions', function()
                 ns.Nav.ResetPositions()
@@ -217,9 +230,9 @@ Options.PAGES = {
             button('Export statistics', opener(function() ns.ExportView.Show() end)),
         }
     end },
-    { id = 'titan', name = 'Titan Panel list', rows = function()
+    { id = 'titan', name = 'Material list', rows = function()
         return {
-            note('What the Titan Panel entry lists when you point at it, and what item tooltips add.'),
+            note('The list shown when you point at the minimap button or the Titan Panel entry, and what item tooltips add.'),
             header('Material list'),
             listSetting(ns.L.showZero, 'showZero'),
             check('Show bank counts', function() return ns.settings.showBank == true end, function(value)
@@ -236,7 +249,7 @@ Options.PAGES = {
         }
     end },
     { id = 'professions', name = 'Professions', rows = function()
-        local rows = { note('The materials of a switched off profession leave the Titan Panel list, the maps and the reports. The data collected for it is kept.') }
+        local rows = { note('The materials of a switched off profession leave the material list, the maps and the reports. The data collected for it is kept.') }
         professionRows(rows)
         return rows
     end },
@@ -333,16 +346,22 @@ local function acquire(page, kind, create)
     return widget
 end
 
-local function fontString(parent, font)
+-- The text of the pages is a little smaller than the game font it starts from (Options.SHRINK points less).
+Options.SHRINK = 2
+local function fontString(parent, font, shrink)
     local text = parent:CreateFontString(nil, 'OVERLAY', font)
     text:SetJustifyH('LEFT')
+    local file, size, flags = text:GetFont()
+    if type(file) == 'string' and type(size) == 'number' and size > 8 then
+        text:SetFont(file, math.max(8, size - (shrink or Options.SHRINK)), flags)
+    end
     return text
 end
 
 local function checkbox(parent)
     local ok, box = pcall(CreateFrame, 'CheckButton', nil, parent, 'SettingsCheckBoxTemplate')
     if not ok or not box then box = CreateFrame('CheckButton', nil, parent, 'UICheckButtonTemplate') end
-    box:SetSize(26, 26)
+    box:SetSize(22, 22)
     box.HoverBackground = nil
     return box
 end
@@ -365,30 +384,30 @@ function Options.Draw(page)
     for _, row in ipairs(page.spec.rows(page)) do
         if row.kind == 'header' then
             local text = acquire(page, 'header', function() return fontString(content, 'GameFontHighlightLarge') end)
-            y = y - 10
+            y = y - 8
             place(text, content, LABEL_X - 14, y); text:SetText(row.text)
-            y = y - 30
+            y = y - 26
         elseif row.kind == 'note' then
-            local text = acquire(page, 'note', function() return fontString(content, 'GameFontNormalSmall') end)
+            local text = acquire(page, 'note', function() return fontString(content, 'GameFontNormalSmall', 1) end)
             text:SetWidth(width - LABEL_X * 2)
             place(text, content, LABEL_X - 14, y); text:SetText(row.text)
-            y = y - math.max(16, (text.GetStringHeight and text:GetStringHeight() or 14) + 8)
+            y = y - math.max(14, (text.GetStringHeight and text:GetStringHeight() or 12) + 7)
         elseif row.kind == 'check' then
             local label = acquire(page, 'label', function() return fontString(content, 'GameFontNormal') end)
             local box = acquire(page, 'check', function() return checkbox(content) end)
             label:SetWidth(LABEL_WIDTH)
-            place(label, content, LABEL_X, y - 6); label:SetText(row.label)
+            place(label, content, LABEL_X, y - 5); label:SetText(row.label)
             place(box, content, CONTROL_X, y)
             box:SetChecked(row.get() and true or false)
             box:SetScript('OnClick', function(self)
                 row.set(self:GetChecked() and true or false)
                 Options.Draw(page)
             end)
-            y = y - 32
+            y = y - 27
         elseif row.kind == 'choice' then
             local label = acquire(page, 'label', function() return fontString(content, 'GameFontNormal') end)
             label:SetWidth(LABEL_WIDTH)
-            place(label, content, LABEL_X, y - 6); label:SetText(row.label)
+            place(label, content, LABEL_X, y - 5); label:SetText(row.label)
             local drop = acquire(page, 'choice', function()
                 local made
                 made = ns.Nav.Dropdown(content, CONTROL_X, y, CHOICE_WIDTH,
@@ -400,7 +419,7 @@ function Options.Draw(page)
             drop.row = row
             place(drop, content, CONTROL_X, y)
             drop.Sync()
-            y = y - 34
+            y = y - 30
         elseif row.kind == 'input' then
             local box = acquire(page, 'input', function()
                 local made = CreateFrame('EditBox', nil, content, 'InputBoxTemplate')
@@ -423,14 +442,19 @@ function Options.Draw(page)
         elseif row.kind == 'button' then
             local b = acquire(page, 'button', function()
                 local made = CreateFrame('Button', nil, content, 'UIPanelButtonTemplate')
-                made:SetHeight(24)
+                made:SetHeight(22)
+                if made.SetNormalFontObject then
+                    made:SetNormalFontObject('GameFontNormalSmall')
+                    if made.SetHighlightFontObject then made:SetHighlightFontObject('GameFontHighlightSmall') end
+                    if made.SetDisabledFontObject then made:SetDisabledFontObject('GameFontDisableSmall') end
+                end
                 return made
             end)
             b:SetText(row.label)
-            b:SetWidth(math.max(160, (b.GetTextWidth and b:GetTextWidth() or 140) + 30))
+            b:SetWidth(math.max(150, (b.GetTextWidth and b:GetTextWidth() or 130) + 26))
             place(b, content, LABEL_X, y)
             b:SetScript('OnClick', function() row.run(); Options.Draw(page) end)
-            y = y - 30
+            y = y - 28
         end
     end
     content:SetHeight(math.max(1, -y + 8))
@@ -441,7 +465,7 @@ local function buildPage(spec)
     local page = { spec = spec, pools = {} }
     local frame = CreateFrame('Frame')
     page.frame = frame
-    local title = fontString(frame, 'GameFontHighlightHuge')
+    local title = fontString(frame, 'GameFontHighlightHuge', 4)
     title:SetPoint('TOPLEFT', frame, 'TOPLEFT', 22, -22)
     title:SetText(spec.name)
     local divider = frame:CreateTexture(nil, 'ARTWORK')

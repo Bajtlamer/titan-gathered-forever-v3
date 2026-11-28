@@ -10,5 +10,4 @@ ns.L = {
     hint = 'Right-click for settings. Mouse wheel changes page.',
     noItems = 'No matching owned materials. Change categories or show zero counts.',
     unsupported = 'Titan Gathered Forever requires WoW Forever interface 16001.',
-    missingTitan = 'Titan Gathered Forever requires Titan Panel with LibDataBroker-1.1 support.',
 }

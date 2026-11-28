@@ -44,15 +44,17 @@ function Titan.Rows()
     return rows
 end
 
-function Titan.Show(owner)
+-- The material list. It hangs below a panel entry (Titan Panel or another data broker display); the minimap button
+-- passes an anchor and its own hint lines.
+function Titan.Show(owner, anchor, hints)
     local tooltip = Titan.tooltip
     if not tooltip then
         tooltip = CreateFrame('GameTooltip', 'TitanGatheredForeverSummaryTooltip', UIParent, 'GameTooltipTemplate')
         Titan.tooltip = tooltip
     end
-    Titan.owner = owner
-    tooltip:SetOwner(owner, 'ANCHOR_NONE')
-    if tooltip.SetPoint then tooltip:SetPoint('TOPLEFT', owner, 'BOTTOMLEFT', 0, 0) end
+    Titan.owner, Titan.anchor, Titan.hints = owner, anchor, hints
+    tooltip:SetOwner(owner, anchor or 'ANCHOR_NONE')
+    if not anchor and tooltip.SetPoint then tooltip:SetPoint('TOPLEFT', owner, 'BOTTOMLEFT', 0, 0) end
     tooltip:ClearLines()
     local skills = ns.Professions.Rows()
     if #skills > 0 then
@@ -82,7 +84,7 @@ function Titan.Show(owner)
         ns.Style.Note(tooltip, ns.Style.Text(ns.Style.gray, 'Bag refresh incomplete; showing last observed counts.'))
     end
     if pages > 1 then ns.Style.Note(tooltip, ns.Style.Text(ns.Style.gray, string.format('Page %d/%d', Titan.page, pages))) end
-    ns.Style.Note(tooltip, ns.Style.Text(ns.Style.gray, ns.L.hint))
+    for _, hint in ipairs(hints or { ns.L.hint }) do ns.Style.Note(tooltip, ns.Style.Text(ns.Style.gray, hint)) end
     tooltip:Show()
 end
 
@@ -96,7 +98,7 @@ function Titan.Refresh()
     if Titan.broker then
         Titan.broker.text = '- v' .. Titan.version
     end
-    if Titan.owner then Titan.Show(Titan.owner) end
+    if Titan.owner then Titan.Show(Titan.owner, Titan.anchor, Titan.hints) end
 end
 
 -- The entries that delete the saved spots of the map that is open (the list of the map menu and the standalone menu).
@@ -438,9 +440,11 @@ function Titan.Menu(owner)
     end)
 end
 
+-- The panel entry. Titan Panel shows it, and so does any other display of the LibDataBroker library (ChocolateBar,
+-- Bazooka and others) that is installed. Without one the addon runs alone: the minimap button shows the list.
 function Titan.Initialize()
     local ldb = LibStub and LibStub:GetLibrary('LibDataBroker-1.1', true)
-    if not ldb then ns.Print(ns.L.missingTitan); return false end
+    if not ldb then ns.Debug('No panel display (Titan Panel or another LibDataBroker display): the minimap button shows the material list.'); return false end
     local version = C_AddOns.GetAddOnMetadata('TitanGatheredForever', 'Version') or ''
     Titan.version = version:match('^(%d+%.%d+%.%d+)') or version
     Titan.broker = ldb:NewDataObject('TitanGatheredForever', {

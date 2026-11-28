@@ -332,7 +332,7 @@ local function start()
         ns.Print('NPC world axes swapped: ' .. tostring(ns.settings.npcAxisSwap))
         ns.NpcNearest()
     end
-    local help = 'Most functions are in the right-click menu of the Titan entry. Command with a parameter: /tgf recipe <recipeID> [operations]. /tgf sales lists the auction sales read from the mail. /tgf kills, /tgf quests and /tgf journal open the kill and quest logs and the journal.'
+    local help = 'Most functions are in the right-click menu of the minimap button (or the Titan Panel entry) and in Esc > Options > AddOns > Titan Gathered. Command with a parameter: /tgf recipe <recipeID> [operations]. /tgf sales lists the auction sales read from the mail. /tgf kills, /tgf quests and /tgf journal open the kill and quest logs and the journal.'
     function ns.ShowStatus(toChat)
         local report = toChat and ns.Print or ns.Debug
         local count = ns.inventory:Get(0)

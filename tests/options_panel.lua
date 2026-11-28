@@ -118,7 +118,7 @@ test('one AddOns category with a page per subject, registered once', function()
     for index = 2, #registered do eq(registered[index].parent, registered[1]) end
     local names = {}
     for index = 2, #registered do names[#names + 1] = registered[index].name end
-    eq(table.concat(names, ','), 'Titan Panel list,Professions,Map pins,Gathering spots,Map materials,Travel routes,Auction house,Diagnostics,Backup')
+    eq(table.concat(names, ','), 'Material list,Professions,Map pins,Gathering spots,Map materials,Travel routes,Auction house,Diagnostics,Backup')
 end)
 
 test('a page reads the settings when shown and a switch writes them with the same update as the menu', function()
@@ -199,6 +199,17 @@ end)
 
 test('every page draws without errors', function()
     for _, spec in ipairs(Options.PAGES) do Options.pages[spec.id].frame:Show() end
+end)
+
+test('the General page says where the material list is, with and without Titan Panel', function()
+    ns.Titan.broker = nil
+    ns.settings.showMinimapButton = true
+    assert(Options.ButtonNote().text:find('No Titan Panel is installed', 1, true))
+    ns.settings.showMinimapButton = false
+    assert(Options.ButtonNote().text:find('material list is not shown', 1, true))
+    ns.Titan.broker = {}
+    assert(Options.ButtonNote().text:find('or the Titan Panel entry', 1, true))
+    ns.Titan.broker, ns.settings.showMinimapButton = nil, true
 end)
 
 test('Open shows the page asked for, or the first one', function()

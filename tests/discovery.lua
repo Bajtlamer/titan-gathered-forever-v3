@@ -54,11 +54,11 @@ local function joined(ns)
     return table.concat(lines, '\n')
 end
 
-test('the manifest names the module like its folder, needs Titan and the core and keeps its own saved table', function()
+test('the manifest names the module like its folder, needs only the core and keeps its own saved table', function()
     local toc = readAll(FOLDER .. '/' .. FOLDER .. '.toc')
     has(toc, '## Interface: 16001')
     has(toc, '## Title: Titan Gathered Discovery\n')
-    has(toc, '## Dependencies: Titan, TitanGatheredForever')
+    has(toc, '## Dependencies: TitanGatheredForever\n')
     has(toc, '## SavedVariables: TitanGatheredForeverDiscoveryDB')
     lacks(toc, 'TitanGatheredForeverV3DB')
     for _, file in ipairs(manifestFiles()) do assert(io.open(FOLDER .. '/' .. file, 'r'), 'listed file is missing: ' .. file) end

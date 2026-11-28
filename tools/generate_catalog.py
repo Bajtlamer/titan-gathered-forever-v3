@@ -11,7 +11,7 @@ from urllib.parse import urlsplit
 PROFESSIONS = {'Alchemy', 'Blacksmithing', 'Cooking', 'Enchanting', 'Engineering',
                'First Aid', 'Fishing', 'Herbalism', 'Leatherworking', 'Mining', 'Skinning', 'Tailoring'}
 MODULE_IDS = {'First Aid': 'FirstAid', 'Herbalism': 'Herbs'}
-VERSION = '0.5.176'
+VERSION = '0.5.177'
 MINING_ORES = {2770, 2771, 2772, 2775, 2776, 3858, 7911, 10620, 11370, 18562}
 SCARCE_MINERALS = {249391, 249425, 249426}
 SCARCE_HERBS = {249274, 249399, 249424}
@@ -444,7 +444,7 @@ def generate(root, check=False):
             f'## Notes: Optional {module["label"]} material catalogue for Titan Gathered Forever.\n'
             f'## Version: {VERSION}\n'
             f'## IconTexture: Interface\\AddOns\\{folder}\\Artwork\\AddonIcon\n'
-            '## Dependencies: Titan, TitanGatheredForever\n\nData.lua\n')
+            '## Dependencies: TitanGatheredForever\n\nData.lua\n')
         module_index.append({key: module[key] for key in ['id', 'label', 'kind', 'folder']} |
                             {'itemCount': len(module['items']), 'recipeCount': len(module['recipes']),
                              'bookCount': len(module.get('book', {}))})

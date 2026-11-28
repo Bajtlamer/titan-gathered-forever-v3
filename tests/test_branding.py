@@ -26,13 +26,16 @@ class BrandingTests(unittest.TestCase):
         toc = (CORE / (NAME + '.toc')).read_text()
         self.assertIn('## Title: ' + TITLE + '\n', toc)
         self.assertIn('## SavedVariables: TitanGatheredForeverV3DB\n', toc)
+        self.assertIn('## OptionalDeps: Titan\n', toc)
+        self.assertNotIn('## Dependencies:', toc)
         modules = json.loads((ROOT / 'catalogue/modules.json').read_text())
         self.assertEqual(len(modules), 13)
         for module in modules:
             folder = module['folder']
             self.assertTrue(folder.startswith(NAME + '_'))
             manifest = (ROOT / folder / (folder + '.toc')).read_text()
-            self.assertIn('## Dependencies: Titan, ' + NAME + '\n', manifest)
+            self.assertIn('## Dependencies: ' + NAME + '\n', manifest)
+            self.assertNotIn('Titan,', manifest)
             self.assertIn('## Title: ' + TITLE + ': ', manifest)
 
     def test_runtime_has_no_old_brand(self):

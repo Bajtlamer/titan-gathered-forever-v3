@@ -2,6 +2,12 @@
 
 Updated 2026-11-28. Versions up to 0.5.172 are published in release-notes/ref-0.5.172.md. These changes describe source candidates since the latest published versioned notes.
 
+## Titan Panel optional and smaller Options text, 0.5.177 (Discovery 0.1.6)
+
+- Titan Panel is optional: the core manifest has OptionalDeps: Titan instead of Dependencies, and the thirteen modules and Discovery depend on the core only. Without a LibDataBroker display the panel entry is not created and nothing is printed (the old "requires Titan Panel" line is gone); the minimap button shows the material list when pointed at (the mouse wheel turns its pages, the hints are its footer), and its right click menu, the world map button and the Options window carry every setting. Any LibDataBroker display (Titan Panel, ChocolateBar, Bazooka) shows the entry. The General Options page says where the list is, also when the minimap button is hidden without a panel display. The Options page Titan Panel list is renamed Material list.
+- The text of the Options pages is smaller: titles, headers, labels and buttons by about two points, notes by one, with tighter rows and smaller check boxes.
+- Versioned notes prepared for the release: release-notes/ref-0.5.177.md and release-notes/ref-discovery-0.1.6.md.
+
 ## Moving the saved data to another computer, 0.5.176
 
 - The Backup page starts with moving or backing up everything: it names the file (TitanGatheredForever.lua, plus TitanGatheredForever_Discovery.lua when Discovery is loaded), shows its folder in a box to copy (default install folder of Windows or macOS; the account folder from the account selected at login, YOUR_ACCOUNT when the client does not give it), tells how to open it in File Explorer or Finder, and lists the steps. It warns that the copied file replaces the data on the other computer. The settings export follows below it. The JSON statistics export is no longer linked from Backup: it is a split developer export, not a backup.

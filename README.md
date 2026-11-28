@@ -8,7 +8,7 @@ Website: [titan-gathered.com](https://www.titan-gathered.com/).
 
 ## Current version
 
-The current stable candidate is version `0.5.176` and targets **WoW Forever 1.60.1, interface 16001**, with Titan Panel installed separately. The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); the published versions are in [ref-0.5.172.md](release-notes/ref-0.5.172.md) and earlier notes. Other WoW editions are outside this project's scope.
+The current stable candidate is version `0.5.177` and targets **WoW Forever 1.60.1, interface 16001**. Titan Panel is optional: with it the addon is a Titan Panel plugin, without it the addon runs on its own (minimap button, world map button and the game Options). The latest source changes are listed in [the unreleased changelog](release-notes/ref-unreleased.md); the published versions are in [ref-0.5.172.md](release-notes/ref-0.5.172.md) and earlier notes. Other WoW editions are outside this project's scope.
 
 A separate, optional data-collection module, [Titan Gathered Discovery](#discovery-data-collection-module) 0.1.0, has its own version line and is released apart from this core; it is installed locally and awaits live acceptance.
 
@@ -72,13 +72,13 @@ Production result events have no recipe ID. Matching therefore requires an unamb
 
 ## Install only what you need
 
-Download the **complete collection ZIP**, or download the **core ZIP plus the individual profession ZIPs** you want. Every optional module requires both the core and Titan Panel. A profession ZIP does not include the core.
+Download the **complete collection ZIP**, or download the **core ZIP plus the individual profession ZIPs** you want. Every optional module requires the core. Titan Panel is optional. A profession ZIP does not include the core.
 
 Extract ZIPs into the Forever client's `Interface/AddOns/` directory. The resulting folders must be siblings:
 
 ```text
 AddOns/
-  Titan/                       # Titan Panel, installed separately
+  Titan/                       # Titan Panel, optional
   TitanGatheredForever/               # TGF v3 shared core
   TitanGatheredForever_Mining/        # Optional
   TitanGatheredForever_Herbalism/         # Optional Herbalism module
@@ -109,13 +109,15 @@ The tool changes the old `TitanGathered2ForeverDB` assignment to `TitanGatheredF
 
 ## Use TGF v3
 
-Right-click the Titan entry for Display, Professions, Additional items, Icon appearance, Flight points, Trainers, vendors and other pins, Gathering map, History and sources, and Diagnostics settings. Data collection is always on: history, map spots, profession actions, production, PvP, rare loot and trainer and vendor windows are recorded whatever the settings say, and only disabling an addon in the AddOns list stops it. Settings only decide what is shown. Map spots are not recorded inside instances, but the statistics there are.
+Right-click the minimap button (or the Titan Panel entry when Titan Panel is installed) for Display, Professions, Additional items, Icon appearance, Flight points, Trainers, vendors and other pins, Gathering map, History and sources, and Diagnostics settings. Data collection is always on: history, map spots, profession actions, production, PvP, rare loot and trainer and vendor windows are recorded whatever the settings say, and only disabling an addon in the AddOns list stops it. Settings only decide what is shown. Map spots are not recorded inside instances, but the statistics there are.
 
-The same settings are in the game Options window (Esc > Options > AddOns > Titan Gathered), with a page per subject: General (minimap button, movable windows, window positions, icon appearance, and buttons that open the main window, Profession statistics, the Journal and the export window), Titan Panel list, Professions, Map pins, Gathering spots, Map materials, Travel routes, Auction house, Diagnostics and Backup. A change there is the same change as in the menu. Backup is for moving to another computer or keeping a backup: everything (statistics, map spots, journal and the settings of every character of the account) is one file, TitanGatheredForever.lua in WTF/Account/<account>/SavedVariables, and the page shows that folder in a box to copy (the default install folder of Windows or macOS, with the account folder when the client names it), with the steps: quit the game, copy the file, put it into the same folder on the other computer with that game closed, start the game. The copied file replaces the data there and does not merge, so with two computers the newest file has to be carried over each time. The game cannot do this in one step from inside: addons have no file access and its text boxes hold about 32 KB, while the saved data is a few MB. The settings alone can also be exported as one text to copy and imported on another account (then reload the interface); the text is only read as values, never run, and a checksum rejects an incomplete copy. Options... at the top of the menu and `/tgf settings` open it.
+Without Titan Panel: the addon needs no other addon. The material list shown by the Titan Panel entry appears when you point at the minimap button, the right-click menu of the minimap button is the same menu, and every setting is also in the game Options window. The panel entry is a LibDataBroker data source, so other panel displays that bring the library (ChocolateBar, Bazooka and similar) show it too. With the minimap button hidden and no panel display, the material list is not shown; the Options window and `/tgf` still work.
 
-Everything that needs no parameter is in the right-click menu of the Titan entry:
+The same settings are in the game Options window (Esc > Options > AddOns > Titan Gathered), with a page per subject: General (minimap button, movable windows, window positions, icon appearance, and buttons that open the main window, Profession statistics, the Journal and the export window), Material list, Professions, Map pins, Gathering spots, Map materials, Travel routes, Auction house, Diagnostics and Backup. A change there is the same change as in the menu. Backup is for moving to another computer or keeping a backup: everything (statistics, map spots, journal and the settings of every character of the account) is one file, TitanGatheredForever.lua in WTF/Account/<account>/SavedVariables, and the page shows that folder in a box to copy (the default install folder of Windows or macOS, with the account folder when the client names it), with the steps: quit the game, copy the file, put it into the same folder on the other computer with that game closed, start the game. The copied file replaces the data there and does not merge, so with two computers the newest file has to be carried over each time. The game cannot do this in one step from inside: addons have no file access and its text boxes hold about 32 KB, while the saved data is a few MB. The settings alone can also be exported as one text to copy and imported on another account (then reload the interface); the text is only read as values, never run, and a checksum rejects an incomplete copy. Options... at the top of the menu and `/tgf settings` open it.
 
-- Display: Show minimap button, Next summary page and Previous summary page. The round minimap button opens the unlearned recipes window with a left click, the menu with a right click, and can be dragged around the minimap edge.
+Everything that needs no parameter is in the right-click menu of the minimap button or the Titan Panel entry (called the Titan menu below):
+
+- Display: Show minimap button, Next summary page and Previous summary page. The round minimap button shows the material list when you point at it (the mouse wheel turns its pages), opens the main window with a left click and the menu with a right click, and can be dragged around the minimap edge.
 - Icon appearance: the small icon appearance window.
 - Trainers, vendors and other pins: map toggles (including quest givers and rare creatures), profession filter, Unlearned recipes, Trainers (list of trainers), and Pin placement (find the nearest pin, swap map axes if pins look mirrored).
 - History and sources: Lifetime materials, Observed chances, Profession statistics, Economy, Kills, Quests, Journal, PvP Board, Export statistics.
@@ -236,7 +238,7 @@ Tagged GitHub releases use the same build and verification pipeline. Runtime ZIP
 
 Report the client and Titan versions, TGF v3 version, affected item/spell IDs, expected results, observed results and reproduction steps. Visible UI changes benefit from screenshots. Run the full checks and the relevant [in-game validation steps](book-wow-forever-validation.md).
 
-Recipe evidence includes the documented [DwarfExplorersBible client-table mirror](https://github.com/masterred92/DwarfExplorersBible/blob/main/Data.lua), supplementary Forever spell references and curated uses retained in `catalogue/`. Titan Panel is an external dependency. Original artwork and upstream material retain their attribution; this README does not assign a new blanket license to third-party content.
+Recipe evidence includes the documented [DwarfExplorersBible client-table mirror](https://github.com/masterred92/DwarfExplorersBible/blob/main/Data.lua), supplementary Forever spell references and curated uses retained in `catalogue/`. Titan Panel is an optional external addon. Original artwork and upstream material retain their attribution; this README does not assign a new blanket license to third-party content.
 
 ## License and notices
 

@@ -97,7 +97,7 @@ def changelog(folder, release, notes):
     if folder == 'TitanGatheredForever':
         return notes
     return ('Version number aligned with the Titan Gathered Forever core %s. The catalogue data of this module is '
-            'unchanged. Requires the core of the same version and Titan Panel.' % release)
+            'unchanged. Requires the core of the same version; Titan Panel is optional.' % release)
 
 
 def multipart(metadata, path):

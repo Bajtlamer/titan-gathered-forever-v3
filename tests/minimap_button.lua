@@ -100,6 +100,29 @@ test('the tooltip explains the clicks', function()
     button.scripts.OnLeave(button); eq(lines.shown, false)
 end)
 
+test('pointing at the button shows the material list and the wheel turns its pages', function()
+    local ns, lines = env()
+    local shown = {}
+    ns.inventory = {}
+    ns.Titan.page = 1
+    ns.Titan.Show = function(owner, anchor, hints) ns.Titan.owner = owner; shown[#shown + 1] = { owner, anchor, hints, ns.Titan.page } end
+    ns.Titan.Hide = function() ns.Titan.owner = nil; shown.hidden = true end
+    ns.MinimapButton.Attach()
+    local button = ns.MinimapButton.button
+    button.scripts.OnEnter(button)
+    eq(#shown, 1); eq(shown[1][1], button); eq(shown[1][2], 'ANCHOR_LEFT')
+    assert(table.concat(shown[1][3], ' '):find('Right click: settings menu', 1, true))
+    eq(lines.shown, nil)
+    button.scripts.OnMouseWheel(button, -1)
+    eq(#shown, 2); eq(shown[2][4], 2)
+    button.scripts.OnMouseWheel(button, 1); button.scripts.OnMouseWheel(button, 1)
+    eq(shown[4][4], 1)
+    button.scripts.OnLeave(button)
+    eq(shown.hidden, true)
+    button.scripts.OnMouseWheel(button, -1)
+    eq(#shown, 4)
+end)
+
 test('dragging moves the button around the edge and saves the angle', function()
     local ns = env()
     ns.MinimapButton.Attach()
